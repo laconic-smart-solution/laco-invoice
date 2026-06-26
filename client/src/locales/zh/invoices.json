@@ -1,0 +1,88 @@
+{
+  "title": "发票管理",
+  "subtitle": "查看和管理从市场订单生成的发票。",
+  "actions": {
+    "export_csv": "导出 CSV",
+    "bulk_download": "批量下载"
+  },
+  "filters": {
+    "marketplace_label": "市场平台",
+    "marketplace_all": "所有市场",
+    "marketplace_tiktok": "TikTok Shop",
+    "marketplace_shopify": "Shopify",
+    "marketplace_amazon": "Amazon",
+    "date_range_label": "日期范围",
+    "date_range_value": "2023年10月01日 - 10月24日",
+    "status_label": "发票状态",
+    "status_all": "全部状态",
+    "more_filters": "更多筛选"
+  },
+  "table": {
+    "empty": "暂无发票。",
+    "showing": "显示第 {{start}}-{{end}} 条，共 {{total}} 条发票",
+    "columns": {
+      "invoice_no": "发票号",
+      "order_id": "订单号",
+      "customer": "客户",
+      "store": "店铺",
+      "grand_total": "总金额",
+      "status": "状态",
+      "created_at": "创建时间",
+      "action": "操作"
+    },
+    "actions": {
+      "download": "下载 PDF",
+      "view_order": "查看订单"
+    }
+  },
+  "status": {
+    "paid": "已付款",
+    "pending": "待处理",
+    "overdue": "逾期",
+    "draft": "草稿"
+  },
+  "detail": {
+    "back_to_invoices": "返回发票列表",
+    "not_found_title": "未找到发票",
+    "not_found_description": "您查找的发票不存在或已被删除。",
+    "actions": { "print": "打印", "download": "下载 PDF" },
+    "document": {
+      "vat": "VAT {{number}}",
+      "invoice_number": "发票号",
+      "issued_at": "开票日期",
+      "due_date": "到期日",
+      "bill_to": "账单收件人",
+      "attn": "收件人：{{name}}",
+      "marketplace_source": "市场来源",
+      "columns": {
+        "description": "描述",
+        "qty": "数量",
+        "unit_price": "单价",
+        "total": "合计"
+      },
+      "bank_details": "银行信息",
+      "iban": "IBAN：{{value}}",
+      "swift": "SWIFT/BIC：{{value}}",
+      "footer_note": "感谢您的业务。请在发票日期后 {{days}} 天内付款。",
+      "subtotal": "小计",
+      "vat_line": "增值税 ({{percent}}%)",
+      "grand_total": "总计"
+    },
+    "sidebar": {
+      "timeline": "发票时间线",
+      "external_systems": "外部系统",
+      "erp_voucher": "SAP ERP 凭证",
+      "view_in_erp": "在 SAP Business One 中查看",
+      "marketplace": "市场",
+      "order_ref": "订单 #{{orderId}}",
+      "skus": "SKU：{{count}}",
+      "country": "国家：{{code}}",
+      "add_note": "添加备注或附件"
+    },
+    "timeline": {
+      "generated": { "title": "发票已生成", "pending": "等待生成" },
+      "synced": { "title": "已同步至市场", "pending": "等待同步..." },
+      "exported": { "title": "已打印/导出", "pending": "等待操作..." }
+    }
+  }
+}

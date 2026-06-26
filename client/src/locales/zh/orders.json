@@ -1,0 +1,85 @@
+{
+  "title": "订单管理",
+  "subtitle": "管理和自动化 TikTok Shop 订单开票。",
+  "actions": {
+    "export_csv": "导出 CSV",
+    "sync_orders": "同步订单",
+    "bulk_generate": "批量生成"
+  },
+  "filters": {
+    "store_label": "市场店铺",
+    "store_all": "所有 TikTok 店铺",
+    "store_tiktok_us": "TikTok Shop US",
+    "store_tiktok_uk": "TikTok Shop UK",
+    "store_tiktok_sg": "TikTok Shop SG",
+    "date_range_label": "日期范围",
+    "date_range_value": "2023年10月01日 - 10月24日",
+    "status_label": "订单状态",
+    "status_all": "全部状态",
+    "more_filters": "更多筛选"
+  },
+  "table": {
+    "empty": "暂无订单。",
+    "select_all": "全选",
+    "select_row": "选择行",
+    "selected_count_one": "已选择 {{count}} 个订单",
+    "selected_count_other": "已选择 {{count}} 个订单",
+    "bulk_generate": "为所选订单生成发票",
+    "showing": "显示第 {{start}}-{{end}} 条，共 {{total}} 条订单",
+    "columns": {
+      "order_id": "订单号",
+      "order_date": "下单日期",
+      "store": "店铺",
+      "customer": "客户",
+      "total_amount": "总金额",
+      "sync_status": "同步状态",
+      "action": "操作"
+    },
+    "actions": {
+      "view_invoice": "查看发票",
+      "generate": "生成",
+      "retry": "重试"
+    }
+  },
+  "sync_status": {
+    "synced": "已同步",
+    "pending": "待处理",
+    "failed": "失败"
+  },
+  "confirm": {
+    "generate": {
+      "title": "生成发票？",
+      "description": "将为订单 {{orderId}} 创建发票。是否继续？"
+    }
+  },
+  "detail": {
+    "back_to_orders": "返回订单列表",
+    "placed_on": "下单于 {{date}}",
+    "view_invoice": "查看发票",
+    "last_synced": "上次同步",
+    "invoice_id": "发票编号",
+    "customer_email": "邮箱",
+    "shipping_address": "收货地址",
+    "not_found_title": "未找到订单",
+    "not_found_description": "您查找的订单不存在或已被删除。",
+    "sections": {
+      "order_info": "订单信息",
+      "customer_info": "客户信息",
+      "line_items": "商品明细"
+    },
+    "line_items": {
+      "product": "商品",
+      "sku": "SKU",
+      "qty": "数量",
+      "unit_price": "单价",
+      "total": "小计"
+    },
+    "summary": {
+      "subtotal": "小计",
+      "tax": "税费",
+      "shipping": "运费",
+      "free": "免费",
+      "total": "合计"
+    }
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "title": "ภาพรวมธุรกิจ",
+  "subtitle": "ประสิทธิภาพแบบเรียลไทม์จากทุกช่องทางมาร์เก็ตเพลส",
+  "actions": {
+    "sync_all_stores": "ซิงก์ร้านค้าทั้งหมด",
+    "bulk_invoices": "ออกใบแจ้งหนี้แบบกลุ่ม"
+  },
+  "stats": {
+    "total_revenue": "รายได้รวม",
+    "total_orders": "คำสั่งซื้อทั้งหมด",
+    "invoices_issued": "ใบแจ้งหนี้ที่ออกแล้ว",
+    "last_sync": "ซิงก์ล่าสุด: {{time}} จาก {{count}} ช่องทาง",
+    "synced_count": "ซิงก์แล้ว {{count}}",
+    "pending_count": "รอดำเนินการ {{count}}",
+    "progress_label": "{{percent}}%",
+    "paid_legend": "ชำระแล้ว ({{count}})",
+    "overdue_legend": "เกินกำหนด ({{count}})",
+    "revenue_trend": "+{{percent}}%",
+    "invoices_of_total": "{{issued}} จาก {{total}}"
+  },
+  "recent_orders": {
+    "title": "คำสั่งซื้อ TikTok Shop ล่าสุด",
+    "view_all": "ดูคำสั่งซื้อทั้งหมด",
+    "empty": "ไม่พบคำสั่งซื้อ",
+    "columns": {
+      "order_id": "รหัสคำสั่งซื้อ",
+      "customer": "ลูกค้า",
+      "amount": "จำนวนเงิน",
+      "status": "สถานะ",
+      "action": "การดำเนินการ"
+    },
+    "actions": {
+      "download": "ดาวน์โหลดใบแจ้งหนี้",
+      "generate": "สร้าง",
+      "retry_sync": "ลองซิงก์อีกครั้ง",
+      "edit": "แก้ไขแบบร่าง"
+    }
+  },
+  "order_status": {
+    "synced": "ซิงก์แล้ว",
+    "pending": "รอดำเนินการ",
+    "error": "ข้อผิดพลาด",
+    "draft": "แบบร่าง"
+  },
+  "marketplaces": {
+    "title": "มาร์เก็ตเพลสที่ใช้งาน",
+    "connect_channel": "เชื่อมต่อช่องทาง",
+    "tiktok": "TikTok Shop",
+    "shopify": "Shopify",
+    "amazon": "Amazon"
+  },
+  "promo": {
+    "title": "เพิ่มประสิทธิภาพกระแสเงินสด",
+    "description": "เรียนรู้ว่าการออกใบแจ้งหนี้แบบกลุ่มอัตโนมัติช่วยประหยัดเวลาได้ 12 ชั่วโมงต่อสัปดาห์",
+    "cta": "อ่านคู่มือ"
+  }
+}

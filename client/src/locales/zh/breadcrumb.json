@@ -1,0 +1,7 @@
+{
+  "login": "登录",
+  "register": "注册",
+  "forgot_password": "忘记密码",
+  "reset_password": "重置密码",
+  "otp_verify": "验证 OTP"
+}

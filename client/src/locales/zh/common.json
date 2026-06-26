@@ -1,0 +1,38 @@
+{
+  "app": {
+    "name": "Laco Invoice"
+  },
+  "home": {
+    "title": "欢迎使用 Laco Invoice",
+    "description": "您的项目已配置完成，可以开始开发。",
+    "cta": "开始使用",
+    "theme_hint": "按 d 键切换主题"
+  },
+  "loading": "加载中...",
+  "dialog": {
+    "cancel": "取消",
+    "confirm": "确认"
+  },
+  "pagination": {
+    "rows_per_page": "每页",
+    "previous": "上一页",
+    "next": "下一页",
+    "showing_range": "显示第 {{start}}–{{end}} 条，共 {{total}} 条"
+  },
+  "time": {
+    "minutes_ago_one": "{{count}} 分钟前",
+    "minutes_ago_other": "{{count}} 分钟前"
+  },
+  "form": {
+    "no_matches": "没有匹配项。",
+    "upload_image": "上传图片",
+    "open_crop_editor": "打开裁剪编辑器",
+    "upload_new_image": "上传新图片",
+    "remove_image": "移除图片",
+    "crop_title": "裁剪图片",
+    "crop_description": "拖动手柄调整裁剪区域。点击应用保存到表单，或上传其他文件。",
+    "upload_new_photo": "上传新照片",
+    "cancel": "取消",
+    "apply": "应用"
+  }
+}

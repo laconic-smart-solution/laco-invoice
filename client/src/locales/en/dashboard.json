@@ -1,0 +1,57 @@
+{
+  "title": "Business Overview",
+  "subtitle": "Real-time performance across all marketplace channels.",
+  "actions": {
+    "sync_all_stores": "Sync All Stores",
+    "bulk_invoices": "Bulk Invoices"
+  },
+  "stats": {
+    "total_revenue": "Total Revenue",
+    "total_orders": "Total Orders",
+    "invoices_issued": "Invoices Issued",
+    "last_sync": "Last sync: {{time}} from {{count}} channels.",
+    "synced_count": "{{count}} SYNCED",
+    "pending_count": "{{count}} PENDING",
+    "progress_label": "{{percent}}%",
+    "paid_legend": "Paid ({{count}})",
+    "overdue_legend": "Overdue ({{count}})",
+    "revenue_trend": "+{{percent}}%",
+    "invoices_of_total": "{{issued}} OF {{total}}"
+  },
+  "recent_orders": {
+    "title": "Recent TikTok Shop Orders",
+    "view_all": "View All Orders",
+    "empty": "No orders found.",
+    "columns": {
+      "order_id": "Order ID",
+      "customer": "Customer",
+      "amount": "Amount",
+      "status": "Status",
+      "action": "Action"
+    },
+    "actions": {
+      "download": "Download invoice",
+      "generate": "Generate",
+      "retry_sync": "Retry Sync",
+      "edit": "Edit draft"
+    }
+  },
+  "order_status": {
+    "synced": "Synced",
+    "pending": "Pending",
+    "error": "Error",
+    "draft": "Draft"
+  },
+  "marketplaces": {
+    "title": "Active Marketplaces",
+    "connect_channel": "Connect Channel",
+    "tiktok": "TikTok Shop",
+    "shopify": "Shopify",
+    "amazon": "Amazon"
+  },
+  "promo": {
+    "title": "Optimize Cash Flow.",
+    "description": "Learn how automated bulk invoicing can save you 12 hours a week.",
+    "cta": "Read Guide"
+  }
+}

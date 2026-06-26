@@ -1,0 +1,15 @@
+{
+  "tagline": "Marketplace Sync",
+  "nav": {
+    "dashboard": "Dashboard",
+    "stores": "Stores",
+    "products": "Products",
+    "orders": "Orders",
+    "invoices": "Invoices",
+    "customers": "Customers",
+    "settings": "Settings"
+  },
+  "user": {
+    "premium_account": "Premium Account"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "tagline": "Marketplace Sync",
+  "nav": {
+    "dashboard": "仪表盘",
+    "stores": "店铺",
+    "products": "产品",
+    "orders": "订单",
+    "invoices": "发票",
+    "customers": "客户",
+    "settings": "设置"
+  },
+  "user": {
+    "premium_account": "高级账户"
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "title": "Order Management",
+  "subtitle": "Manage and automate TikTok Shop order invoicing.",
+  "actions": {
+    "export_csv": "Export CSV",
+    "sync_orders": "Sync Orders",
+    "bulk_generate": "Bulk Generate"
+  },
+  "filters": {
+    "store_label": "Marketplace Store",
+    "store_all": "All TikTok Stores",
+    "store_tiktok_us": "TikTok Shop US",
+    "store_tiktok_uk": "TikTok Shop UK",
+    "store_tiktok_sg": "TikTok Shop SG",
+    "date_range_label": "Date Range",
+    "date_range_value": "Oct 01 - Oct 24, 2023",
+    "status_label": "Order Status",
+    "status_all": "All Statuses",
+    "more_filters": "More filters"
+  },
+  "table": {
+    "empty": "No orders found.",
+    "select_all": "Select all",
+    "select_row": "Select row",
+    "selected_count_one": "{{count}} Order Selected",
+    "selected_count_other": "{{count}} Orders Selected",
+    "bulk_generate": "Generate Invoices for Selection",
+    "showing": "Showing {{start}}-{{end}} of {{total}} orders",
+    "columns": {
+      "order_id": "Order ID",
+      "order_date": "Order Date",
+      "store": "Store",
+      "customer": "Customer",
+      "total_amount": "Total Amount",
+      "sync_status": "Sync Status",
+      "action": "Action"
+    },
+    "actions": {
+      "view_invoice": "View Invoice",
+      "generate": "Generate",
+      "retry": "Retry"
+    }
+  },
+  "sync_status": {
+    "synced": "Synced",
+    "pending": "Pending",
+    "failed": "Failed"
+  },
+  "confirm": {
+    "generate": {
+      "title": "Generate invoice?",
+      "description": "This will create an invoice for order {{orderId}}. Continue?"
+    }
+  },
+  "detail": {
+    "back_to_orders": "Back to Orders",
+    "placed_on": "Placed on {{date}}",
+    "view_invoice": "View Invoice",
+    "last_synced": "Last Synced",
+    "invoice_id": "Invoice ID",
+    "customer_email": "Email",
+    "shipping_address": "Shipping Address",
+    "not_found_title": "Order not found",
+    "not_found_description": "The order you are looking for does not exist or may have been removed.",
+    "sections": {
+      "order_info": "Order Information",
+      "customer_info": "Customer Information",
+      "line_items": "Line Items"
+    },
+    "line_items": {
+      "product": "Product",
+      "sku": "SKU",
+      "qty": "Qty",
+      "unit_price": "Unit Price",
+      "total": "Total"
+    },
+    "summary": {
+      "subtotal": "Subtotal",
+      "tax": "Tax",
+      "shipping": "Shipping",
+      "free": "Free",
+      "total": "Total"
+    }
+  }
+}

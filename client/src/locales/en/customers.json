@@ -1,0 +1,57 @@
+{
+  "title": "Customer Directory",
+  "subtitle": "Manage cross-channel customer data and lifetime value across all platforms.",
+  "sync_status": "Real-time sync active",
+  "actions": {
+    "filter_marketplace": "Filter Marketplace",
+    "export_csv": "Export CSV"
+  },
+  "stats": {
+    "total_customers": "Total Customers",
+    "avg_lifetime_value": "Avg. Lifetime Value",
+    "active_this_month": "Active This Month",
+    "sync_errors": "Sync Errors",
+    "stable": "Stable",
+    "clean": "Clean"
+  },
+  "table": {
+    "empty": "No customers found.",
+    "showing": "Showing {{start}}-{{end}} of {{total}} customers",
+    "filters": {
+      "tiktok": "TikTok Shop",
+      "shopify": "Shopify"
+    },
+    "columns": {
+      "id": "ID",
+      "customer_name": "Customer Name",
+      "email": "Email",
+      "phone": "Phone",
+      "gender": "Gender",
+      "address": "Address"
+    },
+    "gender": {
+      "male": "Male",
+      "female": "Female"
+    },
+    "badges": {
+      "premium": "Premium Member",
+      "top_buyer": "Top 1% Buyer",
+      "new_customer": "New Customer"
+    }
+  },
+  "insights": {
+    "growth": {
+      "title": "Growth Opportunity",
+      "description": "3,200 Shopify customers haven't purchased in 60 days.",
+      "action": "Send campaign"
+    },
+    "identity": {
+      "title": "Identity Verified",
+      "description": "98% of your customer directory has been cross-referenced with marketplace IDs."
+    },
+    "sync": {
+      "title": "Auto-Sync Pulse",
+      "description": "Next global sync scheduled for 14:00 GMT. 42 pending orders in queue."
+    }
+  }
+}

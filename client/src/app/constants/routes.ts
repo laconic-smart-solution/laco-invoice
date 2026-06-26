@@ -1,0 +1,21 @@
+export const ROUTES = {
+  home: "/",
+  dashboard: {
+    root: "/",
+    stores: "/stores",
+    products: "/products",
+    orders: "/orders",
+    orderDetail: (orderId: string) => `/orders/${orderId}`,
+    invoices: "/invoices",
+    invoiceDetail: (invoiceId: string) => `/invoices/${invoiceId}`,
+    customers: "/customers",
+    settings: "/settings",
+  },
+  auth: {
+    login: "/login",
+    register: "/register",
+    forgotPassword: "/forgot-password",
+    resetPassword: "/reset-password",
+    otpVerify: "/otp-verify",
+  },
+} as const

@@ -1,0 +1,7 @@
+{
+  "login": "เข้าสู่ระบบ",
+  "register": "สมัครสมาชิก",
+  "forgot_password": "ลืมรหัสผ่าน",
+  "reset_password": "รีเซ็ตรหัสผ่าน",
+  "otp_verify": "ยืนยัน OTP"
+}

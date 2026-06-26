@@ -1,0 +1,15 @@
+{
+  "tagline": "Marketplace Sync",
+  "nav": {
+    "dashboard": "แดชบอร์ด",
+    "stores": "ร้านค้า",
+    "products": "สินค้า",
+    "orders": "คำสั่งซื้อ",
+    "invoices": "ใบแจ้งหนี้",
+    "customers": "ลูกค้า",
+    "settings": "ตั้งค่า"
+  },
+  "user": {
+    "premium_account": "บัญชีพรีเมียม"
+  }
+}

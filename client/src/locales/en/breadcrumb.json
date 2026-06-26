@@ -1,0 +1,7 @@
+{
+  "login": "Login",
+  "register": "Register",
+  "forgot_password": "Forgot Password",
+  "reset_password": "Reset Password",
+  "otp_verify": "Verify OTP"
+}

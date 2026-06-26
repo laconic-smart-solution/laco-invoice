@@ -1,0 +1,57 @@
+{
+  "title": "ไดเรกทอรีลูกค้า",
+  "subtitle": "จัดการข้อมูลลูกค้าข้ามช่องทางและมูลค่าตลอดอายุการใช้งานบนทุกแพลตฟอร์ม",
+  "sync_status": "ซิงก์แบบเรียลไทม์ทำงานอยู่",
+  "actions": {
+    "filter_marketplace": "กรอง Marketplace",
+    "export_csv": "ส่งออก CSV"
+  },
+  "stats": {
+    "total_customers": "ลูกค้าทั้งหมด",
+    "avg_lifetime_value": "มูลค่าตลอดอายุเฉลี่ย",
+    "active_this_month": "ใช้งานเดือนนี้",
+    "sync_errors": "ข้อผิดพลาดการซิงก์",
+    "stable": "คงที่",
+    "clean": "ปกติ"
+  },
+  "table": {
+    "empty": "ไม่พบลูกค้า",
+    "showing": "แสดง {{start}}-{{end}} จาก {{total}} ลูกค้า",
+    "filters": {
+      "tiktok": "TikTok Shop",
+      "shopify": "Shopify"
+    },
+    "columns": {
+      "id": "รหัส",
+      "customer_name": "ชื่อลูกค้า",
+      "email": "อีเมล",
+      "phone": "โทรศัพท์",
+      "gender": "เพศ",
+      "address": "ที่อยู่"
+    },
+    "gender": {
+      "male": "ชาย",
+      "female": "หญิง"
+    },
+    "badges": {
+      "premium": "สมาชิกพรีเมียม",
+      "top_buyer": "ผู้ซื้ออันดับ 1%",
+      "new_customer": "ลูกค้าใหม่"
+    }
+  },
+  "insights": {
+    "growth": {
+      "title": "โอกาสการเติบโต",
+      "description": "ลูกค้า Shopify 3,200 รายไม่ได้ซื้อสินค้าใน 60 วัน",
+      "action": "ส่งแคมเปญ"
+    },
+    "identity": {
+      "title": "ยืนยันตัวตนแล้ว",
+      "description": "98% ของไดเรกทอรีลูกค้าถูกตรวจสอบกับรหัส marketplace แล้ว"
+    },
+    "sync": {
+      "title": "สถานะซิงก์อัตโนมัติ",
+      "description": "ซิงก์ทั่วโลกครั้งถัดไปเวลา 14:00 GMT มีคำสั่งซื้อรอ 42 รายการ"
+    }
+  }
+}

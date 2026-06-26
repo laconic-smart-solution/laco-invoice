@@ -1,0 +1,57 @@
+{
+  "title": "客户目录",
+  "subtitle": "管理跨渠道客户数据及全平台客户终身价值。",
+  "sync_status": "实时同步已启用",
+  "actions": {
+    "filter_marketplace": "筛选市场",
+    "export_csv": "导出 CSV"
+  },
+  "stats": {
+    "total_customers": "客户总数",
+    "avg_lifetime_value": "平均终身价值",
+    "active_this_month": "本月活跃",
+    "sync_errors": "同步错误",
+    "stable": "稳定",
+    "clean": "正常"
+  },
+  "table": {
+    "empty": "未找到客户。",
+    "showing": "显示第 {{start}}-{{end}} 条，共 {{total}} 位客户",
+    "filters": {
+      "tiktok": "TikTok Shop",
+      "shopify": "Shopify"
+    },
+    "columns": {
+      "id": "ID",
+      "customer_name": "客户姓名",
+      "email": "邮箱",
+      "phone": "电话",
+      "gender": "性别",
+      "address": "地址"
+    },
+    "gender": {
+      "male": "男",
+      "female": "女"
+    },
+    "badges": {
+      "premium": "高级会员",
+      "top_buyer": "前 1% 买家",
+      "new_customer": "新客户"
+    }
+  },
+  "insights": {
+    "growth": {
+      "title": "增长机会",
+      "description": "3,200 名 Shopify 客户已超过 60 天未购买。",
+      "action": "发送营销活动"
+    },
+    "identity": {
+      "title": "身份已验证",
+      "description": "98% 的客户目录已与市场 ID 交叉核对。"
+    },
+    "sync": {
+      "title": "自动同步状态",
+      "description": "下次全局同步计划于 14:00 GMT，队列中有 42 个待处理订单。"
+    }
+  }
+}

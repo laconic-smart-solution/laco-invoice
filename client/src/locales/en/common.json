@@ -1,0 +1,38 @@
+{
+  "app": {
+    "name": "Laco Invoice"
+  },
+  "home": {
+    "title": "Welcome to Laco Invoice",
+    "description": "Your project is set up and ready to build.",
+    "cta": "Get started",
+    "theme_hint": "Press d to toggle theme"
+  },
+  "loading": "Loading...",
+  "dialog": {
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  },
+  "pagination": {
+    "rows_per_page": "Show",
+    "previous": "Previous",
+    "next": "Next",
+    "showing_range": "Showing {{start}} to {{end}} of {{total}}"
+  },
+  "time": {
+    "minutes_ago_one": "{{count}} min ago",
+    "minutes_ago_other": "{{count}} mins ago"
+  },
+  "form": {
+    "no_matches": "No matches.",
+    "upload_image": "Upload image",
+    "open_crop_editor": "Open crop editor",
+    "upload_new_image": "Upload new image",
+    "remove_image": "Remove image",
+    "crop_title": "Crop image",
+    "crop_description": "Drag handles to frame the image. Apply saves to the form, or upload a different file.",
+    "upload_new_photo": "Upload new photo",
+    "cancel": "Cancel",
+    "apply": "Apply"
+  }
+}

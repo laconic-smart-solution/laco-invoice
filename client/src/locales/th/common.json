@@ -1,0 +1,38 @@
+{
+  "app": {
+    "name": "Laco Invoice"
+  },
+  "home": {
+    "title": "ยินดีต้อนรับสู่ Laco Invoice",
+    "description": "โปรเจกต์ของคุณพร้อมสำหรับการพัฒนาแล้ว",
+    "cta": "เริ่มต้นใช้งาน",
+    "theme_hint": "กด d เพื่อสลับธีม"
+  },
+  "loading": "กำลังโหลด...",
+  "dialog": {
+    "cancel": "ยกเลิก",
+    "confirm": "ยืนยัน"
+  },
+  "pagination": {
+    "rows_per_page": "แสดง",
+    "previous": "ก่อนหน้า",
+    "next": "ถัดไป",
+    "showing_range": "แสดง {{start}} ถึง {{end}} จาก {{total}}"
+  },
+  "time": {
+    "minutes_ago_one": "{{count}} นาทีที่แล้ว",
+    "minutes_ago_other": "{{count}} นาทีที่แล้ว"
+  },
+  "form": {
+    "no_matches": "ไม่พบรายการ",
+    "upload_image": "อัปโหลดรูปภาพ",
+    "open_crop_editor": "เปิดตัวแก้ไขครอบรูป",
+    "upload_new_image": "อัปโหลดรูปใหม่",
+    "remove_image": "ลบรูปภาพ",
+    "crop_title": "ครอบรูปภาพ",
+    "crop_description": "ลากขอบเพื่อจัดกรอบรูป กดใช้งานเพื่อบันทึกลงฟอร์ม หรืออัปโหลดไฟล์อื่น",
+    "upload_new_photo": "อัปโหลดรูปใหม่",
+    "cancel": "ยกเลิก",
+    "apply": "ใช้งาน"
+  }
+}
