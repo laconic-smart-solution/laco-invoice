@@ -23,6 +23,6 @@ export interface DashboardStats {
 
 export interface MarketplaceChannel {
   id: string
-  nameKey: "tiktok" | "shopify" | "amazon"
+  nameKey: "lazada" | "shopee" | "tiktok"
   iconClassName: string
 }

@@ -18,7 +18,7 @@ public class StubMarketplaceOrderAdapter implements MarketplaceOrderAdapter {
 
 	private static final Logger log = LoggerFactory.getLogger(StubMarketplaceOrderAdapter.class);
 
-	private static final Set<String> SUPPORTED = Set.of("TIKTOK", "SHOPEE", "LAZADA", "AMAZON");
+	private static final Set<String> SUPPORTED = Set.of("AMAZON");
 
 	@Override
 	public boolean supports(String marketplaceCode) {

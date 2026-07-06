@@ -83,6 +83,40 @@ export const CreateUserPage = PageLoader(
   )
 )
 
+export const StoresPage = PageLoader(
+  lazy(() =>
+    import("@/features/stores/pages/stores-page").then((module) => ({
+      default: module.StoresPage,
+    }))
+  )
+)
+
+export const CreateStorePage = PageLoader(
+  lazy(() =>
+    import("@/features/stores/pages/create-store-page").then((module) => ({
+      default: module.CreateStorePage,
+    }))
+  )
+)
+
+export const StoreDetailPage = PageLoader(
+  lazy(() =>
+    import("@/features/stores/pages/store-detail-page").then((module) => ({
+      default: module.StoreDetailPage,
+    }))
+  )
+)
+
+export const MarketplaceOAuthCallbackPage = PageLoader(
+  lazy(() =>
+    import("@/features/stores/pages/marketplace-oauth-callback-page").then((module) => ({
+      default: module.MarketplaceOAuthCallbackPage,
+    }))
+  )
+)
+
+export const LazadaCallbackPage = MarketplaceOAuthCallbackPage
+
 export const ProductsPage = PageLoader(
   lazy(() =>
     import("@/features/products/pages/products-page").then((module) => ({

@@ -1,6 +1,7 @@
 package com.laconic.lacoinvoice.features.store;
 
 import java.time.Instant;
+import java.util.UUID;
 
 import com.laconic.lacoinvoice.domain.models.MarketplaceConnectionStatus;
 
@@ -13,6 +14,10 @@ public record StoreMarketplaceConnectionDto(
 		Long marketplaceId,
 		String marketplaceCode,
 		String marketplaceName,
+		UUID externalConnectionId,
+		String externalSellerId,
+		String externalCountry,
+		String displayName,
 		Instant tokenExpiry,
 		MarketplaceConnectionStatus status,
 		Instant createdAt,

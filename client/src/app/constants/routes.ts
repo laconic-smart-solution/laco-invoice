@@ -3,6 +3,12 @@ export const ROUTES = {
   dashboard: {
     root: "/",
     stores: "/stores",
+    storeCreate: "/stores/new",
+    storeDetail: (storeId: number | string) => `/stores/${storeId}`,
+    marketplaceCallback: (segment: string) => `/stores/${segment}/callback`,
+    lazadaCallback: "/stores/lazada/callback",
+    shopeeCallback: "/stores/shopee/callback",
+    tiktokCallback: "/stores/tiktok/callback",
     products: "/products",
     orders: "/orders",
     orderDetail: (orderId: string) => `/orders/${orderId}`,

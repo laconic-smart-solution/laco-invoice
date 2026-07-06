@@ -45,9 +45,11 @@
   "marketplaces": {
     "title": "Active Marketplaces",
     "connect_channel": "Connect Channel",
-    "tiktok": "TikTok Shop",
-    "shopify": "Shopify",
-    "amazon": "Amazon"
+    "channels": {
+      "lazada": "Lazada",
+      "shopee": "Shopee",
+      "tiktok": "TikTok Shop"
+    }
   },
   "promo": {
     "title": "Optimize Cash Flow.",

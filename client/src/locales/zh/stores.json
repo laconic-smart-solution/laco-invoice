@@ -1,0 +1,141 @@
+{
+  "title": "Stores",
+  "subtitle": "Manage your stores and connect marketplaces.",
+  "actions": {
+    "add_store": "Add Store"
+  },
+  "stats": {
+    "total_stores": "Total Stores"
+  },
+  "create": {
+    "title": "Add Store",
+    "subtitle": "Create a store to organize marketplace connections and orders."
+  },
+  "detail": {
+    "title": "Store Details"
+  },
+  "connections": {
+    "title": "Marketplace Connections",
+    "subtitle": "Connect seller accounts to sync orders."
+  },
+  "callback": {
+    "title": "Connecting marketplace",
+    "processing": "Completing connection...",
+    "unsupported_marketplace": "Unsupported marketplace callback."
+  },
+  "form": {
+    "back_to_list": "Back to stores",
+    "cancel": "Cancel",
+    "submit_create": "Create store",
+    "name_label": "Store name",
+    "name_placeholder": "My Shop",
+    "logo_url_label": "Logo URL",
+    "logo_url_placeholder": "https://example.com/logo.png",
+    "active_label": "Active store",
+    "active_description": "Inactive stores are hidden from sync workflows.",
+    "validation": {
+      "name_required": "Store name is required"
+    }
+  },
+  "table": {
+    "empty": "No stores found.",
+    "loading": "Loading stores...",
+    "showing": "Showing {{start}}-{{end}} of {{total}} stores",
+    "columns": {
+      "name": "Store",
+      "status": "Status",
+      "created_at": "Created",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "view": "View"
+    }
+  },
+  "marketplaces": {
+    "lazada": {
+      "connect": "Connect Lazada",
+      "connecting": "Redirecting...",
+      "refresh": "Refresh tokens",
+      "disconnect": "Disconnect",
+      "seller_id": "Seller ID",
+      "country": "Country",
+      "token_expires": "Token expires",
+      "status_connected": "Connected",
+      "status_disconnected": "Disconnected",
+      "connections_title": "Lazada Connections",
+      "connections_subtitle": "Connect your Lazada seller account to sync orders.",
+      "no_connections": "No Lazada seller connected yet.",
+      "confirm_disconnect_title": "Disconnect Lazada?",
+      "confirm_disconnect_description": "Disconnect \"{{name}}\"? Order sync for this seller will stop.",
+      "confirm_disconnect_button": "Disconnect",
+      "callback": {
+        "title": "Connecting Lazada",
+        "processing": "Completing Lazada connection...",
+        "success": "Lazada seller connected successfully.",
+        "missing_code": "Authorization code is missing. Please try connecting again.",
+        "missing_state": "OAuth state is missing. Please try connecting again.",
+        "failed": "Unable to connect Lazada. Please try again."
+      }
+    },
+    "shopee": {
+      "connect": "Connect Shopee",
+      "connecting": "Redirecting...",
+      "refresh": "Refresh tokens",
+      "disconnect": "Disconnect",
+      "seller_id": "Shop ID",
+      "country": "Country",
+      "token_expires": "Token expires",
+      "status_connected": "Connected",
+      "status_disconnected": "Disconnected",
+      "connections_title": "Shopee Connections",
+      "connections_subtitle": "Connect your Shopee shop to sync orders.",
+      "no_connections": "No Shopee shop connected yet.",
+      "confirm_disconnect_title": "Disconnect Shopee?",
+      "confirm_disconnect_description": "Disconnect \"{{name}}\"? Order sync for this shop will stop.",
+      "confirm_disconnect_button": "Disconnect",
+      "callback": {
+        "title": "Connecting Shopee",
+        "processing": "Completing Shopee connection...",
+        "success": "Shopee shop connected successfully.",
+        "missing_code": "Authorization code is missing. Please try connecting again.",
+        "missing_state": "OAuth state is missing. Please try connecting again.",
+        "failed": "Unable to connect Shopee. Please try again."
+      }
+    },
+    "tiktok": {
+      "connect": "Connect TikTok Shop",
+      "connecting": "Redirecting...",
+      "refresh": "Refresh tokens",
+      "disconnect": "Disconnect",
+      "seller_id": "Shop ID",
+      "country": "Country",
+      "token_expires": "Token expires",
+      "status_connected": "Connected",
+      "status_disconnected": "Disconnected",
+      "connections_title": "TikTok Shop Connections",
+      "connections_subtitle": "Connect your TikTok Shop to sync orders.",
+      "no_connections": "No TikTok Shop connected yet.",
+      "confirm_disconnect_title": "Disconnect TikTok Shop?",
+      "confirm_disconnect_description": "Disconnect \"{{name}}\"? Order sync for this shop will stop.",
+      "confirm_disconnect_button": "Disconnect",
+      "callback": {
+        "title": "Connecting TikTok Shop",
+        "processing": "Completing TikTok Shop connection...",
+        "success": "TikTok Shop connected successfully.",
+        "missing_code": "Authorization code is missing. Please try connecting again.",
+        "missing_state": "OAuth state is missing. Please try connecting again.",
+        "failed": "Unable to connect TikTok Shop. Please try again."
+      }
+    }
+  },
+  "errors": {
+    "load_failed": "Unable to load stores. Please try again.",
+    "save_failed": "Unable to create store. Please try again.",
+    "lazada_failed": "Lazada request failed. Please try again.",
+    "marketplace_failed": "{{marketplace}} request failed. Please try again."
+  }
+}

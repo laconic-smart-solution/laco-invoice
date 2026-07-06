@@ -8,9 +8,9 @@
   "filters": {
     "marketplace_label": "Marketplace",
     "marketplace_all": "All Marketplaces",
+    "marketplace_lazada": "Lazada",
+    "marketplace_shopee": "Shopee",
     "marketplace_tiktok": "TikTok Shop",
-    "marketplace_shopify": "Shopify",
-    "marketplace_amazon": "Amazon",
     "date_range_label": "Date Range",
     "date_range_value": "Oct 01 - Oct 24, 2023",
     "status_label": "Invoice Status",

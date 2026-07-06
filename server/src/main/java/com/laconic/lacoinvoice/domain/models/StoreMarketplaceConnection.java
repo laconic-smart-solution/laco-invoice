@@ -1,6 +1,7 @@
 package com.laconic.lacoinvoice.domain.models;
 
 import java.time.Instant;
+import java.util.UUID;
 
 import com.laconic.lacoinvoice.common.persistence.MasterEntity;
 
@@ -28,6 +29,18 @@ public class StoreMarketplaceConnection extends MasterEntity {
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "marketplace_id", nullable = false, foreignKey = @ForeignKey(name = "fk_smc_marketplace", value = ConstraintMode.NO_CONSTRAINT))
 	private Marketplace marketplace;
+
+	@Column(name = "external_connection_id")
+	private UUID externalConnectionId;
+
+	@Column(name = "external_seller_id", length = 128)
+	private String externalSellerId;
+
+	@Column(name = "external_country", length = 8)
+	private String externalCountry;
+
+	@Column(name = "display_name", length = 255)
+	private String displayName;
 
 	@Column(name = "access_token", columnDefinition = "CLOB")
 	private String accessToken;
