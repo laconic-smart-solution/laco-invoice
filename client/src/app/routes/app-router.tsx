@@ -11,6 +11,7 @@ import {
   OrderDetailPage,
   OrdersPage,
   OtpVerifyPage,
+  ProductsPage,
   RegisterPage,
   ResetPasswordPage,
   SectionPlaceholderPage,
@@ -32,7 +33,7 @@ export const router = createBrowserRouter([
       },
       {
         path: ROUTES.dashboard.products,
-        element: <SectionPlaceholderPage />,
+        element: <ProductsPage />,
       },
       {
         path: ROUTES.dashboard.orders,

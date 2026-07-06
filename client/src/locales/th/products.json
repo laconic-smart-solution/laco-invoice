@@ -1,0 +1,59 @@
+{
+  "breadcrumb": {
+    "store_management": "การจัดการร้านค้า"
+  },
+  "title": "สินค้า TikTok Shop",
+  "sync_status": "ซิงก์สด",
+  "actions": {
+    "filter": "กรอง",
+    "export_csv": "ส่งออก CSV"
+  },
+  "filters": {
+    "marketplace_label": "แหล่ง Marketplace",
+    "marketplace": {
+      "tiktok_fashion_hh": "TikTok Shop - Fashion HH",
+      "tiktok_beauty_us": "TikTok Shop - Beauty US",
+      "shopify_main": "Shopify - Main Store"
+    },
+    "erp_status_label": "สถานะการแมป ERP",
+    "erp_status": {
+      "all": "ทั้งหมด",
+      "synced": "ซิงก์แล้ว",
+      "unmapped": "ยังไม่แมป"
+    },
+    "price_range_label": "ช่วงราคา",
+    "price_min": "ต่ำสุด",
+    "price_max": "สูงสุด",
+    "reset_view": "รีเซ็ตมุมมอง"
+  },
+  "erp_status": {
+    "synced": "ซิงก์แล้ว",
+    "unmapped": "ยังไม่แมป"
+  },
+  "table": {
+    "empty": "ไม่พบสินค้า",
+    "showing": "แสดง {{start}}-{{end}} จาก {{total}} สินค้า",
+    "store_label": "ร้านค้า: {{id}}",
+    "marketplace_label": "Marketplace: {{id}}",
+    "id_label": "รหัส: {{id}}",
+    "columns": {
+      "store_marketplace": "ร้านค้าและ Marketplace",
+      "product_sku": "รหัสสินค้าและ SKU",
+      "name": "ชื่อ",
+      "price": "ราคา (USD)",
+      "erp_status": "สถานะ ERP",
+      "action": "การดำเนินการ"
+    },
+    "actions": {
+      "view_details": "ดูรายละเอียด",
+      "map_to_erp": "แมปไป ERP"
+    }
+  },
+  "stats": {
+    "mapping_rate": "อัตราการแมป",
+    "action_required": "ต้องดำเนินการ",
+    "action_required_value": "{{count}} สินค้า",
+    "active_sku": "SKU ที่ใช้งาน TikTok Shop",
+    "active_sku_value": "{{count}} รายการ"
+  }
+}

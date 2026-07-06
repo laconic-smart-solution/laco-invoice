@@ -1,0 +1,59 @@
+{
+  "breadcrumb": {
+    "store_management": "店铺管理"
+  },
+  "title": "TikTok Shop 商品",
+  "sync_status": "实时同步",
+  "actions": {
+    "filter": "筛选",
+    "export_csv": "导出 CSV"
+  },
+  "filters": {
+    "marketplace_label": "市场来源",
+    "marketplace": {
+      "tiktok_fashion_hh": "TikTok Shop - Fashion HH",
+      "tiktok_beauty_us": "TikTok Shop - Beauty US",
+      "shopify_main": "Shopify - 主店铺"
+    },
+    "erp_status_label": "ERP 映射状态",
+    "erp_status": {
+      "all": "全部",
+      "synced": "已同步",
+      "unmapped": "未映射"
+    },
+    "price_range_label": "价格区间",
+    "price_min": "最低",
+    "price_max": "最高",
+    "reset_view": "重置视图"
+  },
+  "erp_status": {
+    "synced": "已同步",
+    "unmapped": "未映射"
+  },
+  "table": {
+    "empty": "未找到商品。",
+    "showing": "显示第 {{start}}-{{end}} 条，共 {{total}} 个商品",
+    "store_label": "店铺：{{id}}",
+    "marketplace_label": "市场：{{id}}",
+    "id_label": "ID：{{id}}",
+    "columns": {
+      "store_marketplace": "店铺与市场",
+      "product_sku": "商品 ID 与 SKU",
+      "name": "名称",
+      "price": "价格 (USD)",
+      "erp_status": "ERP 状态",
+      "action": "操作"
+    },
+    "actions": {
+      "view_details": "查看详情",
+      "map_to_erp": "映射到 ERP"
+    }
+  },
+  "stats": {
+    "mapping_rate": "映射率",
+    "action_required": "待处理",
+    "action_required_value": "{{count}} 个商品",
+    "active_sku": "TikTok Shop 活跃 SKU",
+    "active_sku_value": "{{count}} 件"
+  }
+}

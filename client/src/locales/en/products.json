@@ -1,0 +1,59 @@
+{
+  "breadcrumb": {
+    "store_management": "Store Management"
+  },
+  "title": "TikTok Shop Products",
+  "sync_status": "Live Sync",
+  "actions": {
+    "filter": "Filter",
+    "export_csv": "Export CSV"
+  },
+  "filters": {
+    "marketplace_label": "Marketplace Source",
+    "marketplace": {
+      "tiktok_fashion_hh": "TikTok Shop - Fashion HH",
+      "tiktok_beauty_us": "TikTok Shop - Beauty US",
+      "shopify_main": "Shopify - Main Store"
+    },
+    "erp_status_label": "ERP Mapping Status",
+    "erp_status": {
+      "all": "All",
+      "synced": "Synced",
+      "unmapped": "Unmapped"
+    },
+    "price_range_label": "Price Range",
+    "price_min": "Min",
+    "price_max": "Max",
+    "reset_view": "Reset View"
+  },
+  "erp_status": {
+    "synced": "Synced",
+    "unmapped": "Unmapped"
+  },
+  "table": {
+    "empty": "No products found.",
+    "showing": "Showing {{start}}-{{end}} of {{total}} products",
+    "store_label": "Store: {{id}}",
+    "marketplace_label": "Marketplace: {{id}}",
+    "id_label": "ID: {{id}}",
+    "columns": {
+      "store_marketplace": "Store & Marketplace",
+      "product_sku": "Product ID & SKU",
+      "name": "Name",
+      "price": "Price (USD)",
+      "erp_status": "ERP Status",
+      "action": "Action"
+    },
+    "actions": {
+      "view_details": "View Details",
+      "map_to_erp": "Map to ERP"
+    }
+  },
+  "stats": {
+    "mapping_rate": "Mapping Rate",
+    "action_required": "Action Required",
+    "action_required_value": "{{count}} Products",
+    "active_sku": "TikTok Shop Active SKU",
+    "active_sku_value": "{{count}} Items"
+  }
+}

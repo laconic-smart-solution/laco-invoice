@@ -15,11 +15,18 @@ export interface BreadcrumbItem {
 export function useBreadcrumbs(): BreadcrumbItem[] {
   const { pathname } = useLocation()
   const { orderId, invoiceId } = useParams()
-  const { t } = useTranslation(["breadcrumb", "sidebar", "common"])
+  const { t } = useTranslation(["breadcrumb", "sidebar", "common", "products"])
 
   return useMemo(() => {
     if (pathname === ROUTES.dashboard.root) {
       return [{ label: t("sidebar:nav.dashboard") }]
+    }
+
+    if (pathname === ROUTES.dashboard.products) {
+      return [
+        { label: t("sidebar:nav.products"), href: ROUTES.dashboard.products },
+        { label: t("products:breadcrumb.store_management") },
+      ]
     }
 
     const navItem = SIDEBAR_NAV_ITEMS.find(

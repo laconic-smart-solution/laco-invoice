@@ -9,6 +9,7 @@ import enCustomers from "@/locales/en/customers.json"
 import enInvoices from "@/locales/en/invoices.json"
 import enNavbar from "@/locales/en/navbar.json"
 import enOrders from "@/locales/en/orders.json"
+import enProducts from "@/locales/en/products.json"
 import enSidebar from "@/locales/en/sidebar.json"
 import thAuth from "@/locales/th/auth.json"
 import thBreadcrumb from "@/locales/th/breadcrumb.json"
@@ -18,6 +19,7 @@ import thCustomers from "@/locales/th/customers.json"
 import thInvoices from "@/locales/th/invoices.json"
 import thNavbar from "@/locales/th/navbar.json"
 import thOrders from "@/locales/th/orders.json"
+import thProducts from "@/locales/th/products.json"
 import thSidebar from "@/locales/th/sidebar.json"
 import zhAuth from "@/locales/zh/auth.json"
 import zhBreadcrumb from "@/locales/zh/breadcrumb.json"
@@ -27,6 +29,7 @@ import zhCustomers from "@/locales/zh/customers.json"
 import zhInvoices from "@/locales/zh/invoices.json"
 import zhNavbar from "@/locales/zh/navbar.json"
 import zhOrders from "@/locales/zh/orders.json"
+import zhProducts from "@/locales/zh/products.json"
 import zhSidebar from "@/locales/zh/sidebar.json"
 
 export const SUPPORTED_LOCALES = ["en", "th", "zh"] as const
@@ -45,6 +48,7 @@ void i18n.use(initReactI18next).init({
       orders: enOrders,
       invoices: enInvoices,
       customers: enCustomers,
+      products: enProducts,
     },
     th: {
       common: thCommon,
@@ -56,6 +60,7 @@ void i18n.use(initReactI18next).init({
       orders: thOrders,
       invoices: thInvoices,
       customers: thCustomers,
+      products: thProducts,
     },
     zh: {
       common: zhCommon,
@@ -67,6 +72,7 @@ void i18n.use(initReactI18next).init({
       orders: zhOrders,
       invoices: zhInvoices,
       customers: zhCustomers,
+      products: zhProducts,
     },
   },
   lng: "en",
