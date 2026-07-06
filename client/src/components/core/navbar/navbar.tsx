@@ -1,6 +1,8 @@
-import { Bell, CircleHelp, CirclePlus, Search } from "lucide-react"
+import { Bell, CircleHelp, CirclePlus, LogOut, Search } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
 
+import { ROUTES } from "@/app/constants/routes"
 import { NavbarLanguageToggle } from "@/components/core/navbar/navbar-language-toggle"
 import { NavbarThemeToggle } from "@/components/core/navbar/navbar-theme-toggle"
 import { Button } from "@/components/ui/button"
@@ -10,6 +12,7 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group"
 import { cn } from "@/lib/utils"
+import { useAuthStore } from "@/shared/stores/auth-store"
 
 interface NavbarSearchProps {
   className?: string
@@ -49,6 +52,15 @@ function NavbarSyncStatus() {
 
 export function Navbar() {
   const { t } = useTranslation("navbar")
+  const navigate = useNavigate()
+  const user = useAuthStore((state) => state.user)
+  const logout = useAuthStore((state) => state.logout)
+  const displayName = user?.fullName?.trim() || user?.email || ""
+
+  const handleLogout = () => {
+    logout()
+    navigate(ROUTES.auth.login)
+  }
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-4 border-b border-border bg-background px-6">
@@ -86,6 +98,24 @@ export function Navbar() {
           <CirclePlus className="size-4" aria-hidden />
           <span className="hidden sm:inline">{t("generate_invoice")}</span>
         </Button>
+
+        {displayName ? (
+          <div className="hidden items-center gap-2 border-l border-border pl-3 md:flex">
+            <span className="max-w-40 truncate text-sm text-muted-foreground">
+              {displayName}
+            </span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              className="text-muted-foreground"
+              aria-label={t("logout")}
+              onClick={handleLogout}
+            >
+              <LogOut className="size-4" aria-hidden />
+            </Button>
+          </div>
+        ) : null}
       </div>
     </header>
   )

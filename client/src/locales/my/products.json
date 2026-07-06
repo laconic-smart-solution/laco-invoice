@@ -1,0 +1,59 @@
+{
+  "breadcrumb": {
+    "store_management": "ဆိုင် စီမံမှု"
+  },
+  "title": "TikTok Shop ကုန်ပစ္စည်းများ",
+  "sync_status": "Live Sync",
+  "actions": {
+    "filter": "Filter",
+    "export_csv": "CSV ထုတ်ရန်"
+  },
+  "filters": {
+    "marketplace_label": "Marketplace ရင်းမြစ်",
+    "marketplace": {
+      "tiktok_fashion_hh": "TikTok Shop - Fashion HH",
+      "tiktok_beauty_us": "TikTok Shop - Beauty US",
+      "shopify_main": "Shopify - Main Store"
+    },
+    "erp_status_label": "ERP Mapping အခြေအနေ",
+    "erp_status": {
+      "all": "အားလုံး",
+      "synced": "Sync ပြီး",
+      "unmapped": "Map မလုပ်ရသေး"
+    },
+    "price_range_label": "ဈေးနှုန်း အကွာအဝေး",
+    "price_min": "အနည်းဆုံး",
+    "price_max": "အများဆုံး",
+    "reset_view": "Reset View"
+  },
+  "erp_status": {
+    "synced": "Sync ပြီး",
+    "unmapped": "Map မလုပ်ရသေး"
+  },
+  "table": {
+    "empty": "ကုန်ပစ္စည်း မတွေ့ပါ။",
+    "showing": "ကုန်ပစ္စည်း {{total}} ခုအနက် {{start}}-{{end}} ကို ပြနေသည်",
+    "store_label": "ဆိုင်: {{id}}",
+    "marketplace_label": "Marketplace: {{id}}",
+    "id_label": "ID: {{id}}",
+    "columns": {
+      "store_marketplace": "ဆိုင်နှင့် Marketplace",
+      "product_sku": "Product ID & SKU",
+      "name": "အမည်",
+      "price": "ဈေးနှုန်း (USD)",
+      "erp_status": "ERP အခြေအနေ",
+      "action": "လုပ်ဆောင်ချက်"
+    },
+    "actions": {
+      "view_details": "အသေးစိတ် ကြည့်ရန်",
+      "map_to_erp": "ERP သို့ Map လုပ်ရန်"
+    }
+  },
+  "stats": {
+    "mapping_rate": "Mapping Rate",
+    "action_required": "လုပ်ဆောင်ရန် လိုအပ်",
+    "action_required_value": "ကုန်ပစ္စည်း {{count}} ခု",
+    "active_sku": "TikTok Shop Active SKU",
+    "active_sku_value": "{{count}} Items"
+  }
+}

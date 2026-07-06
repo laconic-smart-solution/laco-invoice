@@ -1,0 +1,88 @@
+{
+  "title": "အသုံးပြုသူ စီမံခန့်ခွဲမှု",
+  "subtitle": "ပလက်ဖောင်းရှိ အသုံးပြုသူ အကောင့်များကို ကြည့်ရှုနှင့် စီမံခန့်ခွဲပါ။",
+  "actions": {
+    "add_user": "Add User"
+  },
+  "stats": {
+    "total_users": "စုစုပေါင်း အသုံးပြုသူ"
+  },
+  "create": {
+    "title": "Add User",
+    "subtitle": "Create a new user account and provision access in the identity server."
+  },
+  "form": {
+    "back_to_list": "Back to users",
+    "cancel": "Cancel",
+    "submit_create": "Create user",
+    "full_name_label": "Full name",
+    "full_name_placeholder": "Jane Doe",
+    "email_label": "Email",
+    "email_placeholder": "name@company.com",
+    "username_label": "Username",
+    "username_placeholder": "jane.doe",
+    "password_label": "Password",
+    "password_placeholder": "Minimum 8 characters",
+    "confirm_password_label": "Confirm password",
+    "confirm_password_placeholder": "Re-enter password",
+    "role_label": "Role",
+    "role_placeholder": "Select role",
+    "active_label": "Active account",
+    "active_description": "Inactive users cannot sign in to the platform.",
+    "validation": {
+      "full_name_required": "Full name is required",
+      "invalid_email": "Enter a valid email address",
+      "username_min": "Username must be at least 3 characters",
+      "password_min": "Password must be at least 8 characters",
+      "password_mismatch": "Passwords do not match"
+    }
+  },
+  "filters": {
+    "role_label": "အခန်းကဏ္ဍ",
+    "role": {
+      "all": "အခန်းကဏ္ဍ အားလုံး",
+      "admin": "Admin",
+      "owner": "Owner",
+      "manager": "Manager",
+      "staff": "Staff"
+    }
+  },
+  "errors": {
+    "load_failed": "အသုံးပြုသူများကို မဖတ်နိုင်ပါ။ ထပ်ကြိုးစားပါ။",
+    "save_failed": "Unable to create user. Please try again.",
+    "verify_otp_failed": "OTP ကို အတည်ပြု၍ မရပါ။ ထပ်ကြိုးစားပါ။"
+  },
+  "verify_otp": {
+    "confirm_title": "Mark OTP as verified?",
+    "confirm_description": "Mark \"{{name}}\" as OTP-verified? They will be treated as a verified user without entering an OTP.",
+    "confirm_button": "Mark verified",
+    "success": "\"{{name}}\" has been marked as OTP-verified."
+  },
+  "table": {
+    "empty": "အသုံးပြုသူ မတွေ့ပါ။",
+    "loading": "အသုံးပြုသူများ ဖတ်နေသည်...",
+    "showing": "{{total}} ဦးအနက် {{start}}-{{end}} ပြသနေသည်",
+    "columns": {
+      "id": "ID",
+      "name": "အသုံးပြုသူ",
+      "role": "အခန်းကဏ္ဍ",
+      "status": "အခြေအနေ",
+      "created_at": "ဖန်တီးသည့်အချိန်",
+      "actions": "Actions"
+    },
+    "actions": {
+      "verify_otp": "Verify OTP",
+      "verify_otp_unlinked": "This user is not linked to the identity server."
+    },
+    "roles": {
+      "admin": "Admin",
+      "owner": "Owner",
+      "manager": "Manager",
+      "staff": "Staff"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    }
+  }
+}

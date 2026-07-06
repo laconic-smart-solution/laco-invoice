@@ -1,0 +1,18 @@
+{
+  "not_found": {
+    "page_title": "Page not found | Laco Invoice",
+    "code": "404",
+    "title": "Page not found",
+    "description": "The page you requested doesn't exist, was moved, or the link may be outdated.",
+    "path_label": "Requested path",
+    "go_home": "Go to dashboard",
+    "go_login": "Go to sign in",
+    "go_back": "Go back",
+    "quick_links_label": "Popular destinations",
+    "links": {
+      "dashboard": "Dashboard",
+      "orders": "Orders",
+      "customers": "Customers"
+    }
+  }
+}

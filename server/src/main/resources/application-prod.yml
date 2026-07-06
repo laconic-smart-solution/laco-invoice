@@ -1,0 +1,28 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: oracle.jdbc.OracleDriver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+  jpa:
+    show-sql: false
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT:6379}
+
+app:
+  security:
+    jwks:
+      insecure-ssl: false
+  sso:
+    insecure-ssl: false
+  sync:
+    quartz:
+      enabled: true

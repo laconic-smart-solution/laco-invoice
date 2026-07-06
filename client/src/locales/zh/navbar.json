@@ -4,12 +4,14 @@
   "generate_invoice": "生成发票",
   "notifications": "通知",
   "help": "帮助",
+  "logout": "退出登录",
   "language": "语言",
   "theme_light": "切换到浅色模式",
   "theme_dark": "切换到深色模式",
   "locales": {
     "en": "英语",
     "th": "泰语",
-    "zh": "中文"
+    "zh": "中文",
+    "my": "Myanmar"
   }
 }

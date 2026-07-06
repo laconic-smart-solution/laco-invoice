@@ -1,0 +1,85 @@
+{
+  "title": "အော်ဒါ စီမံမှု",
+  "subtitle": "TikTok Shop အော်ဒါများကို စီမံပြီး ငွေတောင်းခံလွှာ အလိုအလျောက် ထုတ်ပါ။",
+  "actions": {
+    "export_csv": "CSV ထုတ်ရန်",
+    "sync_orders": "အော်ဒါ Sync လုပ်ရန်",
+    "bulk_generate": "အစုလိုက် ထုတ်ရန်"
+  },
+  "filters": {
+    "store_label": "Marketplace ဆိုင်",
+    "store_all": "TikTok ဆိုင်အားလုံး",
+    "store_tiktok_us": "TikTok Shop US",
+    "store_tiktok_uk": "TikTok Shop UK",
+    "store_tiktok_sg": "TikTok Shop SG",
+    "date_range_label": "ရက်စွဲ အကွာအဝေး",
+    "date_range_value": "Oct 01 - Oct 24, 2023",
+    "status_label": "အော်ဒါ အခြေအနေ",
+    "status_all": "အခြေအနေ အားလုံး",
+    "more_filters": "Filter ထပ်ထည့်ရန်"
+  },
+  "table": {
+    "empty": "အော်ဒါ မတွေ့ပါ။",
+    "select_all": "အားလုံး ရွေးရန်",
+    "select_row": "Row ရွေးရန်",
+    "selected_count_one": "အော်ဒါ {{count}} ခု ရွေးထားသည်",
+    "selected_count_other": "အော်ဒါ {{count}} ခု ရွေးထားသည်",
+    "bulk_generate": "ရွေးထားသော အော်ဒါများအတွက် ငွေတောင်းခံလွှာ ထုတ်ရန်",
+    "showing": "အော်ဒါ {{total}} ခုအနက် {{start}}-{{end}} ကို ပြနေသည်",
+    "columns": {
+      "order_id": "အော်ဒါ ID",
+      "order_date": "အော်ဒါ ရက်စွဲ",
+      "store": "ဆိုင်",
+      "customer": "ဖောက်သည်",
+      "total_amount": "စုစုပေါင်း",
+      "sync_status": "Sync အခြေအနေ",
+      "action": "လုပ်ဆောင်ချက်"
+    },
+    "actions": {
+      "view_invoice": "ငွေတောင်းခံလွှာ ကြည့်ရန်",
+      "generate": "ထုတ်ရန်",
+      "retry": "ထပ်ကြိုးစားရန်"
+    }
+  },
+  "sync_status": {
+    "synced": "Sync ပြီး",
+    "pending": "စောင့်ဆိုင်းနေ",
+    "failed": "မအောင်မြင်"
+  },
+  "confirm": {
+    "generate": {
+      "title": "ငွေတောင်းခံလွှာ ထုတ်မလား?",
+      "description": "အော်ဒါ {{orderId}} အတွက် ငွေတောင်းခံလွှာ ဖန်တီးပါမည်။ ဆက်လုပ်မလား?"
+    }
+  },
+  "detail": {
+    "back_to_orders": "အော်ဒါစာရင်းသို့ ပြန်သွားရန်",
+    "placed_on": "{{date}} တွင် မှာယူခဲ့သည်",
+    "view_invoice": "ငွေတောင်းခံလွှာ ကြည့်ရန်",
+    "last_synced": "နောက်ဆုံး Sync",
+    "invoice_id": "ငွေတောင်းခံလွှာ ID",
+    "customer_email": "အီးမေးလ်",
+    "shipping_address": "ပို့ဆောင်ရမည့် လိပ်စာ",
+    "not_found_title": "အော်ဒါ မတွေ့ပါ",
+    "not_found_description": "ရှာဖွေသော အော်ဒါ မရှိတော့ပါ သို့မဟုတ် ဖယ်ရှားခံရပါပြီ။",
+    "sections": {
+      "order_info": "အော်ဒါ အချက်အလက်",
+      "customer_info": "ဖောက်သည် အချက်အလက်",
+      "line_items": "ပစ္စည်းစာရင်း"
+    },
+    "line_items": {
+      "product": "ကုန်ပစ္စည်း",
+      "sku": "SKU",
+      "qty": "အရေအတွက်",
+      "unit_price": "တစ်ခုဈေး",
+      "total": "စုစုပေါင်း"
+    },
+    "summary": {
+      "subtotal": "ခွဲစုစုပေါင်း",
+      "tax": "အခွန်",
+      "shipping": "ပို့ဆောင်ခ",
+      "free": "အခမဲ့",
+      "total": "စုစုပေါင်း"
+    }
+  }
+}

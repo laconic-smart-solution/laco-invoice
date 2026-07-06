@@ -1,0 +1,17 @@
+{
+  "search_placeholder": "အော်ဒါ၊ ငွေတောင်းခံလွှာ ရှာပါ...",
+  "syncing": "ထပ်မံချိတ်ဆက်နေသည်...",
+  "generate_invoice": "ငွေတောင်းခံလွှာ ထုတ်ရန်",
+  "notifications": "အကြောင်းကြားချက်များ",
+  "help": "အကူအညီ",
+  "logout": "ထွက်မည်",
+  "language": "ဘာသာစကား",
+  "theme_light": "Light mode သို့ ပြောင်းရန်",
+  "theme_dark": "Dark mode သို့ ပြောင်းရန်",
+  "locales": {
+    "en": "English",
+    "th": "Thai",
+    "zh": "Chinese",
+    "my": "မြန်မာ"
+  }
+}

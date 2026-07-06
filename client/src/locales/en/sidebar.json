@@ -7,9 +7,16 @@
     "orders": "Orders",
     "invoices": "Invoices",
     "customers": "Customers",
+    "users": "Users",
     "settings": "Settings"
   },
   "user": {
-    "premium_account": "Premium Account"
-  }
+    "roles": {
+      "owner": "Owner",
+      "manager": "Manager",
+      "staff": "Staff",
+      "admin": "Admin"
+    }
+  },
+  "logout": "Log out"
 }

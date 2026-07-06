@@ -1,0 +1,90 @@
+spring:
+  application:
+    name: lacoinvoice
+  profiles:
+    active: dev
+  threads:
+    virtual:
+      enabled: true
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.OracleDialect
+        type:
+          preferred_boolean_jdbc_type: TINYINT
+        query:
+          passDistinctThrough: false
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=500,expireAfterWrite=30m,recordStats
+  quartz:
+    job-store-type: memory
+    auto-startup: false
+
+server:
+  port: 8080
+
+logging:
+  pattern:
+    level: "%5p [%X{requestId:-}]"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized
+
+lacoinvoice:
+  logging:
+    enabled: true
+    request-id-header: X-Request-Id
+    slow-request-threshold-ms: 3000
+    exclude-paths:
+      - /actuator
+
+app:
+  cors:
+    enabled: true
+    allow-credentials: true
+    allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
+    exposed-headers: Authorization,X-Request-Id
+  security:
+    mode: oauth2
+    jwks:
+      insecure-ssl: false
+  sso:
+    insecure-ssl: false
+  users:
+    default-admin:
+      enabled: true
+      email: admin@gmail.com
+      full-name: Admin Laconic
+      username: admin
+      auth-server-user-id: ${DEFAULT_ADMIN_AUTH_SERVER_USER_ID:}
+      role: ADMIN
+  sync:
+    quartz:
+      enabled: false
+      cron: "0 */10 * * * ?"
+      timezone: Asia/Bangkok
+
+sso:
+  url: ${SSO_URL:https://api-auths.laconic.co.th}
+  signup:
+    url: ${SSO_SIGNUP_URL:https://api-auths.laconic.co.th/v1/lcn-sso/auth/sign-up}
+  application-code: ${SSO_APPLICATION_CODE:laco-invoice}
+
+spring.security.oauth2.resourceserver.jwt.jwk-set-uri: ${SSO_JWKS_URL:https://api-auths.laconic.co.th/v1/lcn-sso/auth/jwks.json}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

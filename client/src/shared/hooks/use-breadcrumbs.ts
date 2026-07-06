@@ -14,8 +14,8 @@ export interface BreadcrumbItem {
 
 export function useBreadcrumbs(): BreadcrumbItem[] {
   const { pathname } = useLocation()
-  const { orderId, invoiceId } = useParams()
-  const { t } = useTranslation(["breadcrumb", "sidebar", "common", "products"])
+  const { orderId, invoiceId, customerId } = useParams()
+  const { t } = useTranslation(["breadcrumb", "sidebar", "common", "products", "customers", "users"])
 
   return useMemo(() => {
     if (pathname === ROUTES.dashboard.root) {
@@ -60,6 +60,30 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
       ]
     }
 
+    if (pathname === ROUTES.dashboard.customerCreate) {
+      return [
+        { label: t("sidebar:nav.dashboard"), href: ROUTES.dashboard.root },
+        { label: t("sidebar:nav.customers"), href: ROUTES.dashboard.customers },
+        { label: t("customers:create.title") },
+      ]
+    }
+
+    if (pathname === ROUTES.dashboard.userCreate) {
+      return [
+        { label: t("sidebar:nav.dashboard"), href: ROUTES.dashboard.root },
+        { label: t("sidebar:nav.users"), href: ROUTES.dashboard.users },
+        { label: t("users:create.title") },
+      ]
+    }
+
+    if (customerId && pathname.endsWith("/edit")) {
+      return [
+        { label: t("sidebar:nav.dashboard"), href: ROUTES.dashboard.root },
+        { label: t("sidebar:nav.customers"), href: ROUTES.dashboard.customers },
+        { label: t("customers:edit.title") },
+      ]
+    }
+
     switch (pathname) {
       case ROUTES.auth.login:
         return [
@@ -89,5 +113,5 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
       default:
         return [{ label: t("sidebar:nav.dashboard"), href: ROUTES.dashboard.root }]
     }
-  }, [invoiceId, orderId, pathname, t])
+  }, [customerId, invoiceId, orderId, pathname, t])
 }

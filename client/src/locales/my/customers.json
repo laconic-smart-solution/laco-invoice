@@ -1,0 +1,71 @@
+{
+  "title": "ဖောက်သည် Directory",
+  "subtitle": "သင့်ဆိုင်အတွက် ဖောက်သည်မှတ်တမ်းများ စီမံပါ။",
+  "subtitle_admin": "စနစ်ရှိ ဆိုင်အားလုံးမှ ဖောက်သည်မှတ်တမ်းများကို ကြည့်ရှုပါ။",
+  "sync_status": "Real-time sync လုပ်နေသည်",
+  "actions": {
+    "add_customer": "ဖောက်သည် ထည့်ရန်",
+    "filter_marketplace": "Marketplace Filter",
+    "export_csv": "CSV ထုတ်ရန်"
+  },
+  "stats": {
+    "total_customers": "ဖောက်သည် စုစုပေါင်း"
+  },
+  "create": {
+    "title": "ဖောက်သည် ထည့်ရန်",
+    "subtitle": "သင့်ဆိုင်အတွက် ဖောက်သည်အသစ် ဖန်တီးပါ။"
+  },
+  "edit": {
+    "title": "ဖောက်သည် ပြင်ရန်",
+    "not_found_title": "ဖောက်သည် မတွေ့ပါ",
+    "not_found_description": "ရှာဖွေသော ဖောက်သည် မရှိတော့ပါ သို့မဟုတ် ဖယ်ရှားခံရပါပြီ။"
+  },
+  "form": {
+    "back_to_list": "ဖောက်သည်စာရင်းသို့ ပြန်သွားရန်",
+    "cancel": "မလုပ်တော့",
+    "delete": "ဖျက်မည်",
+    "submit_create": "ဖောက်သည် ဖန်တီးမည်",
+    "submit_update": "ပြောင်းလဲမှုသိမ်းမည်",
+    "name_label": "အမည် (အပြည့်အစုံ)",
+    "name_placeholder": "John Doe",
+    "email_label": "အီးမေးလ်",
+    "email_placeholder": "name@company.com",
+    "phone_label": "ဖုန်း",
+    "phone_placeholder": "+959 000 000 000",
+    "gender_label": "လိင်",
+    "gender_placeholder": "လိင်ရွေးပါ",
+    "address_label": "လိပ်စာ",
+    "address_placeholder": "လမ်း၊ မြို့၊ နိုင်ငံ",
+    "validation": {
+      "name_required": "အမည် ထည့်ရန် လိုအပ်ပါသည်",
+      "invalid_email": "မှန်ကန်သော အီးမေးလ် ထည့်ပါ"
+    }
+  },
+  "delete": {
+    "confirm_title": "ဖောက်သည်ကို ဖျက်မလား?",
+    "confirm_description": "{{name}} ကို ဖောက်သည်စာရင်းထဲမှ ဖယ်ရှားပါမည်။ ပြန်မရနိုင်ပါ။"
+  },
+  "errors": {
+    "load_failed": "ဖောက်သည်စာရင်း မတင်နိုင်ပါ။ ထပ်ကြိုးစားပါ။",
+    "save_failed": "ဖောက်သည်ကို မသိမ်းနိုင်ပါ။ ထပ်ကြိုးစားပါ။",
+    "delete_failed": "ဖောက်သည်ကို မဖျက်နိုင်ပါ။ ထပ်ကြိုးစားပါ။"
+  },
+  "table": {
+    "empty": "ဖောက်သည် မရှိသေးပါ။",
+    "loading": "ဖောက်သည်များ တင်နေသည်...",
+    "showing": "ဖောက်သည် {{total}} ယောက်အနက် {{start}}-{{end}} ကို ပြနေသည်",
+    "columns": {
+      "id": "ID",
+      "store": "Store",
+      "customer_name": "ဖောက်သည် အမည်",
+      "email": "အီးမေးလ်",
+      "phone": "ဖုန်း",
+      "gender": "လိင်",
+      "address": "လိပ်စာ"
+    },
+    "gender": {
+      "male": "ယောက်ျား",
+      "female": "မိန်းမ"
+    }
+  }
+}

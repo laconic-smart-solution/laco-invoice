@@ -1,30 +1,64 @@
 {
   "title": "客户目录",
-  "subtitle": "管理跨渠道客户数据及全平台客户终身价值。",
-  "sync_status": "实时同步已启用",
+  "subtitle": "管理您店铺的客户记录。",
+  "subtitle_admin": "查看系统中所有店铺的客户记录。",
+  "sync_status": "实时同步中",
   "actions": {
-    "filter_marketplace": "筛选市场",
+    "add_customer": "添加客户",
+    "filter_marketplace": "筛选 Marketplace",
     "export_csv": "导出 CSV"
   },
   "stats": {
-    "total_customers": "客户总数",
-    "avg_lifetime_value": "平均终身价值",
-    "active_this_month": "本月活跃",
-    "sync_errors": "同步错误",
-    "stable": "稳定",
-    "clean": "正常"
+    "total_customers": "客户总数"
+  },
+  "create": {
+    "title": "添加客户",
+    "subtitle": "为您的店铺创建新的客户记录。"
+  },
+  "edit": {
+    "title": "编辑客户",
+    "not_found_title": "未找到客户",
+    "not_found_description": "未找到您要查看的客户，或该客户已被删除。"
+  },
+  "form": {
+    "back_to_list": "返回客户列表",
+    "cancel": "取消",
+    "delete": "删除",
+    "submit_create": "创建客户",
+    "submit_update": "保存更改",
+    "name_label": "姓名",
+    "name_placeholder": "张三",
+    "email_label": "电子邮箱",
+    "email_placeholder": "name@company.com",
+    "phone_label": "电话",
+    "phone_placeholder": "+86 138 0000 0000",
+    "gender_label": "性别",
+    "gender_placeholder": "选择性别",
+    "address_label": "地址",
+    "address_placeholder": "街道、城市、国家",
+    "validation": {
+      "name_required": "请输入姓名",
+      "invalid_email": "请输入有效的电子邮箱"
+    }
+  },
+  "delete": {
+    "confirm_title": "删除此客户？",
+    "confirm_description": "将从客户目录中移除 {{name}}，此操作无法撤销。"
+  },
+  "errors": {
+    "load_failed": "无法加载客户列表，请重试。",
+    "save_failed": "无法保存客户，请重试。",
+    "delete_failed": "无法删除客户，请重试。"
   },
   "table": {
-    "empty": "未找到客户。",
-    "showing": "显示第 {{start}}-{{end}} 条，共 {{total}} 位客户",
-    "filters": {
-      "tiktok": "TikTok Shop",
-      "shopify": "Shopify"
-    },
+    "empty": "暂无客户",
+    "loading": "正在加载客户...",
+    "showing": "显示第 {{start}}-{{end}} 条，共 {{total}} 条",
     "columns": {
       "id": "ID",
+      "store": "店铺",
       "customer_name": "客户姓名",
-      "email": "邮箱",
+      "email": "电子邮箱",
       "phone": "电话",
       "gender": "性别",
       "address": "地址"
@@ -32,26 +66,6 @@
     "gender": {
       "male": "男",
       "female": "女"
-    },
-    "badges": {
-      "premium": "高级会员",
-      "top_buyer": "前 1% 买家",
-      "new_customer": "新客户"
-    }
-  },
-  "insights": {
-    "growth": {
-      "title": "增长机会",
-      "description": "3,200 名 Shopify 客户已超过 60 天未购买。",
-      "action": "发送营销活动"
-    },
-    "identity": {
-      "title": "身份已验证",
-      "description": "98% 的客户目录已与市场 ID 交叉核对。"
-    },
-    "sync": {
-      "title": "自动同步状态",
-      "description": "下次全局同步计划于 14:00 GMT，队列中有 42 个待处理订单。"
     }
   }
 }

@@ -1,0 +1,37 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+  task:
+    scheduling:
+      enabled: false
+  datasource:
+    url: jdbc:h2:mem:lacoinvoicetest;MODE=Oracle;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=100,expireAfterWrite=5m
+  quartz:
+    auto-startup: false
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+
+app:
+  security:
+    mode: permit_all
+  users:
+    default-admin:
+      enabled: false
+
+lacoinvoice:
+  logging:
+    enabled: false

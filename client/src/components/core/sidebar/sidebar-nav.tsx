@@ -3,14 +3,20 @@ import { NavLink } from "react-router-dom"
 
 import { SIDEBAR_NAV_ITEMS } from "@/constants/navigation"
 import { cn } from "@/lib/utils"
+import { useAuthStore } from "@/shared/stores/auth-store"
 
 export function SidebarNav() {
   const { t } = useTranslation("sidebar")
+  const userRole = useAuthStore((state) => state.user?.role)
+
+  const navItems = SIDEBAR_NAV_ITEMS.filter(
+    (item) => !item.adminOnly || userRole === "ADMIN"
+  )
 
   return (
     <nav className="flex-1 overflow-y-auto px-3 py-2">
       <ul className="space-y-1">
-        {SIDEBAR_NAV_ITEMS.map((item) => {
+        {navItems.map((item) => {
           const Icon = item.icon
 
           return (

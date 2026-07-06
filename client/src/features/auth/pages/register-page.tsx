@@ -3,22 +3,23 @@ import { ArrowRight, Lock, Mail, User } from "lucide-react"
 import { useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { Link, useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
 import { Button } from "@/components/ui/button"
 import { Form } from "@/components/ui/form"
 import { AuthCard } from "@/features/auth/components/auth-card"
+import { AuthFormError } from "@/features/auth/components/auth-form-error"
 import { AuthIconInput } from "@/features/auth/components/auth-icon-input"
+import { useRegister } from "@/features/auth/hooks/use-register"
 import {
   createRegisterSchema,
   type RegisterFormValues,
 } from "@/features/auth/schemas/register-schema"
-import { persistOtpEmail } from "@/features/auth/util/otp-email"
 
 export function RegisterPage() {
   const { t } = useTranslation("auth")
-  const navigate = useNavigate()
+  const { mutate, isPending, error, clearError } = useRegister()
 
   const registerSchema = useMemo(
     () =>
@@ -42,11 +43,8 @@ export function RegisterPage() {
   })
 
   const onSubmit = (values: RegisterFormValues) => {
-    persistOtpEmail(values.email)
-    const params = new URLSearchParams({ email: values.email, flow: "register" })
-    navigate(`${ROUTES.auth.otpVerify}?${params.toString()}`, {
-      state: { email: values.email },
-    })
+    clearError()
+    void mutate(values)
   }
 
   const loginFooter = (
@@ -112,7 +110,14 @@ export function RegisterPage() {
             required
           />
 
-          <Button type="submit" size="lg" className="h-10 w-full">
+          <AuthFormError message={error} />
+
+          <Button
+            type="submit"
+            size="lg"
+            className="h-10 w-full"
+            disabled={isPending}
+          >
             {t("register.submit")}
             <ArrowRight className="size-4" aria-hidden />
           </Button>

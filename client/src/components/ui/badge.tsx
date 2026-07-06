@@ -46,4 +46,6 @@ function Badge({
   )
 }
 
+// shadcn/ui: variant helper is co-exported with the component.
+// eslint-disable-next-line react-refresh/only-export-components
 export { Badge, badgeVariants }

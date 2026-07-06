@@ -7,9 +7,16 @@
     "orders": "订单",
     "invoices": "发票",
     "customers": "客户",
+    "users": "用户",
     "settings": "设置"
   },
   "user": {
-    "premium_account": "高级账户"
-  }
+    "roles": {
+      "owner": "所有者",
+      "manager": "经理",
+      "staff": "员工",
+      "admin": "管理员"
+    }
+  },
+  "logout": "退出登录"
 }

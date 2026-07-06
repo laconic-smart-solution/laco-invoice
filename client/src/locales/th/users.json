@@ -1,0 +1,88 @@
+{
+  "title": "จัดการผู้ใช้",
+  "subtitle": "ดูและจัดการบัญชีผู้ใช้ทั้งหมดในระบบ",
+  "actions": {
+    "add_user": "เพิ่มผู้ใช้"
+  },
+  "stats": {
+    "total_users": "ผู้ใช้ทั้งหมด"
+  },
+  "create": {
+    "title": "เพิ่มผู้ใช้",
+    "subtitle": "สร้างบัญชีผู้ใช้ใหม่และตั้งค่าการเข้าถึงในระบบยืนยันตัวตน"
+  },
+  "form": {
+    "back_to_list": "กลับไปรายชื่อผู้ใช้",
+    "cancel": "ยกเลิก",
+    "submit_create": "สร้างผู้ใช้",
+    "full_name_label": "ชื่อ-นามสกุล",
+    "full_name_placeholder": "สมชาย ใจดี",
+    "email_label": "อีเมล",
+    "email_placeholder": "name@company.com",
+    "username_label": "ชื่อผู้ใช้",
+    "username_placeholder": "somchai.jaidee",
+    "password_label": "รหัสผ่าน",
+    "password_placeholder": "อย่างน้อย 8 ตัวอักษร",
+    "confirm_password_label": "ยืนยันรหัสผ่าน",
+    "confirm_password_placeholder": "กรอกรหัสผ่านอีกครั้ง",
+    "role_label": "บทบาท",
+    "role_placeholder": "เลือกบทบาท",
+    "active_label": "บัญชีใช้งาน",
+    "active_description": "ผู้ใช้ที่ไม่ active จะไม่สามารถเข้าสู่ระบบได้",
+    "validation": {
+      "full_name_required": "กรุณากรอกชื่อ-นามสกุล",
+      "invalid_email": "กรุณากรอกอีเมลที่ถูกต้อง",
+      "username_min": "ชื่อผู้ใช้ต้องมีอย่างน้อย 3 ตัวอักษร",
+      "password_min": "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร",
+      "password_mismatch": "รหัสผ่านไม่ตรงกัน"
+    }
+  },
+  "filters": {
+    "role_label": "บทบาท",
+    "role": {
+      "all": "ทุกบทบาท",
+      "admin": "ผู้ดูแลระบบ",
+      "owner": "เจ้าของร้าน",
+      "manager": "ผู้จัดการ",
+      "staff": "พนักงาน"
+    }
+  },
+  "errors": {
+    "load_failed": "ไม่สามารถโหลดรายชื่อผู้ใช้ได้ กรุณาลองอีกครั้ง",
+    "save_failed": "ไม่สามารถสร้างผู้ใช้ได้ กรุณาลองอีกครั้ง",
+    "verify_otp_failed": "ไม่สามารถยืนยัน OTP ได้ กรุณาลองอีกครั้ง"
+  },
+  "verify_otp": {
+    "confirm_title": "ทำเครื่องหมาย OTP ว่ายืนยันแล้ว?",
+    "confirm_description": "ทำเครื่องหมาย \"{{name}}\" ว่ายืนยัน OTP แล้ว? ผู้ใช้จะถือว่ายืนยันแล้วโดยไม่ต้องกรอก OTP",
+    "confirm_button": "ทำเครื่องหมายว่ายืนยันแล้ว",
+    "success": "\"{{name}}\" ถูกทำเครื่องหมายว่ายืนยัน OTP แล้ว"
+  },
+  "table": {
+    "empty": "ไม่พบผู้ใช้",
+    "loading": "กำลังโหลดผู้ใช้...",
+    "showing": "แสดง {{start}}-{{end}} จาก {{total}} ผู้ใช้",
+    "columns": {
+      "id": "รหัส",
+      "name": "ผู้ใช้",
+      "role": "บทบาท",
+      "status": "สถานะ",
+      "created_at": "สร้างเมื่อ",
+      "actions": "การดำเนินการ"
+    },
+    "actions": {
+      "verify_otp": "ยืนยัน OTP",
+      "verify_otp_unlinked": "ผู้ใช้รายนี้ยังไม่ได้เชื่อมกับระบบยืนยันตัวตน"
+    },
+    "roles": {
+      "admin": "ผู้ดูแลระบบ",
+      "owner": "เจ้าของร้าน",
+      "manager": "ผู้จัดการ",
+      "staff": "พนักงาน"
+    },
+    "status": {
+      "active": "ใช้งาน",
+      "inactive": "ไม่ใช้งาน"
+    }
+  }
+}

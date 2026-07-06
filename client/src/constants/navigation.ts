@@ -5,6 +5,7 @@ import {
   Settings,
   ShoppingCart,
   Store,
+  UserCog,
   Users,
   type LucideIcon,
 } from "lucide-react"
@@ -15,6 +16,7 @@ export interface SidebarNavItem {
   key: string
   path: string
   icon: LucideIcon
+  adminOnly?: boolean
 }
 
 export const SIDEBAR_NAV_ITEMS: SidebarNavItem[] = [
@@ -24,5 +26,6 @@ export const SIDEBAR_NAV_ITEMS: SidebarNavItem[] = [
   { key: "orders", path: ROUTES.dashboard.orders, icon: ShoppingCart },
   { key: "invoices", path: ROUTES.dashboard.invoices, icon: FileText },
   { key: "customers", path: ROUTES.dashboard.customers, icon: Users },
+  { key: "users", path: ROUTES.dashboard.users, icon: UserCog, adminOnly: true },
   { key: "settings", path: ROUTES.dashboard.settings, icon: Settings },
 ]

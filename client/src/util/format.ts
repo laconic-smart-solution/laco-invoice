@@ -4,6 +4,7 @@ const INTL_LOCALE_MAP: Record<Locale, string> = {
   en: "en-US",
   th: "th-TH",
   zh: "zh-CN",
+  my: "my-MM",
 }
 
 export function getIntlLocale(locale: Locale): string {

@@ -3,22 +3,23 @@ import { ArrowRight, Mail } from "lucide-react"
 import { useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { Link, useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
 import { Button } from "@/components/ui/button"
 import { Form } from "@/components/ui/form"
 import { AuthCard } from "@/features/auth/components/auth-card"
+import { AuthFormError } from "@/features/auth/components/auth-form-error"
 import { AuthIconInput } from "@/features/auth/components/auth-icon-input"
+import { useForgotPassword } from "@/features/auth/hooks/use-forgot-password"
 import {
   createForgotPasswordSchema,
   type ForgotPasswordFormValues,
 } from "@/features/auth/schemas/forgot-password-schema"
-import { persistOtpEmail } from "@/features/auth/util/otp-email"
 
 export function ForgotPasswordPage() {
   const { t } = useTranslation("auth")
-  const navigate = useNavigate()
+  const { mutate, isPending, error, clearError } = useForgotPassword()
 
   const forgotPasswordSchema = useMemo(
     () =>
@@ -36,14 +37,8 @@ export function ForgotPasswordPage() {
   })
 
   const onSubmit = (values: ForgotPasswordFormValues) => {
-    persistOtpEmail(values.email)
-    const params = new URLSearchParams({
-      email: values.email,
-      flow: "forgot-password",
-    })
-    navigate(`${ROUTES.auth.otpVerify}?${params.toString()}`, {
-      state: { email: values.email },
-    })
+    clearError()
+    void mutate(values)
   }
 
   const loginFooter = (
@@ -75,7 +70,14 @@ export function ForgotPasswordPage() {
             required
           />
 
-          <Button type="submit" size="lg" className="h-10 w-full">
+          <AuthFormError message={error} />
+
+          <Button
+            type="submit"
+            size="lg"
+            className="h-10 w-full"
+            disabled={isPending}
+          >
             {t("forgot_password.submit")}
             <ArrowRight className="size-4" aria-hidden />
           </Button>

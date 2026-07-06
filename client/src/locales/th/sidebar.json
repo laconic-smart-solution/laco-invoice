@@ -7,9 +7,16 @@
     "orders": "คำสั่งซื้อ",
     "invoices": "ใบแจ้งหนี้",
     "customers": "ลูกค้า",
+    "users": "ผู้ใช้",
     "settings": "ตั้งค่า"
   },
   "user": {
-    "premium_account": "บัญชีพรีเมียม"
-  }
+    "roles": {
+      "owner": "เจ้าของ",
+      "manager": "ผู้จัดการ",
+      "staff": "พนักงาน",
+      "admin": "ผู้ดูแลระบบ"
+    }
+  },
+  "logout": "ออกจากระบบ"
 }

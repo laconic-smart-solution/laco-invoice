@@ -3,6 +3,9 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/nunito-sans";
 @import "@fontsource-variable/inter";
+@import "@fontsource/noto-sans-myanmar/400.css";
+@import "@fontsource/noto-sans-myanmar/500.css";
+@import "@fontsource/noto-sans-myanmar/600.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -156,6 +159,13 @@
   html {
     @apply font-sans;
     color-scheme: light;
+    }
+  html:lang(my) {
+    font-family: 'Noto Sans Myanmar', 'Nunito Sans Variable', sans-serif;
+    }
+  html:lang(my) .font-heading,
+  html:lang(my) [class*="font-heading"] {
+    font-family: 'Noto Sans Myanmar', 'Inter Variable', sans-serif;
     }
   html.dark {
     color-scheme: dark;

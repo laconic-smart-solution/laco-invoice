@@ -1,29 +1,27 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ArrowRight, Lock } from "lucide-react"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { Link, useNavigate, useSearchParams } from "react-router-dom"
+import { Link } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
 import { Button } from "@/components/ui/button"
 import { Form } from "@/components/ui/form"
 import { AuthCard } from "@/features/auth/components/auth-card"
+import { AuthFormError } from "@/features/auth/components/auth-form-error"
 import { AuthIconInput } from "@/features/auth/components/auth-icon-input"
+import { useResetPassword } from "@/features/auth/hooks/use-reset-password"
 import {
   createResetPasswordSchema,
   type ResetPasswordFormValues,
 } from "@/features/auth/schemas/reset-password-schema"
-import { readOtpEmail } from "@/features/auth/util/otp-email"
 
 export function ResetPasswordPage() {
   const { t } = useTranslation("auth")
-  const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const token = searchParams.get("token")
-  const queryEmail = searchParams.get("email")
-  const email = readOtpEmail(queryEmail)
-  const hasValidSession = Boolean(token || email)
+  const { email, accessToken, submit, isPending } = useResetPassword()
+  const [error, setError] = useState<string | null>(null)
+  const hasValidSession = Boolean(accessToken)
 
   const resetPasswordSchema = useMemo(
     () =>
@@ -42,9 +40,13 @@ export function ResetPasswordPage() {
     },
   })
 
-  const onSubmit = (_values: ResetPasswordFormValues) => {
-    // TODO: wire reset password API with token/email
-    navigate(ROUTES.auth.login)
+  const onSubmit = async (values: ResetPasswordFormValues) => {
+    setError(null)
+    try {
+      await submit(values.password)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t("errors.reset_password_failed"))
+    }
   }
 
   const loginFooter = (
@@ -105,11 +107,13 @@ export function ResetPasswordPage() {
             disabled={!hasValidSession}
           />
 
+          <AuthFormError message={error} />
+
           <Button
             type="submit"
             size="lg"
             className="h-10 w-full"
-            disabled={!hasValidSession}
+            disabled={!hasValidSession || isPending}
           >
             {t("reset_password.submit")}
             <ArrowRight className="size-4" aria-hidden />

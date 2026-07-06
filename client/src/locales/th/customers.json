@@ -1,57 +1,71 @@
 {
-  "title": "ไดเรกทอรีลูกค้า",
-  "subtitle": "จัดการข้อมูลลูกค้าข้ามช่องทางและมูลค่าตลอดอายุการใช้งานบนทุกแพลตฟอร์ม",
-  "sync_status": "ซิงก์แบบเรียลไทม์ทำงานอยู่",
+  "title": "รายชื่อลูกค้า",
+  "subtitle": "จัดการข้อมูลลูกค้าสำหรับร้านของคุณ",
+  "subtitle_admin": "ดูข้อมูลลูกค้าจากทุกร้านในระบบ",
+  "sync_status": "ซิงก์แบบเรียลไทม์",
   "actions": {
+    "add_customer": "เพิ่มลูกค้า",
     "filter_marketplace": "กรอง Marketplace",
     "export_csv": "ส่งออก CSV"
   },
   "stats": {
-    "total_customers": "ลูกค้าทั้งหมด",
-    "avg_lifetime_value": "มูลค่าตลอดอายุเฉลี่ย",
-    "active_this_month": "ใช้งานเดือนนี้",
-    "sync_errors": "ข้อผิดพลาดการซิงก์",
-    "stable": "คงที่",
-    "clean": "ปกติ"
+    "total_customers": "ลูกค้าทั้งหมด"
+  },
+  "create": {
+    "title": "เพิ่มลูกค้า",
+    "subtitle": "สร้างข้อมูลลูกค้าใหม่สำหรับร้านของคุณ"
+  },
+  "edit": {
+    "title": "แก้ไขลูกค้า",
+    "not_found_title": "ไม่พบลูกค้า",
+    "not_found_description": "ไม่พบลูกค้าที่คุณค้นหา หรืออาจถูกลบไปแล้ว"
+  },
+  "form": {
+    "back_to_list": "กลับไปรายชื่อลูกค้า",
+    "cancel": "ยกเลิก",
+    "delete": "ลบ",
+    "submit_create": "สร้างลูกค้า",
+    "submit_update": "บันทึกการเปลี่ยนแปลง",
+    "name_label": "ชื่อ-นามสกุล",
+    "name_placeholder": "สมชาย ใจดี",
+    "email_label": "อีเมล",
+    "email_placeholder": "name@company.com",
+    "phone_label": "เบอร์โทร",
+    "phone_placeholder": "+66 00 000 0000",
+    "gender_label": "เพศ",
+    "gender_placeholder": "เลือกเพศ",
+    "address_label": "ที่อยู่",
+    "address_placeholder": "ถนน อำเภอ จังหวัด",
+    "validation": {
+      "name_required": "กรุณากรอกชื่อ",
+      "invalid_email": "กรุณากรอกอีเมลที่ถูกต้อง"
+    }
+  },
+  "delete": {
+    "confirm_title": "ลบลูกค้านี้?",
+    "confirm_description": "ระบบจะลบ {{name}} ออกจากรายชื่อลูกค้า และไม่สามารถย้อนกลับได้"
+  },
+  "errors": {
+    "load_failed": "โหลดข้อมูลลูกค้าไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "save_failed": "บันทึกข้อมูลลูกค้าไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "delete_failed": "ลบลูกค้าไม่สำเร็จ กรุณาลองอีกครั้ง"
   },
   "table": {
     "empty": "ไม่พบลูกค้า",
-    "showing": "แสดง {{start}}-{{end}} จาก {{total}} ลูกค้า",
-    "filters": {
-      "tiktok": "TikTok Shop",
-      "shopify": "Shopify"
-    },
+    "loading": "กำลังโหลดลูกค้า...",
+    "showing": "แสดง {{start}}-{{end}} จาก {{total}} ราย",
     "columns": {
-      "id": "รหัส",
+      "id": "ID",
+      "store": "ร้าน",
       "customer_name": "ชื่อลูกค้า",
       "email": "อีเมล",
-      "phone": "โทรศัพท์",
+      "phone": "เบอร์โทร",
       "gender": "เพศ",
       "address": "ที่อยู่"
     },
     "gender": {
       "male": "ชาย",
       "female": "หญิง"
-    },
-    "badges": {
-      "premium": "สมาชิกพรีเมียม",
-      "top_buyer": "ผู้ซื้ออันดับ 1%",
-      "new_customer": "ลูกค้าใหม่"
-    }
-  },
-  "insights": {
-    "growth": {
-      "title": "โอกาสการเติบโต",
-      "description": "ลูกค้า Shopify 3,200 รายไม่ได้ซื้อสินค้าใน 60 วัน",
-      "action": "ส่งแคมเปญ"
-    },
-    "identity": {
-      "title": "ยืนยันตัวตนแล้ว",
-      "description": "98% ของไดเรกทอรีลูกค้าถูกตรวจสอบกับรหัส marketplace แล้ว"
-    },
-    "sync": {
-      "title": "สถานะซิงก์อัตโนมัติ",
-      "description": "ซิงก์ทั่วโลกครั้งถัดไปเวลา 14:00 GMT มีคำสั่งซื้อรอ 42 รายการ"
     }
   }
 }

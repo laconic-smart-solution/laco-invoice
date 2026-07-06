@@ -1,0 +1,88 @@
+{
+  "title": "用户管理",
+  "subtitle": "查看和管理平台中的所有用户账户。",
+  "actions": {
+    "add_user": "添加用户"
+  },
+  "stats": {
+    "total_users": "用户总数"
+  },
+  "create": {
+    "title": "添加用户",
+    "subtitle": "创建新用户账户并在身份服务器中配置访问权限。"
+  },
+  "form": {
+    "back_to_list": "返回用户列表",
+    "cancel": "取消",
+    "submit_create": "创建用户",
+    "full_name_label": "姓名",
+    "full_name_placeholder": "张三",
+    "email_label": "电子邮箱",
+    "email_placeholder": "name@company.com",
+    "username_label": "用户名",
+    "username_placeholder": "zhangsan",
+    "password_label": "密码",
+    "password_placeholder": "至少 8 个字符",
+    "confirm_password_label": "确认密码",
+    "confirm_password_placeholder": "再次输入密码",
+    "role_label": "角色",
+    "role_placeholder": "选择角色",
+    "active_label": "启用账户",
+    "active_description": "未启用的用户无法登录平台。",
+    "validation": {
+      "full_name_required": "请输入姓名",
+      "invalid_email": "请输入有效的电子邮箱",
+      "username_min": "用户名至少需要 3 个字符",
+      "password_min": "密码至少需要 8 个字符",
+      "password_mismatch": "两次输入的密码不一致"
+    }
+  },
+  "filters": {
+    "role_label": "角色",
+    "role": {
+      "all": "全部角色",
+      "admin": "管理员",
+      "owner": "店主",
+      "manager": "经理",
+      "staff": "员工"
+    }
+  },
+  "errors": {
+    "load_failed": "无法加载用户列表，请重试。",
+    "save_failed": "无法创建用户，请重试。",
+    "verify_otp_failed": "无法验证 OTP，请重试。"
+  },
+  "verify_otp": {
+    "confirm_title": "标记 OTP 为已验证？",
+    "confirm_description": "将 \"{{name}}\" 标记为 OTP 已验证？该用户将被视为已验证用户，无需输入 OTP。",
+    "confirm_button": "标记为已验证",
+    "success": "\"{{name}}\" 已标记为 OTP 已验证。"
+  },
+  "table": {
+    "empty": "未找到用户。",
+    "loading": "正在加载用户...",
+    "showing": "显示第 {{start}}-{{end}} 条，共 {{total}} 条用户",
+    "columns": {
+      "id": "ID",
+      "name": "用户",
+      "role": "角色",
+      "status": "状态",
+      "created_at": "创建时间",
+      "actions": "操作"
+    },
+    "actions": {
+      "verify_otp": "验证 OTP",
+      "verify_otp_unlinked": "该用户未关联身份服务器。"
+    },
+    "roles": {
+      "admin": "管理员",
+      "owner": "店主",
+      "manager": "经理",
+      "staff": "员工"
+    },
+    "status": {
+      "active": "启用",
+      "inactive": "停用"
+    }
+  }
+}

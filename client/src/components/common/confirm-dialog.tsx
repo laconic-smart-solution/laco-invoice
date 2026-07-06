@@ -17,7 +17,7 @@ interface ConfirmDialogProps {
   description?: string
   confirmLabel?: string
   cancelLabel?: string
-  onConfirm: () => void
+  onConfirm: () => void | Promise<void>
   isLoading?: boolean
   variant?: "default" | "destructive"
 }
@@ -35,9 +35,13 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   const { t } = useTranslation("common")
 
-  const handleConfirm = () => {
-    onConfirm()
-    onOpenChange(false)
+  const handleConfirm = async () => {
+    try {
+      await onConfirm()
+      onOpenChange(false)
+    } catch {
+      // Keep the dialog open when confirmation fails.
+    }
   }
 
   return (
@@ -61,7 +65,7 @@ export function ConfirmDialog({
           <Button
             type="button"
             variant={variant === "destructive" ? "destructive" : "default"}
-            onClick={handleConfirm}
+            onClick={() => void handleConfirm()}
             disabled={isLoading}
           >
             {confirmLabel ?? t("dialog.confirm")}

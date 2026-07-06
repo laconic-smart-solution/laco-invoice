@@ -3,7 +3,7 @@ import { ArrowRight, Lock, Mail } from "lucide-react"
 import { useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { Link, useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
 import { FormCheckBox } from "@/components/common/form-inputs/form-check-box"
@@ -11,8 +11,10 @@ import { Button } from "@/components/ui/button"
 import { Form } from "@/components/ui/form"
 import { AuthCard } from "@/features/auth/components/auth-card"
 import { AuthDivider } from "@/features/auth/components/auth-divider"
+import { AuthFormError } from "@/features/auth/components/auth-form-error"
 import { AuthIconInput } from "@/features/auth/components/auth-icon-input"
 import { OauthProviderButtons } from "@/features/auth/components/oauth-provider-buttons"
+import { useLogin } from "@/features/auth/hooks/use-login"
 import {
   createLoginSchema,
   type LoginFormValues,
@@ -20,13 +22,12 @@ import {
 
 export function LoginPage() {
   const { t } = useTranslation("auth")
-  const navigate = useNavigate()
+  const { mutate, isPending, error, clearError } = useLogin()
 
   const loginSchema = useMemo(
     () =>
       createLoginSchema({
         invalidEmail: t("validation.invalid_email"),
-        passwordMin: t("validation.password_min"),
       }),
     [t]
   )
@@ -40,8 +41,9 @@ export function LoginPage() {
     },
   })
 
-  const onSubmit = () => {
-    navigate(ROUTES.home)
+  const onSubmit = (values: LoginFormValues) => {
+    clearError()
+    void mutate(values)
   }
 
   const registerFooter = (
@@ -102,7 +104,14 @@ export function LoginPage() {
             </Link>
           </div>
 
-          <Button type="submit" size="lg" className="h-10 w-full">
+          <AuthFormError message={error} />
+
+          <Button
+            type="submit"
+            size="lg"
+            className="h-10 w-full"
+            disabled={isPending}
+          >
             {t("login.submit")}
             <ArrowRight className="size-4" aria-hidden />
           </Button>

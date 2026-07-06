@@ -51,6 +51,38 @@ export const CustomersPage = PageLoader(
   )
 )
 
+export const CreateCustomerPage = PageLoader(
+  lazy(() =>
+    import("@/features/customers/pages/create-customer-page").then((module) => ({
+      default: module.CreateCustomerPage,
+    }))
+  )
+)
+
+export const EditCustomerPage = PageLoader(
+  lazy(() =>
+    import("@/features/customers/pages/edit-customer-page").then((module) => ({
+      default: module.EditCustomerPage,
+    }))
+  )
+)
+
+export const UsersPage = PageLoader(
+  lazy(() =>
+    import("@/features/users/pages/users-page").then((module) => ({
+      default: module.UsersPage,
+    }))
+  )
+)
+
+export const CreateUserPage = PageLoader(
+  lazy(() =>
+    import("@/features/users/pages/create-user-page").then((module) => ({
+      default: module.CreateUserPage,
+    }))
+  )
+)
+
 export const ProductsPage = PageLoader(
   lazy(() =>
     import("@/features/products/pages/products-page").then((module) => ({

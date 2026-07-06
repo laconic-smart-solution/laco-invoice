@@ -1,0 +1,88 @@
+{
+  "title": "User Management",
+  "subtitle": "View and manage user accounts across the platform.",
+  "actions": {
+    "add_user": "Add User"
+  },
+  "stats": {
+    "total_users": "Total Users"
+  },
+  "create": {
+    "title": "Add User",
+    "subtitle": "Create a new user account and provision access in the identity server."
+  },
+  "form": {
+    "back_to_list": "Back to users",
+    "cancel": "Cancel",
+    "submit_create": "Create user",
+    "full_name_label": "Full name",
+    "full_name_placeholder": "Jane Doe",
+    "email_label": "Email",
+    "email_placeholder": "name@company.com",
+    "username_label": "Username",
+    "username_placeholder": "jane.doe",
+    "password_label": "Password",
+    "password_placeholder": "Minimum 8 characters",
+    "confirm_password_label": "Confirm password",
+    "confirm_password_placeholder": "Re-enter password",
+    "role_label": "Role",
+    "role_placeholder": "Select role",
+    "active_label": "Active account",
+    "active_description": "Inactive users cannot sign in to the platform.",
+    "validation": {
+      "full_name_required": "Full name is required",
+      "invalid_email": "Enter a valid email address",
+      "username_min": "Username must be at least 3 characters",
+      "password_min": "Password must be at least 8 characters",
+      "password_mismatch": "Passwords do not match"
+    }
+  },
+  "filters": {
+    "role_label": "Role",
+    "role": {
+      "all": "All roles",
+      "admin": "Admin",
+      "owner": "Owner",
+      "manager": "Manager",
+      "staff": "Staff"
+    }
+  },
+  "errors": {
+    "load_failed": "Unable to load users. Please try again.",
+    "save_failed": "Unable to create user. Please try again.",
+    "verify_otp_failed": "Unable to verify OTP. Please try again."
+  },
+  "verify_otp": {
+    "confirm_title": "Mark OTP as verified?",
+    "confirm_description": "Mark \"{{name}}\" as OTP-verified? They will be treated as a verified user without entering an OTP.",
+    "confirm_button": "Mark verified",
+    "success": "\"{{name}}\" has been marked as OTP-verified."
+  },
+  "table": {
+    "empty": "No users found.",
+    "loading": "Loading users...",
+    "showing": "Showing {{start}}-{{end}} of {{total}} users",
+    "columns": {
+      "id": "ID",
+      "name": "User",
+      "role": "Role",
+      "status": "Status",
+      "created_at": "Created",
+      "actions": "Actions"
+    },
+    "actions": {
+      "verify_otp": "Verify OTP",
+      "verify_otp_unlinked": "This user is not linked to the identity server."
+    },
+    "roles": {
+      "admin": "Admin",
+      "owner": "Owner",
+      "manager": "Manager",
+      "staff": "Staff"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    }
+  }
+}

@@ -1,41 +1,55 @@
 import { useMemo } from "react"
+import { useTranslation } from "react-i18next"
 
+import { AuthFormError } from "@/features/auth/components/auth-form-error"
 import { CustomersHeader } from "@/features/customers/components/customers-header"
-import { CustomersInsights } from "@/features/customers/components/customers-insights"
 import { CustomersStatCards } from "@/features/customers/components/customers-stat-cards"
 import { CustomersTable } from "@/features/customers/components/customers-table"
+import { useAuthStore } from "@/shared/stores/auth-store"
+import { useCustomersPageQuery, getCustomerErrorMessage } from "@/shared/queries/customer.query"
 import {
-  getMockCustomersPage,
-  MOCK_CUSTOMER_STATS,
-  MOCK_CUSTOMERS_TOTAL,
-} from "@/features/customers/data/mock-customers"
-import { usePagination } from "@/shared/hooks/use-pagination"
+  getPaginationMeta,
+  usePagination,
+} from "@/shared/hooks/use-pagination"
 
 export function CustomersPage() {
-  const {
-    page,
-    limit,
-    totalPages,
-    start,
-    end,
-    canGoPrev,
-    canGoNext,
-    setPage,
-    setLimit,
-  } = usePagination({ total: MOCK_CUSTOMERS_TOTAL })
+  const { t } = useTranslation("customers")
+  const isAdmin = useAuthStore((state) => state.user?.role === "ADMIN")
 
-  const customers = useMemo(
-    () => getMockCustomersPage(page, limit),
+  const { page, limit, setPage, setLimit } = usePagination()
+
+  const pageRequest = useMemo(
+    () => ({
+      pageNumber: page,
+      pageSize: limit,
+    }),
     [page, limit]
   )
 
+  const { data, isLoading, isError, error } = useCustomersPageQuery(pageRequest)
+
+  const customers = data?.data ?? []
+  const totalCount = data?.meta?.totalElements ?? 0
+  const { totalPages, start, end, canGoPrev, canGoNext } = getPaginationMeta(
+    page,
+    limit,
+    totalCount
+  )
+
+  const loadError =
+    isError && error
+      ? getCustomerErrorMessage(error, t("errors.load_failed"))
+      : null
+
   return (
     <div className="space-y-6 p-6">
-      <CustomersHeader />
-      <CustomersStatCards stats={MOCK_CUSTOMER_STATS} />
+      <CustomersHeader isAdmin={isAdmin} />
+      <CustomersStatCards totalCustomers={totalCount} />
+      <AuthFormError message={loadError} />
       <CustomersTable
         customers={customers}
-        totalCount={MOCK_CUSTOMERS_TOTAL}
+        isAdmin={isAdmin}
+        totalCount={totalCount}
         page={page}
         limit={limit}
         totalPages={totalPages}
@@ -43,10 +57,10 @@ export function CustomersPage() {
         end={end}
         canGoPrev={canGoPrev}
         canGoNext={canGoNext}
+        isLoading={isLoading}
         onPageChange={setPage}
         onLimitChange={setLimit}
       />
-      <CustomersInsights />
     </div>
   )
 }

@@ -1,11 +1,10 @@
 import { useTranslation } from "react-i18next"
 
 import { cn } from "@/lib/utils"
+import type { UserRole } from "@/shared/types/auth.types"
+import { useAuthStore } from "@/shared/stores/auth-store"
 
 interface SidebarUserCardProps {
-  name?: string
-  accountTypeKey?: string
-  avatarUrl?: string | null
   className?: string
 }
 
@@ -18,13 +17,22 @@ function getInitials(name: string) {
     .toUpperCase()
 }
 
-export function SidebarUserCard({
-  name = "Alex Chen",
-  accountTypeKey = "user.premium_account",
-  avatarUrl = null,
-  className,
-}: SidebarUserCardProps) {
+function getRoleLabelKey(role: UserRole): string {
+  return `user.roles.${role.toLowerCase()}`
+}
+
+export function SidebarUserCard({ className }: SidebarUserCardProps) {
   const { t } = useTranslation("sidebar")
+  const user = useAuthStore((state) => state.user)
+
+  if (!user) {
+    return null
+  }
+
+  const displayName = user.fullName?.trim() || user.email
+  const subtitle = user.fullName?.trim()
+    ? user.email
+    : t(getRoleLabelKey(user.role))
 
   return (
     <div
@@ -33,23 +41,15 @@ export function SidebarUserCard({
         className
       )}
     >
-      {avatarUrl ? (
-        <img
-          src={avatarUrl}
-          alt=""
-          className="size-9 shrink-0 rounded-full border border-border object-cover"
-        />
-      ) : (
-        <div
-          aria-hidden
-          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground"
-        >
-          {getInitials(name)}
-        </div>
-      )}
+      <div
+        aria-hidden
+        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground"
+      >
+        {getInitials(displayName)}
+      </div>
       <div className="min-w-0">
-        <p className="truncate text-sm font-medium text-foreground">{name}</p>
-        <p className="truncate text-xs text-muted-foreground">{t(accountTypeKey)}</p>
+        <p className="truncate text-sm font-medium text-foreground">{displayName}</p>
+        <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
       </div>
     </div>
   )

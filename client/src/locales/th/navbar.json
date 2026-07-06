@@ -4,12 +4,14 @@
   "generate_invoice": "สร้างใบแจ้งหนี้",
   "notifications": "การแจ้งเตือน",
   "help": "ความช่วยเหลือ",
+  "logout": "ออกจากระบบ",
   "language": "ภาษา",
   "theme_light": "สลับเป็นโหมดสว่าง",
   "theme_dark": "สลับเป็นโหมดมืด",
   "locales": {
     "en": "อังกฤษ",
     "th": "ไทย",
-    "zh": "จีน"
+    "zh": "จีน",
+    "my": "Myanmar"
   }
 }

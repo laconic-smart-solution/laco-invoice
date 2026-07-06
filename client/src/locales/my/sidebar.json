@@ -1,0 +1,22 @@
+{
+  "tagline": "Marketplace Sync",
+  "nav": {
+    "dashboard": "ဒက်ရှ်ဘုတ်",
+    "stores": "ဆိုင်များ",
+    "products": "ကုန်ပစ္စည်းများ",
+    "orders": "အော်ဒါများ",
+    "invoices": "ငွေတောင်းခံလွှာများ",
+    "customers": "ဖောက်သည်များ",
+    "users": "အသုံးပြုသူများ",
+    "settings": "ဆက်တင်များ"
+  },
+  "user": {
+    "roles": {
+      "owner": "ပိုင်ရှင်",
+      "manager": "မန်နေဂျာ",
+      "staff": "ဝန်ထမ်း",
+      "admin": "Admin"
+    }
+  },
+  "logout": "ထွက်မည်"
+}

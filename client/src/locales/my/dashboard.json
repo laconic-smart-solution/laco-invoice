@@ -1,0 +1,57 @@
+{
+  "title": "လုပ်ငန်းအခြေအနေ",
+  "subtitle": "ဈေးကွက်တစ်ခုချင်းစီမှ လက်ရှိစွမ်းဆောင်ရည်",
+  "actions": {
+    "sync_all_stores": "ဆိုင်အားလုံး Sync လုပ်ရန်",
+    "bulk_invoices": "ငွေတောင်းခံလွှာ အစုလိုက် ထုတ်ရန်"
+  },
+  "stats": {
+    "total_revenue": "စုစုပေါင်း ဝင်ငွေ",
+    "total_orders": "အော်ဒါ စုစုပေါင်း",
+    "invoices_issued": "ထုတ်ပြီးသော ငွေတောင်းခံလွှာ",
+    "last_sync": "နောက်ဆုံး sync — {{time}} (channel {{count}} ခု)",
+    "synced_count": "Sync ပြီး {{count}}",
+    "pending_count": "စောင့်ဆိုင်းနေ {{count}}",
+    "progress_label": "{{percent}}%",
+    "paid_legend": "ပေးချေပြီး ({{count}})",
+    "overdue_legend": "ရက်လွန်ပြီး ({{count}})",
+    "revenue_trend": "+{{percent}}%",
+    "invoices_of_total": "{{issued}} / {{total}}"
+  },
+  "recent_orders": {
+    "title": "TikTok Shop အော်ဒါ နောက်ဆုံးများ",
+    "view_all": "အော်ဒါ အားလုံး ကြည့်ရန်",
+    "empty": "အော်ဒါ မရှိသေးပါ။",
+    "columns": {
+      "order_id": "အော်ဒါ ID",
+      "customer": "ဖောက်သည်",
+      "amount": "ပမာဏ",
+      "status": "အခြေအနေ",
+      "action": "လုပ်ဆောင်ချက်"
+    },
+    "actions": {
+      "download": "ငွေတောင်းခံလွှာ ဒေါင်းလုဒ်",
+      "generate": "ထုတ်ရန်",
+      "retry_sync": "Sync ထပ်လုပ်ရန်",
+      "edit": "Draft ပြင်ရန်"
+    }
+  },
+  "order_status": {
+    "synced": "Sync ပြီး",
+    "pending": "စောင့်ဆိုင်းနေ",
+    "error": "Error",
+    "draft": "Draft"
+  },
+  "marketplaces": {
+    "title": "သုံးနေသော Marketplace များ",
+    "connect_channel": "Channel ချိတ်ဆက်ရန်",
+    "tiktok": "TikTok Shop",
+    "shopify": "Shopify",
+    "amazon": "Amazon"
+  },
+  "promo": {
+    "title": "Cash Flow ကို ပိုကောင်းအောင် လုပ်ပါ",
+    "description": "ငွေတောင်းခံလွှာ အလိုအလျောက် ထုတ်ခြင်းဖြင့် တစ်ပတ်ကို ၁၂ နာရီ ချွေတာနိုင်ပါတယ်။",
+    "cta": "လမ်းညွှန် ဖတ်ရန်"
+  }
+}

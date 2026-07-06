@@ -1,0 +1,18 @@
+{
+  "not_found": {
+    "page_title": "页面未找到 | Laco Invoice",
+    "code": "404",
+    "title": "页面未找到",
+    "description": "您访问的页面不存在、已被移动，或链接可能已失效。",
+    "path_label": "请求路径",
+    "go_home": "返回仪表盘",
+    "go_login": "前往登录",
+    "go_back": "返回上一页",
+    "quick_links_label": "常用页面",
+    "links": {
+      "dashboard": "仪表盘",
+      "orders": "订单",
+      "customers": "客户"
+    }
+  }
+}

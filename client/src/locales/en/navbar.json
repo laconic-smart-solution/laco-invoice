@@ -4,12 +4,14 @@
   "generate_invoice": "Generate Invoice",
   "notifications": "Notifications",
   "help": "Help",
+  "logout": "Log out",
   "language": "Language",
   "theme_light": "Switch to light mode",
   "theme_dark": "Switch to dark mode",
   "locales": {
     "en": "English",
     "th": "Thai",
-    "zh": "Chinese"
+    "zh": "Chinese",
+    "my": "Myanmar"
   }
 }

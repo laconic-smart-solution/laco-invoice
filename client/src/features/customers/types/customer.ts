@@ -1,22 +1,36 @@
 export type CustomerGender = "male" | "female"
 
-export type CustomerBadgeTier = "premium" | "top_buyer" | "new_customer"
-
 export interface Customer {
-  id: string
+  id: number
+  storeId: number | null
   name: string
-  email: string
-  phone: string
-  gender: CustomerGender
-  address: string
-  badge?: CustomerBadgeTier
+  email: string | null
+  phone: string | null
+  gender: CustomerGender | string | null
+  address: string | null
+  createdAt: string | null
+  updatedAt: string | null
 }
 
-export interface CustomerStats {
-  totalCustomers: number
-  totalCustomersTrendPercent: number
-  avgLifetimeValue: number
-  avgLifetimeValueTrendPercent: number
-  activeThisMonth: number
-  syncErrors: number
+export interface CustomerCreateInput {
+  name: string
+  email?: string
+  phone?: string
+  gender?: string
+  address?: string
+}
+
+export type CustomerUpdateInput = CustomerCreateInput
+
+export interface CustomerPageRequest {
+  pageNumber: number
+  pageSize: number
+  sortBy?: string
+  sortOrder?: "ASC" | "DESC"
+  filter?: {
+    name?: string
+    email?: string
+    phone?: string
+    gender?: string
+  }
 }

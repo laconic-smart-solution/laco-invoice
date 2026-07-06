@@ -15,6 +15,7 @@ const LOCALE_LABEL_KEYS: Record<Locale, string> = {
   en: "locales.en",
   th: "locales.th",
   zh: "locales.zh",
+  my: "locales.my",
 }
 
 export function NavbarLanguageToggle() {

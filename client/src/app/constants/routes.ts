@@ -9,6 +9,10 @@ export const ROUTES = {
     invoices: "/invoices",
     invoiceDetail: (invoiceId: string) => `/invoices/${invoiceId}`,
     customers: "/customers",
+    customerCreate: "/customers/new",
+    customerEdit: (customerId: string) => `/customers/${customerId}/edit`,
+    users: "/users",
+    userCreate: "/users/new",
     settings: "/settings",
   },
   auth: {

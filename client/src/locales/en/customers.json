@@ -1,28 +1,62 @@
 {
   "title": "Customer Directory",
-  "subtitle": "Manage cross-channel customer data and lifetime value across all platforms.",
+  "subtitle": "Manage customer records for your store.",
+  "subtitle_admin": "View customer records across all stores in the system.",
   "sync_status": "Real-time sync active",
   "actions": {
+    "add_customer": "Add Customer",
     "filter_marketplace": "Filter Marketplace",
     "export_csv": "Export CSV"
   },
   "stats": {
-    "total_customers": "Total Customers",
-    "avg_lifetime_value": "Avg. Lifetime Value",
-    "active_this_month": "Active This Month",
-    "sync_errors": "Sync Errors",
-    "stable": "Stable",
-    "clean": "Clean"
+    "total_customers": "Total Customers"
+  },
+  "create": {
+    "title": "Add Customer",
+    "subtitle": "Create a new customer record for your store."
+  },
+  "edit": {
+    "title": "Edit Customer",
+    "not_found_title": "Customer not found",
+    "not_found_description": "The customer you are looking for does not exist or may have been removed."
+  },
+  "form": {
+    "back_to_list": "Back to customers",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "submit_create": "Create customer",
+    "submit_update": "Save changes",
+    "name_label": "Full name",
+    "name_placeholder": "John Doe",
+    "email_label": "Email",
+    "email_placeholder": "name@company.com",
+    "phone_label": "Phone",
+    "phone_placeholder": "+1 (555) 000-0000",
+    "gender_label": "Gender",
+    "gender_placeholder": "Select gender",
+    "address_label": "Address",
+    "address_placeholder": "Street, city, country",
+    "validation": {
+      "name_required": "Name is required",
+      "invalid_email": "Enter a valid email address"
+    }
+  },
+  "delete": {
+    "confirm_title": "Delete customer?",
+    "confirm_description": "This will remove {{name}} from your customer directory. This action cannot be undone."
+  },
+  "errors": {
+    "load_failed": "Unable to load customers. Please try again.",
+    "save_failed": "Unable to save customer. Please try again.",
+    "delete_failed": "Unable to delete customer. Please try again."
   },
   "table": {
     "empty": "No customers found.",
+    "loading": "Loading customers...",
     "showing": "Showing {{start}}-{{end}} of {{total}} customers",
-    "filters": {
-      "tiktok": "TikTok Shop",
-      "shopify": "Shopify"
-    },
     "columns": {
       "id": "ID",
+      "store": "Store",
       "customer_name": "Customer Name",
       "email": "Email",
       "phone": "Phone",
@@ -32,26 +66,6 @@
     "gender": {
       "male": "Male",
       "female": "Female"
-    },
-    "badges": {
-      "premium": "Premium Member",
-      "top_buyer": "Top 1% Buyer",
-      "new_customer": "New Customer"
-    }
-  },
-  "insights": {
-    "growth": {
-      "title": "Growth Opportunity",
-      "description": "3,200 Shopify customers haven't purchased in 60 days.",
-      "action": "Send campaign"
-    },
-    "identity": {
-      "title": "Identity Verified",
-      "description": "98% of your customer directory has been cross-referenced with marketplace IDs."
-    },
-    "sync": {
-      "title": "Auto-Sync Pulse",
-      "description": "Next global sync scheduled for 14:00 GMT. 42 pending orders in queue."
     }
   }
 }

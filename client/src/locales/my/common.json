@@ -1,0 +1,38 @@
+{
+  "app": {
+    "name": "Laco Invoice"
+  },
+  "home": {
+    "title": "Laco Invoice မှ ကြိုဆိုပါသည်",
+    "description": "ပရောဂျက် အဆင်သင့်ဖြစ်ပြီး ဆက်လက်တည်ဆောက်နိုင်ပါပြီ။",
+    "cta": "စတင်ရန်",
+    "theme_hint": "Theme ပြောင်းရန် d ကို နှိပ်ပါ"
+  },
+  "loading": "ခဏစောင့်ပါ...",
+  "dialog": {
+    "cancel": "မလုပ်တော့",
+    "confirm": "အတည်ပြုမည်"
+  },
+  "pagination": {
+    "rows_per_page": "ပြသမည်",
+    "previous": "ယခင်",
+    "next": "နောက်တစ်ခု",
+    "showing_range": "{{total}} ခုအနက် {{start}} မှ {{end}} ကို ပြနေသည်"
+  },
+  "time": {
+    "minutes_ago_one": "{{count}} မိနစ်အကြာ",
+    "minutes_ago_other": "{{count}} မိနစ်အကြာ"
+  },
+  "form": {
+    "no_matches": "တူညီမှု မရှိပါ။",
+    "upload_image": "ပုံတင်ရန်",
+    "open_crop_editor": "Crop ပြင်ဆင်ရန်",
+    "upload_new_image": "ပုံအသစ် တင်ရန်",
+    "remove_image": "ပုံဖယ်ရှားရန်",
+    "crop_title": "ပုံ Crop လုပ်ရန်",
+    "crop_description": "Handle များကို ဆွဲ၍ ပုံအကွာအဝေးကို သတ်မှတ်ပါ။ Apply နှိပ်ပါက Form ထဲသို့ သိမ်းမည်။",
+    "upload_new_photo": "ဓာတ်ပုံအသစ် တင်ရန်",
+    "cancel": "မလုပ်တော့",
+    "apply": "သုံးမည်"
+  }
+}
