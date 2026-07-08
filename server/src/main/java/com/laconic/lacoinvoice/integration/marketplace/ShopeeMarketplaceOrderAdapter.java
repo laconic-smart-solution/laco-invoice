@@ -22,6 +22,6 @@ public class ShopeeMarketplaceOrderAdapter extends AbstractMarketplaceOrderAdapt
 	protected List<GatewayOrderData> fetchFromGateway(StoreMarketplaceConnection connection, String updatedFrom) {
 		Long storeId = connection.getStore().getId();
 		UUID tenantId = MarketplaceScopeSupport.toTenantUuid(storeId);
-		return client.listOrders(tenantId, connection.getExternalConnectionId(), updatedFrom);
+		return client.listOrders(tenantId, connection.getAccessToken(), connection.getExternalSellerId(), updatedFrom);
 	}
 }

@@ -13,11 +13,7 @@ public interface MarketplaceGatewayClient {
 
 	GatewayStoreData connect(UUID tenantId, UUID actorId, String code, String displayName, String shopId);
 
-	List<GatewayStoreData> listStores(UUID tenantId, UUID actorId);
+	GatewayStoreData refresh(UUID tenantId, UUID actorId, String refreshToken, String shopId);
 
-	GatewayStoreData refresh(UUID tenantId, UUID actorId, UUID externalStoreId);
-
-	void revoke(UUID tenantId, UUID actorId, UUID externalStoreId);
-
-	List<GatewayOrderData> listOrders(UUID tenantId, UUID externalStoreId, String updatedFrom);
+	List<GatewayOrderData> listOrders(UUID tenantId, String accessToken, String sellerId, String updatedFrom);
 }

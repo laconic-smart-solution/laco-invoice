@@ -25,6 +25,26 @@ public record StoreMarketplaceConnectionViewDto(
 		MarketplaceConnectionStatus status,
 		Instant createdAt) {
 
+	public static StoreMarketplaceConnectionViewDto fromEntity(
+			String marketplaceCode,
+			StoreMarketplaceConnection entity) {
+		Long storeId = entity.getStore() != null ? entity.getStore().getId() : null;
+		return new StoreMarketplaceConnectionViewDto(
+				marketplaceCode,
+				entity.getId(),
+				entity.getExternalConnectionId(),
+				storeId,
+				entity.getExternalSellerId(),
+				entity.getDisplayName(),
+				entity.getExternalCountry(),
+				null,
+				null,
+				entity.getTokenExpiry(),
+				null,
+				entity.getStatus(),
+				entity.getCreatedAt());
+	}
+
 	public static StoreMarketplaceConnectionViewDto from(
 			String marketplaceCode,
 			Long storeId,

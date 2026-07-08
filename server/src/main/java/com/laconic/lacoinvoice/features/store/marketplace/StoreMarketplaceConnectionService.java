@@ -106,19 +106,10 @@ public class StoreMarketplaceConnectionService {
 		Store store = findStoreOrThrow(storeId);
 		verifyStoreOwner(store);
 
-		MarketplaceGatewayClient client = resolveClient(marketplaceCode);
-		UUID tenantId = MarketplaceScopeSupport.toTenantUuid(storeId);
-		UUID actorId = MarketplaceScopeSupport.toActorUuid(requireCurrentUserId());
-		List<GatewayStoreData> gatewayStores = client.listStores(tenantId, actorId);
-
 		String normalizedCode = marketplaceCode.toUpperCase();
-		return gatewayStores.stream()
-				.map(gatewayStore -> {
-					StoreMarketplaceConnection local = connectionRepository
-							.findByStore_IdAndExternalConnectionId(storeId, gatewayStore.id())
-							.orElse(null);
-					return StoreMarketplaceConnectionViewDto.from(normalizedCode, storeId, gatewayStore, local);
-				})
+		return connectionRepository.findByStore_IdAndMarketplace_CodeIgnoreCase(storeId, marketplaceCode)
+				.stream()
+				.map(connection -> StoreMarketplaceConnectionViewDto.fromEntity(normalizedCode, connection))
 				.toList();
 	}
 
@@ -131,25 +122,26 @@ public class StoreMarketplaceConnectionService {
 		Store store = findStoreOrThrow(storeId);
 		verifyStoreOwner(store);
 
+		StoreMarketplaceConnection connection = connectionRepository
+				.findByStore_IdAndExternalConnectionId(storeId, externalConnectionId)
+				.orElseThrow(() -> new ResourceNotFoundException(
+						"Marketplace connection not found: externalConnectionId=" + externalConnectionId));
+
+		if (connection.getRefreshToken() == null || connection.getRefreshToken().isBlank()) {
+			throw new ResourceNotFoundException("Connection has no refresh token; reconnect the marketplace.");
+		}
+
 		MarketplaceGatewayClient client = resolveClient(marketplaceCode);
 		UUID tenantId = MarketplaceScopeSupport.toTenantUuid(storeId);
 		UUID actorId = MarketplaceScopeSupport.toActorUuid(requireCurrentUserId());
-		GatewayStoreData gatewayStore = client.refresh(tenantId, actorId, externalConnectionId);
-
-		StoreMarketplaceConnection connection = connectionRepository
-				.findByStore_IdAndExternalConnectionId(storeId, externalConnectionId)
-				.orElseGet(StoreMarketplaceConnection::new);
-
-		if (connection.getId() == null) {
-			connection.setStore(store);
-			connection.setMarketplace(marketplaceRepository.findByCodeIgnoreCase(marketplaceCode)
-					.orElseThrow(() -> new ResourceNotFoundException("Marketplace not found: code=" + marketplaceCode)));
-		}
+		GatewayStoreData gatewayStore = client.refresh(
+				tenantId,
+				actorId,
+				connection.getRefreshToken(),
+				connection.getExternalSellerId());
 
 		MarketplaceConnectionSupport.applyGatewayMetadata(connection, gatewayStore, connection.getDisplayName());
 		connection.setStatus(MarketplaceConnectionStatus.CONNECTED);
-		connection.setAccessToken(null);
-		connection.setRefreshToken(null);
 
 		return mapper.toConnectionDto(connectionRepository.save(connection));
 	}
@@ -160,14 +152,11 @@ public class StoreMarketplaceConnectionService {
 		Store store = findStoreOrThrow(storeId);
 		verifyStoreOwner(store);
 
-		MarketplaceGatewayClient client = resolveClient(marketplaceCode);
-		UUID tenantId = MarketplaceScopeSupport.toTenantUuid(storeId);
-		UUID actorId = MarketplaceScopeSupport.toActorUuid(requireCurrentUserId());
-		client.revoke(tenantId, actorId, externalConnectionId);
-
 		connectionRepository.findByStore_IdAndExternalConnectionId(storeId, externalConnectionId)
 				.ifPresent(connection -> {
 					connection.setStatus(MarketplaceConnectionStatus.DISCONNECTED);
+					connection.setAccessToken(null);
+					connection.setRefreshToken(null);
 					connectionRepository.save(connection);
 				});
 	}

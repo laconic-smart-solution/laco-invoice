@@ -9,6 +9,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.laconic.lacoinvoice.common.exception.BadGatewayException;
 import com.laconic.lacoinvoice.config.CommunicationProperties;
@@ -16,7 +17,6 @@ import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayApiResponse;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayAuthorizeUrlData;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayOrderItemData;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayOrderListData;
-import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayPagedStoresData;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayStoreData;
 
 public abstract class AbstractMarketplaceGatewayClient implements MarketplaceGatewayClient {
@@ -27,13 +27,7 @@ public abstract class AbstractMarketplaceGatewayClient implements MarketplaceGat
 	private static final ParameterizedTypeReference<GatewayApiResponse<GatewayStoreData>> STORE_TYPE =
 			new ParameterizedTypeReference<>() {
 			};
-	private static final ParameterizedTypeReference<GatewayApiResponse<GatewayPagedStoresData>> PAGED_STORES_TYPE =
-			new ParameterizedTypeReference<>() {
-			};
 	private static final ParameterizedTypeReference<GatewayApiResponse<GatewayOrderListData>> ORDERS_TYPE =
-			new ParameterizedTypeReference<>() {
-			};
-	private static final ParameterizedTypeReference<GatewayApiResponse<Object>> VOID_DATA_TYPE =
 			new ParameterizedTypeReference<>() {
 			};
 
@@ -84,47 +78,25 @@ public abstract class AbstractMarketplaceGatewayClient implements MarketplaceGat
 	}
 
 	@Override
-	public List<GatewayStoreData> listStores(UUID tenantId, UUID actorId) {
-		String uri = UriComponentsBuilder.fromUriString(resolveApiUrl("/api/v1/stores"))
-				.queryParam("page", 1)
-				.queryParam("limit", 100)
-				.build()
-				.toUriString();
-		GatewayPagedStoresData data = exchange(
-				restClient.get().uri(uri),
-				tenantId,
-				actorId,
-				PAGED_STORES_TYPE);
-		if (data == null || data.items() == null) {
-			return List.of();
-		}
-		return data.items();
-	}
-
-	@Override
-	public GatewayStoreData refresh(UUID tenantId, UUID actorId, UUID externalStoreId) {
+	public GatewayStoreData refresh(UUID tenantId, UUID actorId, String refreshToken, String shopId) {
+		RefreshPayload payload = new RefreshPayload(refreshToken, shopId);
 		return exchange(
 				restClient.post()
-						.uri(resolveApiUrl("/api/v1/stores/" + externalStoreId + "/refresh")),
+						.uri(resolveApiUrl("/api/v1/stores/refresh"))
+						.contentType(MediaType.APPLICATION_JSON)
+						.body(payload),
 				tenantId,
 				actorId,
 				STORE_TYPE);
 	}
 
 	@Override
-	public void revoke(UUID tenantId, UUID actorId, UUID externalStoreId) {
-		exchange(
-				restClient.delete()
-						.uri(resolveApiUrl("/api/v1/stores/" + externalStoreId)),
-				tenantId,
-				actorId,
-				VOID_DATA_TYPE);
-	}
-
-	@Override
-	public List<GatewayOrderData> listOrders(UUID tenantId, UUID externalStoreId, String updatedFrom) {
+	public List<GatewayOrderData> listOrders(UUID tenantId, String accessToken, String sellerId, String updatedFrom) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(resolveApiUrl("/api/v1/orders"))
-				.queryParam("store_id", externalStoreId);
+				.queryParam("access_token", accessToken);
+		if (sellerId != null && !sellerId.isBlank()) {
+			builder.queryParam("seller_id", sellerId);
+		}
 		if (updatedFrom != null && !updatedFrom.isBlank()) {
 			builder.queryParam("updated_from", updatedFrom);
 		}
@@ -205,6 +177,12 @@ public abstract class AbstractMarketplaceGatewayClient implements MarketplaceGat
 	private record ConnectPayload(
 			String code,
 			@JsonProperty("display_name") String displayName,
+			@JsonProperty("shop_id") String shopId) {
+	}
+
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private record RefreshPayload(
+			@JsonProperty("refresh_token") String refreshToken,
 			@JsonProperty("shop_id") String shopId) {
 	}
 }

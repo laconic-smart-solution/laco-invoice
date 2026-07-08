@@ -17,7 +17,7 @@ spring:
 
 app:
   cors:
-    allowed-origin-patterns: http://localhost:*,http://127.0.0.1:*
+    allowed-origin-patterns: http://localhost:*,http://127.0.0.1:*,http://192.168.23.224:*,http://192.168.23.224,https://brittany-pretrochal-supergloriously.ngrok-free.dev:*
   security:
     jwks:
       insecure-ssl: ${JWKS_INSECURE_SSL:true}

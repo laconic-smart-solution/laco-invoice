@@ -28,31 +28,61 @@ public final class MarketplaceConnectionSupport {
 				.orElseThrow(() -> new ResourceNotFoundException("Marketplace not found: code=" + marketplaceCode));
 
 		Long storeId = store.getId();
-		StoreMarketplaceConnection connection = connectionRepository
-				.findByStore_IdAndExternalConnectionId(storeId, gatewayStore.id())
-				.orElseGet(() -> connectionRepository
-						.findByStore_IdAndMarketplace_CodeIgnoreCase(storeId, marketplaceCode)
-						.orElse(new StoreMarketplaceConnection()));
+		StoreMarketplaceConnection connection = resolveExistingConnection(
+				connectionRepository,
+				storeId,
+				marketplaceCode,
+				gatewayStore);
 
 		connection.setStore(store);
 		connection.setMarketplace(marketplace);
 		applyGatewayMetadata(connection, gatewayStore, preferredDisplayName);
 		connection.setStatus(MarketplaceConnectionStatus.CONNECTED);
-		connection.setAccessToken(null);
-		connection.setRefreshToken(null);
+		connection.setAccessToken(gatewayStore.accessToken());
+		connection.setRefreshToken(gatewayStore.refreshToken());
 
 		return connectionRepository.save(connection);
+	}
+
+	private static StoreMarketplaceConnection resolveExistingConnection(
+			StoreMarketplaceConnectionRepository connectionRepository,
+			Long storeId,
+			String marketplaceCode,
+			GatewayStoreData gatewayStore) {
+		if (gatewayStore.id() != null) {
+			return connectionRepository
+					.findByStore_IdAndExternalConnectionId(storeId, gatewayStore.id())
+					.orElseGet(() -> connectionRepository
+							.findByStore_IdAndMarketplace_CodeIgnoreCase(storeId, marketplaceCode)
+							.orElse(new StoreMarketplaceConnection()));
+		}
+		return connectionRepository
+				.findByStore_IdAndMarketplace_CodeIgnoreCase(storeId, marketplaceCode)
+				.orElse(new StoreMarketplaceConnection());
 	}
 
 	public static void applyGatewayMetadata(
 			StoreMarketplaceConnection connection,
 			GatewayStoreData gatewayStore,
 			String preferredDisplayName) {
-		connection.setExternalConnectionId(gatewayStore.id());
+		UUID externalId = gatewayStore.id();
+		if (externalId == null) {
+			externalId = connection.getExternalConnectionId();
+		}
+		if (externalId == null) {
+			externalId = UUID.randomUUID();
+		}
+		connection.setExternalConnectionId(externalId);
 		connection.setExternalSellerId(gatewayStore.sellerId());
 		connection.setExternalCountry(gatewayStore.country());
 		connection.setDisplayName(resolveDisplayName(preferredDisplayName, gatewayStore));
 		connection.setTokenExpiry(gatewayStore.tokenExpiresAt());
+		if (gatewayStore.accessToken() != null) {
+			connection.setAccessToken(gatewayStore.accessToken());
+		}
+		if (gatewayStore.refreshToken() != null) {
+			connection.setRefreshToken(gatewayStore.refreshToken());
+		}
 	}
 
 	public static String resolveDisplayName(String preferred, GatewayStoreData gatewayStore) {
