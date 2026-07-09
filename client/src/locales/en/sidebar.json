@@ -1,5 +1,10 @@
 {
   "tagline": "Marketplace Sync",
+  "nav_label": "Main navigation",
+  "toggle": {
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "stores": "Stores",
