@@ -17,6 +17,7 @@ import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayApiResponse;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayAuthorizeUrlData;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayOrderItemData;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayOrderListData;
+import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayProductListData;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayStoreData;
 
 public abstract class AbstractMarketplaceGatewayClient implements MarketplaceGatewayClient {
@@ -28,6 +29,9 @@ public abstract class AbstractMarketplaceGatewayClient implements MarketplaceGat
 			new ParameterizedTypeReference<>() {
 			};
 	private static final ParameterizedTypeReference<GatewayApiResponse<GatewayOrderListData>> ORDERS_TYPE =
+			new ParameterizedTypeReference<>() {
+			};
+	private static final ParameterizedTypeReference<GatewayApiResponse<GatewayProductListData>> PRODUCTS_TYPE =
 			new ParameterizedTypeReference<>() {
 			};
 
@@ -109,6 +113,39 @@ public abstract class AbstractMarketplaceGatewayClient implements MarketplaceGat
 			return List.of();
 		}
 		return data.items().stream().map(this::toOrderData).toList();
+	}
+
+	@Override
+	public GatewayProductListData listProducts(
+			UUID tenantId,
+			String accessToken,
+			String sellerId,
+			int page,
+			int limit,
+			String search) {
+		int safePage = page < 1 ? 1 : page;
+		int safeLimit = limit < 1 ? 20 : Math.min(limit, 100);
+
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(resolveApiUrl("/api/v1/products"))
+				.queryParam("access_token", accessToken)
+				.queryParam("page", safePage)
+				.queryParam("limit", safeLimit);
+		if (sellerId != null && !sellerId.isBlank()) {
+			builder.queryParam("seller_id", sellerId);
+			builder.queryParam("shop_id", sellerId);
+		}
+		if (search != null && !search.isBlank()) {
+			builder.queryParam("search", search);
+		}
+		GatewayProductListData data = exchange(
+				restClient.get().uri(builder.build().toUriString()),
+				tenantId,
+				null,
+				PRODUCTS_TYPE);
+		if (data == null) {
+			return new GatewayProductListData(List.of(), 0);
+		}
+		return data;
 	}
 
 	private GatewayOrderData toOrderData(GatewayOrderItemData item) {

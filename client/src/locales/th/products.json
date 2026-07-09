@@ -2,20 +2,16 @@
   "breadcrumb": {
     "store_management": "การจัดการร้านค้า"
   },
-  "title": "สินค้า TikTok Shop",
-  "sync_status": "ซิงก์สด",
+  "title": "สินค้า Marketplace",
+  "sync_status": "กำลังซิงก์",
   "actions": {
     "filter": "กรอง",
     "export_csv": "ส่งออก CSV"
   },
   "filters": {
     "marketplace_label": "แหล่ง Marketplace",
-    "marketplace": {
-      "tiktok_fashion_hh": "TikTok Shop - Fashion HH",
-      "tiktok_beauty_us": "TikTok Shop - Beauty US",
-      "shopify_main": "Shopify - Main Store"
-    },
-    "erp_status_label": "สถานะการแมป ERP",
+    "marketplace_placeholder": "เลือกร้านค้าที่เชื่อมต่อแล้ว",
+    "erp_status_label": "สถานะ ERP",
     "erp_status": {
       "all": "ทั้งหมด",
       "synced": "ซิงก์แล้ว",
@@ -30,8 +26,20 @@
     "synced": "ซิงก์แล้ว",
     "unmapped": "ยังไม่แมป"
   },
+  "status": {
+    "unknown": "ไม่ทราบ"
+  },
+  "empty": {
+    "no_connections": "ยังไม่มีการเชื่อมต่อ marketplace กรุณาเชื่อมต่อ Lazada, Shopee หรือ TikTok Shop จากหน้ารายละเอียดร้านค้าก่อน",
+    "go_to_stores": "ไปที่ร้านค้า"
+  },
+  "errors": {
+    "load_sources_failed": "โหลดแหล่ง marketplace ไม่สำเร็จ",
+    "load_products_failed": "โหลดสินค้า marketplace ไม่สำเร็จ"
+  },
   "table": {
     "empty": "ไม่พบสินค้า",
+    "loading": "กำลังโหลดสินค้า...",
     "showing": "แสดง {{start}}-{{end}} จาก {{total}} สินค้า",
     "store_label": "ร้านค้า: {{id}}",
     "marketplace_label": "Marketplace: {{id}}",
@@ -40,8 +48,8 @@
       "store_marketplace": "ร้านค้าและ Marketplace",
       "product_sku": "รหัสสินค้าและ SKU",
       "name": "ชื่อ",
-      "price": "ราคา (USD)",
-      "erp_status": "สถานะ ERP",
+      "price": "ราคา",
+      "erp_status": "ERP",
       "action": "การดำเนินการ"
     },
     "actions": {
@@ -53,7 +61,7 @@
     "mapping_rate": "อัตราการแมป",
     "action_required": "ต้องดำเนินการ",
     "action_required_value": "{{count}} สินค้า",
-    "active_sku": "SKU ที่ใช้งาน TikTok Shop",
-    "active_sku_value": "{{count}} รายการ"
+    "active_sku": "SKU ที่ใช้งาน",
+    "active_sku_value": "{{count}} SKU"
   }
 }

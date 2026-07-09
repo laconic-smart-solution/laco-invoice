@@ -18,7 +18,7 @@ export function ProductsStatCards({ stats }: ProductsStatCardsProps) {
     <div className="grid gap-4 lg:grid-cols-3">
       <StatCard
         title={t("stats.mapping_rate")}
-        value={`${stats.mappingRatePercent}%`}
+        value={`${stats.mappingRatePercent.toFixed(1)}%`}
         icon={CheckCircle2}
         iconWrapperClassName="bg-success/10 text-success"
       />

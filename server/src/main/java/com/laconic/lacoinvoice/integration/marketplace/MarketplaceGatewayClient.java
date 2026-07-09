@@ -3,6 +3,7 @@ package com.laconic.lacoinvoice.integration.marketplace;
 import java.util.List;
 import java.util.UUID;
 
+import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayProductListData;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayStoreData;
 
 public interface MarketplaceGatewayClient {
@@ -16,4 +17,12 @@ public interface MarketplaceGatewayClient {
 	GatewayStoreData refresh(UUID tenantId, UUID actorId, String refreshToken, String shopId);
 
 	List<GatewayOrderData> listOrders(UUID tenantId, String accessToken, String sellerId, String updatedFrom);
+
+	GatewayProductListData listProducts(
+			UUID tenantId,
+			String accessToken,
+			String sellerId,
+			int page,
+			int limit,
+			String search);
 }

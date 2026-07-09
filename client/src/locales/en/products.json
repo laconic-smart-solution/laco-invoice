@@ -2,20 +2,16 @@
   "breadcrumb": {
     "store_management": "Store Management"
   },
-  "title": "TikTok Shop Products",
-  "sync_status": "Live Sync",
+  "title": "Marketplace Products",
+  "sync_status": "Syncing",
   "actions": {
     "filter": "Filter",
     "export_csv": "Export CSV"
   },
   "filters": {
     "marketplace_label": "Marketplace Source",
-    "marketplace": {
-      "tiktok_fashion_hh": "TikTok Shop - Fashion HH",
-      "tiktok_beauty_us": "TikTok Shop - Beauty US",
-      "shopify_main": "Shopify - Main Store"
-    },
-    "erp_status_label": "ERP Mapping Status",
+    "marketplace_placeholder": "Select a connected store",
+    "erp_status_label": "ERP Status",
     "erp_status": {
       "all": "All",
       "synced": "Synced",
@@ -30,8 +26,20 @@
     "synced": "Synced",
     "unmapped": "Unmapped"
   },
+  "status": {
+    "unknown": "Unknown"
+  },
+  "empty": {
+    "no_connections": "No marketplace connections found. Connect Lazada, Shopee, or TikTok Shop from your store details page first.",
+    "go_to_stores": "Go to Stores"
+  },
+  "errors": {
+    "load_sources_failed": "Failed to load marketplace sources.",
+    "load_products_failed": "Failed to load marketplace products."
+  },
   "table": {
     "empty": "No products found.",
+    "loading": "Loading products...",
     "showing": "Showing {{start}}-{{end}} of {{total}} products",
     "store_label": "Store: {{id}}",
     "marketplace_label": "Marketplace: {{id}}",
@@ -40,8 +48,8 @@
       "store_marketplace": "Store & Marketplace",
       "product_sku": "Product ID & SKU",
       "name": "Name",
-      "price": "Price (USD)",
-      "erp_status": "ERP Status",
+      "price": "Price",
+      "erp_status": "ERP",
       "action": "Action"
     },
     "actions": {
@@ -53,7 +61,7 @@
     "mapping_rate": "Mapping Rate",
     "action_required": "Action Required",
     "action_required_value": "{{count}} Products",
-    "active_sku": "TikTok Shop Active SKU",
-    "active_sku_value": "{{count}} Items"
+    "active_sku": "Active SKU",
+    "active_sku_value": "{{count}} SKUs"
   }
 }
