@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate, useParams, useSearchParams } from "react-router-dom"
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
 import type { MarketplaceConfig } from "@/features/stores/config/marketplaces"
-import { getMarketplaceByRouteSegment } from "@/features/stores/config/marketplaces"
+import {
+  getMarketplaceByRouteSegment,
+  getMarketplaceFromCallbackPath,
+} from "@/features/stores/config/marketplaces"
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
 import { parseOAuthState } from "@/features/stores/util/oauth-state"
 import {
@@ -13,8 +16,10 @@ import {
 } from "@/shared/queries/marketplace-connection.query"
 
 export function MarketplaceOAuthCallbackPage() {
-  const { marketplace: marketplaceSegment = "" } = useParams()
-  const marketplaceConfig = getMarketplaceByRouteSegment(marketplaceSegment)
+  const { marketplace: marketplaceParam = "" } = useParams()
+  const { pathname } = useLocation()
+  const marketplaceConfig =
+    getMarketplaceByRouteSegment(marketplaceParam) ?? getMarketplaceFromCallbackPath(pathname)
 
   if (!marketplaceConfig) {
     return <UnsupportedMarketplaceCallback />

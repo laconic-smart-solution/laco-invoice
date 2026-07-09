@@ -51,18 +51,6 @@ export const router = createBrowserRouter([
         element: <CreateStorePage />,
       },
       {
-        path: ROUTES.dashboard.lazadaCallback,
-        element: <MarketplaceOAuthCallbackPage />,
-      },
-      {
-        path: ROUTES.dashboard.shopeeCallback,
-        element: <MarketplaceOAuthCallbackPage />,
-      },
-      {
-        path: ROUTES.dashboard.tiktokCallback,
-        element: <MarketplaceOAuthCallbackPage />,
-      },
-      {
         path: `${ROUTES.dashboard.stores}/:marketplace/callback`,
         element: <MarketplaceOAuthCallbackPage />,
       },

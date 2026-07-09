@@ -41,6 +41,14 @@ export function getMarketplaceByRouteSegment(segment: string): MarketplaceConfig
   return SUPPORTED_MARKETPLACES.find((item) => item.routeSegment === normalized)
 }
 
+export function getMarketplaceFromCallbackPath(pathname: string): MarketplaceConfig | undefined {
+  const match = pathname.match(/^\/stores\/([^/]+)\/callback\/?$/)
+  if (!match) {
+    return undefined
+  }
+  return getMarketplaceByRouteSegment(match[1])
+}
+
 export function getEnabledMarketplaces(): MarketplaceConfig[] {
   return SUPPORTED_MARKETPLACES.filter((item) => item.connectEnabled)
 }
