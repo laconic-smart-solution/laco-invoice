@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "serve -s dist -l 5173"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -35,6 +36,7 @@
     "react-i18next": "^17.0.8",
     "react-image-crop": "^11.1.2",
     "react-router-dom": "^7.18.0",
+    "serve": "^14.2.6",
     "shadcn": "^4.11.0",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4",
