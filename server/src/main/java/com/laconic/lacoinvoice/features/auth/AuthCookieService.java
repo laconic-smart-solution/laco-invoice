@@ -27,7 +27,7 @@ public class AuthCookieService {
 			return;
 		}
 		addCookie(response, properties.getAccessName(), token.getAccessToken(), properties.getPath(),
-				rememberMe ? token.getExpiresIn() : null);
+				token.getExpiresIn());
 		if (StringUtils.hasText(token.getRefreshToken())) {
 			addCookie(response, properties.getRefreshName(), token.getRefreshToken(), properties.getRefreshPath(),
 					rememberMe ? token.getRefreshExpiresIn() : null);
