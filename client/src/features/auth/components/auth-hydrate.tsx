@@ -6,7 +6,7 @@ export function AuthHydrate() {
   const hydrate = useAuthStore((state) => state.hydrate)
 
   useEffect(() => {
-    hydrate()
+    void hydrate()
   }, [hydrate])
 
   return null

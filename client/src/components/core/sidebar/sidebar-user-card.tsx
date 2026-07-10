@@ -6,6 +6,7 @@ import { useAuthStore } from "@/shared/stores/auth-store"
 
 interface SidebarUserCardProps {
   className?: string
+  isCollapsed?: boolean
 }
 
 function getInitials(name: string) {
@@ -21,7 +22,7 @@ function getRoleLabelKey(role: UserRole): string {
   return `user.roles.${role.toLowerCase()}`
 }
 
-export function SidebarUserCard({ className }: SidebarUserCardProps) {
+export function SidebarUserCard({ className, isCollapsed = false }: SidebarUserCardProps) {
   const { t } = useTranslation("sidebar")
   const user = useAuthStore((state) => state.user)
 
@@ -37,9 +38,11 @@ export function SidebarUserCard({ className }: SidebarUserCardProps) {
   return (
     <div
       className={cn(
-        "flex items-center gap-3 border border-border bg-card p-3",
+        "flex items-center border border-border bg-card",
+        isCollapsed ? "justify-center p-2" : "gap-3 p-3",
         className
       )}
+      title={isCollapsed ? displayName : undefined}
     >
       <div
         aria-hidden
@@ -47,7 +50,13 @@ export function SidebarUserCard({ className }: SidebarUserCardProps) {
       >
         {getInitials(displayName)}
       </div>
-      <div className="min-w-0">
+      <div
+        className={cn(
+          "min-w-0 overflow-hidden motion-safe:transition-[opacity,width] motion-safe:duration-200",
+          isCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"
+        )}
+        aria-hidden={isCollapsed}
+      >
         <p className="truncate text-sm font-medium text-foreground">{displayName}</p>
         <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
       </div>

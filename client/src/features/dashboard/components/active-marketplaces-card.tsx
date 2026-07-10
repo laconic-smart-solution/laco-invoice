@@ -1,12 +1,15 @@
 import { ChevronRight, Plus, Store } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { Link } from "react-router-dom"
 
+import { ROUTES } from "@/app/constants/routes"
 import { Button } from "@/components/ui/button"
-import { MOCK_MARKETPLACES } from "@/features/dashboard/data/mock-dashboard"
+import { getEnabledMarketplaces } from "@/features/stores/config/marketplaces"
 import { cn } from "@/lib/utils"
 
 export function ActiveMarketplacesCard() {
   const { t } = useTranslation("dashboard")
+  const marketplaces = getEnabledMarketplaces()
 
   return (
     <section className="border border-border bg-card shadow-sm">
@@ -17,25 +20,24 @@ export function ActiveMarketplacesCard() {
       </div>
 
       <ul className="divide-y divide-border">
-        {MOCK_MARKETPLACES.map((channel) => (
-          <li key={channel.id}>
-            <button
-              type="button"
+        {marketplaces.map((marketplace) => (
+          <li key={marketplace.code}>
+            <Link
+              to={ROUTES.dashboard.stores}
               className="flex w-full items-center gap-3 px-5 py-3.5 text-left transition-colors hover:bg-muted/50"
             >
               <span
                 className={cn(
-                  "flex size-8 shrink-0 items-center justify-center",
-                  channel.iconClassName
+                  "flex size-8 shrink-0 items-center justify-center bg-muted text-foreground"
                 )}
               >
                 <Store className="size-4" aria-hidden />
               </span>
               <span className="flex-1 text-sm font-medium">
-                {t(`marketplaces.${channel.nameKey}`)}
+                {t(`marketplaces.channels.${marketplace.code.toLowerCase()}`)}
               </span>
               <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
-            </button>
+            </Link>
           </li>
         ))}
       </ul>
@@ -44,9 +46,12 @@ export function ActiveMarketplacesCard() {
         <Button
           variant="outline"
           className="w-full border-dashed text-muted-foreground"
+          asChild
         >
-          <Plus data-icon="inline-start" />
-          {t("marketplaces.connect_channel")}
+          <Link to={ROUTES.dashboard.stores}>
+            <Plus data-icon="inline-start" />
+            {t("marketplaces.connect_channel")}
+          </Link>
         </Button>
       </div>
     </section>

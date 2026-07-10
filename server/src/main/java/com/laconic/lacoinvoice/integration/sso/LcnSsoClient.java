@@ -11,12 +11,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.laconic.lacoinvoice.common.exception.BadGatewayException;
 import com.laconic.lacoinvoice.common.exception.ResourceConflictException;
+import com.laconic.lacoinvoice.integration.sso.dto.AuthTokenDto;
+import com.laconic.lacoinvoice.integration.sso.dto.LcnSsoAuthApiResponse;
 import com.laconic.lacoinvoice.integration.sso.dto.LcnSsoChangeCredentialsApiResponse;
 import com.laconic.lacoinvoice.integration.sso.dto.LcnSsoCredentialsResponse;
 import com.laconic.lacoinvoice.integration.sso.dto.LcnSsoSignupResponse;
+import com.laconic.lacoinvoice.integration.sso.dto.LcnSsoTokenApiResponse;
 import com.laconic.lacoinvoice.integration.sso.dto.LcnSsoUpdateUserApiResponse;
 import com.laconic.lacoinvoice.integration.sso.dto.LcnSsoUserResponse;
 
@@ -69,6 +73,138 @@ public class LcnSsoClient {
 			}
 			throw new BadGatewayException("SSO signup failed: " + e.getMessage(), e);
 		}
+	}
+
+	public LcnSsoAuthApiResponse login(String baseSsoUrl, String applicationCode, String username, String password) {
+		String base = normalizeHttpUrl(baseSsoUrl);
+		String uri = base.replaceAll("/$", "") + "/v1/lcn-sso/auth/login";
+		Map<String, Object> payload = Map.of(
+				"username", username.trim(),
+				"password", password);
+		try {
+			LcnSsoAuthApiResponse body = restClient.post()
+					.uri(uri)
+					.contentType(MediaType.APPLICATION_JSON)
+					.header("X-Application-Code", applicationCode)
+					.body(payload)
+					.retrieve()
+					.body(LcnSsoAuthApiResponse.class);
+			if (body == null || body.getData() == null) {
+				throw new BadGatewayException("SSO login returned invalid response.");
+			}
+			return body;
+		} catch (RestClientResponseException e) {
+			String responseBody = e.getResponseBodyAsString();
+			log.error("SSO login HTTP error: status={} body={}", e.getStatusCode(), responseBody);
+			HttpStatus status = HttpStatus.resolve(e.getStatusCode().value());
+			if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.BAD_REQUEST) {
+				throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+						extractSsoMessage(responseBody, "Invalid email or password."));
+			}
+			throw new BadGatewayException("SSO login failed: " + e.getMessage(), e);
+		}
+	}
+
+	public LcnSsoAuthApiResponse verifyOtpAuth(
+			String baseSsoUrl,
+			String applicationCode,
+			String email,
+			String otp) {
+		String uri = UriComponentsBuilder.fromUriString(authEndpoint(baseSsoUrl, "/v1/lcn-sso/auth/verify/otp"))
+				.queryParam("email", email.trim())
+				.queryParam("otp", otp.trim())
+				.queryParam("applicationCode", applicationCode)
+				.toUriString();
+		try {
+			LcnSsoAuthApiResponse body = restClient.post()
+					.uri(uri)
+					.retrieve()
+					.body(LcnSsoAuthApiResponse.class);
+			if (body == null || body.getData() == null) {
+				throw new BadGatewayException("SSO verify OTP returned invalid response.");
+			}
+			return body;
+		} catch (RestClientResponseException e) {
+			String responseBody = e.getResponseBodyAsString();
+			log.error("SSO verify OTP HTTP error: status={} body={}", e.getStatusCode(), responseBody);
+			HttpStatus status = HttpStatus.resolve(e.getStatusCode().value());
+			if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.BAD_REQUEST) {
+				throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+						extractSsoMessage(responseBody, "Invalid or expired OTP."));
+			}
+			throw new BadGatewayException("SSO verify OTP failed: " + e.getMessage(), e);
+		}
+	}
+
+	public void resendOtp(String baseSsoUrl, String email) {
+		String uri = UriComponentsBuilder.fromUriString(authEndpoint(baseSsoUrl, "/v1/lcn-sso/auth/resend-otp/email"))
+				.queryParam("email", email.trim())
+				.toUriString();
+		try {
+			restClient.post()
+					.uri(uri)
+					.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+					.retrieve()
+					.toBodilessEntity();
+		} catch (RestClientResponseException e) {
+			String responseBody = e.getResponseBodyAsString();
+			log.error("SSO resend OTP HTTP error: status={} body={}", e.getStatusCode(), responseBody);
+			throw new BadGatewayException("SSO resend OTP failed: " + e.getMessage(), e);
+		}
+	}
+
+	public AuthTokenDto refresh(String baseSsoUrl, String applicationCode, String refreshToken) {
+		String uri = UriComponentsBuilder.fromUriString(authEndpoint(baseSsoUrl, "/v1/lcn-sso/auth/refresh"))
+				.queryParam("refreshToken", refreshToken)
+				.toUriString();
+		try {
+			LcnSsoTokenApiResponse body = restClient.post()
+					.uri(uri)
+					.header("X-Application-Code", applicationCode)
+					.retrieve()
+					.body(LcnSsoTokenApiResponse.class);
+			if (body == null || body.getData() == null || body.getData().getAccessToken() == null) {
+				throw new BadGatewayException("SSO refresh returned invalid response.");
+			}
+			return body.getData();
+		} catch (RestClientResponseException e) {
+			String responseBody = e.getResponseBodyAsString();
+			log.error("SSO refresh HTTP error: status={} body={}", e.getStatusCode(), responseBody);
+			HttpStatus status = HttpStatus.resolve(e.getStatusCode().value());
+			if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.BAD_REQUEST) {
+				throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+						extractSsoMessage(responseBody, "Invalid or expired refresh token."));
+			}
+			throw new BadGatewayException("SSO refresh failed: " + e.getMessage(), e);
+		}
+	}
+
+	public void changePasswordAuth(String baseSsoUrl, String accessToken, String newPassword) {
+		String uri = UriComponentsBuilder.fromUriString(authEndpoint(baseSsoUrl, "/v1/lcn-sso/auth/change-password"))
+				.queryParam("accessToken", accessToken)
+				.toUriString();
+		Map<String, Object> payload = Map.of("newPassword", newPassword);
+		try {
+			restClient.post()
+					.uri(uri)
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(payload)
+					.retrieve()
+					.toBodilessEntity();
+		} catch (RestClientResponseException e) {
+			String responseBody = e.getResponseBodyAsString();
+			log.error("SSO change-password HTTP error: status={} body={}", e.getStatusCode(), responseBody);
+			HttpStatus status = HttpStatus.resolve(e.getStatusCode().value());
+			if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.BAD_REQUEST) {
+				throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+						extractSsoMessage(responseBody, "Unable to change password."));
+			}
+			throw new BadGatewayException("SSO change-password failed: " + e.getMessage(), e);
+		}
+	}
+
+	private static String authEndpoint(String baseSsoUrl, String path) {
+		return normalizeHttpUrl(baseSsoUrl).replaceAll("/$", "") + path;
 	}
 
 	private static String extractSsoMessage(String responseBody, String fallback) {

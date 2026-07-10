@@ -1,5 +1,10 @@
 {
   "tagline": "Marketplace Sync",
+  "nav_label": "အဓိက လမ်းညွှန်",
+  "toggle": {
+    "collapse": "ဘေးဘားကို ချုံ့ရန်",
+    "expand": "ဘေးဘားကို ချဲ့ရန်"
+  },
   "nav": {
     "dashboard": "ဒက်ရှ်ဘုတ်",
     "stores": "ဆိုင်များ",

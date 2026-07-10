@@ -29,7 +29,6 @@ import com.laconic.lacoinvoice.features.user.UserCommands.UpdateRequest;
 import com.laconic.lacoinvoice.features.user.UserCommands.UpdateRoleRequest;
 import com.laconic.lacoinvoice.features.user.pageable.UserPageRequest;
 import com.laconic.lacoinvoice.integration.sso.LcnSsoClient;
-import com.laconic.lacoinvoice.integration.sso.dto.AuthTokenDto;
 import com.laconic.lacoinvoice.integration.sso.dto.LcnSsoSignupResponse;
 import com.laconic.lacoinvoice.integration.sso.dto.LcnSsoUserResponse;
 
@@ -58,7 +57,6 @@ public class UserServiceImpl extends BaseServiceImpl<User, UserDto, CreateReques
 	public UserDto create(CreateRequest request) {
 		String password = request.getPassword();
 		String rollbackSsoUserId = null;
-		AuthTokenDto signupToken = null;
 		try {
 			if (StringUtils.hasText(password)) {
 				validateSsoSignupRequest(request);
@@ -77,9 +75,6 @@ public class UserServiceImpl extends BaseServiceImpl<User, UserDto, CreateReques
 				String ssoUserId = ssoResponse.getData().userId();
 				request.setAuthServerUserId(ssoUserId);
 				rollbackSsoUserId = ssoUserId;
-				if (ssoResponse.getData().token() != null) {
-					signupToken = ssoResponse.getData().token();
-				}
 			} else if (!StringUtils.hasText(request.getAuthServerUserId())) {
 				throw new IllegalArgumentException(
 						"Either password (SSO sign-up) or authServerUserId (link existing SSO user) is required.");
@@ -87,11 +82,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, UserDto, CreateReques
 
 			User entity = createEntity(request);
 			User saved = repository.save(entity);
-			UserDto dto = mapper.toDto(saved);
-			if (signupToken != null) {
-				dto.setAuthToken(signupToken);
-			}
-			return dto;
+			return mapper.toDto(saved);
 		} catch (RuntimeException e) {
 			if (rollbackSsoUserId != null && StringUtils.hasText(ssoProperties.getUrl())) {
 				try {

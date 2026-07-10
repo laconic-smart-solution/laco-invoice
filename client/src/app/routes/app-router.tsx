@@ -19,6 +19,10 @@ import {
   SectionPlaceholderPage,
   UsersPage,
   CreateUserPage,
+  StoresPage,
+  CreateStorePage,
+  StoreDetailPage,
+  MarketplaceOAuthCallbackPage,
 } from "@/app/constants/lazyload"
 import { AdminRoute } from "@/components/common/admin-route"
 import { GuestRoute } from "@/components/common/guest-route"
@@ -40,7 +44,19 @@ export const router = createBrowserRouter([
       },
       {
         path: ROUTES.dashboard.stores,
-        element: <SectionPlaceholderPage />,
+        element: <StoresPage />,
+      },
+      {
+        path: ROUTES.dashboard.storeCreate,
+        element: <CreateStorePage />,
+      },
+      {
+        path: `${ROUTES.dashboard.stores}/:marketplace/callback`,
+        element: <MarketplaceOAuthCallbackPage />,
+      },
+      {
+        path: `${ROUTES.dashboard.stores}/:storeId`,
+        element: <StoreDetailPage />,
       },
       {
         path: ROUTES.dashboard.products,

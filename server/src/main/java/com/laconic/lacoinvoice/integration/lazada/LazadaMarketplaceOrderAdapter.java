@@ -1,0 +1,29 @@
+package com.laconic.lacoinvoice.integration.lazada;
+
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.stereotype.Component;
+
+import com.laconic.lacoinvoice.domain.models.StoreMarketplaceConnection;
+import com.laconic.lacoinvoice.integration.marketplace.MarketplaceScopeSupport;
+import com.laconic.lacoinvoice.integration.marketplace.order.AbstractMarketplaceOrderAdapter;
+import com.laconic.lacoinvoice.integration.marketplace.order.GatewayOrderData;
+
+@Component
+public class LazadaMarketplaceOrderAdapter extends AbstractMarketplaceOrderAdapter {
+
+	private final LazadaServiceClient client;
+
+	public LazadaMarketplaceOrderAdapter(LazadaServiceClient client) {
+		super("LAZADA");
+		this.client = client;
+	}
+
+	@Override
+	protected List<GatewayOrderData> fetchFromGateway(StoreMarketplaceConnection connection, String updatedFrom) {
+		Long storeId = connection.getStore().getId();
+		UUID tenantId = MarketplaceScopeSupport.toTenantUuid(storeId);
+		return client.listOrders(tenantId, connection.getAccessToken(), connection.getExternalSellerId(), updatedFrom);
+	}
+}

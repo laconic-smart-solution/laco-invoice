@@ -1,59 +1,67 @@
 {
   "breadcrumb": {
-    "store_management": "ဆိုင် စီမံမှု"
+    "store_management": "ဆိုင်စီမံမှု"
   },
-  "title": "TikTok Shop ကုန်ပစ္စည်းများ",
-  "sync_status": "Live Sync",
+  "title": "Marketplace ကုန်ပစ္စည်းများ",
+  "sync_status": "Sync လုပ်နေသည်",
   "actions": {
-    "filter": "Filter",
+    "filter": "စစ်ထုတ်ရန်",
     "export_csv": "CSV ထုတ်ရန်"
   },
   "filters": {
-    "marketplace_label": "Marketplace ရင်းမြစ်",
-    "marketplace": {
-      "tiktok_fashion_hh": "TikTok Shop - Fashion HH",
-      "tiktok_beauty_us": "TikTok Shop - Beauty US",
-      "shopify_main": "Shopify - Main Store"
-    },
-    "erp_status_label": "ERP Mapping အခြေအနေ",
+    "marketplace_label": "Marketplace အရင်းအမြစ်",
+    "marketplace_placeholder": "ချိတ်ဆက်ထားသော ဆိုင်ကို ရွေးပါ",
+    "erp_status_label": "ERP အခြေအနေ",
     "erp_status": {
       "all": "အားလုံး",
       "synced": "Sync ပြီး",
-      "unmapped": "Map မလုပ်ရသေး"
+      "unmapped": "မချိတ်ရသေး"
     },
-    "price_range_label": "ဈေးနှုန်း အကွာအဝေး",
+    "price_range_label": "စျေးနှုန်းအကွာအဝေး",
     "price_min": "အနည်းဆုံး",
     "price_max": "အများဆုံး",
-    "reset_view": "Reset View"
+    "reset_view": "မြင်ကွင်းပြန်သတ်မှတ်ရန်"
   },
   "erp_status": {
     "synced": "Sync ပြီး",
-    "unmapped": "Map မလုပ်ရသေး"
+    "unmapped": "မချိတ်ရသေး"
+  },
+  "status": {
+    "unknown": "မသိ"
+  },
+  "empty": {
+    "no_connections": "Marketplace ချိတ်ဆက်မှု မတွေ့ပါ။ Lazada၊ Shopee သို့မဟုတ် TikTok Shop ကို ဆိုင်အသေးစိတ်စာမျက်နှာမှ ဦးစွာချိတ်ဆက်ပါ။",
+    "go_to_stores": "ဆိုင်များသို့ သွားရန်"
+  },
+  "errors": {
+    "load_sources_failed": "Marketplace အရင်းအမြစ်များ ဖွင့်မရပါ။",
+    "load_products_failed": "Marketplace ကုန်ပစ္စည်းများ ဖွင့်မရပါ။"
   },
   "table": {
     "empty": "ကုန်ပစ္စည်း မတွေ့ပါ။",
-    "showing": "ကုန်ပစ္စည်း {{total}} ခုအနက် {{start}}-{{end}} ကို ပြနေသည်",
+    "loading": "ကုန်ပစ္စည်းများ ဖွင့်နေသည်...",
+    "showing": "{{total}} ခုအနက် {{start}}-{{end}} ပြနေသည်",
     "store_label": "ဆိုင်: {{id}}",
     "marketplace_label": "Marketplace: {{id}}",
     "id_label": "ID: {{id}}",
     "columns": {
       "store_marketplace": "ဆိုင်နှင့် Marketplace",
-      "product_sku": "Product ID & SKU",
+      "product_sku": "ကုန်ပစ္စည်း ID နှင့် SKU",
       "name": "အမည်",
-      "price": "ဈေးနှုန်း (USD)",
-      "erp_status": "ERP အခြေအနေ",
+      "price": "စျေးနှုန်း",
+      "erp_status": "ERP",
       "action": "လုပ်ဆောင်ချက်"
     },
     "actions": {
-      "view_details": "အသေးစိတ် ကြည့်ရန်",
-      "map_to_erp": "ERP သို့ Map လုပ်ရန်"
+      "view_details": "အသေးစိတ်ကြည့်ရန်",
+      "map_to_erp": "ERP သို့ ချိတ်ရန်"
     }
   },
   "stats": {
-    "mapping_rate": "Mapping Rate",
-    "action_required": "လုပ်ဆောင်ရန် လိုအပ်",
+    "mapping_rate": "ချိတ်ဆက်မှုနှုန်း",
+    "action_required": "လုပ်ဆောင်ရန်လို",
     "action_required_value": "ကုန်ပစ္စည်း {{count}} ခု",
-    "active_sku": "TikTok Shop Active SKU",
-    "active_sku_value": "{{count}} Items"
+    "active_sku": "အသုံးပြုနေသော SKU",
+    "active_sku_value": "SKU {{count}} ခု"
   }
 }

@@ -14,8 +14,8 @@ rem set DB_PASSWORD=your_password
 rem set SSO_JWKS_URL=https://api-auths.laconic.co.th/v1/lcn-sso/auth/jwks.json
 rem set SSO_APPLICATION_CODE=laco-invoice
 
-echo [INFO] Starting lacoinvoice (profile: dev, port: 8080)...
-echo [INFO] Swagger UI: http://localhost:8080/swagger-ui.html
+echo [INFO] Starting lacoinvoice (profile: dev, port: 8091)...
+echo [INFO] Swagger UI: http://localhost:8091/swagger-ui.html
 echo.
 
 call mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=dev %*

@@ -9,7 +9,7 @@ import { useDataTable } from "@/components/common/data-table/use-data-table"
 import { StatusBadge } from "@/components/common/status-badge"
 import type { StatusBadgeVariant } from "@/components/common/status-badge"
 import { Button } from "@/components/ui/button"
-import type { Product, ProductErpStatus } from "@/features/products/types/product"
+import type { ProductErpStatus, ProductTableRow } from "@/features/products/types/product"
 import { useLocaleStore } from "@/shared/stores/locale-store"
 import { formatCurrency } from "@/util/format"
 
@@ -19,7 +19,7 @@ const ERP_STATUS_BADGE: Record<ProductErpStatus, StatusBadgeVariant> = {
 }
 
 interface ProductRowActionProps {
-  product: Product
+  product: ProductTableRow
 }
 
 function ProductRowAction({ product }: ProductRowActionProps) {
@@ -49,7 +49,8 @@ function ProductRowAction({ product }: ProductRowActionProps) {
 }
 
 interface ProductsTableProps {
-  products: Product[]
+  products: ProductTableRow[]
+  isLoading?: boolean
   totalCount: number
   page: number
   limit: number
@@ -64,6 +65,7 @@ interface ProductsTableProps {
 
 export function ProductsTable({
   products,
+  isLoading = false,
   totalCount,
   page,
   limit,
@@ -78,19 +80,15 @@ export function ProductsTable({
   const { t } = useTranslation("products")
   const locale = useLocaleStore((state) => state.locale)
 
-  const columns = useMemo<ColumnDef<Product>[]>(
+  const columns = useMemo<ColumnDef<ProductTableRow>[]>(
     () => [
       {
         id: "store_marketplace",
         header: t("table.columns.store_marketplace"),
         cell: ({ row }) => (
           <div className="min-w-[160px] space-y-0.5">
-            <p className="text-sm text-foreground">
-              {t("table.store_label", { id: row.original.storeId })}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {t("table.marketplace_label", { id: row.original.marketplaceId })}
-            </p>
+            <p className="text-sm text-foreground">{row.original.storeName}</p>
+            <p className="text-xs text-muted-foreground">{row.original.marketplaceName}</p>
           </div>
         ),
       },
@@ -100,11 +98,13 @@ export function ProductsTable({
         cell: ({ row }) => (
           <div className="min-w-[180px] space-y-1.5">
             <p className="text-sm text-foreground">
-              {t("table.id_label", { id: row.original.productId })}
+              {t("table.id_label", { id: row.original.externalProductId })}
             </p>
-            <span className="inline-flex rounded-md border border-border bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground">
-              {row.original.sku}
-            </span>
+            {row.original.sku ? (
+              <span className="inline-flex rounded-md border border-border bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground">
+                {row.original.sku}
+              </span>
+            ) : null}
           </div>
         ),
       },
@@ -118,7 +118,18 @@ export function ProductsTable({
       {
         accessorKey: "price",
         header: t("table.columns.price"),
-        cell: ({ getValue }) => formatCurrency(getValue<number>(), locale),
+        cell: ({ row }) => {
+          const amount = Number.parseFloat(row.original.price)
+          const currency = row.original.currency || "USD"
+          if (!Number.isFinite(amount)) {
+            return <span className="text-muted-foreground">—</span>
+          }
+          return (
+            <span className="font-medium text-foreground">
+              {formatCurrency(amount, locale, currency)}
+            </span>
+          )
+        },
       },
       {
         accessorKey: "erpStatus",
@@ -146,13 +157,16 @@ export function ProductsTable({
   const table = useDataTable({
     data: products,
     columns,
-    getRowId: (row) => row.id,
+    getRowId: (row) => `${row.externalProductId}-${row.sku}`,
   })
 
   return (
     <section className="border border-border bg-card shadow-sm">
       <div className="overflow-x-auto">
-        <DataTable table={table} emptyMessage={t("table.empty")} />
+        <DataTable
+          table={table}
+          emptyMessage={isLoading ? t("table.loading") : t("table.empty")}
+        />
       </div>
 
       <DataTableFooter

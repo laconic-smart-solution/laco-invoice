@@ -1,5 +1,10 @@
 {
   "tagline": "Marketplace Sync",
+  "nav_label": "主导航",
+  "toggle": {
+    "collapse": "收起侧边栏",
+    "expand": "展开侧边栏"
+  },
   "nav": {
     "dashboard": "仪表盘",
     "stores": "店铺",

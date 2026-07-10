@@ -208,7 +208,7 @@ export const INVOICE_STATUS_FILTER_OPTIONS = [
 
 export const INVOICE_MARKETPLACE_FILTER_OPTIONS = [
   { value: "all", labelKey: "filters.marketplace_all" },
-  { value: "tiktok", labelKey: "filters.marketplace_tiktok" },
-  { value: "shopify", labelKey: "filters.marketplace_shopify" },
-  { value: "amazon", labelKey: "filters.marketplace_amazon" },
+  { value: "LAZADA", labelKey: "filters.marketplace_lazada" },
+  { value: "SHOPEE", labelKey: "filters.marketplace_shopee" },
+  { value: "TIKTOK", labelKey: "filters.marketplace_tiktok" },
 ] as const

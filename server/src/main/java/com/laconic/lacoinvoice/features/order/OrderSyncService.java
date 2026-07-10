@@ -25,10 +25,10 @@ import com.laconic.lacoinvoice.domain.repositories.ProductRepository;
 import com.laconic.lacoinvoice.domain.repositories.StoreMarketplaceConnectionRepository;
 import com.laconic.lacoinvoice.domain.repositories.StoreRepository;
 import com.laconic.lacoinvoice.integration.cache.MarketplaceTokenCache;
-import com.laconic.lacoinvoice.integration.marketplace.MarketplaceFetchedOrder;
-import com.laconic.lacoinvoice.integration.marketplace.MarketplaceFetchedOrderItem;
-import com.laconic.lacoinvoice.integration.marketplace.MarketplaceOrderAdapter;
-import com.laconic.lacoinvoice.integration.marketplace.MarketplaceOrderAdapterRegistry;
+import com.laconic.lacoinvoice.integration.marketplace.order.MarketplaceFetchedOrder;
+import com.laconic.lacoinvoice.integration.marketplace.order.MarketplaceFetchedOrderItem;
+import com.laconic.lacoinvoice.integration.marketplace.order.MarketplaceOrderAdapter;
+import com.laconic.lacoinvoice.integration.marketplace.order.MarketplaceOrderAdapterRegistry;
 
 @Service
 public class OrderSyncService {

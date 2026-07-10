@@ -1,20 +1,9 @@
 export type UserRole = "OWNER" | "MANAGER" | "STAFF" | "ADMIN"
 
-export interface AuthToken {
-  access_token: string
-  refresh_token: string
-  expires_in: number
-  refresh_expires_in: number
-  token_type: string
-  scope?: string
-}
-
-export interface SsoLoginResponse {
-  userId: number
-  keycloakId?: string
-  otpVerified: boolean
-  token: AuthToken
+export interface AuthSessionResponse {
+  userId: number | null
   email: string
+  otpVerified: boolean
 }
 
 export interface VerifyOtpRequest {
@@ -28,12 +17,6 @@ export interface MeProfile {
   fullName: string | null
   role: UserRole
   active: boolean
-}
-
-export interface AuthSession {
-  accessToken: string
-  refreshToken: string
-  user: MeProfile | null
 }
 
 export interface LoginCredentials {

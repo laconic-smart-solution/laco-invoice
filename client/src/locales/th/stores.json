@@ -1,0 +1,128 @@
+{
+  "title": "ร้านค้า",
+  "subtitle": "จัดการร้านค้าและเชื่อมต่อ marketplace",
+  "actions": { "add_store": "เพิ่มร้านค้า" },
+  "stats": { "total_stores": "ร้านค้าทั้งหมด" },
+  "create": {
+    "title": "เพิ่มร้านค้า",
+    "subtitle": "สร้างร้านค้าเพื่อจัดการการเชื่อมต่อ marketplace และคำสั่งซื้อ"
+  },
+  "detail": { "title": "รายละเอียดร้านค้า" },
+  "connections": {
+    "title": "การเชื่อมต่อ Marketplace",
+    "subtitle": "เชื่อมต่อบัญชีผู้ขายเพื่อซิงค์คำสั่งซื้อ"
+  },
+  "callback": {
+    "title": "กำลังเชื่อมต่อ marketplace",
+    "processing": "กำลังดำเนินการเชื่อมต่อ...",
+    "unsupported_marketplace": "ไม่รองรับ marketplace callback นี้"
+  },
+  "form": {
+    "back_to_list": "กลับไปรายการร้านค้า",
+    "cancel": "ยกเลิก",
+    "submit_create": "สร้างร้านค้า",
+    "name_label": "ชื่อร้านค้า",
+    "name_placeholder": "ร้านของฉัน",
+    "logo_url_label": "URL โลโก้",
+    "logo_url_placeholder": "https://example.com/logo.png",
+    "active_label": "ร้านค้าใช้งาน",
+    "active_description": "ร้านค้าที่ไม่ active จะไม่ถูกใช้ในการซิงค์",
+    "validation": { "name_required": "กรุณากรอกชื่อร้านค้า" }
+  },
+  "table": {
+    "empty": "ไม่พบร้านค้า",
+    "loading": "กำลังโหลดร้านค้า...",
+    "showing": "แสดง {{start}}-{{end}} จาก {{total}} ร้านค้า",
+    "columns": {
+      "name": "ร้านค้า",
+      "status": "สถานะ",
+      "created_at": "สร้างเมื่อ",
+      "actions": "การดำเนินการ"
+    },
+    "status": { "active": "ใช้งาน", "inactive": "ไม่ใช้งาน" },
+    "actions": { "view": "ดู" }
+  },
+  "marketplaces": {
+    "lazada": {
+      "connect": "เชื่อมต่อ Lazada",
+      "connecting": "กำลังเปลี่ยนหน้า...",
+      "refresh": "รีเฟรชโทเค็น",
+      "disconnect": "ยกเลิกการเชื่อมต่อ",
+      "seller_id": "รหัสผู้ขาย",
+      "country": "ประเทศ",
+      "token_expires": "โทเค็นหมดอายุ",
+      "status_connected": "เชื่อมต่อแล้ว",
+      "status_disconnected": "ยกเลิกการเชื่อมต่อแล้ว",
+      "connections_title": "การเชื่อมต่อ Lazada",
+      "connections_subtitle": "เชื่อมต่อบัญชีผู้ขาย Lazada เพื่อซิงค์คำสั่งซื้อ",
+      "no_connections": "ยังไม่ได้เชื่อมต่อผู้ขาย Lazada",
+      "confirm_disconnect_title": "ยกเลิกการเชื่อมต่อ Lazada?",
+      "confirm_disconnect_description": "ยกเลิกการเชื่อมต่อ \"{{name}}\"? การซิงค์คำสั่งซื้อจะหยุด",
+      "confirm_disconnect_button": "ยกเลิกการเชื่อมต่อ",
+      "callback": {
+        "title": "กำลังเชื่อมต่อ Lazada",
+        "processing": "กำลังเชื่อมต่อ Lazada...",
+        "success": "เชื่อมต่อผู้ขาย Lazada สำเร็จ",
+        "missing_code": "ไม่พบรหัสยืนยัน กรุณาลองใหม่อีกครั้ง",
+        "missing_state": "ไม่พบ OAuth state กรุณาลองใหม่อีกครั้ง",
+        "failed": "ไม่สามารถเชื่อมต่อ Lazada ได้ กรุณาลองอีกครั้ง"
+      }
+    },
+    "shopee": {
+      "connect": "เชื่อมต่อ Shopee",
+      "connecting": "กำลังเปลี่ยนหน้า...",
+      "refresh": "รีเฟรชโทเค็น",
+      "disconnect": "ยกเลิกการเชื่อมต่อ",
+      "seller_id": "รหัสร้านค้า",
+      "country": "ประเทศ",
+      "token_expires": "โทเค็นหมดอายุ",
+      "status_connected": "เชื่อมต่อแล้ว",
+      "status_disconnected": "ยกเลิกการเชื่อมต่อแล้ว",
+      "connections_title": "การเชื่อมต่อ Shopee",
+      "connections_subtitle": "เชื่อมต่อร้านค้า Shopee เพื่อซิงค์คำสั่งซื้อ",
+      "no_connections": "ยังไม่ได้เชื่อมต่อ Shopee",
+      "confirm_disconnect_title": "ยกเลิกการเชื่อมต่อ Shopee?",
+      "confirm_disconnect_description": "ยกเลิกการเชื่อมต่อ \"{{name}}\"? การซิงค์คำสั่งซื้อจะหยุด",
+      "confirm_disconnect_button": "ยกเลิกการเชื่อมต่อ",
+      "callback": {
+        "title": "กำลังเชื่อมต่อ Shopee",
+        "processing": "กำลังเชื่อมต่อ Shopee...",
+        "success": "เชื่อมต่อ Shopee สำเร็จ",
+        "missing_code": "ไม่พบรหัสยืนยัน กรุณาลองใหม่อีกครั้ง",
+        "missing_state": "ไม่พบ OAuth state กรุณาลองใหม่อีกครั้ง",
+        "failed": "ไม่สามารถเชื่อมต่อ Shopee ได้ กรุณาลองอีกครั้ง"
+      }
+    },
+    "tiktok": {
+      "connect": "เชื่อมต่อ TikTok Shop",
+      "connecting": "กำลังเปลี่ยนหน้า...",
+      "refresh": "รีเฟรชโทเค็น",
+      "disconnect": "ยกเลิกการเชื่อมต่อ",
+      "seller_id": "รหัสร้านค้า",
+      "country": "ประเทศ",
+      "token_expires": "โทเค็นหมดอายุ",
+      "status_connected": "เชื่อมต่อแล้ว",
+      "status_disconnected": "ยกเลิกการเชื่อมต่อแล้ว",
+      "connections_title": "การเชื่อมต่อ TikTok Shop",
+      "connections_subtitle": "เชื่อมต่อ TikTok Shop เพื่อซิงค์คำสั่งซื้อ",
+      "no_connections": "ยังไม่ได้เชื่อมต่อ TikTok Shop",
+      "confirm_disconnect_title": "ยกเลิกการเชื่อมต่อ TikTok Shop?",
+      "confirm_disconnect_description": "ยกเลิกการเชื่อมต่อ \"{{name}}\"? การซิงค์คำสั่งซื้อจะหยุด",
+      "confirm_disconnect_button": "ยกเลิกการเชื่อมต่อ",
+      "callback": {
+        "title": "กำลังเชื่อมต่อ TikTok Shop",
+        "processing": "กำลังเชื่อมต่อ TikTok Shop...",
+        "success": "เชื่อมต่อ TikTok Shop สำเร็จ",
+        "missing_code": "ไม่พบรหัสยืนยัน กรุณาลองใหม่อีกครั้ง",
+        "missing_state": "ไม่พบ OAuth state กรุณาลองใหม่อีกครั้ง",
+        "failed": "ไม่สามารถเชื่อมต่อ TikTok Shop ได้ กรุณาลองอีกครั้ง"
+      }
+    }
+  },
+  "errors": {
+    "load_failed": "ไม่สามารถโหลดร้านค้าได้ กรุณาลองอีกครั้ง",
+    "save_failed": "ไม่สามารถสร้างร้านค้าได้ กรุณาลองอีกครั้ง",
+    "lazada_failed": "คำขอ Lazada ล้มเหลว กรุณาลองอีกครั้ง",
+    "marketplace_failed": "คำขอ {{marketplace}} ล้มเหลว กรุณาลองอีกครั้ง"
+  }
+}

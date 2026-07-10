@@ -11,7 +11,7 @@ public final class ObjectMapUtils {
 
 	public static Map<String, Object> toMap(Object obj) {
 		if (obj == null) {
-			return Map.of();
+			return new LinkedHashMap<>();
 		}
 		Map<String, Object> result = new LinkedHashMap<>();
 		for (Field field : obj.getClass().getDeclaredFields()) {
@@ -30,7 +30,7 @@ public final class ObjectMapUtils {
 
 	public static Map<String, Object> toMap(Object obj, Map<String, String> filterFieldToEntityField) {
 		if (obj == null) {
-			return Map.of();
+			return new LinkedHashMap<>();
 		}
 		Map<String, Object> result = new LinkedHashMap<>();
 		for (Field field : obj.getClass().getDeclaredFields()) {

@@ -26,7 +26,7 @@ spring:
     auto-startup: false
 
 server:
-  port: 8080
+  port: 8091
 
 logging:
   pattern:
@@ -55,6 +55,14 @@ app:
     allow-credentials: true
     allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
     exposed-headers: Authorization,X-Request-Id
+  auth:
+    cookies:
+      access-name: laco_invoice_access_token
+      refresh-name: laco_invoice_refresh_token
+      secure: true
+      same-site: Lax
+      path: /
+      refresh-path: /api/v1/auth
   security:
     mode: oauth2
     jwks:
@@ -74,6 +82,12 @@ app:
       enabled: false
       cron: "0 */10 * * * ?"
       timezone: Asia/Bangkok
+  communication:
+    gateway-url: ${COMMUNICATION_GATEWAY_URL:http://localhost:8084}
+    lazada-base-path: ${COMMUNICATION_LAZADA_BASE_PATH:}
+    shopee-base-path: ${COMMUNICATION_SHOPEE_BASE_PATH:}
+    tiktok-base-path: ${COMMUNICATION_TIKTOK_BASE_PATH:}
+    gateway-secret: ${GATEWAY_SECRET:hello}
 
 sso:
   url: ${SSO_URL:https://api-auths.laconic.co.th}

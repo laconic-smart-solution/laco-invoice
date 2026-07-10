@@ -3,13 +3,11 @@ import { useTranslation } from "react-i18next"
 import { useNavigate, useSearchParams } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
-import { setAuthStorageMode } from "@/shared/auth/auth-storage"
 import {
   getAuthErrorMessage,
   useSignInMutation,
 } from "@/shared/queries/auth.query"
 import { meService } from "@/shared/services/me.service"
-import type { AuthSession } from "@/shared/types/auth.types"
 import { useAuthStore } from "@/shared/stores/auth-store"
 
 interface LoginInput {
@@ -29,22 +27,26 @@ export function useLogin() {
   const { t } = useTranslation("auth")
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const login = useAuthStore((state) => state.login)
+  const establishSession = useAuthStore((state) => state.establishSession)
+  const setUser = useAuthStore((state) => state.setUser)
   const signInMutation = useSignInMutation()
   const [error, setError] = useState<string | null>(null)
 
   const mutate = async (values: LoginInput) => {
     setError(null)
-    setAuthStorageMode(values.rememberMe)
 
     try {
       const response = await signInMutation.mutateAsync({
         identifier: values.email.trim(),
         password: values.password,
+        rememberMe: values.rememberMe,
       })
 
       if (!response.otpVerified) {
         const params = new URLSearchParams({ email: response.email })
+        if (values.rememberMe) {
+          params.set("rememberMe", "1")
+        }
         const returnUrl = searchParams.get("returnUrl")
         if (returnUrl) {
           params.set("returnUrl", returnUrl)
@@ -53,21 +55,13 @@ export function useLogin() {
         return
       }
 
-      const session: AuthSession = {
-        accessToken: response.token.access_token,
-        refreshToken: response.token.refresh_token,
-        user: null,
-      }
-      login(session)
+      establishSession()
 
       try {
         const profile = await meService.getProfile()
-        login({
-          ...session,
-          user: profile,
-        })
+        setUser(profile)
       } catch {
-        // Profile fetch is best-effort after token is stored.
+        // Profile fetch is best-effort after cookies are set.
       }
 
       navigate(resolveReturnUrl(searchParams.get("returnUrl")))

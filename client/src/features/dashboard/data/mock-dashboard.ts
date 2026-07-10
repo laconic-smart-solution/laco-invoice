@@ -57,18 +57,18 @@ export const MOCK_RECENT_ORDERS: RecentOrder[] = [
 
 export const MOCK_MARKETPLACES: MarketplaceChannel[] = [
   {
-    id: "tiktok",
-    nameKey: "tiktok",
-    iconClassName: "bg-foreground text-background",
+    id: "lazada",
+    nameKey: "lazada",
+    iconClassName: "bg-primary text-primary-foreground",
   },
   {
-    id: "shopify",
-    nameKey: "shopify",
+    id: "shopee",
+    nameKey: "shopee",
     iconClassName: "bg-success text-success-foreground",
   },
   {
-    id: "amazon",
-    nameKey: "amazon",
-    iconClassName: "bg-info text-info-foreground",
+    id: "tiktok",
+    nameKey: "tiktok",
+    iconClassName: "bg-foreground text-background",
   },
 ]

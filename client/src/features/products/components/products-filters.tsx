@@ -1,5 +1,4 @@
 import { RefreshCw } from "lucide-react"
-import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
@@ -12,25 +11,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  ERP_STATUS_FILTER_OPTIONS,
-  MARKETPLACE_SOURCE_OPTIONS,
-} from "@/features/products/data/mock-products"
-import type { ProductErpFilter } from "@/features/products/types/product"
+import type { MarketplaceProductSource, ProductFiltersState } from "@/features/products/types/product"
+import { ERP_STATUS_FILTER_OPTIONS } from "@/features/products/util/erp-status"
+import { buildProductSourceKey } from "@/shared/services/marketplace-product.service"
 import { cn } from "@/lib/utils"
 
-export function ProductsFilters() {
+interface ProductsFiltersProps {
+  sources: MarketplaceProductSource[]
+  value: ProductFiltersState
+  selectedSourceKey: string
+  onChange: (value: ProductFiltersState) => void
+  disabled?: boolean
+}
+
+export function ProductsFilters({
+  sources,
+  value,
+  selectedSourceKey,
+  onChange,
+  disabled = false,
+}: ProductsFiltersProps) {
   const { t } = useTranslation("products")
-  const [marketplace, setMarketplace] = useState("tiktok_fashion_hh")
-  const [erpStatus, setErpStatus] = useState<ProductErpFilter>("all")
-  const [priceMin, setPriceMin] = useState("")
-  const [priceMax, setPriceMax] = useState("")
 
   const handleReset = () => {
-    setMarketplace("tiktok_fashion_hh")
-    setErpStatus("all")
-    setPriceMin("")
-    setPriceMax("")
+    onChange({
+      sourceKey: "",
+      erpStatus: "all",
+      priceMin: "",
+      priceMax: "",
+    })
   }
 
   return (
@@ -40,16 +49,23 @@ export function ProductsFilters() {
           <Label className="text-xs text-muted-foreground">
             {t("filters.marketplace_label")}
           </Label>
-          <Select value={marketplace} onValueChange={setMarketplace}>
+          <Select
+            value={selectedSourceKey}
+            onValueChange={(sourceKey) => onChange({ ...value, sourceKey })}
+            disabled={disabled || sources.length === 0}
+          >
             <SelectTrigger className="w-full">
-              <SelectValue />
+              <SelectValue placeholder={t("filters.marketplace_placeholder")} />
             </SelectTrigger>
             <SelectContent>
-              {MARKETPLACE_SOURCE_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {t(option.labelKey)}
-                </SelectItem>
-              ))}
+              {sources.map((source) => {
+                const key = buildProductSourceKey(source.storeId, source.marketplaceCode)
+                return (
+                  <SelectItem key={key} value={key}>
+                    {source.label}
+                  </SelectItem>
+                )
+              })}
             </SelectContent>
           </Select>
         </div>
@@ -63,13 +79,14 @@ export function ProductsFilters() {
               <Button
                 key={option.value}
                 type="button"
-                variant={erpStatus === option.value ? "default" : "ghost"}
+                variant={value.erpStatus === option.value ? "default" : "ghost"}
                 size="sm"
                 className={cn(
                   "h-8 flex-1 rounded-sm text-xs",
-                  erpStatus !== option.value && "text-muted-foreground"
+                  value.erpStatus !== option.value && "text-muted-foreground"
                 )}
-                onClick={() => setErpStatus(option.value)}
+                onClick={() => onChange({ ...value, erpStatus: option.value })}
+                disabled={disabled}
               >
                 {t(option.labelKey)}
               </Button>
@@ -86,23 +103,25 @@ export function ProductsFilters() {
               type="number"
               min={0}
               placeholder={t("filters.price_min")}
-              value={priceMin}
-              onChange={(event) => setPriceMin(event.target.value)}
+              value={value.priceMin}
+              onChange={(event) => onChange({ ...value, priceMin: event.target.value })}
               className="h-9"
+              disabled={disabled}
             />
             <span className="text-muted-foreground">–</span>
             <Input
               type="number"
               min={0}
               placeholder={t("filters.price_max")}
-              value={priceMax}
-              onChange={(event) => setPriceMax(event.target.value)}
+              value={value.priceMax}
+              onChange={(event) => onChange({ ...value, priceMax: event.target.value })}
               className="h-9"
+              disabled={disabled}
             />
           </div>
         </div>
 
-        <Button className="shrink-0" onClick={handleReset}>
+        <Button className="shrink-0" onClick={handleReset} disabled={disabled}>
           <RefreshCw data-icon="inline-start" />
           {t("filters.reset_view")}
         </Button>

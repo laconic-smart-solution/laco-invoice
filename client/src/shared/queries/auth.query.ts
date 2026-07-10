@@ -30,7 +30,7 @@ export function getAuthErrorMessage(error: unknown, fallback: string): string {
 
 export function useSignInMutation() {
   return useMutation({
-    mutationFn: (body: LoginCredentials) => authService.signInToSso(body),
+    mutationFn: (body: LoginCredentials & { rememberMe: boolean }) => authService.login(body),
   })
 }
 
@@ -42,7 +42,7 @@ export function useSignUpMutation() {
 
 export function useVerifyOtpMutation() {
   return useMutation({
-    mutationFn: (body: VerifyOtpRequest) => authService.verifyOtp(body),
+    mutationFn: (body: VerifyOtpRequest & { rememberMe?: boolean }) => authService.verifyOtp(body),
   })
 }
 
@@ -54,12 +54,6 @@ export function useResendOtpMutation() {
 
 export function useResetPasswordMutation() {
   return useMutation({
-    mutationFn: ({
-      payload,
-      accessToken,
-    }: {
-      payload: ResetPasswordRequest
-      accessToken: string
-    }) => authService.resetPassword(payload, accessToken),
+    mutationFn: (payload: ResetPasswordRequest) => authService.resetPassword(payload),
   })
 }

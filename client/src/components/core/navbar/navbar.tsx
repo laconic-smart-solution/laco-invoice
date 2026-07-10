@@ -57,8 +57,8 @@ export function Navbar() {
   const logout = useAuthStore((state) => state.logout)
   const displayName = user?.fullName?.trim() || user?.email || ""
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    await logout()
     navigate(ROUTES.auth.login)
   }
 
