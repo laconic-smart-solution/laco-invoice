@@ -19,9 +19,9 @@ import {
 
 export function ResetPasswordPage() {
   const { t } = useTranslation("auth")
-  const { email, accessToken, submit, isPending } = useResetPassword()
+  const { email, isAuthenticated, submit, isPending } = useResetPassword()
   const [error, setError] = useState<string | null>(null)
-  const hasValidSession = Boolean(accessToken)
+  const hasValidSession = isAuthenticated
 
   const resetPasswordSchema = useMemo(
     () =>

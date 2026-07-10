@@ -25,8 +25,8 @@ export function SidebarLogoutButton({
     return null
   }
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    await logout()
     navigate(ROUTES.auth.login)
   }
 

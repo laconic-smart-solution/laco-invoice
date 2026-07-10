@@ -2,7 +2,6 @@ import { useTranslation } from "react-i18next"
 import { useNavigate, useSearchParams } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
-import { getAccessToken } from "@/shared/auth/auth-storage"
 import {
   getAuthErrorMessage,
   useResetPasswordMutation,
@@ -14,22 +13,19 @@ export function useResetPassword() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const logout = useAuthStore((state) => state.logout)
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const resetMutation = useResetPasswordMutation()
 
-  const accessToken = searchParams.get("token") ?? getAccessToken() ?? ""
   const email = searchParams.get("email") ?? ""
 
   const submit = async (newPassword: string) => {
-    if (!accessToken) {
+    if (!isAuthenticated) {
       throw new Error(t("reset_password.missing_token"))
     }
 
     try {
-      await resetMutation.mutateAsync({
-        payload: { newPassword },
-        accessToken,
-      })
-      logout()
+      await resetMutation.mutateAsync({ newPassword })
+      await logout()
       navigate(ROUTES.auth.login)
     } catch (err: unknown) {
       throw new Error(getAuthErrorMessage(err, t("errors.reset_password_failed")), {
@@ -40,7 +36,7 @@ export function useResetPassword() {
 
   return {
     email,
-    accessToken,
+    isAuthenticated,
     submit,
     isPending: resetMutation.isPending,
   }

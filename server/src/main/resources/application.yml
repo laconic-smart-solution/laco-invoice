@@ -55,6 +55,14 @@ app:
     allow-credentials: true
     allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
     exposed-headers: Authorization,X-Request-Id
+  auth:
+    cookies:
+      access-name: laco_invoice_access_token
+      refresh-name: laco_invoice_refresh_token
+      secure: true
+      same-site: Lax
+      path: /
+      refresh-path: /api/v1/auth
   security:
     mode: oauth2
     jwks:

@@ -1,76 +1,64 @@
-import {
-  clearAuthSession,
-  readAuthSession,
-  writeAuthSession,
-} from "@/shared/auth/auth-storage"
-import type { AuthSession, MeProfile } from "@/shared/types/auth.types"
+import { meService } from "@/shared/services/me.service"
+import type { MeProfile } from "@/shared/types/auth.types"
 import { create } from "zustand"
 
 interface AuthState {
   user: MeProfile | null
-  accessToken: string | null
-  refreshToken: string | null
   isAuthenticated: boolean
   isHydrated: boolean
-  hydrate: () => void
-  login: (session: AuthSession) => void
+  hydrate: () => Promise<void>
   setUser: (user: MeProfile | null) => void
-  logout: () => void
+  establishSession: (user?: MeProfile | null) => void
+  clearSession: () => void
+  logout: () => Promise<void>
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-  accessToken: null,
-  refreshToken: null,
   isAuthenticated: false,
   isHydrated: false,
-  hydrate: () => {
-    const session = readAuthSession()
-    if (session?.accessToken) {
+  hydrate: async () => {
+    try {
+      const profile = await meService.getProfile()
       set({
-        user: session.user,
-        accessToken: session.accessToken,
-        refreshToken: session.refreshToken,
+        user: profile,
         isAuthenticated: true,
         isHydrated: true,
       })
-      return
+    } catch {
+      set({
+        user: null,
+        isAuthenticated: false,
+        isHydrated: true,
+      })
     }
-    clearAuthSession()
-    set({
-      user: null,
-      accessToken: null,
-      refreshToken: null,
-      isAuthenticated: false,
-      isHydrated: true,
-    })
   },
-  login: (session) => {
-    writeAuthSession(session)
+  setUser: (user) => {
+    set({ user })
+  },
+  establishSession: (user = null) => {
     set({
-      user: session.user,
-      accessToken: session.accessToken,
-      refreshToken: session.refreshToken,
+      user,
       isAuthenticated: true,
       isHydrated: true,
     })
   },
-  setUser: (user) => {
-    const session = readAuthSession()
-    if (!session) {
-      set({ user })
-      return
-    }
-    const next = { ...session, user }
-    writeAuthSession(next)
-    set({ user })
-  },
-  logout: () => {
-    clearAuthSession()
+  clearSession: () => {
     set({
       user: null,
-      accessToken: null,
-      refreshToken: null,
+      isAuthenticated: false,
+      isHydrated: true,
+    })
+  },
+  logout: async () => {
+    const { authService } = await import("@/shared/services/auth.service")
+    try {
+      await authService.logout()
+    } catch {
+      // Clear local state even when the server session is already gone.
+    }
+    set({
+      user: null,
       isAuthenticated: false,
       isHydrated: true,
     })

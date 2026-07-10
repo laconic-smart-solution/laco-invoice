@@ -21,7 +21,8 @@ public class LacoinvoiceSecurityConfig {
 	public SecurityFilterChain securityFilterChain(
 			HttpSecurity http,
 			@Value("${app.security.mode:oauth2}") String securityMode,
-			AuditUserContextFilter auditUserContextFilter) throws Exception {
+			AuditUserContextFilter auditUserContextFilter,
+			CookieBearerTokenResolver cookieBearerTokenResolver) throws Exception {
 		http.csrf(AbstractHttpConfigurer::disable);
 		http.cors(Customizer.withDefaults());
 		if ("permit_all".equalsIgnoreCase(securityMode.trim())) {
@@ -32,11 +33,19 @@ public class LacoinvoiceSecurityConfig {
 					.permitAll()
 					.requestMatchers(HttpMethod.POST, "/api/v1/users")
 					.permitAll()
+					.requestMatchers(HttpMethod.POST,
+							"/api/v1/auth/login",
+							"/api/v1/auth/verify-otp",
+							"/api/v1/auth/resend-otp",
+							"/api/v1/auth/refresh")
+					.permitAll()
 					.anyRequest()
 					.permitAll());
 			return http.build();
 		}
-		http.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+		http.oauth2ResourceServer(oauth2 -> oauth2
+				.bearerTokenResolver(cookieBearerTokenResolver)
+				.jwt(Customizer.withDefaults()));
 		http.addFilterAfter(auditUserContextFilter, BearerTokenAuthenticationFilter.class);
 		http.authorizeHttpRequests(auth -> auth
 				.requestMatchers(HttpMethod.OPTIONS, "/**")
@@ -44,6 +53,12 @@ public class LacoinvoiceSecurityConfig {
 				.requestMatchers("/actuator/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
 				.permitAll()
 				.requestMatchers(HttpMethod.POST, "/api/v1/users")
+				.permitAll()
+				.requestMatchers(HttpMethod.POST,
+						"/api/v1/auth/login",
+						"/api/v1/auth/verify-otp",
+						"/api/v1/auth/resend-otp",
+						"/api/v1/auth/refresh")
 				.permitAll()
 				.anyRequest()
 				.authenticated());

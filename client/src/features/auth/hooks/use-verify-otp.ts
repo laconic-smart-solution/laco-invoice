@@ -9,7 +9,6 @@ import {
   useVerifyOtpMutation,
 } from "@/shared/queries/auth.query"
 import { meService } from "@/shared/services/me.service"
-import type { AuthSession } from "@/shared/types/auth.types"
 import { useAuthStore } from "@/shared/stores/auth-store"
 
 function isForgotPasswordFlow(mode: string | null, flow: string | null): boolean {
@@ -27,7 +26,8 @@ export function useVerifyOtp() {
   const { t } = useTranslation("auth")
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const login = useAuthStore((state) => state.login)
+  const establishSession = useAuthStore((state) => state.establishSession)
+  const setUser = useAuthStore((state) => state.setUser)
   const verifyMutation = useVerifyOtpMutation()
   const resendMutation = useResendOtpMutation()
   const [error, setError] = useState<string | null>(null)
@@ -35,40 +35,29 @@ export function useVerifyOtp() {
   const mode = searchParams.get("mode")
   const flow = searchParams.get("flow")
   const returnUrl = searchParams.get("returnUrl")
+  const rememberMe = searchParams.get("rememberMe") === "1"
   const isForgotFlow = isForgotPasswordFlow(mode, flow)
 
   const verify = async (email: string, otp: string) => {
     setError(null)
 
     try {
-      const response = await verifyMutation.mutateAsync({ email, otp })
-      const accessToken = response.token.access_token
-      const refreshToken = response.token.refresh_token
+      await verifyMutation.mutateAsync({ email, otp, rememberMe })
 
       if (isForgotFlow) {
-        const params = new URLSearchParams({
-          email,
-          token: accessToken,
-        })
+        establishSession()
+        const params = new URLSearchParams({ email })
         navigate(`${ROUTES.auth.resetPassword}?${params.toString()}`)
         return
       }
 
-      const session: AuthSession = {
-        accessToken,
-        refreshToken,
-        user: null,
-      }
-      login(session)
+      establishSession()
 
       try {
         const profile = await meService.getProfile()
-        login({
-          ...session,
-          user: profile,
-        })
+        setUser(profile)
       } catch {
-        // Profile fetch is best-effort after token is stored.
+        // Profile fetch is best-effort after cookies are set.
       }
 
       navigate(resolveReturnUrl(returnUrl))
