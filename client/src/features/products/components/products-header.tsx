@@ -1,4 +1,4 @@
-import { Download, Filter } from "lucide-react"
+import { Download, Filter, RefreshCw } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
@@ -7,9 +7,16 @@ import { cn } from "@/lib/utils"
 interface ProductsHeaderProps {
   className?: string
   isSyncing?: boolean
+  canSync?: boolean
+  onSync?: () => void
 }
 
-export function ProductsHeader({ className, isSyncing = false }: ProductsHeaderProps) {
+export function ProductsHeader({
+  className,
+  isSyncing = false,
+  canSync = false,
+  onSync,
+}: ProductsHeaderProps) {
   const { t } = useTranslation("products")
 
   return (
@@ -37,6 +44,16 @@ export function ProductsHeader({ className, isSyncing = false }: ProductsHeaderP
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
+        <Button
+          onClick={onSync}
+          disabled={!canSync || isSyncing}
+        >
+          <RefreshCw
+            data-icon="inline-start"
+            className={cn(isSyncing && "animate-spin")}
+          />
+          {t("actions.sync_now")}
+        </Button>
         <Button variant="outline" disabled>
           <Filter data-icon="inline-start" />
           {t("actions.filter")}

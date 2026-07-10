@@ -5,8 +5,14 @@
   "title": "Marketplace Products",
   "sync_status": "Syncing",
   "actions": {
+    "sync_now": "Sync Now",
     "filter": "Filter",
     "export_csv": "Export CSV"
+  },
+  "sync": {
+    "completed": "Product sync completed.",
+    "failed": "Product sync failed.",
+    "start_failed": "Could not start product sync."
   },
   "filters": {
     "marketplace_label": "Marketplace Source",
@@ -31,11 +37,14 @@
   },
   "empty": {
     "no_connections": "No marketplace connections found. Connect Lazada, Shopee, or TikTok Shop from your store details page first.",
-    "go_to_stores": "Go to Stores"
+    "go_to_stores": "Go to Stores",
+    "never_synced": "No products synced yet for this marketplace source.",
+    "sync_now_prompt": "Run Sync Now to import products from the marketplace."
   },
   "errors": {
     "load_sources_failed": "Failed to load marketplace sources.",
-    "load_products_failed": "Failed to load marketplace products."
+    "load_products_failed": "Failed to load marketplace products.",
+    "load_detail_failed": "Failed to load product detail."
   },
   "table": {
     "empty": "No products found.",
@@ -63,5 +72,18 @@
     "action_required_value": "{{count}} Products",
     "active_sku": "Active SKU",
     "active_sku_value": "{{count}} SKUs"
+  },
+  "detail": {
+    "loading": "Loading product...",
+    "not_found_title": "Product not found",
+    "not_found_description": "This product may have been removed or you may not have access.",
+    "back_to_products": "Back to Products",
+    "description": "Description",
+    "images": "Images",
+    "variants": "Variants",
+    "variant_sku": "SKU",
+    "variant_price": "Price",
+    "variant_status": "Status",
+    "variant_quantity": "Quantity"
   }
 }

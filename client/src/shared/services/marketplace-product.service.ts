@@ -1,5 +1,10 @@
 import type { MarketplaceCode } from "@/features/stores/config/marketplaces"
-import type { MarketplaceProduct, MarketplaceProductSource } from "@/features/products/types/product"
+import type {
+  MarketplaceProduct,
+  MarketplaceProductDetail,
+  MarketplaceProductSource,
+  MarketplaceProductSyncRun,
+} from "@/features/products/types/product"
 import { apiClient } from "@/app/api/client"
 import type { ApiResponse } from "@/shared/types/api-response"
 
@@ -11,6 +16,11 @@ export interface MarketplaceProductListParams {
   search?: string
   priceMin?: number
   priceMax?: number
+}
+
+export interface MarketplaceProductSyncParams {
+  storeId: number
+  marketplaceCode: MarketplaceCode
 }
 
 export const marketplaceProductService = {
@@ -40,6 +50,34 @@ export const marketplaceProductService = {
       items: response.data.data ?? [],
       total: response.data.meta?.totalElements ?? 0,
     }
+  },
+
+  getDetail: async (productId: number) => {
+    const response = await apiClient.get<ApiResponse<MarketplaceProductDetail>>(
+      `/v1/marketplace-products/${productId}`
+    )
+    return response.data.data
+  },
+
+  startSync: async (params: MarketplaceProductSyncParams) => {
+    const response = await apiClient.post<ApiResponse<MarketplaceProductSyncRun>>(
+      "/v1/marketplace-products/sync",
+      null,
+      {
+        params: {
+          storeId: params.storeId,
+          marketplaceCode: params.marketplaceCode,
+        },
+      }
+    )
+    return response.data.data
+  },
+
+  getSyncStatus: async (syncRunId: number) => {
+    const response = await apiClient.get<ApiResponse<MarketplaceProductSyncRun>>(
+      `/v1/marketplace-products/sync/${syncRunId}`
+    )
+    return response.data.data
   },
 }
 

@@ -1,5 +1,6 @@
 package com.laconic.lacoinvoice.features.marketplaceproduct;
 
+import java.time.Instant;
 import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -12,5 +13,7 @@ public record MarketplaceProductSourceDto(
 		String marketplaceName,
 		UUID externalConnectionId,
 		String label,
-		String country) {
+		String country,
+		Instant lastSyncedAt,
+		String syncStatus) {
 }

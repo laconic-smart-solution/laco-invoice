@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,9 +21,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class MarketplaceProductController {
 
 	private final MarketplaceProductService service;
+	private final MarketplaceProductSyncService syncService;
 
-	public MarketplaceProductController(MarketplaceProductService service) {
+	public MarketplaceProductController(
+			MarketplaceProductService service,
+			MarketplaceProductSyncService syncService) {
 		this.service = service;
+		this.syncService = syncService;
 	}
 
 	@GetMapping("/sources")
@@ -31,7 +37,7 @@ public class MarketplaceProductController {
 	}
 
 	@GetMapping
-	@Operation(summary = "List marketplace products for a connected store source")
+	@Operation(summary = "List synced marketplace products from database")
 	public ApiResponse<List<MarketplaceProductDto>> listProducts(
 			@RequestParam Long storeId,
 			@RequestParam String marketplaceCode,
@@ -39,7 +45,8 @@ public class MarketplaceProductController {
 			@RequestParam(defaultValue = "20") int limit,
 			@RequestParam(required = false) String search,
 			@RequestParam(required = false) BigDecimal priceMin,
-			@RequestParam(required = false) BigDecimal priceMax) {
+			@RequestParam(required = false) BigDecimal priceMax,
+			@RequestParam(required = false) String erpStatus) {
 		MarketplaceProductService.MarketplaceProductPageResult result = service.listProducts(
 				storeId,
 				marketplaceCode,
@@ -47,17 +54,28 @@ public class MarketplaceProductController {
 				limit,
 				search,
 				priceMin,
-				priceMax);
+				priceMax,
+				erpStatus);
 		return ApiResponse.ok("OK", result.items(), result.meta());
 	}
 
-	@GetMapping("/detail")
-	@Operation(summary = "Get marketplace product detail for a connected store source")
-	public ApiResponse<MarketplaceProductDetailDto> getProductDetail(
+	@GetMapping("/{id}")
+	@Operation(summary = "Get marketplace product detail by database id")
+	public ApiResponse<MarketplaceProductDetailDto> getProductDetail(@PathVariable Long id) {
+		return ApiResponse.ok("OK", service.getProductDetail(id));
+	}
+
+	@PostMapping("/sync")
+	@Operation(summary = "Start marketplace product sync job for a store source")
+	public ApiResponse<MarketplaceProductSyncRunDto> startSync(
 			@RequestParam Long storeId,
-			@RequestParam String marketplaceCode,
-			@RequestParam String externalProductId,
-			@RequestParam(required = false) String sku) {
-		return ApiResponse.ok("OK", service.getProductDetail(storeId, marketplaceCode, externalProductId, sku));
+			@RequestParam String marketplaceCode) {
+		return ApiResponse.ok("Sync started", syncService.startSync(storeId, marketplaceCode));
+	}
+
+	@GetMapping("/sync/{syncRunId}")
+	@Operation(summary = "Get marketplace product sync job status")
+	public ApiResponse<MarketplaceProductSyncRunDto> getSyncStatus(@PathVariable Long syncRunId) {
+		return ApiResponse.ok("OK", syncService.getSyncRun(syncRunId));
 	}
 }

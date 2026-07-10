@@ -24,6 +24,11 @@ spring:
   quartz:
     job-store-type: memory
     auto-startup: false
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: false
 
 server:
   port: 8091

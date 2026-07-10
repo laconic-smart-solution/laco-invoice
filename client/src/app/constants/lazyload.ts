@@ -125,6 +125,14 @@ export const ProductsPage = PageLoader(
   )
 )
 
+export const ProductDetailPage = PageLoader(
+  lazy(() =>
+    import("@/features/products/pages/product-detail-page").then((module) => ({
+      default: module.ProductDetailPage,
+    }))
+  )
+)
+
 export const LoginPage = PageLoader(
   lazy(() =>
     import("@/features/auth/pages/login-page").then((module) => ({

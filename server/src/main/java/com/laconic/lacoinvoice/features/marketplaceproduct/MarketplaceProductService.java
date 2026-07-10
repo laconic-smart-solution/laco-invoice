@@ -6,6 +6,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -18,30 +21,39 @@ import com.laconic.lacoinvoice.common.web.PageMeta;
 import com.laconic.lacoinvoice.config.AuthorizationService;
 import com.laconic.lacoinvoice.domain.models.Marketplace;
 import com.laconic.lacoinvoice.domain.models.MarketplaceConnectionStatus;
+import com.laconic.lacoinvoice.domain.models.MarketplaceProductSyncRun;
+import com.laconic.lacoinvoice.domain.models.MarketplaceProductSyncStatus;
+import com.laconic.lacoinvoice.domain.models.Product;
 import com.laconic.lacoinvoice.domain.models.Store;
 import com.laconic.lacoinvoice.domain.models.StoreMarketplaceConnection;
+import com.laconic.lacoinvoice.domain.repositories.MarketplaceProductSyncRunRepository;
+import com.laconic.lacoinvoice.domain.repositories.ProductErpMappingRepository;
+import com.laconic.lacoinvoice.domain.repositories.ProductRepository;
 import com.laconic.lacoinvoice.domain.repositories.StoreMarketplaceConnectionRepository;
 import com.laconic.lacoinvoice.domain.repositories.StoreRepository;
-import com.laconic.lacoinvoice.integration.marketplace.product.GatewayProductDetail;
-import com.laconic.lacoinvoice.integration.marketplace.product.MarketplaceProductAdapterRegistry;
-import com.laconic.lacoinvoice.integration.marketplace.product.MarketplaceProductPage;
 
 @Service
 public class MarketplaceProductService {
 
 	private final StoreRepository storeRepository;
 	private final StoreMarketplaceConnectionRepository connectionRepository;
-	private final MarketplaceProductAdapterRegistry adapterRegistry;
+	private final ProductRepository productRepository;
+	private final ProductErpMappingRepository mappingRepository;
+	private final MarketplaceProductSyncRunRepository syncRunRepository;
 	private final AuthorizationService authz;
 
 	public MarketplaceProductService(
 			StoreRepository storeRepository,
 			StoreMarketplaceConnectionRepository connectionRepository,
-			MarketplaceProductAdapterRegistry adapterRegistry,
+			ProductRepository productRepository,
+			ProductErpMappingRepository mappingRepository,
+			MarketplaceProductSyncRunRepository syncRunRepository,
 			AuthorizationService authz) {
 		this.storeRepository = storeRepository;
 		this.connectionRepository = connectionRepository;
-		this.adapterRegistry = adapterRegistry;
+		this.productRepository = productRepository;
+		this.mappingRepository = mappingRepository;
+		this.syncRunRepository = syncRunRepository;
 		this.authz = authz;
 	}
 
@@ -71,6 +83,9 @@ public class MarketplaceProductService {
 						: "";
 				String display = connection.getDisplayName() != null ? connection.getDisplayName().trim() : "";
 				String label = buildSourceLabel(store.getName(), marketplaceName, display, country);
+				MarketplaceProductSyncRun latestSync = syncRunRepository
+						.findFirstByStoreIdAndMarketplaceCodeIgnoreCaseOrderByStartedAtDesc(store.getId(), marketplaceCode)
+						.orElse(null);
 				sources.add(new MarketplaceProductSourceDto(
 						store.getId(),
 						store.getName(),
@@ -78,7 +93,11 @@ public class MarketplaceProductService {
 						marketplaceName,
 						connection.getExternalConnectionId(),
 						label,
-						country));
+						country,
+						latestSync != null ? latestSync.getCompletedAt() != null
+								? latestSync.getCompletedAt()
+								: latestSync.getStartedAt() : null,
+						latestSync != null ? latestSync.getStatus().name() : null));
 			}
 		}
 
@@ -95,100 +114,115 @@ public class MarketplaceProductService {
 			int limit,
 			String search,
 			BigDecimal priceMin,
-			BigDecimal priceMax) {
+			BigDecimal priceMax,
+			String erpStatus) {
 		Store store = findStoreOrThrow(storeId);
 		verifyStoreOwner(store);
+		verifyConnectedSource(storeId, marketplaceCode);
 
-		StoreMarketplaceConnection connection = connectionRepository
-				.findByStore_IdAndMarketplace_CodeIgnoreCase(storeId, marketplaceCode)
-				.filter(item -> item.getStatus() == MarketplaceConnectionStatus.CONNECTED)
-				.orElseThrow(() -> new ResourceNotFoundException(
-						"No connected marketplace found for storeId=" + storeId + " marketplace=" + marketplaceCode));
-
-		Marketplace marketplace = connection.getMarketplace();
-		String normalizedCode = marketplace != null ? marketplace.getCode().toUpperCase() : marketplaceCode.toUpperCase();
-		String marketplaceName = marketplace != null && marketplace.getName() != null
-				? marketplace.getName()
-				: normalizedCode;
-
-		MarketplaceProductPage productPage = adapterRegistry.resolve(normalizedCode)
-				.fetchProductPage(connection, page, limit, search);
-
-		List<MarketplaceProductDto> items = productPage.items().stream()
-				.filter(item -> matchesPriceRange(item.price(), priceMin, priceMax))
-				.map(item -> new MarketplaceProductDto(
-						store.getId(),
-						store.getName(),
-						normalizedCode,
-						marketplaceName,
-						item.externalProductId(),
-						item.sku(),
-						item.name(),
-						item.price(),
-						item.currency(),
-						item.status()))
-				.toList();
+		String normalizedCode = marketplaceCode.toUpperCase();
+		String marketplaceName = resolveMarketplaceName(storeId, normalizedCode);
 
 		int safePage = page < 1 ? 1 : page;
 		int safeLimit = limit < 1 ? 20 : Math.min(limit, 100);
-		long total = productPage.total();
-		int totalPages = total == 0 ? 0 : (int) Math.ceil((double) total / safeLimit);
-		PageMeta meta = new PageMeta(safePage - 1, safeLimit, total, totalPages);
+		PageRequest pageable = PageRequest.of(safePage - 1, safeLimit, Sort.by(Sort.Direction.DESC, "updatedAt"));
+
+		Page<Product> productPage = productRepository.findAll(
+				MarketplaceProductSpecifications.marketplaceList(
+						storeId,
+						normalizedCode,
+						search,
+						priceMin,
+						priceMax,
+						erpStatus),
+				pageable);
+
+		List<MarketplaceProductDto> items = productPage.getContent().stream()
+				.map(product -> toListDto(product, store, normalizedCode, marketplaceName))
+				.toList();
+
+		PageMeta meta = new PageMeta(
+				productPage.getNumber(),
+				productPage.getSize(),
+				productPage.getTotalElements(),
+				productPage.getTotalPages());
 		return new MarketplaceProductPageResult(items, meta);
 	}
 
 	@Transactional(readOnly = true)
 	@PreAuthorize("@authz.isOwnerOrAdmin()")
-	public MarketplaceProductDetailDto getProductDetail(
-			Long storeId,
-			String marketplaceCode,
-			String externalProductId,
-			String sku) {
-		Store store = findStoreOrThrow(storeId);
+	public MarketplaceProductDetailDto getProductDetail(Long productId) {
+		Product product = productRepository.findById(productId)
+				.orElseThrow(() -> new ResourceNotFoundException("Product not found: id=" + productId));
+		if (!StringUtils.hasText(product.getMarketplaceCode())) {
+			throw new ResourceNotFoundException("Product is not a marketplace product: id=" + productId);
+		}
+		Store store = product.getStore();
+		if (store == null) {
+			throw new ResourceNotFoundException("Product store not found: id=" + productId);
+		}
 		verifyStoreOwner(store);
 
-		StoreMarketplaceConnection connection = connectionRepository
-				.findByStore_IdAndMarketplace_CodeIgnoreCase(storeId, marketplaceCode)
-				.filter(item -> item.getStatus() == MarketplaceConnectionStatus.CONNECTED)
-				.orElseThrow(() -> new ResourceNotFoundException(
-						"No connected marketplace found for storeId=" + storeId + " marketplace=" + marketplaceCode));
-
-		Marketplace marketplace = connection.getMarketplace();
-		String normalizedCode = marketplace != null ? marketplace.getCode().toUpperCase() : marketplaceCode.toUpperCase();
-		String marketplaceName = marketplace != null && marketplace.getName() != null
-				? marketplace.getName()
-				: normalizedCode;
-
-		GatewayProductDetail detail = adapterRegistry.resolve(normalizedCode)
-				.fetchProductDetail(connection, externalProductId, sku);
-
-		String resolvedSku = detail.sku() != null ? detail.sku() : sku;
-		List<MarketplaceProductVariantDto> variants = detail.variants() == null
-				? List.of()
-				: detail.variants().stream()
-						.map(variant -> new MarketplaceProductVariantDto(
-								variant.sku(),
-								variant.price(),
-								variant.currency(),
-								variant.status(),
-								variant.quantity()))
-						.toList();
+		String marketplaceCode = product.getMarketplaceCode().toUpperCase();
+		String marketplaceName = resolveMarketplaceName(store.getId(), marketplaceCode);
+		String price = product.getPrice() != null ? product.getPrice().toPlainString() : "0";
 
 		return new MarketplaceProductDetailDto(
+				product.getId(),
 				store.getId(),
 				store.getName(),
-				normalizedCode,
+				marketplaceCode,
 				marketplaceName,
-				detail.externalProductId(),
-				resolvedSku,
-				detail.name(),
-				detail.description(),
-				detail.price(),
-				detail.currency(),
-				detail.status(),
-				detail.images() != null ? detail.images() : List.of(),
-				variants,
-				MarketplaceProductErpSupport.derivePlaceholderErp(detail.externalProductId(), resolvedSku));
+				product.getExternalProductId(),
+				product.getSku(),
+				product.getName(),
+				product.getDescription(),
+				price,
+				product.getCurrency(),
+				product.getStatus(),
+				MarketplaceProductJsonSupport.parseImages(product.getImagesJson()),
+				MarketplaceProductJsonSupport.parseVariants(product.getVariantsJson()),
+				MarketplaceProductErpSupport.fromProduct(product, mappingRepository));
+	}
+
+	private MarketplaceProductDto toListDto(
+			Product product,
+			Store store,
+			String marketplaceCode,
+			String marketplaceName) {
+		String price = product.getPrice() != null ? product.getPrice().toPlainString() : "0";
+		String erpStatus = MarketplaceProductErpSupport.erpStatusLabel(product, mappingRepository);
+		return new MarketplaceProductDto(
+				product.getId(),
+				store.getId(),
+				store.getName(),
+				marketplaceCode,
+				marketplaceName,
+				product.getExternalProductId(),
+				product.getSku(),
+				product.getName(),
+				price,
+				product.getCurrency(),
+				product.getStatus(),
+				erpStatus);
+	}
+
+	private void verifyConnectedSource(Long storeId, String marketplaceCode) {
+		connectionRepository
+				.findByStore_IdAndMarketplace_CodeIgnoreCase(storeId, marketplaceCode)
+				.filter(item -> item.getStatus() == MarketplaceConnectionStatus.CONNECTED)
+				.filter(item -> StringUtils.hasText(item.getAccessToken()))
+				.orElseThrow(() -> new ResourceNotFoundException(
+						"No connected marketplace found for storeId=" + storeId + " marketplace=" + marketplaceCode));
+	}
+
+	private String resolveMarketplaceName(Long storeId, String marketplaceCode) {
+		return connectionRepository
+				.findByStore_IdAndMarketplace_CodeIgnoreCase(storeId, marketplaceCode)
+				.map(StoreMarketplaceConnection::getMarketplace)
+				.map(Marketplace::getName)
+				.filter(StringUtils::hasText)
+				.orElse(marketplaceCode);
 	}
 
 	private List<Store> resolveAccessibleStores() {
@@ -234,27 +268,6 @@ public class MarketplaceProductService {
 			label.append(" (").append(country).append(")");
 		}
 		return label.toString();
-	}
-
-	private static boolean matchesPriceRange(String rawPrice, BigDecimal min, BigDecimal max) {
-		if (min == null && max == null) {
-			return true;
-		}
-		if (!StringUtils.hasText(rawPrice)) {
-			return false;
-		}
-		try {
-			BigDecimal price = new BigDecimal(rawPrice.trim());
-			if (min != null && price.compareTo(min) < 0) {
-				return false;
-			}
-			if (max != null && price.compareTo(max) > 0) {
-				return false;
-			}
-			return true;
-		} catch (NumberFormatException ex) {
-			return false;
-		}
 	}
 
 	public record MarketplaceProductPageResult(List<MarketplaceProductDto> items, PageMeta meta) {

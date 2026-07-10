@@ -4,6 +4,8 @@ export type ProductErpStatus = "synced" | "unmapped"
 
 export type ProductErpFilter = "all" | ProductErpStatus
 
+export type MarketplaceProductSyncStatus = "RUNNING" | "COMPLETED" | "FAILED"
+
 export interface MarketplaceProductSource {
   storeId: number
   storeName: string
@@ -12,9 +14,12 @@ export interface MarketplaceProductSource {
   externalConnectionId: string
   label: string
   country: string | null
+  lastSyncedAt: string | null
+  syncStatus: MarketplaceProductSyncStatus | null
 }
 
 export interface MarketplaceProduct {
+  id: number
   storeId: number
   storeName: string
   marketplaceCode: MarketplaceCode
@@ -29,6 +34,55 @@ export interface MarketplaceProduct {
 
 export interface ProductTableRow extends MarketplaceProduct {
   erpStatus: ProductErpStatus
+}
+
+export interface MarketplaceProductVariant {
+  sku: string
+  price: string
+  currency: string
+  status: string
+  quantity: string
+}
+
+export interface MarketplaceProductErpDetail {
+  status: string
+  localProductId: number | null
+  erpItemId: number | null
+  erpSku: string | null
+  erpName: string | null
+  mappedAt: string | null
+}
+
+export interface MarketplaceProductDetail {
+  id: number
+  storeId: number
+  storeName: string
+  marketplaceCode: MarketplaceCode
+  marketplaceName: string
+  externalProductId: string
+  sku: string
+  name: string
+  description: string | null
+  price: string
+  currency: string
+  status: string
+  images: string[]
+  variants: MarketplaceProductVariant[]
+  erp: MarketplaceProductErpDetail
+}
+
+export interface MarketplaceProductSyncRun {
+  id: number
+  storeId: number
+  marketplaceCode: MarketplaceCode
+  status: MarketplaceProductSyncStatus
+  insertedCount: number
+  updatedCount: number
+  disabledCount: number
+  failedCount: number
+  errorMessage: string | null
+  startedAt: string
+  completedAt: string | null
 }
 
 export interface ProductStats {

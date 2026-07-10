@@ -5,8 +5,14 @@
   "title": "Marketplace ကုန်ပစ္စည်းများ",
   "sync_status": "Sync လုပ်နေသည်",
   "actions": {
+    "sync_now": "ယခု Sync လုပ်ရန်",
     "filter": "စစ်ထုတ်ရန်",
     "export_csv": "CSV ထုတ်ရန်"
+  },
+  "sync": {
+    "completed": "ကုန်ပစ္စည်း sync ပြီးပါပြီ။",
+    "failed": "ကုန်ပစ္စည်း sync မအောင်မြင်ပါ။",
+    "start_failed": "ကုန်ပစ္စည်း sync စတင်၍ မရပါ။"
   },
   "filters": {
     "marketplace_label": "Marketplace အရင်းအမြစ်",
@@ -31,11 +37,14 @@
   },
   "empty": {
     "no_connections": "Marketplace ချိတ်ဆက်မှု မတွေ့ပါ။ Lazada၊ Shopee သို့မဟုတ် TikTok Shop ကို ဆိုင်အသေးစိတ်စာမျက်နှာမှ ဦးစွာချိတ်ဆက်ပါ။",
-    "go_to_stores": "ဆိုင်များသို့ သွားရန်"
+    "go_to_stores": "ဆိုင်များသို့ သွားရန်",
+    "never_synced": "ဤ marketplace အရင်းအမြစ်အတွက် sync လုပ်ထားသော ကုန်ပစ္စည်း မရှိသေးပါ။",
+    "sync_now_prompt": "Marketplace မှ ကုန်ပစ္စည်းများ တင်သွင်းရန် ယခု Sync လုပ်ပါ။"
   },
   "errors": {
     "load_sources_failed": "Marketplace အရင်းအမြစ်များ ဖွင့်မရပါ။",
-    "load_products_failed": "Marketplace ကုန်ပစ္စည်းများ ဖွင့်မရပါ။"
+    "load_products_failed": "Marketplace ကုန်ပစ္စည်းများ ဖွင့်မရပါ။",
+    "load_detail_failed": "ကုန်ပစ္စည်း အသေးစိတ် ဖွင့်မရပါ။"
   },
   "table": {
     "empty": "ကုန်ပစ္စည်း မတွေ့ပါ။",
@@ -63,5 +72,18 @@
     "action_required_value": "ကုန်ပစ္စည်း {{count}} ခု",
     "active_sku": "အသုံးပြုနေသော SKU",
     "active_sku_value": "SKU {{count}} ခု"
+  },
+  "detail": {
+    "loading": "ကုန်ပစ္စည်း ဖွင့်နေသည်...",
+    "not_found_title": "ကုန်ပစ္စည်း မတွေ့ပါ",
+    "not_found_description": "ဤကုန်ပစ္စည်းကို ဖယ်ရှားထားပြီး သို့မဟုတ် သင်ဝင်ရောက်ခွင့် မရှိနိုင်ပါ။",
+    "back_to_products": "ကုန်ပစ္စည်းများသို့ ပြန်သွားရန်",
+    "description": "ဖော်ပြချက်",
+    "images": "ပုံများ",
+    "variants": "Variants",
+    "variant_sku": "SKU",
+    "variant_price": "စျေးနှုန်း",
+    "variant_status": "အခြေအနေ",
+    "variant_quantity": "အရေအတွက်"
   }
 }

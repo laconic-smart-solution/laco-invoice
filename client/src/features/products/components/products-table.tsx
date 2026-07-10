@@ -2,6 +2,9 @@ import type { ColumnDef } from "@tanstack/react-table"
 import { Pencil } from "lucide-react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { Link } from "react-router-dom"
+
+import { ROUTES } from "@/app/constants/routes"
 
 import { DataTable } from "@/components/common/data-table/data-table"
 import { DataTableFooter } from "@/components/common/data-table/data-table-footer"
@@ -25,25 +28,28 @@ interface ProductRowActionProps {
 function ProductRowAction({ product }: ProductRowActionProps) {
   const { t } = useTranslation("products")
 
-  if (product.erpStatus === "synced") {
+  if (product.erpStatus === "unmapped") {
     return (
       <Button
-        variant="link"
-        className="h-auto gap-1.5 p-0 text-info"
+        size="sm"
         onClick={(event) => event.stopPropagation()}
       >
-        {t("table.actions.view_details")}
-        <Pencil className="size-3.5" aria-hidden />
+        {t("table.actions.map_to_erp")}
       </Button>
     )
   }
 
   return (
     <Button
-      size="sm"
+      variant="link"
+      className="h-auto gap-1.5 p-0 text-info"
+      asChild
       onClick={(event) => event.stopPropagation()}
     >
-      {t("table.actions.map_to_erp")}
+      <Link to={ROUTES.dashboard.productDetail(product.id)}>
+        {t("table.actions.view_details")}
+        <Pencil className="size-3.5" aria-hidden />
+      </Link>
     </Button>
   )
 }
@@ -157,7 +163,7 @@ export function ProductsTable({
   const table = useDataTable({
     data: products,
     columns,
-    getRowId: (row) => `${row.externalProductId}-${row.sku}`,
+    getRowId: (row) => String(row.id),
   })
 
   return (

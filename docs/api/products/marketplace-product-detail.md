@@ -1,24 +1,25 @@
 # Marketplace Product Detail API
 
-Read-through product detail for a connected marketplace store. Used by the **View Details** action on synced marketplace products.
+Database-backed product detail for synced marketplace products. Used by the **View Details** action on the products list page.
 
 ## Architecture
 
 ```text
 React client
-  → GET /api/v1/marketplace-products/detail (laco-invoice BFF)
-    → MarketplaceProductAdapter (LAZADA / SHOPEE / TIKTOK)
-      → communication-service GET /api/v1/products/{externalProductId}
-        → Lazada REST /product/item/get (LAZADA only; others stub)
+  → GET /api/v1/marketplace-products/{id} (laco-invoice BFF)
+    → products table (description, images_json, variants_json)
+    → product_erp_mapping (ERP summary when linked)
 ```
 
-Authentication uses the cookie-based BFF session (`withCredentials: true`). No tokens are sent from the browser to the identity server.
+Data is populated by the **Sync Now** Spring Batch job (list upsert + detail enrichment). Read APIs never call the marketplace gateway directly.
+
+Authentication uses the cookie-based BFF session (`withCredentials: true`).
 
 ---
 
 ## BFF endpoint
 
-### `GET /api/v1/marketplace-products/detail`
+### `GET /api/v1/marketplace-products/{id}`
 
 Returns marketplace product detail plus ERP mapping summary for the product detail page.
 
@@ -26,19 +27,16 @@ Returns marketplace product detail plus ERP mapping summary for the product deta
 
 **Cookies:** `laco_invoice_access_token` (HttpOnly) or `Authorization: Bearer` for Swagger.
 
-#### Query parameters
+#### Path parameters
 
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `storeId` | Yes | laco-invoice store ID |
-| `marketplaceCode` | Yes | `LAZADA`, `SHOPEE`, or `TIKTOK` |
-| `externalProductId` | Yes | Marketplace item ID (e.g. Lazada `item_id`) |
-| `sku` | No | Seller SKU to focus variant; when omitted, first SKU is used |
+| Parameter | Description |
+|-----------|-------------|
+| `id` | laco-invoice `products.id` (database primary key) |
 
 #### Example request
 
 ```http
-GET /api/v1/marketplace-products/detail?storeId=21&marketplaceCode=LAZADA&externalProductId=2384719201&sku=HMG4
+GET /api/v1/marketplace-products/1042
 Cookie: laco_invoice_access_token=...
 ```
 
@@ -50,6 +48,7 @@ Cookie: laco_invoice_access_token=...
   "code": 200,
   "message": "OK",
   "data": {
+    "id": 1042,
     "storeId": 21,
     "storeName": "new",
     "marketplaceCode": "LAZADA",
@@ -71,22 +70,15 @@ Cookie: laco_invoice_access_token=...
         "currency": "THB",
         "status": "active",
         "quantity": "12"
-      },
-      {
-        "sku": "HMG5",
-        "price": "1590.00",
-        "currency": "THB",
-        "status": "active",
-        "quantity": "4"
       }
     ],
     "erp": {
       "status": "SYNCED",
-      "localProductId": null,
-      "erpItemId": null,
+      "localProductId": 1042,
+      "erpItemId": 9001,
       "erpSku": "HMG4",
-      "erpName": null,
-      "mappedAt": null
+      "erpName": "ERP item name",
+      "mappedAt": "2026-07-01T08:00:00Z"
     }
   }
 }
@@ -98,8 +90,7 @@ Cookie: laco_invoice_access_token=...
 |------|------|
 | `401` | Missing or expired session |
 | `403` | User is not store owner/admin |
-| `404` | Store, connection, or product not found |
-| `502` | Marketplace gateway/vendor error |
+| `404` | Product not found or not a marketplace product |
 
 ---
 
@@ -109,19 +100,20 @@ Cookie: laco_invoice_access_token=...
 
 | Field | Type | Description |
 |-------|------|-------------|
+| `id` | number | laco-invoice `products.id` |
 | `storeId` | number | laco-invoice store ID |
 | `storeName` | string | Store display name |
 | `marketplaceCode` | string | `LAZADA`, `SHOPEE`, `TIKTOK` |
 | `marketplaceName` | string | Human-readable marketplace name |
 | `externalProductId` | string | Marketplace item ID |
-| `sku` | string | Focused SKU (from query or first variant) |
+| `sku` | string | Seller SKU |
 | `name` | string | Product title |
-| `description` | string | Marketplace description (when available) |
-| `price` | string | Price for focused SKU |
+| `description` | string \| null | Synced from marketplace detail step |
+| `price` | string | Decimal string |
 | `currency` | string | e.g. `THB` |
 | `status` | string | Marketplace status |
-| `images` | string[] | Product image URLs |
-| `variants` | object[] | All SKU variants for the item |
+| `images` | string[] | Image URLs from `images_json` |
+| `variants` | object[] | Variants from `variants_json` |
 | `erp` | object | ERP mapping summary (see below) |
 
 ### Variant (`variants[]`)
@@ -132,7 +124,7 @@ Cookie: laco_invoice_access_token=...
 | `price` | string | Variant price |
 | `currency` | string | Currency code |
 | `status` | string | Variant status |
-| `quantity` | string | Stock quantity when vendor provides it |
+| `quantity` | string | Stock quantity when available |
 
 ### ERP (`erp`)
 
@@ -145,72 +137,6 @@ Cookie: laco_invoice_access_token=...
 | `erpName` | string \| null | ERP item name when synced |
 | `mappedAt` | string \| null | ISO-8601 mapping timestamp |
 
-> **Note:** ERP fields are currently **placeholder** on the BFF until marketplace products are linked to persisted `products` / `product_erp_mapping` records. `status` uses the same deterministic placeholder as the list page.
-
----
-
-## Communication-service endpoint
-
-### `GET /api/v1/products/{externalProductId}`
-
-Called by laco-invoice server-to-server through the gateway.
-
-**Headers**
-
-| Header | Required |
-|--------|----------|
-| `X-Gateway-Secret` | Yes |
-| `X-Tenant-ID` | Yes (store UUID) |
-
-**Query parameters**
-
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `access_token` | Yes | OAuth token from `store_marketplace_connections` |
-| `seller_id` | No | Lazada seller ID |
-| `shop_id` | No | Shopee/TikTok shop ID |
-| `sku` | No | Focus SKU |
-
-**Gateway paths**
-
-| Marketplace | Public path |
-|-------------|-------------|
-| Lazada | `/comms/lazada/api/v1/products/{externalProductId}` |
-| Shopee | `/comms/shopee/api/v1/products/{externalProductId}` |
-| TikTok | `/comms/tiktok/api/v1/products/{externalProductId}` |
-
-#### Vendor response `data`
-
-```json
-{
-  "external_product_id": "2384719201",
-  "sku": "HMG4",
-  "name": "Product name",
-  "description": "Description",
-  "price": "1490.00",
-  "currency": "THB",
-  "status": "active",
-  "images": ["https://..."],
-  "variants": [
-    {
-      "sku": "HMG4",
-      "price": "1490.00",
-      "currency": "THB",
-      "status": "active",
-      "quantity": "12"
-    }
-  ]
-}
-```
-
-#### Vendor support
-
-| Marketplace | Detail source | Status |
-|-------------|---------------|--------|
-| Lazada | `GET /product/item/get` | Implemented |
-| Shopee | — | Not implemented (404) |
-| TikTok | — | Not implemented (404) |
-
 ---
 
 ## Related endpoints
@@ -218,30 +144,26 @@ Called by laco-invoice server-to-server through the gateway.
 | Method | Path | Purpose |
 |--------|------|---------|
 | `GET` | `/api/v1/marketplace-products/sources` | Connected store sources |
-| `GET` | `/api/v1/marketplace-products` | Paginated product list |
-| `POST` | `/api/v1/products/{productId}/erp-mapping` | Create ERP mapping (local product) |
-| `DELETE` | `/api/v1/products/{productId}/erp-mapping/{mappingId}` | Remove ERP mapping |
+| `GET` | `/api/v1/marketplace-products` | Paginated product list (DB) |
+| `POST` | `/api/v1/marketplace-products/sync` | Start sync job |
+| `GET` | `/api/v1/marketplace-products/sync/{syncRunId}` | Poll sync status |
+
+See [marketplace-product-sync.md](./marketplace-product-sync.md) for sync job details.
 
 ---
 
-## Client usage (future)
+## Client usage
 
 ```ts
 // shared/services/marketplace-product.service.ts
 export const marketplaceProductService = {
-  getDetail: async (params: {
-    storeId: number
-    marketplaceCode: string
-    externalProductId: string
-    sku?: string
-  }) => {
+  getDetail: async (productId: number) => {
     const response = await apiClient.get<ApiResponse<MarketplaceProductDetail>>(
-      "/v1/marketplace-products/detail",
-      { params }
+      `/v1/marketplace-products/${productId}`
     )
     return response.data.data
   },
 }
 ```
 
-Route suggestion: `/products/:externalProductId?storeId=&marketplaceCode=&sku=`
+Route: `/products/:productId`

@@ -5,8 +5,14 @@
   "title": "Marketplace 商品",
   "sync_status": "同步中",
   "actions": {
+    "sync_now": "立即同步",
     "filter": "筛选",
     "export_csv": "导出 CSV"
+  },
+  "sync": {
+    "completed": "商品同步完成。",
+    "failed": "商品同步失败。",
+    "start_failed": "无法启动商品同步。"
   },
   "filters": {
     "marketplace_label": "Marketplace 来源",
@@ -31,11 +37,14 @@
   },
   "empty": {
     "no_connections": "未找到 marketplace 连接。请先在店铺详情页连接 Lazada、Shopee 或 TikTok Shop。",
-    "go_to_stores": "前往店铺"
+    "go_to_stores": "前往店铺",
+    "never_synced": "此 marketplace 来源尚未同步任何商品。",
+    "sync_now_prompt": "点击立即同步从 marketplace 导入商品。"
   },
   "errors": {
     "load_sources_failed": "加载 marketplace 来源失败。",
-    "load_products_failed": "加载 marketplace 商品失败。"
+    "load_products_failed": "加载 marketplace 商品失败。",
+    "load_detail_failed": "加载商品详情失败。"
   },
   "table": {
     "empty": "未找到商品。",
@@ -63,5 +72,18 @@
     "action_required_value": "{{count}} 个商品",
     "active_sku": "活跃 SKU",
     "active_sku_value": "{{count}} 个 SKU"
+  },
+  "detail": {
+    "loading": "正在加载商品...",
+    "not_found_title": "未找到商品",
+    "not_found_description": "该商品可能已被删除，或您没有访问权限。",
+    "back_to_products": "返回商品列表",
+    "description": "描述",
+    "images": "图片",
+    "variants": "规格",
+    "variant_sku": "SKU",
+    "variant_price": "价格",
+    "variant_status": "状态",
+    "variant_quantity": "库存"
   }
 }

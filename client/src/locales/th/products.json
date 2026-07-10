@@ -5,8 +5,14 @@
   "title": "สินค้า Marketplace",
   "sync_status": "กำลังซิงก์",
   "actions": {
+    "sync_now": "ซิงก์ตอนนี้",
     "filter": "กรอง",
     "export_csv": "ส่งออก CSV"
+  },
+  "sync": {
+    "completed": "ซิงก์สินค้าเสร็จสิ้น",
+    "failed": "ซิงก์สินค้าไม่สำเร็จ",
+    "start_failed": "ไม่สามารถเริ่มซิงก์สินค้าได้"
   },
   "filters": {
     "marketplace_label": "แหล่ง Marketplace",
@@ -31,11 +37,14 @@
   },
   "empty": {
     "no_connections": "ยังไม่มีการเชื่อมต่อ marketplace กรุณาเชื่อมต่อ Lazada, Shopee หรือ TikTok Shop จากหน้ารายละเอียดร้านค้าก่อน",
-    "go_to_stores": "ไปที่ร้านค้า"
+    "go_to_stores": "ไปที่ร้านค้า",
+    "never_synced": "ยังไม่มีสินค้าที่ซิงก์สำหรับแหล่ง marketplace นี้",
+    "sync_now_prompt": "กดซิงก์ตอนนี้เพื่อนำเข้าสินค้าจาก marketplace"
   },
   "errors": {
     "load_sources_failed": "โหลดแหล่ง marketplace ไม่สำเร็จ",
-    "load_products_failed": "โหลดสินค้า marketplace ไม่สำเร็จ"
+    "load_products_failed": "โหลดสินค้า marketplace ไม่สำเร็จ",
+    "load_detail_failed": "โหลดรายละเอียดสินค้าไม่สำเร็จ"
   },
   "table": {
     "empty": "ไม่พบสินค้า",
@@ -63,5 +72,18 @@
     "action_required_value": "{{count}} สินค้า",
     "active_sku": "SKU ที่ใช้งาน",
     "active_sku_value": "{{count}} SKU"
+  },
+  "detail": {
+    "loading": "กำลังโหลดสินค้า...",
+    "not_found_title": "ไม่พบสินค้า",
+    "not_found_description": "สินค้านี้อาจถูกลบหรือคุณไม่มีสิทธิ์เข้าถึง",
+    "back_to_products": "กลับไปที่สินค้า",
+    "description": "คำอธิบาย",
+    "images": "รูปภาพ",
+    "variants": "ตัวเลือกสินค้า",
+    "variant_sku": "SKU",
+    "variant_price": "ราคา",
+    "variant_status": "สถานะ",
+    "variant_quantity": "จำนวน"
   }
 }

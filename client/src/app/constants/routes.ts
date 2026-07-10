@@ -10,6 +10,7 @@ export const ROUTES = {
     shopeeCallback: "/stores/shopee/callback",
     tiktokCallback: "/stores/tiktok/callback",
     products: "/products",
+    productDetail: (productId: number | string) => `/products/${productId}`,
     orders: "/orders",
     orderDetail: (orderId: string) => `/orders/${orderId}`,
     invoices: "/invoices",
