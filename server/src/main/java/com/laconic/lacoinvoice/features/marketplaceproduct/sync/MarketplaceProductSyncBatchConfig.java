@@ -1,6 +1,9 @@
 package com.laconic.lacoinvoice.features.marketplaceproduct.sync;
 
+import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.configuration.support.JobRegistrySmartInitializingSingleton;
+import org.springframework.batch.core.configuration.support.MapJobRegistry;
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.JobOperator;
@@ -24,9 +27,22 @@ public class MarketplaceProductSyncBatchConfig {
 	public static final String JOB_NAME = "marketplaceProductSyncJob";
 
 	@Bean
-	public JobOperator asyncJobOperator(JobRepository jobRepository) throws Exception {
+	public JobRegistry jobRegistry() {
+		return new MapJobRegistry();
+	}
+
+	@Bean
+	public JobRegistrySmartInitializingSingleton jobRegistryBeanPostProcessor(JobRegistry jobRegistry) {
+		JobRegistrySmartInitializingSingleton registrar = new JobRegistrySmartInitializingSingleton();
+		registrar.setJobRegistry(jobRegistry);
+		return registrar;
+	}
+
+	@Bean
+	public JobOperator asyncJobOperator(JobRepository jobRepository, JobRegistry jobRegistry) throws Exception {
 		TaskExecutorJobOperator operator = new TaskExecutorJobOperator();
 		operator.setJobRepository(jobRepository);
+		operator.setJobRegistry(jobRegistry);
 		operator.setTaskExecutor(new SimpleAsyncTaskExecutor("marketplace-product-sync-"));
 		operator.afterPropertiesSet();
 		return operator;
