@@ -19,7 +19,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   isHydrated: false,
   hydrate: async () => {
     try {
-      const profile = await meService.getProfile()
+      const profile = await meService.getProfile({ skipAuthRefresh: true })
       set({
         user: profile,
         isAuthenticated: true,

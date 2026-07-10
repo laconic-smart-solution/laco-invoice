@@ -33,11 +33,12 @@ public class LacoinvoiceSecurityConfig {
 					.permitAll()
 					.requestMatchers(HttpMethod.POST, "/api/v1/users")
 					.permitAll()
-					.requestMatchers(HttpMethod.POST,
-							"/api/v1/auth/login",
-							"/api/v1/auth/verify-otp",
-							"/api/v1/auth/resend-otp",
-							"/api/v1/auth/refresh")
+				.requestMatchers(HttpMethod.POST,
+						"/api/v1/auth/login",
+						"/api/v1/auth/verify-otp",
+						"/api/v1/auth/resend-otp",
+						"/api/v1/auth/refresh",
+						"/api/v1/auth/logout")
 					.permitAll()
 					.anyRequest()
 					.permitAll());
@@ -58,8 +59,9 @@ public class LacoinvoiceSecurityConfig {
 						"/api/v1/auth/login",
 						"/api/v1/auth/verify-otp",
 						"/api/v1/auth/resend-otp",
-						"/api/v1/auth/refresh")
-				.permitAll()
+						"/api/v1/auth/refresh",
+						"/api/v1/auth/logout")
+					.permitAll()
 				.anyRequest()
 				.authenticated());
 		return http.build();
