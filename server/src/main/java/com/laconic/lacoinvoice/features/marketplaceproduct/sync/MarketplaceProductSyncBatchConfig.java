@@ -2,7 +2,6 @@ package com.laconic.lacoinvoice.features.marketplaceproduct.sync;
 
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.support.JobRegistrySmartInitializingSingleton;
 import org.springframework.batch.core.configuration.support.MapJobRegistry;
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -11,6 +10,7 @@ import org.springframework.batch.core.launch.support.TaskExecutorJobOperator;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
@@ -27,19 +27,12 @@ public class MarketplaceProductSyncBatchConfig {
 	public static final String JOB_NAME = "marketplaceProductSyncJob";
 
 	@Bean
-	public JobRegistry jobRegistry() {
-		return new MapJobRegistry();
-	}
+	public JobOperator asyncJobOperator(
+			JobRepository jobRepository,
+			@Qualifier("marketplaceProductSyncJob") Job marketplaceProductSyncJob) throws Exception {
+		JobRegistry jobRegistry = new MapJobRegistry();
+		jobRegistry.register(marketplaceProductSyncJob);
 
-	@Bean
-	public JobRegistrySmartInitializingSingleton jobRegistryBeanPostProcessor(JobRegistry jobRegistry) {
-		JobRegistrySmartInitializingSingleton registrar = new JobRegistrySmartInitializingSingleton();
-		registrar.setJobRegistry(jobRegistry);
-		return registrar;
-	}
-
-	@Bean
-	public JobOperator asyncJobOperator(JobRepository jobRepository, JobRegistry jobRegistry) throws Exception {
 		TaskExecutorJobOperator operator = new TaskExecutorJobOperator();
 		operator.setJobRepository(jobRepository);
 		operator.setJobRegistry(jobRegistry);
