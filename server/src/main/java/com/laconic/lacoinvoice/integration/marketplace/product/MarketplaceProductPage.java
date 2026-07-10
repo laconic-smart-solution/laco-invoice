@@ -1,4 +1,4 @@
-package com.laconic.lacoinvoice.integration.marketplace;
+package com.laconic.lacoinvoice.integration.marketplace.product;
 
 import java.util.List;
 

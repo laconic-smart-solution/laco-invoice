@@ -22,8 +22,9 @@ import com.laconic.lacoinvoice.domain.models.Store;
 import com.laconic.lacoinvoice.domain.models.StoreMarketplaceConnection;
 import com.laconic.lacoinvoice.domain.repositories.StoreMarketplaceConnectionRepository;
 import com.laconic.lacoinvoice.domain.repositories.StoreRepository;
-import com.laconic.lacoinvoice.integration.marketplace.MarketplaceProductAdapterRegistry;
-import com.laconic.lacoinvoice.integration.marketplace.MarketplaceProductPage;
+import com.laconic.lacoinvoice.integration.marketplace.product.GatewayProductDetail;
+import com.laconic.lacoinvoice.integration.marketplace.product.MarketplaceProductAdapterRegistry;
+import com.laconic.lacoinvoice.integration.marketplace.product.MarketplaceProductPage;
 
 @Service
 public class MarketplaceProductService {
@@ -134,6 +135,60 @@ public class MarketplaceProductService {
 		int totalPages = total == 0 ? 0 : (int) Math.ceil((double) total / safeLimit);
 		PageMeta meta = new PageMeta(safePage - 1, safeLimit, total, totalPages);
 		return new MarketplaceProductPageResult(items, meta);
+	}
+
+	@Transactional(readOnly = true)
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	public MarketplaceProductDetailDto getProductDetail(
+			Long storeId,
+			String marketplaceCode,
+			String externalProductId,
+			String sku) {
+		Store store = findStoreOrThrow(storeId);
+		verifyStoreOwner(store);
+
+		StoreMarketplaceConnection connection = connectionRepository
+				.findByStore_IdAndMarketplace_CodeIgnoreCase(storeId, marketplaceCode)
+				.filter(item -> item.getStatus() == MarketplaceConnectionStatus.CONNECTED)
+				.orElseThrow(() -> new ResourceNotFoundException(
+						"No connected marketplace found for storeId=" + storeId + " marketplace=" + marketplaceCode));
+
+		Marketplace marketplace = connection.getMarketplace();
+		String normalizedCode = marketplace != null ? marketplace.getCode().toUpperCase() : marketplaceCode.toUpperCase();
+		String marketplaceName = marketplace != null && marketplace.getName() != null
+				? marketplace.getName()
+				: normalizedCode;
+
+		GatewayProductDetail detail = adapterRegistry.resolve(normalizedCode)
+				.fetchProductDetail(connection, externalProductId, sku);
+
+		String resolvedSku = detail.sku() != null ? detail.sku() : sku;
+		List<MarketplaceProductVariantDto> variants = detail.variants() == null
+				? List.of()
+				: detail.variants().stream()
+						.map(variant -> new MarketplaceProductVariantDto(
+								variant.sku(),
+								variant.price(),
+								variant.currency(),
+								variant.status(),
+								variant.quantity()))
+						.toList();
+
+		return new MarketplaceProductDetailDto(
+				store.getId(),
+				store.getName(),
+				normalizedCode,
+				marketplaceName,
+				detail.externalProductId(),
+				resolvedSku,
+				detail.name(),
+				detail.description(),
+				detail.price(),
+				detail.currency(),
+				detail.status(),
+				detail.images() != null ? detail.images() : List.of(),
+				variants,
+				MarketplaceProductErpSupport.derivePlaceholderErp(detail.externalProductId(), resolvedSku));
 	}
 
 	private List<Store> resolveAccessibleStores() {

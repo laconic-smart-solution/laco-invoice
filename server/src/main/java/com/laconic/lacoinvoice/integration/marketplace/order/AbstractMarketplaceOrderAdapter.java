@@ -1,4 +1,4 @@
-package com.laconic.lacoinvoice.integration.marketplace;
+package com.laconic.lacoinvoice.integration.marketplace.order;
 
 import java.math.BigDecimal;
 import java.util.Collections;

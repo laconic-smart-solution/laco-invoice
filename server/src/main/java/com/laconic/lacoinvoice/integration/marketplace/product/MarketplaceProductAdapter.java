@@ -1,4 +1,4 @@
-package com.laconic.lacoinvoice.integration.marketplace;
+package com.laconic.lacoinvoice.integration.marketplace.product;
 
 import java.util.List;
 
@@ -13,6 +13,11 @@ public interface MarketplaceProductAdapter {
 			int page,
 			int limit,
 			String search);
+
+	GatewayProductDetail fetchProductDetail(
+			StoreMarketplaceConnection connection,
+			String externalProductId,
+			String sku);
 
 	default MarketplaceProductPage fetchProductPage(
 			StoreMarketplaceConnection connection,

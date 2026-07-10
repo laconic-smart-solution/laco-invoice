@@ -23,7 +23,7 @@ import com.laconic.lacoinvoice.domain.repositories.StoreMarketplaceConnectionRep
 import com.laconic.lacoinvoice.domain.repositories.StoreRepository;
 import com.laconic.lacoinvoice.features.store.StoreMapper;
 import com.laconic.lacoinvoice.features.store.StoreMarketplaceConnectionDto;
-import com.laconic.lacoinvoice.integration.marketplace.MarketplaceGatewayClient;
+import com.laconic.lacoinvoice.integration.marketplace.client.MarketplaceGatewayClient;
 import com.laconic.lacoinvoice.integration.marketplace.MarketplaceScopeSupport;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayStoreData;
 

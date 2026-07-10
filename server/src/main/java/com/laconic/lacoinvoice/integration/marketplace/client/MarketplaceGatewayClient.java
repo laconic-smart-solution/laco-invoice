@@ -1,11 +1,12 @@
-package com.laconic.lacoinvoice.integration.marketplace;
+package com.laconic.lacoinvoice.integration.marketplace.client;
 
 import java.util.List;
 import java.util.UUID;
 
+import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayProductDetailData;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayProductListData;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayStoreData;
-
+import com.laconic.lacoinvoice.integration.marketplace.order.GatewayOrderData;
 public interface MarketplaceGatewayClient {
 
 	String marketplaceCode();
@@ -25,4 +26,11 @@ public interface MarketplaceGatewayClient {
 			int page,
 			int limit,
 			String search);
+
+	GatewayProductDetailData getProduct(
+			UUID tenantId,
+			String accessToken,
+			String sellerId,
+			String externalProductId,
+			String sku);
 }

@@ -1,4 +1,4 @@
-package com.laconic.lacoinvoice.integration.marketplace;
+package com.laconic.lacoinvoice.integration.lazada;
 
 import java.util.List;
 import java.util.UUID;
@@ -6,15 +6,17 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 import com.laconic.lacoinvoice.domain.models.StoreMarketplaceConnection;
-import com.laconic.lacoinvoice.integration.tiktok.TikTokServiceClient;
+import com.laconic.lacoinvoice.integration.marketplace.MarketplaceScopeSupport;
+import com.laconic.lacoinvoice.integration.marketplace.order.AbstractMarketplaceOrderAdapter;
+import com.laconic.lacoinvoice.integration.marketplace.order.GatewayOrderData;
 
 @Component
-public class TikTokMarketplaceOrderAdapter extends AbstractMarketplaceOrderAdapter {
+public class LazadaMarketplaceOrderAdapter extends AbstractMarketplaceOrderAdapter {
 
-	private final TikTokServiceClient client;
+	private final LazadaServiceClient client;
 
-	public TikTokMarketplaceOrderAdapter(TikTokServiceClient client) {
-		super("TIKTOK");
+	public LazadaMarketplaceOrderAdapter(LazadaServiceClient client) {
+		super("LAZADA");
 		this.client = client;
 	}
 

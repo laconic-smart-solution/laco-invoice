@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import com.laconic.lacoinvoice.config.CommunicationProperties;
-import com.laconic.lacoinvoice.integration.marketplace.AbstractMarketplaceGatewayClient;
+import com.laconic.lacoinvoice.integration.marketplace.client.AbstractMarketplaceGatewayClient;
 
 @Component
 public class ShopeeServiceClient extends AbstractMarketplaceGatewayClient {

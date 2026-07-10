@@ -1,13 +1,15 @@
-package com.laconic.lacoinvoice.integration.marketplace;
+package com.laconic.lacoinvoice.integration.shopee;
 
 import java.util.List;
 
 import org.springframework.stereotype.Component;
 
 import com.laconic.lacoinvoice.domain.models.StoreMarketplaceConnection;
-import com.laconic.lacoinvoice.integration.marketplace.MarketplaceProductPage;
+import com.laconic.lacoinvoice.integration.marketplace.MarketplaceScopeSupport;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayProductListData;
-import com.laconic.lacoinvoice.integration.shopee.ShopeeServiceClient;
+import com.laconic.lacoinvoice.integration.marketplace.product.AbstractMarketplaceProductAdapter;
+import com.laconic.lacoinvoice.integration.marketplace.product.GatewayProductData;
+import com.laconic.lacoinvoice.integration.marketplace.product.MarketplaceProductPage;
 
 @Component
 public class ShopeeMarketplaceProductAdapter extends AbstractMarketplaceProductAdapter {

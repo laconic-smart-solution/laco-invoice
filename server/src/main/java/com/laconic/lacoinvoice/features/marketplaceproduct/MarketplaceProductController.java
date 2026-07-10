@@ -50,4 +50,14 @@ public class MarketplaceProductController {
 				priceMax);
 		return ApiResponse.ok("OK", result.items(), result.meta());
 	}
+
+	@GetMapping("/detail")
+	@Operation(summary = "Get marketplace product detail for a connected store source")
+	public ApiResponse<MarketplaceProductDetailDto> getProductDetail(
+			@RequestParam Long storeId,
+			@RequestParam String marketplaceCode,
+			@RequestParam String externalProductId,
+			@RequestParam(required = false) String sku) {
+		return ApiResponse.ok("OK", service.getProductDetail(storeId, marketplaceCode, externalProductId, sku));
+	}
 }

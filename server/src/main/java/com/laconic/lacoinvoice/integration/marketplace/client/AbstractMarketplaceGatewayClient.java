@@ -1,4 +1,4 @@
-package com.laconic.lacoinvoice.integration.marketplace;
+package com.laconic.lacoinvoice.integration.marketplace.client;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,8 +17,10 @@ import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayApiResponse;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayAuthorizeUrlData;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayOrderItemData;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayOrderListData;
+import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayProductDetailData;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayProductListData;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayStoreData;
+import com.laconic.lacoinvoice.integration.marketplace.order.GatewayOrderData;
 
 public abstract class AbstractMarketplaceGatewayClient implements MarketplaceGatewayClient {
 
@@ -32,6 +34,9 @@ public abstract class AbstractMarketplaceGatewayClient implements MarketplaceGat
 			new ParameterizedTypeReference<>() {
 			};
 	private static final ParameterizedTypeReference<GatewayApiResponse<GatewayProductListData>> PRODUCTS_TYPE =
+			new ParameterizedTypeReference<>() {
+			};
+	private static final ParameterizedTypeReference<GatewayApiResponse<GatewayProductDetailData>> PRODUCT_DETAIL_TYPE =
 			new ParameterizedTypeReference<>() {
 			};
 
@@ -146,6 +151,34 @@ public abstract class AbstractMarketplaceGatewayClient implements MarketplaceGat
 			return new GatewayProductListData(List.of(), 0);
 		}
 		return data;
+	}
+
+	@Override
+	public GatewayProductDetailData getProduct(
+			UUID tenantId,
+			String accessToken,
+			String sellerId,
+			String externalProductId,
+			String sku) {
+		if (externalProductId == null || externalProductId.isBlank()) {
+			throw new BadGatewayException(serviceLabel + " requires external product id.");
+		}
+
+		UriComponentsBuilder builder = UriComponentsBuilder
+				.fromUriString(resolveApiUrl("/api/v1/products/" + externalProductId.trim()))
+				.queryParam("access_token", accessToken);
+		if (sellerId != null && !sellerId.isBlank()) {
+			builder.queryParam("seller_id", sellerId);
+			builder.queryParam("shop_id", sellerId);
+		}
+		if (sku != null && !sku.isBlank()) {
+			builder.queryParam("sku", sku);
+		}
+		return exchange(
+				restClient.get().uri(builder.build().toUriString()),
+				tenantId,
+				null,
+				PRODUCT_DETAIL_TYPE);
 	}
 
 	private GatewayOrderData toOrderData(GatewayOrderItemData item) {
