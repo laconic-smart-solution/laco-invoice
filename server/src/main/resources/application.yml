@@ -87,6 +87,10 @@ app:
       enabled: false
       cron: "0 */10 * * * ?"
       timezone: Asia/Bangkok
+  marketplace-product-sync:
+    list-chunk-size: 50
+    detail-chunk-size: 10
+    detail-request-delay-ms: 300
   communication:
     gateway-url: ${COMMUNICATION_GATEWAY_URL:http://localhost:8084}
     lazada-base-path: ${COMMUNICATION_LAZADA_BASE_PATH:}

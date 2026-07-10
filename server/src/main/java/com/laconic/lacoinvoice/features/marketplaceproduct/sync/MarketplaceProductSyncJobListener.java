@@ -10,26 +10,19 @@ import org.springframework.stereotype.Component;
 import com.laconic.lacoinvoice.domain.models.MarketplaceProductSyncRun;
 import com.laconic.lacoinvoice.domain.models.MarketplaceProductSyncStatus;
 import com.laconic.lacoinvoice.domain.repositories.MarketplaceProductSyncRunRepository;
+import com.laconic.lacoinvoice.features.marketplaceproduct.MarketplaceProductSyncService;
 
 @Component
 public class MarketplaceProductSyncJobListener implements JobExecutionListener {
 
 	private final MarketplaceProductSyncRunRepository syncRunRepository;
-	private final MarketplaceProductSyncRunContext syncRunContext;
+	private final MarketplaceProductSyncProgressPublisher progressPublisher;
 
 	public MarketplaceProductSyncJobListener(
 			MarketplaceProductSyncRunRepository syncRunRepository,
-			MarketplaceProductSyncRunContext syncRunContext) {
+			MarketplaceProductSyncProgressPublisher progressPublisher) {
 		this.syncRunRepository = syncRunRepository;
-		this.syncRunContext = syncRunContext;
-	}
-
-	@Override
-	public void beforeJob(JobExecution jobExecution) {
-		Long syncRunId = jobExecution.getJobParameters().getLong("syncRunId");
-		if (syncRunId != null) {
-			syncRunContext.initialize(syncRunId);
-		}
+		this.progressPublisher = progressPublisher;
 	}
 
 	@Override
@@ -42,7 +35,6 @@ public class MarketplaceProductSyncJobListener implements JobExecutionListener {
 		if (run == null) {
 			return;
 		}
-		syncRunContext.save();
 		run.setCompletedAt(Instant.now());
 		if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
 			run.setStatus(MarketplaceProductSyncStatus.COMPLETED);
@@ -53,5 +45,6 @@ public class MarketplaceProductSyncJobListener implements JobExecutionListener {
 			}
 		}
 		syncRunRepository.save(run);
+		progressPublisher.publish(MarketplaceProductSyncService.toDto(run));
 	}
 }

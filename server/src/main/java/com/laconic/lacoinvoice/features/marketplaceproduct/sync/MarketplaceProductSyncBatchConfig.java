@@ -11,20 +11,28 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import com.laconic.lacoinvoice.config.MarketplaceProductSyncProperties;
 import com.laconic.lacoinvoice.domain.models.Product;
 import com.laconic.lacoinvoice.integration.marketplace.product.GatewayProductData;
 
 @Configuration
 @EnableBatchProcessing
+@EnableConfigurationProperties(MarketplaceProductSyncProperties.class)
 public class MarketplaceProductSyncBatchConfig {
 
 	public static final String JOB_NAME = "marketplaceProductSyncJob";
+
+	private final MarketplaceProductSyncProperties syncProperties;
+
+	public MarketplaceProductSyncBatchConfig(MarketplaceProductSyncProperties syncProperties) {
+		this.syncProperties = syncProperties;
+	}
 
 	@Bean
 	public JobOperator asyncJobOperator(
@@ -39,13 +47,6 @@ public class MarketplaceProductSyncBatchConfig {
 		operator.setTaskExecutor(new SimpleAsyncTaskExecutor("marketplace-product-sync-"));
 		operator.afterPropertiesSet();
 		return operator;
-	}
-
-	@Bean
-	public TaskExecutor marketplaceProductDetailTaskExecutor() {
-		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor("marketplace-product-detail-");
-		executor.setConcurrencyLimit(4);
-		return executor;
 	}
 
 	@Bean
@@ -70,7 +71,7 @@ public class MarketplaceProductSyncBatchConfig {
 			MarketplaceProductPagingItemReader listReader,
 			MarketplaceProductListUpsertWriter listWriter) {
 		return new StepBuilder("marketplaceProductListUpsertStep", jobRepository)
-				.<GatewayProductData, GatewayProductData>chunk(50, transactionManager)
+				.<GatewayProductData, GatewayProductData>chunk(syncProperties.getListChunkSize(), transactionManager)
 				.reader(listReader)
 				.writer(listWriter)
 				.build();
@@ -82,14 +83,12 @@ public class MarketplaceProductSyncBatchConfig {
 			PlatformTransactionManager transactionManager,
 			MarketplaceProductDetailItemReader detailReader,
 			MarketplaceProductDetailEnrichProcessor detailProcessor,
-			MarketplaceProductDetailEnrichWriter detailWriter,
-			TaskExecutor marketplaceProductDetailTaskExecutor) {
+			MarketplaceProductDetailEnrichWriter detailWriter) {
 		return new StepBuilder("marketplaceProductDetailEnrichStep", jobRepository)
-				.<Product, Product>chunk(10, transactionManager)
+				.<Product, Product>chunk(syncProperties.getDetailChunkSize(), transactionManager)
 				.reader(detailReader)
 				.processor(detailProcessor)
 				.writer(detailWriter)
-				.taskExecutor(marketplaceProductDetailTaskExecutor)
 				.build();
 	}
 

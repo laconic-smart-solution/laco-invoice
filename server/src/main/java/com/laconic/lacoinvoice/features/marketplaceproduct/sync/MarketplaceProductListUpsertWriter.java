@@ -21,7 +21,7 @@ public class MarketplaceProductListUpsertWriter implements ItemWriter<GatewayPro
 
 	private final StoreRepository storeRepository;
 	private final MarketplaceProductPersistenceService persistenceService;
-	private final MarketplaceProductSyncRunContext syncRunContext;
+	private final MarketplaceProductSyncProgressService progressService;
 
 	@Value("#{jobParameters['storeId']}")
 	private Long storeId;
@@ -40,10 +40,10 @@ public class MarketplaceProductListUpsertWriter implements ItemWriter<GatewayPro
 	public MarketplaceProductListUpsertWriter(
 			StoreRepository storeRepository,
 			MarketplaceProductPersistenceService persistenceService,
-			MarketplaceProductSyncRunContext syncRunContext) {
+			MarketplaceProductSyncProgressService progressService) {
 		this.storeRepository = storeRepository;
 		this.persistenceService = persistenceService;
-		this.syncRunContext = syncRunContext;
+		this.progressService = progressService;
 	}
 
 	@Override
@@ -60,8 +60,7 @@ public class MarketplaceProductListUpsertWriter implements ItemWriter<GatewayPro
 				items,
 				startedAt,
 				syncRunId);
-		syncRunContext.recordUpsertBatch(batchResult);
-		syncRunContext.save();
+		progressService.recordUpsertBatch(syncRunId, batchResult);
 	}
 
 	private void ensureStore() {
@@ -70,3 +69,4 @@ public class MarketplaceProductListUpsertWriter implements ItemWriter<GatewayPro
 		}
 	}
 }
+

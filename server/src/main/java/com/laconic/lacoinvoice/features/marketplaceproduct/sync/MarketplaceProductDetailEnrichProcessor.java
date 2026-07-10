@@ -19,7 +19,8 @@ public class MarketplaceProductDetailEnrichProcessor implements ItemProcessor<Pr
 	private final StoreMarketplaceConnectionRepository connectionRepository;
 	private final MarketplaceProductAdapterRegistry adapterRegistry;
 	private final MarketplaceProductPersistenceService persistenceService;
-	private final MarketplaceProductSyncRunContext syncRunContext;
+	private final MarketplaceProductSyncProgressService progressService;
+	private final MarketplaceProductSyncDetailThrottler detailThrottler;
 
 	@Value("#{jobParameters['storeId']}")
 	private Long storeId;
@@ -27,17 +28,22 @@ public class MarketplaceProductDetailEnrichProcessor implements ItemProcessor<Pr
 	@Value("#{jobParameters['marketplaceCode']}")
 	private String marketplaceCode;
 
+	@Value("#{jobParameters['syncRunId']}")
+	private Long syncRunId;
+
 	private StoreMarketplaceConnection connection;
 
 	public MarketplaceProductDetailEnrichProcessor(
 			StoreMarketplaceConnectionRepository connectionRepository,
 			MarketplaceProductAdapterRegistry adapterRegistry,
 			MarketplaceProductPersistenceService persistenceService,
-			MarketplaceProductSyncRunContext syncRunContext) {
+			MarketplaceProductSyncProgressService progressService,
+			MarketplaceProductSyncDetailThrottler detailThrottler) {
 		this.connectionRepository = connectionRepository;
 		this.adapterRegistry = adapterRegistry;
 		this.persistenceService = persistenceService;
-		this.syncRunContext = syncRunContext;
+		this.progressService = progressService;
+		this.detailThrottler = detailThrottler;
 	}
 
 	@Override
@@ -47,11 +53,12 @@ public class MarketplaceProductDetailEnrichProcessor implements ItemProcessor<Pr
 			return product;
 		}
 		try {
+			detailThrottler.awaitTurn(marketplaceCode);
 			GatewayProductDetail detail = adapterRegistry.resolve(marketplaceCode)
 					.fetchProductDetail(connection, product.getExternalProductId(), product.getSku());
 			persistenceService.updateDetailFields(product.getId(), detail);
 		} catch (Exception ex) {
-			syncRunContext.recordFailure();
+			progressService.incrementFailed(syncRunId);
 		}
 		return product;
 	}

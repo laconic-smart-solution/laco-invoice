@@ -18,20 +18,25 @@ import com.laconic.lacoinvoice.domain.models.MarketplaceProductSyncRun;
 import com.laconic.lacoinvoice.domain.models.MarketplaceProductSyncStatus;
 import com.laconic.lacoinvoice.domain.repositories.MarketplaceProductSyncRunRepository;
 
+import com.laconic.lacoinvoice.features.marketplaceproduct.sync.MarketplaceProductSyncProgressPublisher;
+
 @Service
 public class MarketplaceProductSyncService {
 
 	private final MarketplaceProductSyncRunRepository syncRunRepository;
 	private final JobOperator jobOperator;
 	private final Job marketplaceProductSyncJob;
+	private final MarketplaceProductSyncProgressPublisher progressPublisher;
 
 	public MarketplaceProductSyncService(
 			MarketplaceProductSyncRunRepository syncRunRepository,
 			@Qualifier("asyncJobOperator") JobOperator jobOperator,
-			@Qualifier("marketplaceProductSyncJob") Job marketplaceProductSyncJob) {
+			@Qualifier("marketplaceProductSyncJob") Job marketplaceProductSyncJob,
+			MarketplaceProductSyncProgressPublisher progressPublisher) {
 		this.syncRunRepository = syncRunRepository;
 		this.jobOperator = jobOperator;
 		this.marketplaceProductSyncJob = marketplaceProductSyncJob;
+		this.progressPublisher = progressPublisher;
 	}
 
 	@Transactional
@@ -55,6 +60,7 @@ public class MarketplaceProductSyncService {
 		run.setStartedAt(Instant.now());
 		AuditUserContext.getCurrentLocalUserId().ifPresent(run::setTriggeredBy);
 		run = syncRunRepository.save(run);
+		progressPublisher.publish(toDto(run));
 
 		JobParameters parameters = new JobParametersBuilder()
 				.addLong("syncRunId", run.getId())
@@ -71,6 +77,7 @@ public class MarketplaceProductSyncService {
 			run.setErrorMessage(ex.getMessage());
 			run.setCompletedAt(Instant.now());
 			syncRunRepository.save(run);
+			progressPublisher.publish(toDto(run));
 			throw new IllegalStateException("Failed to start product sync job.", ex);
 		}
 		return toDto(run);
@@ -84,7 +91,7 @@ public class MarketplaceProductSyncService {
 		return toDto(run);
 	}
 
-	static MarketplaceProductSyncRunDto toDto(MarketplaceProductSyncRun run) {
+	public static MarketplaceProductSyncRunDto toDto(MarketplaceProductSyncRun run) {
 		return new MarketplaceProductSyncRunDto(
 				run.getId(),
 				run.getStoreId(),

@@ -9,7 +9,7 @@ import { marketplaceProductService } from "@/shared/services/marketplace-product
 
 const SYNC_POLL_INTERVAL_MS = 2000
 
-const TERMINAL_SYNC_STATUSES: MarketplaceProductSyncStatus[] = ["COMPLETED", "FAILED"]
+export const TERMINAL_SYNC_STATUSES: MarketplaceProductSyncStatus[] = ["COMPLETED", "FAILED"]
 
 export const marketplaceProductKeys = {
   all: ["marketplace-products"] as const,
@@ -57,16 +57,26 @@ export function useStartMarketplaceProductSyncMutation() {
   return useMutation({
     mutationFn: (params: MarketplaceProductSyncParams) =>
       marketplaceProductService.startSync(params),
-    onSuccess: () => {
+    onSuccess: (run) => {
       void queryClient.invalidateQueries({ queryKey: marketplaceProductKeys.sources() })
+      if (run?.id) {
+        queryClient.setQueryData(marketplaceProductKeys.sync(run.id), run)
+      }
     },
   })
 }
 
+interface MarketplaceProductSyncStatusQueryOptions {
+  pollingEnabled?: boolean
+}
+
 export function useMarketplaceProductSyncStatusQuery(
   syncRunId: number | null,
-  enabled = true
+  enabled = true,
+  options: MarketplaceProductSyncStatusQueryOptions = {}
 ) {
+  const { pollingEnabled = true } = options
+
   return useQuery({
     queryKey: marketplaceProductKeys.sync(syncRunId ?? 0),
     queryFn: () => {
@@ -77,6 +87,9 @@ export function useMarketplaceProductSyncStatusQuery(
     },
     enabled: enabled && syncRunId != null && syncRunId > 0,
     refetchInterval: (query) => {
+      if (!pollingEnabled) {
+        return false
+      }
       const status = query.state.data?.status
       if (status && TERMINAL_SYNC_STATUSES.includes(status)) {
         return false

@@ -17,7 +17,7 @@ import com.laconic.lacoinvoice.features.marketplaceproduct.MarketplaceProductPer
 public class MarketplaceProductSoftDisableTasklet implements Tasklet {
 
 	private final MarketplaceProductPersistenceService persistenceService;
-	private final MarketplaceProductSyncRunContext syncRunContext;
+	private final MarketplaceProductSyncProgressService progressService;
 
 	@Value("#{jobParameters['storeId']}")
 	private Long storeId;
@@ -28,11 +28,14 @@ public class MarketplaceProductSoftDisableTasklet implements Tasklet {
 	@Value("#{jobParameters['syncStartedAt']}")
 	private String syncStartedAt;
 
+	@Value("#{jobParameters['syncRunId']}")
+	private Long syncRunId;
+
 	public MarketplaceProductSoftDisableTasklet(
 			MarketplaceProductPersistenceService persistenceService,
-			MarketplaceProductSyncRunContext syncRunContext) {
+			MarketplaceProductSyncProgressService progressService) {
 		this.persistenceService = persistenceService;
-		this.syncRunContext = syncRunContext;
+		this.progressService = progressService;
 	}
 
 	@Override
@@ -41,8 +44,8 @@ public class MarketplaceProductSoftDisableTasklet implements Tasklet {
 				storeId,
 				marketplaceCode,
 				Instant.parse(syncStartedAt));
-		syncRunContext.setDisabledCount(disabled);
-		syncRunContext.save();
+		progressService.setDisabledCount(syncRunId, disabled);
 		return RepeatStatus.FINISHED;
 	}
 }
+

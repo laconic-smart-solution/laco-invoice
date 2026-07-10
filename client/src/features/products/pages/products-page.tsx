@@ -24,6 +24,7 @@ import {
   buildProductSourceKey,
   parseProductSourceKey,
 } from "@/shared/services/marketplace-product.service"
+import { useMarketplaceProductSyncSubscription } from "@/shared/hooks/use-marketplace-product-sync-subscription"
 
 const DEFAULT_FILTERS: ProductFiltersState = {
   sourceKey: "",
@@ -94,9 +95,14 @@ export function ProductsPage() {
 
   const startSyncMutation = useStartMarketplaceProductSyncMutation()
 
+  const { usePollingFallback } = useMarketplaceProductSyncSubscription(activeSyncRunId, {
+    enabled: activeSyncRunId != null,
+  })
+
   const { data: syncRun } = useMarketplaceProductSyncStatusQuery(
     activeSyncRunId,
-    activeSyncRunId != null
+    activeSyncRunId != null,
+    { pollingEnabled: usePollingFallback }
   )
 
   const isSyncRunning =
