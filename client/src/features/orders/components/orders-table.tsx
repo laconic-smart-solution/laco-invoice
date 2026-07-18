@@ -8,6 +8,7 @@ import { ROUTES } from "@/app/constants/routes"
 import { ConfirmDialog } from "@/components/common/confirm-dialog"
 import { DataTable } from "@/components/common/data-table/data-table"
 import { DataTableFooter } from "@/components/common/data-table/data-table-footer"
+import { DataTableRowActions } from "@/components/common/data-table/data-table-row-actions"
 import { DataTableToolbar } from "@/components/common/data-table/data-table-toolbar"
 import {
   useDataTable,
@@ -15,7 +16,7 @@ import {
 } from "@/components/common/data-table/use-data-table"
 import { StatusBadge } from "@/components/common/status-badge"
 import type { StatusBadgeVariant } from "@/components/common/status-badge"
-import { Button } from "@/components/ui/button"
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import type { Order, OrderSyncStatus } from "@/features/orders/types/order"
 import { useLocaleStore } from "@/shared/stores/locale-store"
 import { formatCurrency, formatDate } from "@/util/format"
@@ -34,45 +35,34 @@ interface OrderRowActionProps {
 function OrderRowAction({ order, onGenerate }: OrderRowActionProps) {
   const { t } = useTranslation("orders")
 
-  switch (order.syncStatus) {
-    case "synced":
-      return (
-        <Button
-          variant="link"
-          className="h-auto p-0 text-info"
-          onClick={(event) => event.stopPropagation()}
-        >
-          {t("table.actions.view_invoice")}
-        </Button>
-      )
-    case "pending":
-      return (
-        <Button
-          size="xs"
-          className="uppercase"
-          onClick={(event) => {
-            event.stopPropagation()
-            onGenerate(order)
-          }}
-        >
-          {t("table.actions.generate")}
-        </Button>
-      )
-    case "failed":
-      return (
-        <Button
-          variant="link"
-          size="sm"
-          className="h-auto p-0 text-destructive"
-          onClick={(event) => event.stopPropagation()}
-        >
-          <RefreshCw data-icon="inline-start" />
-          {t("table.actions.retry")}
-        </Button>
-      )
-    default:
-      return null
+  if (
+    order.syncStatus !== "synced" &&
+    order.syncStatus !== "pending" &&
+    order.syncStatus !== "failed"
+  ) {
+    return null
   }
+
+  return (
+    <DataTableRowActions>
+      {order.syncStatus === "synced" ? (
+        <DropdownMenuItem onSelect={() => undefined}>
+          {t("table.actions.view_invoice")}
+        </DropdownMenuItem>
+      ) : null}
+      {order.syncStatus === "pending" ? (
+        <DropdownMenuItem onSelect={() => onGenerate(order)}>
+          {t("table.actions.generate")}
+        </DropdownMenuItem>
+      ) : null}
+      {order.syncStatus === "failed" ? (
+        <DropdownMenuItem variant="destructive" onSelect={() => undefined}>
+          <RefreshCw aria-hidden />
+          {t("table.actions.retry")}
+        </DropdownMenuItem>
+      ) : null}
+    </DataTableRowActions>
+  )
 }
 
 interface OrdersTableProps {
@@ -245,7 +235,9 @@ export function OrdersTable({
       <div className="overflow-x-auto">
         <DataTable
           table={table}
-          emptyMessage={isLoading ? t("table.loading") : t("table.empty")}
+          emptyMessage={t("table.empty")}
+          isLoading={isLoading}
+          skeletonRowCount={limit}
           onRowClick={handleRowClick}
         />
       </div>

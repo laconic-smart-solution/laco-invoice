@@ -16,7 +16,10 @@ export function DashboardShell({ children }: DashboardShellProps) {
 
   return (
     <div className="flex min-h-svh max-h-svh bg-background">
-      <Sidebar />
+      <div className="relative shrink-0">
+        <Sidebar />
+        <SidebarToggle className="absolute top-[4.75rem] right-0 z-30 translate-x-1/2 -translate-y-1/2" />
+      </div>
       <div className="flex min-w-0 flex-1 flex-col">
         <Navbar />
         <main id="main-content" className="flex-1 overflow-y-auto">
@@ -30,8 +33,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
 export function DashboardLayout() {
   return (
     <DashboardShell>
-      <div className="relative bg-background px-6 py-3">
-        <SidebarToggle className="absolute top-1/2 left-0 z-20 -translate-x-1/2 -translate-y-1/2" />
+      <div className="bg-background px-6 py-3">
         <AppBreadcrumb />
       </div>
       <Outlet />

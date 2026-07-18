@@ -1,8 +1,8 @@
 import { ShieldCheck } from "lucide-react"
-import type { MouseEvent } from "react"
 import { useTranslation } from "react-i18next"
 
-import { Button } from "@/components/ui/button"
+import { DataTableRowActions } from "@/components/common/data-table/data-table-row-actions"
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import type { AdminUser } from "@/features/users/types/user"
 
 interface UserRowActionsProps {
@@ -13,27 +13,20 @@ interface UserRowActionsProps {
 export function UserRowActions({ user, onVerifyOtp }: UserRowActionsProps) {
   const { t } = useTranslation("users")
 
-  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation()
-    onVerifyOtp(user)
-  }
-
   return (
-    <Button
-      type="button"
-      variant="outline"
-      size="sm"
-      className="h-8 gap-1.5"
-      onClick={handleClick}
-      disabled={!user.authServerUserId}
-      title={
-        user.authServerUserId
-          ? undefined
-          : t("table.actions.verify_otp_unlinked")
-      }
-    >
-      <ShieldCheck className="size-3.5" aria-hidden />
-      {t("table.actions.verify_otp")}
-    </Button>
+    <DataTableRowActions>
+      <DropdownMenuItem
+        disabled={!user.authServerUserId}
+        title={
+          user.authServerUserId
+            ? undefined
+            : t("table.actions.verify_otp_unlinked")
+        }
+        onSelect={() => onVerifyOtp(user)}
+      >
+        <ShieldCheck aria-hidden />
+        {t("table.actions.verify_otp")}
+      </DropdownMenuItem>
+    </DataTableRowActions>
   )
 }

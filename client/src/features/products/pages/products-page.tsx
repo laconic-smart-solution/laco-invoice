@@ -10,7 +10,6 @@ import { ProductsHeader } from "@/features/products/components/products-header"
 import { ProductsStatCards } from "@/features/products/components/products-stat-cards"
 import { ProductsTable } from "@/features/products/components/products-table"
 import type { ProductFiltersState, ProductStats } from "@/features/products/types/product"
-import { derivePlaceholderErpStatus } from "@/features/products/util/erp-status"
 import { Button } from "@/components/ui/button"
 import { DEFAULT_LIMIT, DEFAULT_PAGE, getPaginationMeta } from "@/shared/hooks/use-pagination"
 import {
@@ -142,21 +141,14 @@ export function ProductsPage() {
     }
   }, [isSyncRunning, parsedSource, startSyncMutation, t])
 
-  const productsWithErp = useMemo(
-    () =>
-      (productResult?.items ?? []).map((product) => ({
-        ...product,
-        erpStatus: derivePlaceholderErpStatus(product),
-      })),
-    [productResult?.items]
-  )
+  const products = productResult?.items ?? []
 
   const filteredProducts = useMemo(() => {
     if (filters.erpStatus === "all") {
-      return productsWithErp
+      return products
     }
-    return productsWithErp.filter((product) => product.erpStatus === filters.erpStatus)
-  }, [filters.erpStatus, productsWithErp])
+    return products.filter((product) => product.erpStatus === filters.erpStatus)
+  }, [filters.erpStatus, products])
 
   const totalCount = productResult?.total ?? 0
   const pagination = getPaginationMeta(page, limit, totalCount)
@@ -166,16 +158,16 @@ export function ProductsPage() {
   }, [activeSourceKey, filters.priceMin, filters.priceMax, filters.erpStatus])
 
   const stats: ProductStats = useMemo(() => {
-    const syncedCount = productsWithErp.filter((product) => product.erpStatus === "synced").length
-    const unmappedCount = productsWithErp.filter((product) => product.erpStatus === "unmapped").length
-    const totalOnPage = productsWithErp.length
+    const syncedCount = products.filter((product) => product.erpStatus === "synced").length
+    const unmappedCount = products.filter((product) => product.erpStatus === "unmapped").length
+    const totalOnPage = products.length
 
     return {
       mappingRatePercent: totalOnPage > 0 ? (syncedCount / totalOnPage) * 100 : 0,
       actionRequiredCount: unmappedCount,
       activeSkuCount: syncedCount,
     }
-  }, [productsWithErp])
+  }, [products])
 
   const requestError =
     sourcesError != null
@@ -218,6 +210,7 @@ export function ProductsPage() {
         </div>
       ) : (
         <>
+          <ProductsStatCards stats={stats} />
           <ProductsFilters
             sources={sources}
             value={filters}
@@ -242,7 +235,6 @@ export function ProductsPage() {
               setPage(1)
             }}
           />
-          <ProductsStatCards stats={stats} />
         </>
       )}
     </div>

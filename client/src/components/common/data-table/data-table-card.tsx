@@ -14,6 +14,9 @@ interface DataTableCardProps<TData> {
   className?: string
   tableClassName?: string
   toolbar?: ReactNode
+  isLoading?: boolean
+  skeletonRowCount?: number
+  onRowClick?: (row: TData) => void
 }
 
 export function DataTableCard<TData>({
@@ -25,6 +28,9 @@ export function DataTableCard<TData>({
   className,
   tableClassName,
   toolbar,
+  isLoading = false,
+  skeletonRowCount,
+  onRowClick,
 }: DataTableCardProps<TData>) {
   return (
     <section
@@ -43,7 +49,13 @@ export function DataTableCard<TData>({
       {toolbar}
 
       <div className={cn("overflow-x-auto", tableClassName)}>
-        <DataTable table={table} emptyMessage={emptyMessage} />
+        <DataTable
+          table={table}
+          emptyMessage={emptyMessage}
+          isLoading={isLoading}
+          skeletonRowCount={skeletonRowCount}
+          onRowClick={onRowClick}
+        />
       </div>
     </section>
   )

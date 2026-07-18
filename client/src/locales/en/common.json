@@ -19,6 +19,9 @@
     "next": "Next",
     "showing_range": "Showing {{start}} to {{end}} of {{total}}"
   },
+  "table": {
+    "open_menu": "Open menu"
+  },
   "time": {
     "minutes_ago_one": "{{count}} min ago",
     "minutes_ago_other": "{{count}} mins ago"

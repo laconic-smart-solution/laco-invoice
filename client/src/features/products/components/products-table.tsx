@@ -1,17 +1,23 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Pencil } from "lucide-react"
-import { useMemo } from "react"
+import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
 
 import { DataTable } from "@/components/common/data-table/data-table"
 import { DataTableFooter } from "@/components/common/data-table/data-table-footer"
+import { DataTableRowActions } from "@/components/common/data-table/data-table-row-actions"
 import { useDataTable } from "@/components/common/data-table/use-data-table"
 import { StatusBadge } from "@/components/common/status-badge"
 import type { StatusBadgeVariant } from "@/components/common/status-badge"
-import { Button } from "@/components/ui/button"
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import type { ProductErpStatus, ProductTableRow } from "@/features/products/types/product"
 import { useLocaleStore } from "@/shared/stores/locale-store"
 import { formatCurrency } from "@/util/format"
@@ -28,29 +34,21 @@ interface ProductRowActionProps {
 function ProductRowAction({ product }: ProductRowActionProps) {
   const { t } = useTranslation("products")
 
-  if (product.erpStatus === "unmapped") {
-    return (
-      <Button
-        size="sm"
-        onClick={(event) => event.stopPropagation()}
-      >
-        {t("table.actions.map_to_erp")}
-      </Button>
-    )
-  }
-
   return (
-    <Button
-      variant="link"
-      className="h-auto gap-1.5 p-0 text-info"
-      asChild
-      onClick={(event) => event.stopPropagation()}
-    >
-      <Link to={ROUTES.dashboard.productDetail(product.id)}>
-        {t("table.actions.view_details")}
-        <Pencil className="size-3.5" aria-hidden />
-      </Link>
-    </Button>
+    <DataTableRowActions>
+      {product.erpStatus === "unmapped" ? (
+        <DropdownMenuItem onSelect={() => undefined}>
+          {t("table.actions.map_to_erp")}
+        </DropdownMenuItem>
+      ) : (
+        <DropdownMenuItem asChild>
+          <Link to={ROUTES.dashboard.productDetail(product.id)}>
+            <Pencil aria-hidden />
+            {t("table.actions.view_details")}
+          </Link>
+        </DropdownMenuItem>
+      )}
+    </DataTableRowActions>
   )
 }
 
@@ -84,7 +82,15 @@ export function ProductsTable({
   onLimitChange,
 }: ProductsTableProps) {
   const { t } = useTranslation("products")
+  const navigate = useNavigate()
   const locale = useLocaleStore((state) => state.locale)
+
+  const handleRowClick = useCallback(
+    (product: ProductTableRow) => {
+      void navigate(ROUTES.dashboard.productDetail(product.id))
+    },
+    [navigate]
+  )
 
   const columns = useMemo<ColumnDef<ProductTableRow>[]>(
     () => [
@@ -117,9 +123,22 @@ export function ProductsTable({
       {
         accessorKey: "name",
         header: t("table.columns.name"),
-        cell: ({ getValue }) => (
-          <span className="font-medium text-foreground">{getValue<string>()}</span>
-        ),
+        cell: ({ getValue }) => {
+          const name = getValue<string>()
+
+          return (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="block max-w-[220px] truncate font-medium text-foreground">
+                  {name}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-sm">
+                <p className="whitespace-normal break-words">{name}</p>
+              </TooltipContent>
+            </Tooltip>
+          )
+        },
       },
       {
         accessorKey: "price",
@@ -171,7 +190,10 @@ export function ProductsTable({
       <div className="overflow-x-auto">
         <DataTable
           table={table}
-          emptyMessage={isLoading ? t("table.loading") : t("table.empty")}
+          emptyMessage={t("table.empty")}
+          isLoading={isLoading}
+          skeletonRowCount={limit}
+          onRowClick={handleRowClick}
         />
       </div>
 
