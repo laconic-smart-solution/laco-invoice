@@ -105,16 +105,27 @@ public class OrderSyncService {
 						store.getId(), marketplace.getId(), payload.externalOrderId())
 				.orElseGet(Order::new);
 
-		CustomerInfo customer = order.getCustomer();
-		if (customer == null) {
-			customer = new CustomerInfo();
-		}
+		CustomerInfo customer = resolveCustomer(store, marketplace, order, payload);
 		customer.setStore(store);
-		customer.setName(payload.customerName());
-		customer.setEmail(payload.customerEmail());
-		customer.setPhone(payload.customerPhone());
-		customer.setGender(payload.customerGender());
-		customer.setAddress(payload.customerAddress());
+		customer.setMarketplace(marketplace);
+		if (StringUtils.hasText(payload.externalCustomerId())) {
+			customer.setExternalCustomerId(payload.externalCustomerId().trim());
+		}
+		if (StringUtils.hasText(payload.customerName())) {
+			customer.setName(payload.customerName().trim());
+		}
+		if (StringUtils.hasText(payload.customerEmail())) {
+			customer.setEmail(payload.customerEmail().trim());
+		}
+		if (StringUtils.hasText(payload.customerPhone())) {
+			customer.setPhone(payload.customerPhone().trim());
+		}
+		if (StringUtils.hasText(payload.customerGender())) {
+			customer.setGender(payload.customerGender().trim());
+		}
+		if (StringUtils.hasText(payload.customerAddress())) {
+			customer.setAddress(payload.customerAddress().trim());
+		}
 		customer = customerInfoRepository.save(customer);
 
 		order.setStore(store);
@@ -163,6 +174,37 @@ public class OrderSyncService {
 					"Order {} synced with empty line items; leaving existing order_items unchanged",
 					payload.externalOrderId());
 		}
+	}
+
+	private CustomerInfo resolveCustomer(
+			Store store,
+			Marketplace marketplace,
+			Order order,
+			MarketplaceFetchedOrder payload) {
+		if (StringUtils.hasText(payload.externalCustomerId())) {
+			var byExternal = customerInfoRepository.findFirstByStore_IdAndMarketplace_IdAndExternalCustomerId(
+					store.getId(), marketplace.getId(), payload.externalCustomerId().trim());
+			if (byExternal.isPresent()) {
+				return byExternal.get();
+			}
+		}
+		if (StringUtils.hasText(payload.customerPhone())) {
+			String phone = payload.customerPhone().trim();
+			var byPhone = customerInfoRepository.findFirstByStore_IdAndMarketplace_IdAndPhoneIgnoreCase(
+					store.getId(), marketplace.getId(), phone);
+			if (byPhone.isPresent()) {
+				return byPhone.get();
+			}
+			var legacyByPhone = customerInfoRepository.findFirstByStore_IdAndPhoneIgnoreCaseAndMarketplaceIsNull(
+					store.getId(), phone);
+			if (legacyByPhone.isPresent()) {
+				return legacyByPhone.get();
+			}
+		}
+		if (order.getCustomer() != null) {
+			return order.getCustomer();
+		}
+		return new CustomerInfo();
 	}
 
 	private static OrderStatus parseStatus(String raw) {

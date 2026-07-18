@@ -5,8 +5,14 @@
   "sync_status": "实时同步中",
   "actions": {
     "add_customer": "添加客户",
+    "sync_customers": "同步客户",
     "filter_marketplace": "筛选 Marketplace",
     "export_csv": "导出 CSV"
+  },
+  "filters": {
+    "store_label": "店铺 / Marketplace",
+    "store_placeholder": "选择来源",
+    "store_all": "全部来源"
   },
   "stats": {
     "total_customers": "客户总数"
@@ -48,7 +54,8 @@
   "errors": {
     "load_failed": "无法加载客户列表，请重试。",
     "save_failed": "无法保存客户，请重试。",
-    "delete_failed": "无法删除客户，请重试。"
+    "delete_failed": "无法删除客户，请重试。",
+    "sync_failed": "无法同步客户，请重试。"
   },
   "table": {
     "empty": "暂无客户",

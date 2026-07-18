@@ -8,6 +8,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record CustomerDto(
 		Long id,
 		Long storeId,
+		String storeName,
+		Long marketplaceId,
+		String marketplaceCode,
+		String externalCustomerId,
 		String name,
 		String email,
 		String phone,

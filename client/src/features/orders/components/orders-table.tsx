@@ -169,6 +169,17 @@ export function OrdersTable({
       {
         accessorKey: "customer",
         header: t("table.columns.customer"),
+        cell: ({ row }) => {
+          const phone = row.original.customerPhone?.trim()
+          return (
+            <div className="min-w-[140px]">
+              <p className="font-medium text-foreground">{row.original.customer}</p>
+              {phone ? (
+                <p className="text-xs text-muted-foreground">{phone}</p>
+              ) : null}
+            </div>
+          )
+        },
       },
       {
         accessorKey: "totalAmount",

@@ -13,5 +13,6 @@ public record GatewayOrderData(
 		String customerEmail,
 		String customerPhone,
 		String customerAddress,
+		String externalCustomerId,
 		List<GatewayOrderLineItem> items) {
 }

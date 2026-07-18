@@ -66,6 +66,8 @@
     "last_synced": "Last Synced",
     "invoice_id": "Invoice ID",
     "customer_email": "Email",
+    "customer_phone": "Phone",
+    "customer_gender": "Gender",
     "shipping_address": "Shipping Address",
     "not_found_title": "Order not found",
     "not_found_description": "The order you are looking for does not exist or may have been removed.",

@@ -14,9 +14,16 @@ public class CustomerMapper implements BaseMapper<CustomerInfo, CustomerDto> {
 			return null;
 		}
 		Long storeId = entity.getStore() != null ? entity.getStore().getId() : null;
+		String storeName = entity.getStore() != null ? entity.getStore().getName() : null;
+		Long marketplaceId = entity.getMarketplace() != null ? entity.getMarketplace().getId() : null;
+		String marketplaceCode = entity.getMarketplace() != null ? entity.getMarketplace().getCode() : null;
 		return new CustomerDto(
 				entity.getId(),
 				storeId,
+				storeName,
+				marketplaceId,
+				marketplaceCode,
+				entity.getExternalCustomerId(),
 				entity.getName(),
 				entity.getEmail(),
 				entity.getPhone(),

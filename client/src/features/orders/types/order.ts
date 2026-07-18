@@ -15,6 +15,8 @@ export interface Order {
   storeId: string
   storeName: string
   customer: string
+  customerId?: string
+  customerPhone?: string
   totalAmount: number
   currency: string
   syncStatus: OrderSyncStatus
@@ -22,6 +24,8 @@ export interface Order {
 
 export interface OrderDetail extends Order {
   customerEmail: string
+  customerPhone: string
+  customerGender: string
   shippingAddress: string
   subtotal: number
   tax: number

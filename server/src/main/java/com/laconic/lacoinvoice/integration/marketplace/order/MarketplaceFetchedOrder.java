@@ -18,5 +18,6 @@ public record MarketplaceFetchedOrder(
 		String customerPhone,
 		String customerGender,
 		String customerAddress,
+		String externalCustomerId,
 		List<MarketplaceFetchedOrderItem> items) {
 }

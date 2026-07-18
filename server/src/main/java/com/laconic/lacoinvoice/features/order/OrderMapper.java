@@ -21,6 +21,7 @@ public class OrderMapper implements BaseMapper<Order, OrderDto> {
 		String marketplaceCode = entity.getMarketplace() != null ? entity.getMarketplace().getCode() : null;
 		Long customerId = entity.getCustomer() != null ? entity.getCustomer().getId() : null;
 		String customerName = entity.getCustomer() != null ? entity.getCustomer().getName() : null;
+		String customerPhone = entity.getCustomer() != null ? entity.getCustomer().getPhone() : null;
 		return new OrderDto(
 				entity.getId(),
 				storeId,
@@ -29,6 +30,7 @@ public class OrderMapper implements BaseMapper<Order, OrderDto> {
 				marketplaceCode,
 				customerId,
 				customerName,
+				customerPhone,
 				entity.getExternalOrderId(),
 				entity.getOrderStatus(),
 				entity.getSubtotal(),

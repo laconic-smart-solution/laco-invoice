@@ -16,5 +16,6 @@ public record GatewayOrderItemData(
 		@JsonProperty("customer_email") String customerEmail,
 		@JsonProperty("customer_phone") String customerPhone,
 		@JsonProperty("customer_address") String customerAddress,
+		@JsonProperty("external_customer_id") String externalCustomerId,
 		List<GatewayOrderLineItemData> items) {
 }

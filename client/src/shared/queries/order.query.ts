@@ -6,6 +6,7 @@ import {
   extractApiErrorMessage,
   isAxiosStatusMessage,
 } from "@/shared/api/extract-api-error-message"
+import { customerKeys } from "@/shared/queries/customer.query"
 
 export const orderKeys = {
   all: ["orders"] as const,
@@ -37,6 +38,8 @@ export function useTriggerOrderSyncMutation() {
     mutationFn: () => orderService.triggerSync(),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
+      // Customers are upserted inline during order sync
+      void queryClient.invalidateQueries({ queryKey: customerKeys.lists() })
     },
   })
 }

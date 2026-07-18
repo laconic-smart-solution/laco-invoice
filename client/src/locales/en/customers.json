@@ -5,8 +5,14 @@
   "sync_status": "Real-time sync active",
   "actions": {
     "add_customer": "Add Customer",
+    "sync_customers": "Sync Customers",
     "filter_marketplace": "Filter Marketplace",
     "export_csv": "Export CSV"
+  },
+  "filters": {
+    "store_label": "Store / Marketplace",
+    "store_placeholder": "Select source",
+    "store_all": "All sources"
   },
   "stats": {
     "total_customers": "Total Customers"
@@ -48,7 +54,8 @@
   "errors": {
     "load_failed": "Unable to load customers. Please try again.",
     "save_failed": "Unable to save customer. Please try again.",
-    "delete_failed": "Unable to delete customer. Please try again."
+    "delete_failed": "Unable to delete customer. Please try again.",
+    "sync_failed": "Unable to sync customers. Please try again."
   },
   "table": {
     "empty": "No customers found.",

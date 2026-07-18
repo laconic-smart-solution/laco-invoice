@@ -66,6 +66,8 @@
     "last_synced": "上次同步",
     "invoice_id": "发票编号",
     "customer_email": "邮箱",
+    "customer_phone": "电话",
+    "customer_gender": "性别",
     "shipping_address": "收货地址",
     "not_found_title": "未找到订单",
     "not_found_description": "您查找的订单不存在或已被删除。",

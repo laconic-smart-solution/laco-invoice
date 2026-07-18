@@ -84,13 +84,31 @@ export function CustomersTable({
 
     if (isAdmin) {
       baseColumns.push({
-        accessorKey: "storeId",
+        id: "store",
         header: t("table.columns.store"),
-        cell: ({ getValue }) => (
-          <span className="font-mono text-xs text-muted-foreground">
-            {getValue<number | null>() ?? "—"}
-          </span>
-        ),
+        cell: ({ row }) => {
+          const customer = row.original
+          const storeName = customer.storeName?.trim()
+          const marketplaceCode = customer.marketplaceCode?.trim()
+          if (storeName && marketplaceCode) {
+            return (
+              <span className="text-sm text-foreground">
+                {storeName} — {marketplaceCode}
+              </span>
+            )
+          }
+          if (storeName) {
+            return <span className="text-sm text-foreground">{storeName}</span>
+          }
+          if (marketplaceCode) {
+            return <span className="text-sm text-muted-foreground">{marketplaceCode}</span>
+          }
+          return (
+            <span className="font-mono text-xs text-muted-foreground">
+              {customer.storeId ?? "—"}
+            </span>
+          )
+        },
       })
     }
 
