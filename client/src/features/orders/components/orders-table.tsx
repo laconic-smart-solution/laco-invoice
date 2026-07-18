@@ -18,7 +18,7 @@ import type { StatusBadgeVariant } from "@/components/common/status-badge"
 import { Button } from "@/components/ui/button"
 import type { Order, OrderSyncStatus } from "@/features/orders/types/order"
 import { useLocaleStore } from "@/shared/stores/locale-store"
-import { formatCurrency } from "@/util/format"
+import { formatCurrency, formatDate } from "@/util/format"
 
 const SYNC_STATUS_BADGE: Record<OrderSyncStatus, StatusBadgeVariant> = {
   synced: "synced",
@@ -87,6 +87,7 @@ interface OrdersTableProps {
   canGoNext: boolean
   onPageChange: (page: number) => void
   onLimitChange: (limit: number) => void
+  isLoading?: boolean
 }
 
 export function OrdersTable({
@@ -101,6 +102,7 @@ export function OrdersTable({
   canGoNext,
   onPageChange,
   onLimitChange,
+  isLoading = false,
 }: OrdersTableProps) {
   const { t } = useTranslation("orders")
   const navigate = useNavigate()
@@ -140,6 +142,17 @@ export function OrdersTable({
       {
         accessorKey: "orderDate",
         header: t("table.columns.order_date"),
+        cell: ({ getValue }) => {
+          const value = getValue<string>()
+          if (!value) {
+            return "—"
+          }
+          const parsed = new Date(value)
+          if (Number.isNaN(parsed.getTime()) || parsed.getFullYear() < 1971) {
+            return "—"
+          }
+          return formatDate(value, locale)
+        },
       },
       {
         accessorKey: "storeName",
@@ -160,7 +173,8 @@ export function OrdersTable({
       {
         accessorKey: "totalAmount",
         header: t("table.columns.total_amount"),
-        cell: ({ getValue }) => formatCurrency(getValue<number>(), locale),
+        cell: ({ row }) =>
+          formatCurrency(row.original.totalAmount, locale, row.original.currency),
       },
       {
         accessorKey: "syncStatus",
@@ -231,7 +245,7 @@ export function OrdersTable({
       <div className="overflow-x-auto">
         <DataTable
           table={table}
-          emptyMessage={t("table.empty")}
+          emptyMessage={isLoading ? t("table.loading") : t("table.empty")}
           onRowClick={handleRowClick}
         />
       </div>

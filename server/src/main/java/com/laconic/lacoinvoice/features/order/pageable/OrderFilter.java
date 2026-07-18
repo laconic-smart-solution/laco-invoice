@@ -17,5 +17,9 @@ public class OrderFilter {
 
 	private String externalOrderId;
 
+	private Long storeId;
+
 	private Long marketplaceId;
+
+	private String marketplaceCode;
 }

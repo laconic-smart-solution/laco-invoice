@@ -16,20 +16,25 @@ public class OrderMapper implements BaseMapper<Order, OrderDto> {
 			return null;
 		}
 		Long storeId = entity.getStore() != null ? entity.getStore().getId() : null;
+		String storeName = entity.getStore() != null ? entity.getStore().getName() : null;
 		Long marketplaceId = entity.getMarketplace() != null ? entity.getMarketplace().getId() : null;
 		String marketplaceCode = entity.getMarketplace() != null ? entity.getMarketplace().getCode() : null;
 		Long customerId = entity.getCustomer() != null ? entity.getCustomer().getId() : null;
+		String customerName = entity.getCustomer() != null ? entity.getCustomer().getName() : null;
 		return new OrderDto(
 				entity.getId(),
 				storeId,
+				storeName,
 				marketplaceId,
 				marketplaceCode,
 				customerId,
+				customerName,
 				entity.getExternalOrderId(),
 				entity.getOrderStatus(),
 				entity.getSubtotal(),
 				entity.getShippingFee(),
 				entity.getTotalAmount(),
+				entity.getCurrency(),
 				entity.getOrderDate(),
 				entity.getCreatedAt());
 	}

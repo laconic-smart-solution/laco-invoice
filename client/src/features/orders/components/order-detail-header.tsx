@@ -18,14 +18,29 @@ interface OrderDetailHeaderProps {
   order: OrderDetail
   locale: Locale
   onGenerate: () => void
+  onSync?: () => void
+  isSyncing?: boolean
 }
 
 export function OrderDetailHeader({
   order,
   locale,
   onGenerate,
+  onSync,
+  isSyncing = false,
 }: OrderDetailHeaderProps) {
   const { t } = useTranslation("orders")
+
+  const orderDateLabel = (() => {
+    if (!order.orderDate) {
+      return "—"
+    }
+    const parsed = new Date(order.orderDate)
+    if (Number.isNaN(parsed.getTime()) || parsed.getFullYear() < 1971) {
+      return "—"
+    }
+    return formatDate(order.orderDate, locale)
+  })()
 
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -42,7 +57,7 @@ export function OrderDetailHeader({
           </div>
           <p className="text-sm text-muted-foreground">
             {t("detail.placed_on", {
-              date: formatDate(order.orderDate, locale),
+              date: orderDateLabel,
             })}
             {" · "}
             {order.storeName}
@@ -50,8 +65,13 @@ export function OrderDetailHeader({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" className="border-primary text-primary">
-            <RefreshCw data-icon="inline-start" />
+          <Button
+            variant="outline"
+            className="border-primary text-primary"
+            onClick={onSync}
+            disabled={isSyncing || !onSync}
+          >
+            <RefreshCw data-icon="inline-start" className={isSyncing ? "animate-spin" : undefined} />
             {t("actions.sync_orders")}
           </Button>
           {order.syncStatus === "synced" && order.invoiceId ? (

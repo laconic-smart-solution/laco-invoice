@@ -1,5 +1,4 @@
 import { Calendar, ListFilter } from "lucide-react"
-import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
@@ -12,15 +11,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import type { MarketplaceProductSource } from "@/features/products/types/product"
 import {
   ORDER_STATUS_FILTER_OPTIONS,
-  ORDER_STORE_FILTER_OPTIONS,
-} from "@/features/orders/data/mock-orders"
+  type OrderFiltersState,
+} from "@/features/orders/types/order-filters"
+import { buildProductSourceKey } from "@/shared/services/marketplace-product.service"
 
-export function OrdersFilters() {
+interface OrdersFiltersProps {
+  sources: MarketplaceProductSource[]
+  value: OrderFiltersState
+  selectedSourceKey: string
+  onChange: (value: OrderFiltersState) => void
+  disabled?: boolean
+}
+
+export function OrdersFilters({
+  sources,
+  value,
+  selectedSourceKey,
+  onChange,
+  disabled = false,
+}: OrdersFiltersProps) {
   const { t } = useTranslation("orders")
-  const [store, setStore] = useState("all")
-  const [status, setStatus] = useState("all")
 
   return (
     <section className="border border-border bg-card p-4 shadow-sm">
@@ -29,16 +42,26 @@ export function OrdersFilters() {
           <Label className="text-xs text-muted-foreground">
             {t("filters.store_label")}
           </Label>
-          <Select value={store} onValueChange={setStore}>
+          <Select
+            value={selectedSourceKey}
+            onValueChange={(sourceKey) =>
+              onChange({ ...value, sourceKey: sourceKey === "all" ? "" : sourceKey })
+            }
+            disabled={disabled || sources.length === 0}
+          >
             <SelectTrigger className="w-full">
-              <SelectValue />
+              <SelectValue placeholder={t("filters.store_placeholder")} />
             </SelectTrigger>
             <SelectContent>
-              {ORDER_STORE_FILTER_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {t(option.labelKey)}
-                </SelectItem>
-              ))}
+              <SelectItem value="all">{t("filters.store_all")}</SelectItem>
+              {sources.map((source) => {
+                const key = buildProductSourceKey(source.storeId, source.marketplaceCode)
+                return (
+                  <SelectItem key={key} value={key}>
+                    {source.label}
+                  </SelectItem>
+                )
+              })}
             </SelectContent>
           </Select>
         </div>
@@ -64,7 +87,11 @@ export function OrdersFilters() {
           <Label className="text-xs text-muted-foreground">
             {t("filters.status_label")}
           </Label>
-          <Select value={status} onValueChange={setStatus}>
+          <Select
+            value={value.orderStatus}
+            onValueChange={(orderStatus) => onChange({ ...value, orderStatus })}
+            disabled={disabled}
+          >
             <SelectTrigger className="w-full">
               <SelectValue />
             </SelectTrigger>
@@ -83,6 +110,7 @@ export function OrdersFilters() {
           size="icon"
           className="shrink-0"
           aria-label={t("filters.more_filters")}
+          disabled={disabled}
         >
           <ListFilter />
         </Button>

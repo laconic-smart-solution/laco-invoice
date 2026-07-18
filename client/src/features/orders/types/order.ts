@@ -16,6 +16,7 @@ export interface Order {
   storeName: string
   customer: string
   totalAmount: number
+  currency: string
   syncStatus: OrderSyncStatus
 }
 

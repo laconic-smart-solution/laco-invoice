@@ -64,10 +64,10 @@ export function OrderLineItems({ order }: OrderLineItemsProps) {
                   {item.quantity}
                 </TableCell>
                 <TableCell className="px-4 py-3.5 text-right text-sm">
-                  {formatCurrency(item.unitPrice, locale)}
+                  {formatCurrency(item.unitPrice, locale, order.currency)}
                 </TableCell>
                 <TableCell className="px-4 py-3.5 text-right text-sm font-medium">
-                  {formatCurrency(lineTotal, locale)}
+                  {formatCurrency(lineTotal, locale, order.currency)}
                 </TableCell>
               </TableRow>
             )
@@ -79,23 +79,23 @@ export function OrderLineItems({ order }: OrderLineItemsProps) {
         <dl className="ml-auto w-full max-w-xs space-y-2 text-sm">
           <div className="flex justify-between gap-4">
             <dt className="text-muted-foreground">{t("detail.summary.subtotal")}</dt>
-            <dd>{formatCurrency(order.subtotal, locale)}</dd>
+            <dd>{formatCurrency(order.subtotal, locale, order.currency)}</dd>
           </div>
           <div className="flex justify-between gap-4">
             <dt className="text-muted-foreground">{t("detail.summary.tax")}</dt>
-            <dd>{formatCurrency(order.tax, locale)}</dd>
+            <dd>{formatCurrency(order.tax, locale, order.currency)}</dd>
           </div>
           <div className="flex justify-between gap-4">
             <dt className="text-muted-foreground">{t("detail.summary.shipping")}</dt>
             <dd>
               {order.shipping === 0
                 ? t("detail.summary.free")
-                : formatCurrency(order.shipping, locale)}
+                : formatCurrency(order.shipping, locale, order.currency)}
             </dd>
           </div>
           <div className="flex justify-between gap-4 border-t border-border pt-2 font-semibold">
             <dt>{t("detail.summary.total")}</dt>
-            <dd>{formatCurrency(order.totalAmount, locale)}</dd>
+            <dd>{formatCurrency(order.totalAmount, locale, order.currency)}</dd>
           </div>
         </dl>
       </div>

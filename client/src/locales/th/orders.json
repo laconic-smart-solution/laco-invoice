@@ -1,6 +1,6 @@
 {
   "title": "จัดการคำสั่งซื้อ",
-  "subtitle": "จัดการและออกใบแจ้งหนี้คำสั่งซื้อ TikTok Shop อัตโนมัติ",
+  "subtitle": "จัดการและออกใบแจ้งหนี้คำสั่งซื้อจากมาร์เก็ตเพลสอัตโนมัติ",
   "actions": {
     "export_csv": "ส่งออก CSV",
     "sync_orders": "ซิงก์คำสั่งซื้อ",
@@ -8,10 +8,8 @@
   },
   "filters": {
     "store_label": "ร้านค้ามาร์เก็ตเพลส",
-    "store_all": "ร้าน TikTok ทั้งหมด",
-    "store_tiktok_us": "TikTok Shop US",
-    "store_tiktok_uk": "TikTok Shop UK",
-    "store_tiktok_sg": "TikTok Shop SG",
+    "store_all": "ร้านที่เชื่อมต่อทั้งหมด",
+    "store_placeholder": "เลือกร้านค้า",
     "date_range_label": "ช่วงวันที่",
     "date_range_value": "01 ต.ค. - 24 ต.ค. 2023",
     "status_label": "สถานะคำสั่งซื้อ",
@@ -20,6 +18,7 @@
   },
   "table": {
     "empty": "ไม่พบคำสั่งซื้อ",
+    "loading": "กำลังโหลดคำสั่งซื้อ…",
     "select_all": "เลือกทั้งหมด",
     "select_row": "เลือกแถว",
     "selected_count_one": "เลือก {{count}} รายการ",
@@ -46,6 +45,13 @@
     "pending": "รอดำเนินการ",
     "failed": "ล้มเหลว"
   },
+  "order_status": {
+    "pending": "รอดำเนินการ",
+    "confirmed": "ยืนยันแล้ว",
+    "shipped": "จัดส่งแล้ว",
+    "delivered": "ส่งมอบแล้ว",
+    "cancelled": "ยกเลิก"
+  },
   "confirm": {
     "generate": {
       "title": "สร้างใบแจ้งหนี้?",
@@ -53,6 +59,7 @@
     }
   },
   "detail": {
+    "loading": "กำลังโหลดคำสั่งซื้อ…",
     "back_to_orders": "กลับไปคำสั่งซื้อ",
     "placed_on": "สั่งซื้อเมื่อ {{date}}",
     "view_invoice": "ดูใบแจ้งหนี้",
@@ -81,5 +88,9 @@
       "free": "ฟรี",
       "total": "ยอดรวม"
     }
+  },
+  "errors": {
+    "load_failed": "โหลดคำสั่งซื้อไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "sync_failed": "ซิงก์คำสั่งซื้อไม่สำเร็จ กรุณาลองอีกครั้ง"
   }
 }

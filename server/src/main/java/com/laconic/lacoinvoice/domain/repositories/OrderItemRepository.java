@@ -7,4 +7,6 @@ import com.laconic.lacoinvoice.domain.models.OrderItem;
 
 @Repository
 public interface OrderItemRepository extends BaseRepository<OrderItem> {
+
+	void deleteByOrder_Id(Long orderId);
 }

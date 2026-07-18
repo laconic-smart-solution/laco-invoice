@@ -110,6 +110,8 @@ public class OrderSyncService {
 			customer = new CustomerInfo();
 		}
 		customer.setStore(store);
+		customer.setName(payload.customerName());
+		customer.setEmail(payload.customerEmail());
 		customer.setPhone(payload.customerPhone());
 		customer.setGender(payload.customerGender());
 		customer.setAddress(payload.customerAddress());
@@ -124,9 +126,11 @@ public class OrderSyncService {
 		order.setSubtotal(payload.subtotal());
 		order.setShippingFee(payload.shippingFee());
 		order.setTotalAmount(payload.totalAmount());
+		order.setCurrency(payload.currency());
 		order.setOrderDate(payload.orderDate());
 		Order saved = orderRepository.save(order);
 
+		orderItemRepository.deleteByOrder_Id(saved.getId());
 		if (payload.items() != null) {
 			for (MarketplaceFetchedOrderItem itemPayload : payload.items()) {
 				OrderItem item = new OrderItem();

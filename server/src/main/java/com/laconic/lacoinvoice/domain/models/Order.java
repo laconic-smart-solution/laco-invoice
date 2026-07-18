@@ -50,6 +50,9 @@ public class Order extends StoreScopedEntity {
 	@Column(name = "total_amount", precision = 18, scale = 2)
 	private BigDecimal totalAmount;
 
+	@Column(length = 3)
+	private String currency;
+
 	@Column(name = "order_date")
 	private Instant orderDate;
 }

@@ -3,7 +3,12 @@ import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 
-export function OrdersHeader() {
+interface OrdersHeaderProps {
+  onSync?: () => void
+  isSyncing?: boolean
+}
+
+export function OrdersHeader({ onSync, isSyncing = false }: OrdersHeaderProps) {
   const { t } = useTranslation("orders")
 
   return (
@@ -16,8 +21,13 @@ export function OrdersHeader() {
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Button variant="outline" className="border-primary text-primary">
-          <RefreshCw data-icon="inline-start" />
+        <Button
+          variant="outline"
+          className="border-primary text-primary"
+          onClick={onSync}
+          disabled={isSyncing || !onSync}
+        >
+          <RefreshCw data-icon="inline-start" className={isSyncing ? "animate-spin" : undefined} />
           {t("actions.sync_orders")}
         </Button>
         <Button variant="outline">

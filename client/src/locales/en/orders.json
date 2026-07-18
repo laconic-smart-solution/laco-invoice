@@ -1,6 +1,6 @@
 {
   "title": "Order Management",
-  "subtitle": "Manage and automate TikTok Shop order invoicing.",
+  "subtitle": "Manage and automate marketplace order invoicing.",
   "actions": {
     "export_csv": "Export CSV",
     "sync_orders": "Sync Orders",
@@ -8,10 +8,8 @@
   },
   "filters": {
     "store_label": "Marketplace Store",
-    "store_all": "All TikTok Stores",
-    "store_tiktok_us": "TikTok Shop US",
-    "store_tiktok_uk": "TikTok Shop UK",
-    "store_tiktok_sg": "TikTok Shop SG",
+    "store_all": "All connected stores",
+    "store_placeholder": "Select a store",
     "date_range_label": "Date Range",
     "date_range_value": "Oct 01 - Oct 24, 2023",
     "status_label": "Order Status",
@@ -20,6 +18,7 @@
   },
   "table": {
     "empty": "No orders found.",
+    "loading": "Loading orders…",
     "select_all": "Select all",
     "select_row": "Select row",
     "selected_count_one": "{{count}} Order Selected",
@@ -46,6 +45,13 @@
     "pending": "Pending",
     "failed": "Failed"
   },
+  "order_status": {
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "shipped": "Shipped",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled"
+  },
   "confirm": {
     "generate": {
       "title": "Generate invoice?",
@@ -53,6 +59,7 @@
     }
   },
   "detail": {
+    "loading": "Loading order…",
     "back_to_orders": "Back to Orders",
     "placed_on": "Placed on {{date}}",
     "view_invoice": "View Invoice",
@@ -81,5 +88,9 @@
       "free": "Free",
       "total": "Total"
     }
+  },
+  "errors": {
+    "load_failed": "Unable to load orders. Please try again.",
+    "sync_failed": "Unable to sync orders. Please try again."
   }
 }

@@ -1,5 +1,6 @@
 package com.laconic.lacoinvoice.integration.marketplace.client;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,11 +17,13 @@ import com.laconic.lacoinvoice.config.CommunicationProperties;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayApiResponse;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayAuthorizeUrlData;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayOrderItemData;
+import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayOrderLineItemData;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayOrderListData;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayProductDetailData;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayProductListData;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayStoreData;
 import com.laconic.lacoinvoice.integration.marketplace.order.GatewayOrderData;
+import com.laconic.lacoinvoice.integration.marketplace.order.GatewayOrderLineItem;
 
 public abstract class AbstractMarketplaceGatewayClient implements MarketplaceGatewayClient {
 
@@ -100,9 +103,20 @@ public abstract class AbstractMarketplaceGatewayClient implements MarketplaceGat
 	}
 
 	@Override
-	public List<GatewayOrderData> listOrders(UUID tenantId, String accessToken, String sellerId, String updatedFrom) {
+	public List<GatewayOrderData> listOrders(
+			UUID tenantId,
+			String accessToken,
+			String sellerId,
+			String updatedFrom,
+			int page,
+			int limit) {
+		int safePage = page < 1 ? 1 : page;
+		int safeLimit = limit < 1 ? 20 : Math.min(limit, 100);
+
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(resolveApiUrl("/api/v1/orders"))
-				.queryParam("access_token", accessToken);
+				.queryParam("access_token", accessToken)
+				.queryParam("page", safePage)
+				.queryParam("limit", safeLimit);
 		if (sellerId != null && !sellerId.isBlank()) {
 			builder.queryParam("seller_id", sellerId);
 		}
@@ -190,12 +204,47 @@ public abstract class AbstractMarketplaceGatewayClient implements MarketplaceGat
 				orderedAt = null;
 			}
 		}
+		List<GatewayOrderLineItem> lineItems = List.of();
+		if (item.items() != null && !item.items().isEmpty()) {
+			lineItems = item.items().stream().map(this::toOrderLineItem).toList();
+		}
 		return new GatewayOrderData(
 				item.externalOrderId(),
 				item.status(),
 				item.totalAmount(),
 				item.currency(),
-				orderedAt);
+				orderedAt,
+				item.customerName(),
+				item.customerEmail(),
+				item.customerPhone(),
+				item.customerAddress(),
+				lineItems);
+	}
+
+	private GatewayOrderLineItem toOrderLineItem(GatewayOrderLineItemData item) {
+		BigDecimal price = parseAmount(item.price());
+		int quantity = item.quantity() != null && item.quantity() > 0 ? item.quantity() : 1;
+		BigDecimal lineTotal = parseAmount(item.lineTotal());
+		if (lineTotal.compareTo(BigDecimal.ZERO) == 0 && price.compareTo(BigDecimal.ZERO) > 0) {
+			lineTotal = price.multiply(BigDecimal.valueOf(quantity));
+		}
+		return new GatewayOrderLineItem(
+				item.sku(),
+				item.productName(),
+				price,
+				quantity,
+				lineTotal);
+	}
+
+	private static BigDecimal parseAmount(String raw) {
+		if (raw == null || raw.isBlank()) {
+			return BigDecimal.ZERO;
+		}
+		try {
+			return new BigDecimal(raw.trim());
+		} catch (NumberFormatException ex) {
+			return BigDecimal.ZERO;
+		}
 	}
 
 	protected <T> T exchange(
@@ -211,6 +260,7 @@ public abstract class AbstractMarketplaceGatewayClient implements MarketplaceGat
 			if (actorId != null) {
 				request = request.header("X-Actor-ID", actorId.toString());
 			}
+			request = applyVendorHeaders(request);
 			GatewayApiResponse<T> envelope = request.retrieve().body(type);
 			if (envelope == null) {
 				throw new BadGatewayException(serviceLabel + " returned an empty response.");
@@ -229,6 +279,17 @@ public abstract class AbstractMarketplaceGatewayClient implements MarketplaceGat
 		} catch (Exception e) {
 			throw new BadGatewayException(serviceLabel + " request failed: " + e.getMessage(), e);
 		}
+	}
+
+	/**
+	 * Marketplace-specific headers (e.g. Lazada app credentials). Default: no-op.
+	 */
+	protected RestClient.RequestHeadersSpec<?> applyVendorHeaders(RestClient.RequestHeadersSpec<?> request) {
+		return request;
+	}
+
+	protected CommunicationProperties properties() {
+		return properties;
 	}
 
 	String resolveApiUrl(String path) {

@@ -1,6 +1,6 @@
 {
   "title": "အော်ဒါ စီမံမှု",
-  "subtitle": "TikTok Shop အော်ဒါများကို စီမံပြီး ငွေတောင်းခံလွှာ အလိုအလျောက် ထုတ်ပါ။",
+  "subtitle": "Marketplace အော်ဒါများကို စီမံပြီး ငွေတောင်းခံလွှာ အလိုအလျောက် ထုတ်ပါ။",
   "actions": {
     "export_csv": "CSV ထုတ်ရန်",
     "sync_orders": "အော်ဒါ Sync လုပ်ရန်",
@@ -8,10 +8,8 @@
   },
   "filters": {
     "store_label": "Marketplace ဆိုင်",
-    "store_all": "TikTok ဆိုင်အားလုံး",
-    "store_tiktok_us": "TikTok Shop US",
-    "store_tiktok_uk": "TikTok Shop UK",
-    "store_tiktok_sg": "TikTok Shop SG",
+    "store_all": "ချိတ်ဆက်ထားသော ဆိုင်အားလုံး",
+    "store_placeholder": "ဆိုင်ရွေးပါ",
     "date_range_label": "ရက်စွဲ အကွာအဝေး",
     "date_range_value": "Oct 01 - Oct 24, 2023",
     "status_label": "အော်ဒါ အခြေအနေ",
@@ -20,6 +18,7 @@
   },
   "table": {
     "empty": "အော်ဒါ မတွေ့ပါ။",
+    "loading": "အော်ဒါများ တင်နေသည်…",
     "select_all": "အားလုံး ရွေးရန်",
     "select_row": "Row ရွေးရန်",
     "selected_count_one": "အော်ဒါ {{count}} ခု ရွေးထားသည်",
@@ -46,6 +45,13 @@
     "pending": "စောင့်ဆိုင်းနေ",
     "failed": "မအောင်မြင်"
   },
+  "order_status": {
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "shipped": "Shipped",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled"
+  },
   "confirm": {
     "generate": {
       "title": "ငွေတောင်းခံလွှာ ထုတ်မလား?",
@@ -53,6 +59,7 @@
     }
   },
   "detail": {
+    "loading": "အော်ဒါ တင်နေသည်…",
     "back_to_orders": "အော်ဒါစာရင်းသို့ ပြန်သွားရန်",
     "placed_on": "{{date}} တွင် မှာယူခဲ့သည်",
     "view_invoice": "ငွေတောင်းခံလွှာ ကြည့်ရန်",
@@ -81,5 +88,9 @@
       "free": "အခမဲ့",
       "total": "စုစုပေါင်း"
     }
+  },
+  "errors": {
+    "load_failed": "အော်ဒါများ မတင်နိုင်ပါ။ ထပ်ကြိုးစားပါ။",
+    "sync_failed": "အော်ဒါများ sync မလုပ်နိုင်ပါ။ ထပ်ကြိုးစားပါ။"
   }
 }

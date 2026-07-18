@@ -1,6 +1,6 @@
 {
   "title": "订单管理",
-  "subtitle": "管理和自动化 TikTok Shop 订单开票。",
+  "subtitle": "管理和自动化各 marketplace 订单开票。",
   "actions": {
     "export_csv": "导出 CSV",
     "sync_orders": "同步订单",
@@ -8,10 +8,8 @@
   },
   "filters": {
     "store_label": "市场店铺",
-    "store_all": "所有 TikTok 店铺",
-    "store_tiktok_us": "TikTok Shop US",
-    "store_tiktok_uk": "TikTok Shop UK",
-    "store_tiktok_sg": "TikTok Shop SG",
+    "store_all": "所有已连接店铺",
+    "store_placeholder": "选择店铺",
     "date_range_label": "日期范围",
     "date_range_value": "2023年10月01日 - 10月24日",
     "status_label": "订单状态",
@@ -20,6 +18,7 @@
   },
   "table": {
     "empty": "暂无订单。",
+    "loading": "正在加载订单…",
     "select_all": "全选",
     "select_row": "选择行",
     "selected_count_one": "已选择 {{count}} 个订单",
@@ -46,6 +45,13 @@
     "pending": "待处理",
     "failed": "失败"
   },
+  "order_status": {
+    "pending": "待处理",
+    "confirmed": "已确认",
+    "shipped": "已发货",
+    "delivered": "已送达",
+    "cancelled": "已取消"
+  },
   "confirm": {
     "generate": {
       "title": "生成发票？",
@@ -53,6 +59,7 @@
     }
   },
   "detail": {
+    "loading": "正在加载订单…",
     "back_to_orders": "返回订单列表",
     "placed_on": "下单于 {{date}}",
     "view_invoice": "查看发票",
@@ -81,5 +88,9 @@
       "free": "免费",
       "total": "合计"
     }
+  },
+  "errors": {
+    "load_failed": "无法加载订单列表，请重试。",
+    "sync_failed": "无法同步订单，请重试。"
   }
 }

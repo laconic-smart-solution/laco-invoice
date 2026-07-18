@@ -29,3 +29,7 @@ app:
   users:
     default-admin:
       auth-server-user-id: ${DEFAULT_ADMIN_AUTH_SERVER_USER_ID:f14b9e92-0acf-42d3-9a85-cabc7d994c93}
+  # Lazada Open Platform credentials (caller-owned; forwarded as X-Lazada-App-Key/Secret)
+  communication:
+    lazada-app-key: ${LAZADA_APP_KEY:139411}
+    lazada-app-secret: ${LAZADA_APP_SECRET:JGDsqR9i0CvXXgdqNOW9tdFuUeBXZmXe}

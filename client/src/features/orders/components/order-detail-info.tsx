@@ -46,7 +46,13 @@ export function OrderDetailInfo({ order, locale }: OrderDetailInfoProps) {
           <DetailField
             icon={Calendar}
             label={t("table.columns.order_date")}
-            value={formatDate(order.orderDate, locale)}
+            value={
+              order.orderDate &&
+              !Number.isNaN(new Date(order.orderDate).getTime()) &&
+              new Date(order.orderDate).getFullYear() >= 1971
+                ? formatDate(order.orderDate, locale)
+                : "—"
+            }
           />
           {order.lastSyncedAt ? (
             <DetailField

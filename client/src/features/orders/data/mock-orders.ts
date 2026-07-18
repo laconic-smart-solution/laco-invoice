@@ -90,6 +90,7 @@ function buildMockOrder(globalIndex: number): OrderDetail {
     customerEmail: `${emailSlug}@example.com`,
     shippingAddress: `${100 + (globalIndex % 900)} Market Street, Suite ${(globalIndex % 40) + 1}, San Francisco, CA 94103`,
     totalAmount,
+    currency: "USD",
     subtotal,
     tax,
     shipping,
