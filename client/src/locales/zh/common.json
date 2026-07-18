@@ -30,7 +30,8 @@
     },
     "view": {
       "columns": "列",
-      "toggle_columns": "切换列显示"
+      "toggle_columns": "切换列显示",
+      "reset_columns": "重置列"
     }
   },
   "time": {

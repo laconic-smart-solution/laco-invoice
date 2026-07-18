@@ -30,7 +30,8 @@
     },
     "view": {
       "columns": "ကော်လံများ",
-      "toggle_columns": "ကော်လံ ပြ/ဖျောက်"
+      "toggle_columns": "ကော်လံ ပြ/ဖျောက်",
+      "reset_columns": "Reset column"
     }
   },
   "time": {

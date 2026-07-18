@@ -30,7 +30,8 @@
     },
     "view": {
       "columns": "คอลัมน์",
-      "toggle_columns": "แสดง/ซ่อนคอลัมน์"
+      "toggle_columns": "แสดง/ซ่อนคอลัมน์",
+      "reset_columns": "รีเซ็ตคอลัมน์"
     }
   },
   "time": {

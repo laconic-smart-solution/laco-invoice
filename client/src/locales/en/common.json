@@ -30,7 +30,8 @@
     },
     "view": {
       "columns": "Columns",
-      "toggle_columns": "Toggle columns"
+      "toggle_columns": "Toggle columns",
+      "reset_columns": "Reset column"
     }
   },
   "time": {

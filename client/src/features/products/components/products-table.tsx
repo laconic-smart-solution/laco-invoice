@@ -1,4 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table"
+import { RotateCcw } from "lucide-react"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate } from "react-router-dom"
@@ -13,6 +14,7 @@ import { DataTableViewOptions } from "@/components/common/data-table/data-table-
 import { useDataTable } from "@/components/common/data-table/use-data-table"
 import { StatusBadge } from "@/components/common/status-badge"
 import type { StatusBadgeVariant } from "@/components/common/status-badge"
+import { Button } from "@/components/ui/button"
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import {
   Tooltip,
@@ -81,6 +83,7 @@ export function ProductsTable({
   onLimitChange,
 }: ProductsTableProps) {
   const { t } = useTranslation("products")
+  const { t: tCommon } = useTranslation("common")
   const navigate = useNavigate()
   const locale = useLocaleStore((state) => state.locale)
 
@@ -225,9 +228,25 @@ export function ProductsTable({
     getRowId: (row) => String(row.id),
   })
 
+  const handleResetColumns = () => {
+    table.resetColumnVisibility()
+    table.resetColumnFilters()
+    table.resetSorting()
+  }
+
   return (
     <section className="border border-border bg-card shadow-sm">
-      <div className="flex items-center justify-end border-b border-border px-4 py-3">
+      <div className="flex items-center justify-end gap-2 border-b border-border px-4 py-3">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="h-8 gap-1.5"
+          onClick={handleResetColumns}
+        >
+          <RotateCcw className="size-3.5" />
+          {tCommon("table.view.reset_columns")}
+        </Button>
         <DataTableViewOptions table={table} columnLabels={columnLabels} />
       </div>
 

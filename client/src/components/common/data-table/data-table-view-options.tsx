@@ -38,7 +38,7 @@ export function DataTableViewOptions<TData>({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="ml-auto h-8 gap-1.5">
+        <Button variant="outline" size="sm" className="h-8 gap-1.5">
           <Settings2 className="size-3.5" />
           {t("table.view.columns")}
         </Button>
