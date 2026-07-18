@@ -15,8 +15,11 @@
     "start_failed": "ไม่สามารถเริ่มซิงก์สินค้าได้"
   },
   "filters": {
+    "search_label": "ค้นหา",
+    "search_placeholder": "ค้นหาด้วยชื่อ SKU หรือรหัสสินค้า",
     "marketplace_label": "แหล่ง Marketplace",
     "marketplace_placeholder": "เลือกร้านค้าที่เชื่อมต่อแล้ว",
+    "marketplace_all": "ทั้งหมด",
     "erp_status_label": "สถานะ ERP",
     "erp_status": {
       "all": "ทั้งหมด",
@@ -26,6 +29,13 @@
     "price_range_label": "ช่วงราคา",
     "price_min": "ต่ำสุด",
     "price_max": "สูงสุด",
+    "price_sort_label": "เรียงตามราคา",
+    "price_sort_placeholder": "เลือกลำดับการเรียง",
+    "price_sort": {
+      "none": "ค่าเริ่มต้น",
+      "asc": "ต่ำไปสูง",
+      "desc": "สูงไปต่ำ"
+    },
     "reset_view": "รีเซ็ตมุมมอง"
   },
   "erp_status": {

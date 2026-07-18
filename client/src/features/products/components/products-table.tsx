@@ -1,5 +1,4 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { Pencil } from "lucide-react"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate } from "react-router-dom"
@@ -7,8 +6,10 @@ import { Link, useNavigate } from "react-router-dom"
 import { ROUTES } from "@/app/constants/routes"
 
 import { DataTable } from "@/components/common/data-table/data-table"
+import { DataTableColumnHeader } from "@/components/common/data-table/data-table-column-header"
 import { DataTableFooter } from "@/components/common/data-table/data-table-footer"
 import { DataTableRowActions } from "@/components/common/data-table/data-table-row-actions"
+import { DataTableViewOptions } from "@/components/common/data-table/data-table-view-options"
 import { useDataTable } from "@/components/common/data-table/use-data-table"
 import { StatusBadge } from "@/components/common/status-badge"
 import type { StatusBadgeVariant } from "@/components/common/status-badge"
@@ -36,18 +37,16 @@ function ProductRowAction({ product }: ProductRowActionProps) {
 
   return (
     <DataTableRowActions>
+      <DropdownMenuItem asChild>
+        <Link to={ROUTES.dashboard.productDetail(product.id)}>
+          {t("table.actions.view_details")}
+        </Link>
+      </DropdownMenuItem>
       {product.erpStatus === "unmapped" ? (
         <DropdownMenuItem onSelect={() => undefined}>
           {t("table.actions.map_to_erp")}
         </DropdownMenuItem>
-      ) : (
-        <DropdownMenuItem asChild>
-          <Link to={ROUTES.dashboard.productDetail(product.id)}>
-            <Pencil aria-hidden />
-            {t("table.actions.view_details")}
-          </Link>
-        </DropdownMenuItem>
-      )}
+      ) : null}
     </DataTableRowActions>
   )
 }
@@ -92,11 +91,28 @@ export function ProductsTable({
     [navigate]
   )
 
+  const columnLabels = useMemo(
+    () => ({
+      store_marketplace: t("table.columns.store_marketplace"),
+      product_sku: t("table.columns.product_sku"),
+      name: t("table.columns.name"),
+      price: t("table.columns.price"),
+      erpStatus: t("table.columns.erp_status"),
+    }),
+    [t]
+  )
+
   const columns = useMemo<ColumnDef<ProductTableRow>[]>(
     () => [
       {
         id: "store_marketplace",
-        header: t("table.columns.store_marketplace"),
+        accessorFn: (row) => `${row.storeName} ${row.marketplaceName}`,
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.store_marketplace")}
+          />
+        ),
         cell: ({ row }) => (
           <div className="min-w-[160px] space-y-0.5">
             <p className="text-sm text-foreground">{row.original.storeName}</p>
@@ -106,7 +122,13 @@ export function ProductsTable({
       },
       {
         id: "product_sku",
-        header: t("table.columns.product_sku"),
+        accessorFn: (row) => `${row.externalProductId} ${row.sku ?? ""}`,
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.product_sku")}
+          />
+        ),
         cell: ({ row }) => (
           <div className="min-w-[180px] space-y-1.5">
             <p className="text-sm text-foreground">
@@ -122,7 +144,12 @@ export function ProductsTable({
       },
       {
         accessorKey: "name",
-        header: t("table.columns.name"),
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.name")}
+          />
+        ),
         cell: ({ getValue }) => {
           const name = getValue<string>()
 
@@ -142,7 +169,12 @@ export function ProductsTable({
       },
       {
         accessorKey: "price",
-        header: t("table.columns.price"),
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.price")}
+          />
+        ),
         cell: ({ row }) => {
           const amount = Number.parseFloat(row.original.price)
           const currency = row.original.currency || "USD"
@@ -158,7 +190,12 @@ export function ProductsTable({
       },
       {
         accessorKey: "erpStatus",
-        header: t("table.columns.erp_status"),
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.erp_status")}
+          />
+        ),
         cell: ({ getValue }) => {
           const status = getValue<ProductErpStatus>()
           return (
@@ -173,6 +210,9 @@ export function ProductsTable({
       {
         id: "action",
         header: t("table.columns.action"),
+        enableSorting: false,
+        enableHiding: false,
+        enableColumnFilter: false,
         cell: ({ row }) => <ProductRowAction product={row.original} />,
       },
     ],
@@ -187,6 +227,10 @@ export function ProductsTable({
 
   return (
     <section className="border border-border bg-card shadow-sm">
+      <div className="flex items-center justify-end border-b border-border px-4 py-3">
+        <DataTableViewOptions table={table} columnLabels={columnLabels} />
+      </div>
+
       <div className="overflow-x-auto">
         <DataTable
           table={table}

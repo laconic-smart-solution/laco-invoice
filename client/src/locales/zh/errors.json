@@ -14,5 +14,16 @@
       "orders": "订单",
       "customers": "客户"
     }
+  },
+  "something_went_wrong": {
+    "page_title": "出错了 | Laco Invoice",
+    "code": "Error",
+    "title": "出了点问题",
+    "description": "加载此页面时发生了意外错误。您可以重试，或返回安全页面。",
+    "details_label": "错误详情",
+    "try_again": "重试",
+    "go_home": "返回仪表盘",
+    "go_login": "前往登录",
+    "go_back": "返回上一页"
   }
 }

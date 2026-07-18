@@ -20,7 +20,18 @@
     "showing_range": "Showing {{start}} to {{end}} of {{total}}"
   },
   "table": {
-    "open_menu": "Open menu"
+    "open_menu": "Open menu",
+    "column": {
+      "search_placeholder": "Search...",
+      "search_aria": "Search {{column}}",
+      "sort_asc": "Asc",
+      "sort_desc": "Desc",
+      "hide": "Hide"
+    },
+    "view": {
+      "columns": "Columns",
+      "toggle_columns": "Toggle columns"
+    }
   },
   "time": {
     "minutes_ago_one": "{{count}} min ago",

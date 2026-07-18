@@ -1,4 +1,4 @@
-import { RefreshCw } from "lucide-react"
+import { RefreshCw, Search } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
@@ -11,7 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { MarketplaceProductSource, ProductFiltersState } from "@/features/products/types/product"
+import type {
+  MarketplaceProductSource,
+  ProductFiltersState,
+  ProductPriceSort,
+} from "@/features/products/types/product"
 import { ERP_STATUS_FILTER_OPTIONS } from "@/features/products/util/erp-status"
 import { buildProductSourceKey } from "@/shared/services/marketplace-product.service"
 import { cn } from "@/lib/utils"
@@ -23,6 +27,12 @@ interface ProductsFiltersProps {
   onChange: (value: ProductFiltersState) => void
   disabled?: boolean
 }
+
+const PRICE_SORT_OPTIONS: { value: ProductPriceSort; labelKey: string }[] = [
+  { value: "none", labelKey: "filters.price_sort.none" },
+  { value: "asc", labelKey: "filters.price_sort.asc" },
+  { value: "desc", labelKey: "filters.price_sort.desc" },
+]
 
 export function ProductsFilters({
   sources,
@@ -36,28 +46,57 @@ export function ProductsFilters({
   const handleReset = () => {
     onChange({
       sourceKey: "",
+      search: "",
       erpStatus: "all",
       priceMin: "",
       priceMax: "",
+      priceSort: "none",
     })
   }
 
   return (
-    <section className="border border-border bg-card p-4 shadow-sm">
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
+    <section
+      id="products-filters"
+      className="border border-border bg-card p-4 shadow-sm"
+    >
+      <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_auto] xl:items-end">
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground" htmlFor="products-search">
+            {t("filters.search_label")}
+          </Label>
+          <div className="relative">
+            <Search
+              className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden
+            />
+            <Input
+              id="products-search"
+              type="search"
+              placeholder={t("filters.search_placeholder")}
+              value={value.search}
+              onChange={(event) => onChange({ ...value, search: event.target.value })}
+              className="h-9 pl-8"
+              disabled={disabled}
+            />
+          </div>
+        </div>
+
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground">
             {t("filters.marketplace_label")}
           </Label>
           <Select
             value={selectedSourceKey}
-            onValueChange={(sourceKey) => onChange({ ...value, sourceKey })}
+            onValueChange={(sourceKey) =>
+              onChange({ ...value, sourceKey: sourceKey === "all" ? "" : sourceKey })
+            }
             disabled={disabled || sources.length === 0}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder={t("filters.marketplace_placeholder")} />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="all">{t("filters.marketplace_all")}</SelectItem>
               {sources.map((source) => {
                 const key = buildProductSourceKey(source.storeId, source.marketplaceCode)
                 return (
@@ -86,7 +125,7 @@ export function ProductsFilters({
                   value.erpStatus !== option.value && "text-muted-foreground"
                 )}
                 onClick={() => onChange({ ...value, erpStatus: option.value })}
-                disabled
+                disabled={disabled}
               >
                 {t(option.labelKey)}
               </Button>
@@ -119,6 +158,30 @@ export function ProductsFilters({
               disabled={disabled}
             />
           </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">
+            {t("filters.price_sort_label")}
+          </Label>
+          <Select
+            value={value.priceSort}
+            onValueChange={(priceSort) =>
+              onChange({ ...value, priceSort: priceSort as ProductPriceSort })
+            }
+            disabled={disabled}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={t("filters.price_sort_placeholder")} />
+            </SelectTrigger>
+            <SelectContent>
+              {PRICE_SORT_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {t(option.labelKey)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <Button className="shrink-0" onClick={handleReset} disabled={disabled}>

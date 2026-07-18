@@ -15,8 +15,11 @@
     "start_failed": "Could not start product sync."
   },
   "filters": {
+    "search_label": "Search",
+    "search_placeholder": "Search by name, SKU, or product ID",
     "marketplace_label": "Marketplace Source",
     "marketplace_placeholder": "Select a connected store",
+    "marketplace_all": "All",
     "erp_status_label": "ERP Status",
     "erp_status": {
       "all": "All",
@@ -26,6 +29,13 @@
     "price_range_label": "Price Range",
     "price_min": "Min",
     "price_max": "Max",
+    "price_sort_label": "Sort by Price",
+    "price_sort_placeholder": "Select sort order",
+    "price_sort": {
+      "none": "Default",
+      "asc": "Low to High",
+      "desc": "High to Low"
+    },
     "reset_view": "Reset View"
   },
   "erp_status": {

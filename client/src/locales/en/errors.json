@@ -14,5 +14,16 @@
       "orders": "Orders",
       "customers": "Customers"
     }
+  },
+  "something_went_wrong": {
+    "page_title": "Something went wrong | Laco Invoice",
+    "code": "Error",
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred while loading this page. You can try again, or return to a safe page.",
+    "details_label": "Error details",
+    "try_again": "Try again",
+    "go_home": "Go to dashboard",
+    "go_login": "Go to sign in",
+    "go_back": "Go back"
   }
 }

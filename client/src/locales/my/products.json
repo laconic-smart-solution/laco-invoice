@@ -15,8 +15,11 @@
     "start_failed": "ကုန်ပစ္စည်း sync စတင်၍ မရပါ။"
   },
   "filters": {
+    "search_label": "ရှာရန်",
+    "search_placeholder": "အမည်၊ SKU သို့မဟုတ် ကုန်ပစ္စည်း ID ဖြင့် ရှာရန်",
     "marketplace_label": "Marketplace အရင်းအမြစ်",
     "marketplace_placeholder": "ချိတ်ဆက်ထားသော ဆိုင်ကို ရွေးပါ",
+    "marketplace_all": "အားလုံး",
     "erp_status_label": "ERP အခြေအနေ",
     "erp_status": {
       "all": "အားလုံး",
@@ -26,6 +29,13 @@
     "price_range_label": "စျေးနှုန်းအကွာအဝေး",
     "price_min": "အနည်းဆုံး",
     "price_max": "အများဆုံး",
+    "price_sort_label": "စျေးနှုန်းအလိုက် စီရန်",
+    "price_sort_placeholder": "စီစဉ်ပုံ ရွေးပါ",
+    "price_sort": {
+      "none": "ပုံမှန်",
+      "asc": "နည်းမှများ",
+      "desc": "များမှနည်း"
+    },
     "reset_view": "မြင်ကွင်းပြန်သတ်မှတ်ရန်"
   },
   "erp_status": {

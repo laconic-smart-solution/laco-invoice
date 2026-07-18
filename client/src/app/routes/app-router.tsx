@@ -31,123 +31,129 @@ import { ProtectedRoute } from "@/components/common/protected-route"
 import { AuthLayout } from "@/components/layouts/auth-layout"
 import { DashboardLayout } from "@/components/layouts/dashboard-layout"
 import { NotFoundPage } from "@/features/errors/pages/not-found-page"
+import { SomethingWentWrongPage } from "@/features/errors/pages/something-went-wrong-page"
 
 export const router = createBrowserRouter([
   {
-    element: <ProtectedRoute />,
+    errorElement: <SomethingWentWrongPage />,
     children: [
       {
-        element: <DashboardLayout />,
-        children: [
-      {
-        index: true,
-        element: <DashboardPage />,
-      },
-      {
-        path: ROUTES.dashboard.stores,
-        element: <StoresPage />,
-      },
-      {
-        path: ROUTES.dashboard.storeCreate,
-        element: <CreateStorePage />,
-      },
-      {
-        path: `${ROUTES.dashboard.stores}/:marketplace/callback`,
-        element: <MarketplaceOAuthCallbackPage />,
-      },
-      {
-        path: `${ROUTES.dashboard.stores}/:storeId`,
-        element: <StoreDetailPage />,
-      },
-      {
-        path: ROUTES.dashboard.products,
-        element: <ProductsPage />,
-      },
-      {
-        path: `${ROUTES.dashboard.products}/:productId`,
-        element: <ProductDetailPage />,
-      },
-      {
-        path: ROUTES.dashboard.orders,
-        element: <OrdersPage />,
-      },
-      {
-        path: `${ROUTES.dashboard.orders}/:orderId`,
-        element: <OrderDetailPage />,
-      },
-      {
-        path: ROUTES.dashboard.invoices,
-        element: <InvoicesPage />,
-      },
-      {
-        path: `${ROUTES.dashboard.invoices}/:invoiceId`,
-        element: <InvoiceDetailPage />,
-      },
-      {
-        path: ROUTES.dashboard.customers,
-        element: <CustomersPage />,
-      },
-      {
-        path: ROUTES.dashboard.customerCreate,
-        element: <CreateCustomerPage />,
-      },
-      {
-        path: `${ROUTES.dashboard.customers}/:customerId/edit`,
-        element: <EditCustomerPage />,
-      },
-      {
-        element: <AdminRoute />,
+        element: <ProtectedRoute />,
         children: [
           {
-            path: ROUTES.dashboard.users,
-            element: <UsersPage />,
-          },
-          {
-            path: ROUTES.dashboard.userCreate,
-            element: <CreateUserPage />,
+            element: <DashboardLayout />,
+            children: [
+              {
+                index: true,
+                element: <DashboardPage />,
+              },
+              {
+                path: ROUTES.dashboard.stores,
+                element: <StoresPage />,
+              },
+              {
+                path: ROUTES.dashboard.storeCreate,
+                element: <CreateStorePage />,
+              },
+              {
+                path: `${ROUTES.dashboard.stores}/:marketplace/callback`,
+                element: <MarketplaceOAuthCallbackPage />,
+              },
+              {
+                path: `${ROUTES.dashboard.stores}/:storeId`,
+                element: <StoreDetailPage />,
+              },
+              {
+                path: ROUTES.dashboard.products,
+                element: <ProductsPage />,
+              },
+              {
+                path: `${ROUTES.dashboard.products}/:productId`,
+                element: <ProductDetailPage />,
+              },
+              {
+                path: ROUTES.dashboard.orders,
+                element: <OrdersPage />,
+              },
+              {
+                path: `${ROUTES.dashboard.orders}/:orderId`,
+                element: <OrderDetailPage />,
+              },
+              {
+                path: ROUTES.dashboard.invoices,
+                element: <InvoicesPage />,
+              },
+              {
+                path: `${ROUTES.dashboard.invoices}/:invoiceId`,
+                element: <InvoiceDetailPage />,
+              },
+              {
+                path: ROUTES.dashboard.customers,
+                element: <CustomersPage />,
+              },
+              {
+                path: ROUTES.dashboard.customerCreate,
+                element: <CreateCustomerPage />,
+              },
+              {
+                path: `${ROUTES.dashboard.customers}/:customerId/edit`,
+                element: <EditCustomerPage />,
+              },
+              {
+                element: <AdminRoute />,
+                children: [
+                  {
+                    path: ROUTES.dashboard.users,
+                    element: <UsersPage />,
+                  },
+                  {
+                    path: ROUTES.dashboard.userCreate,
+                    element: <CreateUserPage />,
+                  },
+                ],
+              },
+              {
+                path: ROUTES.dashboard.settings,
+                element: <SectionPlaceholderPage />,
+              },
+            ],
           },
         ],
       },
       {
-        path: ROUTES.dashboard.settings,
-        element: <SectionPlaceholderPage />,
-      },
-        ],
-      },
-    ],
-  },
-  {
-    element: <GuestRoute />,
-    children: [
-      {
-        element: <AuthLayout />,
+        element: <GuestRoute />,
         children: [
-      {
-        path: ROUTES.auth.login,
-        element: <LoginPage />,
-      },
-      {
-        path: ROUTES.auth.register,
-        element: <RegisterPage />,
-      },
-      {
-        path: ROUTES.auth.forgotPassword,
-        element: <ForgotPasswordPage />,
-      },
-      {
-        path: ROUTES.auth.otpVerify,
-        element: <OtpVerifyPage />,
-      },
-      {
-        path: ROUTES.auth.resetPassword,
-        element: <ResetPasswordPage />,
-      },
+          {
+            element: <AuthLayout />,
+            children: [
+              {
+                path: ROUTES.auth.login,
+                element: <LoginPage />,
+              },
+              {
+                path: ROUTES.auth.register,
+                element: <RegisterPage />,
+              },
+              {
+                path: ROUTES.auth.forgotPassword,
+                element: <ForgotPasswordPage />,
+              },
+              {
+                path: ROUTES.auth.otpVerify,
+                element: <OtpVerifyPage />,
+              },
+              {
+                path: ROUTES.auth.resetPassword,
+                element: <ResetPasswordPage />,
+              },
+            ],
+          },
         ],
       },
+      {
+        path: "*",
+        element: <NotFoundPage />,
+      },
     ],
-  },
-  {
-    path: "*",
-    element: <NotFoundPage />,
   },
 ])

@@ -16,6 +16,7 @@ import {
   marketplaceProductKeys,
   useMarketplaceProductSourcesQuery,
   useMarketplaceProductSyncStatusQuery,
+  useMarketplaceProductsAcrossSourcesQuery,
   useMarketplaceProductsQuery,
   useStartMarketplaceProductSyncMutation,
 } from "@/shared/queries/marketplace-product.query"
@@ -27,9 +28,16 @@ import { useMarketplaceProductSyncSubscription } from "@/shared/hooks/use-market
 
 const DEFAULT_FILTERS: ProductFiltersState = {
   sourceKey: "",
+  search: "",
   erpStatus: "all",
   priceMin: "",
   priceMax: "",
+  priceSort: "none",
+}
+
+function parseProductPrice(price: string): number {
+  const parsed = Number.parseFloat(price)
+  return Number.isFinite(parsed) ? parsed : 0
 }
 
 export function ProductsPage() {
@@ -38,6 +46,7 @@ export function ProductsPage() {
   const [page, setPage] = useState(DEFAULT_PAGE)
   const [limit, setLimit] = useState(DEFAULT_LIMIT)
   const [filters, setFilters] = useState<ProductFiltersState>(DEFAULT_FILTERS)
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false)
   const [activeSyncRunId, setActiveSyncRunId] = useState<number | null>(null)
   const [syncMessage, setSyncMessage] = useState<string | null>(null)
 
@@ -47,32 +56,28 @@ export function ProductsPage() {
     error: sourcesError,
   } = useMarketplaceProductSourcesQuery()
 
-  const activeSourceKey = useMemo(() => {
-    if (filters.sourceKey) {
-      return filters.sourceKey
-    }
-    if (sources.length > 0) {
-      return buildProductSourceKey(sources[0].storeId, sources[0].marketplaceCode)
-    }
-    return ""
-  }, [filters.sourceKey, sources])
+  const isAllSources = !filters.sourceKey
+  const selectedSourceKey = filters.sourceKey || "all"
 
   const activeSource = useMemo(
     () =>
       sources.find(
         (source) =>
-          buildProductSourceKey(source.storeId, source.marketplaceCode) === activeSourceKey
+          buildProductSourceKey(source.storeId, source.marketplaceCode) ===
+          filters.sourceKey
       ) ?? null,
-    [activeSourceKey, sources]
+    [filters.sourceKey, sources]
   )
 
   const parsedSource = useMemo(
-    () => (activeSourceKey ? parseProductSourceKey(activeSourceKey) : null),
-    [activeSourceKey]
+    () => (filters.sourceKey ? parseProductSourceKey(filters.sourceKey) : null),
+    [filters.sourceKey]
   )
 
   const priceMin = filters.priceMin ? Number.parseFloat(filters.priceMin) : undefined
   const priceMax = filters.priceMax ? Number.parseFloat(filters.priceMax) : undefined
+  const resolvedPriceMin = Number.isFinite(priceMin) ? priceMin : undefined
+  const resolvedPriceMax = Number.isFinite(priceMax) ? priceMax : undefined
 
   const {
     data: productResult,
@@ -85,11 +90,24 @@ export function ProductsPage() {
           marketplaceCode: parsedSource.marketplaceCode,
           page,
           limit,
-          priceMin: Number.isFinite(priceMin) ? priceMin : undefined,
-          priceMax: Number.isFinite(priceMax) ? priceMax : undefined,
+          priceMin: resolvedPriceMin,
+          priceMax: resolvedPriceMax,
         }
       : null,
-    sources.length > 0
+    !isAllSources && sources.length > 0
+  )
+
+  const {
+    data: allProductsResult,
+    isLoading: allProductsLoading,
+    error: allProductsError,
+  } = useMarketplaceProductsAcrossSourcesQuery(
+    sources,
+    {
+      priceMin: resolvedPriceMin,
+      priceMax: resolvedPriceMax,
+    },
+    isAllSources && sources.length > 0
   )
 
   const startSyncMutation = useStartMarketplaceProductSyncMutation()
@@ -141,21 +159,74 @@ export function ProductsPage() {
     }
   }, [isSyncRunning, parsedSource, startSyncMutation, t])
 
-  const products = productResult?.items ?? []
+  const products = isAllSources
+    ? (allProductsResult?.items ?? [])
+    : (productResult?.items ?? [])
 
   const filteredProducts = useMemo(() => {
-    if (filters.erpStatus === "all") {
-      return products
-    }
-    return products.filter((product) => product.erpStatus === filters.erpStatus)
-  }, [filters.erpStatus, products])
+    const searchTerm = filters.search.trim().toLowerCase()
 
-  const totalCount = productResult?.total ?? 0
+    let next = products
+
+    if (searchTerm) {
+      next = next.filter((product) => {
+        const haystack = [
+          product.name,
+          product.sku,
+          product.externalProductId,
+          product.storeName,
+          product.marketplaceName,
+        ]
+          .join(" ")
+          .toLowerCase()
+        return haystack.includes(searchTerm)
+      })
+    }
+
+    if (filters.erpStatus !== "all") {
+      next = next.filter((product) => product.erpStatus === filters.erpStatus)
+    }
+
+    if (filters.priceSort === "asc" || filters.priceSort === "desc") {
+      const direction = filters.priceSort === "asc" ? 1 : -1
+      next = [...next].sort(
+        (a, b) =>
+          (parseProductPrice(a.price) - parseProductPrice(b.price)) * direction
+      )
+    }
+
+    return next
+  }, [filters.erpStatus, filters.priceSort, filters.search, products])
+
+  const hasClientFilters =
+    filters.search.trim().length > 0 ||
+    filters.erpStatus !== "all" ||
+    filters.priceSort !== "none"
+
+  const pagedProducts = useMemo(() => {
+    if (!isAllSources) {
+      return filteredProducts
+    }
+    const startIndex = (page - 1) * limit
+    return filteredProducts.slice(startIndex, startIndex + limit)
+  }, [filteredProducts, isAllSources, limit, page])
+
+  const totalCount =
+    isAllSources || hasClientFilters
+      ? filteredProducts.length
+      : (productResult?.total ?? 0)
   const pagination = getPaginationMeta(page, limit, totalCount)
 
   useEffect(() => {
     setPage(1)
-  }, [activeSourceKey, filters.priceMin, filters.priceMax, filters.erpStatus])
+  }, [
+    filters.sourceKey,
+    filters.search,
+    filters.erpStatus,
+    filters.priceMin,
+    filters.priceMax,
+    filters.priceSort,
+  ])
 
   const stats: ProductStats = useMemo(() => {
     const syncedCount = products.filter((product) => product.erpStatus === "synced").length
@@ -169,17 +240,21 @@ export function ProductsPage() {
     }
   }, [products])
 
+  const isProductsLoading = isAllSources ? allProductsLoading : productsLoading
+  const productsRequestError = isAllSources ? allProductsError : productsError
+
   const requestError =
     sourcesError != null
       ? t("errors.load_sources_failed")
-      : productsError != null
+      : productsRequestError != null
         ? t("errors.load_products_failed")
         : null
 
   const showEmptyConnections = !sourcesLoading && sources.length === 0
   const showNeverSynced =
+    !isAllSources &&
     !sourcesLoading &&
-    !productsLoading &&
+    !isProductsLoading &&
     activeSource != null &&
     activeSource.syncStatus == null &&
     totalCount === 0
@@ -189,7 +264,9 @@ export function ProductsPage() {
       <ProductsHeader
         isSyncing={isSyncRunning}
         canSync={parsedSource != null && !showEmptyConnections}
+        isFiltersOpen={isFiltersOpen}
         onSync={() => void handleSync()}
+        onToggleFilters={() => setIsFiltersOpen((open) => !open)}
       />
       <AuthFormError message={requestError ?? syncMessage} />
 
@@ -211,16 +288,18 @@ export function ProductsPage() {
       ) : (
         <>
           <ProductsStatCards stats={stats} />
-          <ProductsFilters
-            sources={sources}
-            value={filters}
-            selectedSourceKey={activeSourceKey}
-            onChange={setFilters}
-            disabled={sourcesLoading}
-          />
+          {isFiltersOpen ? (
+            <ProductsFilters
+              sources={sources}
+              value={filters}
+              selectedSourceKey={selectedSourceKey}
+              onChange={setFilters}
+              disabled={sourcesLoading}
+            />
+          ) : null}
           <ProductsTable
-            products={filteredProducts}
-            isLoading={sourcesLoading || productsLoading}
+            products={pagedProducts}
+            isLoading={sourcesLoading || isProductsLoading}
             totalCount={totalCount}
             page={pagination.page}
             limit={pagination.limit}

@@ -1,12 +1,17 @@
 import {
   getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
   useReactTable,
   type ColumnDef,
+  type ColumnFiltersState,
   type OnChangeFn,
   type RowSelectionState,
+  type SortingState,
   type TableOptions,
+  type VisibilityState,
 } from "@tanstack/react-table"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 
 import { createSelectColumn } from "@/components/common/data-table/select-column"
 
@@ -31,8 +36,15 @@ export function useDataTable<TData>({
   getRowId,
   state,
   onRowSelectionChange,
+  onSortingChange,
+  onColumnFiltersChange,
+  onColumnVisibilityChange,
   ...options
 }: UseDataTableOptions<TData>) {
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+
   const resolvedColumns = useMemo(() => {
     if (!enableRowSelection) {
       return columns
@@ -50,12 +62,28 @@ export function useDataTable<TData>({
     data,
     columns: resolvedColumns,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     enableRowSelection,
     getRowId,
-    state,
     onRowSelectionChange,
+    onSortingChange: onSortingChange ?? setSorting,
+    onColumnFiltersChange: onColumnFiltersChange ?? setColumnFilters,
+    onColumnVisibilityChange: onColumnVisibilityChange ?? setColumnVisibility,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      ...state,
+    },
     ...options,
   })
 }
 
-export type { OnChangeFn, RowSelectionState }
+export type {
+  ColumnFiltersState,
+  OnChangeFn,
+  RowSelectionState,
+  SortingState,
+  VisibilityState,
+}

@@ -20,7 +20,18 @@
     "showing_range": "แสดง {{start}} ถึง {{end}} จาก {{total}}"
   },
   "table": {
-    "open_menu": "เปิดเมนู"
+    "open_menu": "เปิดเมนู",
+    "column": {
+      "search_placeholder": "ค้นหา...",
+      "search_aria": "ค้นหา {{column}}",
+      "sort_asc": "น้อยไปมาก",
+      "sort_desc": "มากไปน้อย",
+      "hide": "ซ่อน"
+    },
+    "view": {
+      "columns": "คอลัมน์",
+      "toggle_columns": "แสดง/ซ่อนคอลัมน์"
+    }
   },
   "time": {
     "minutes_ago_one": "{{count}} นาทีที่แล้ว",

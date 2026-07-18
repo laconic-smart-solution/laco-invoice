@@ -8,14 +8,18 @@ interface ProductsHeaderProps {
   className?: string
   isSyncing?: boolean
   canSync?: boolean
+  isFiltersOpen?: boolean
   onSync?: () => void
+  onToggleFilters?: () => void
 }
 
 export function ProductsHeader({
   className,
   isSyncing = false,
   canSync = false,
+  isFiltersOpen = false,
   onSync,
+  onToggleFilters,
 }: ProductsHeaderProps) {
   const { t } = useTranslation("products")
 
@@ -54,7 +58,12 @@ export function ProductsHeader({
           />
           {t("actions.sync_now")}
         </Button>
-        <Button variant="outline" disabled>
+        <Button
+          variant={isFiltersOpen ? "default" : "outline"}
+          onClick={onToggleFilters}
+          aria-expanded={isFiltersOpen}
+          aria-controls="products-filters"
+        >
           <Filter data-icon="inline-start" />
           {t("actions.filter")}
         </Button>

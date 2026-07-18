@@ -20,7 +20,18 @@
     "showing_range": "显示第 {{start}}–{{end}} 条，共 {{total}} 条"
   },
   "table": {
-    "open_menu": "打开菜单"
+    "open_menu": "打开菜单",
+    "column": {
+      "search_placeholder": "搜索...",
+      "search_aria": "搜索 {{column}}",
+      "sort_asc": "升序",
+      "sort_desc": "降序",
+      "hide": "隐藏"
+    },
+    "view": {
+      "columns": "列",
+      "toggle_columns": "切换列显示"
+    }
   },
   "time": {
     "minutes_ago_one": "{{count}} 分钟前",

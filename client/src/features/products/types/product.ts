@@ -96,9 +96,13 @@ export interface MarketplaceProductStats {
   totalProducts: number
 }
 
+export type ProductPriceSort = "none" | "asc" | "desc"
+
 export interface ProductFiltersState {
   sourceKey: string
+  search: string
   erpStatus: ProductErpFilter
   priceMin: string
   priceMax: string
+  priceSort: ProductPriceSort
 }
