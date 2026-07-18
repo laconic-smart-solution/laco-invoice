@@ -55,7 +55,22 @@ export function mapOrderDtoToOrder(dto: ApiOrderDto): Order {
     customer: formatCustomerName(dto.customerName),
     totalAmount: dto.totalAmount,
     currency: resolveCurrency(dto),
-    syncStatus: "pending",
+    syncStatus: mapOrderStatusToSyncBadge(dto.orderStatus),
+  }
+}
+
+function mapOrderStatusToSyncBadge(
+  status: ApiOrderDto["orderStatus"] | undefined
+): Order["syncStatus"] {
+  switch (status) {
+    case "SHIPPED":
+    case "DELIVERED":
+    case "CONFIRMED":
+      return "synced"
+    case "CANCELLED":
+      return "failed"
+    default:
+      return "pending"
   }
 }
 

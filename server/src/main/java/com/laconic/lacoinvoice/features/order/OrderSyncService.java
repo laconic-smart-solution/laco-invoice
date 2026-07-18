@@ -130,8 +130,10 @@ public class OrderSyncService {
 		order.setOrderDate(payload.orderDate());
 		Order saved = orderRepository.save(order);
 
-		orderItemRepository.deleteByOrder_Id(saved.getId());
-		if (payload.items() != null) {
+		// Only replace line items when the marketplace returned some.
+		// Empty list usually means item enrichment failed — do not wipe existing rows.
+		if (payload.items() != null && !payload.items().isEmpty()) {
+			orderItemRepository.deleteByOrder_Id(saved.getId());
 			for (MarketplaceFetchedOrderItem itemPayload : payload.items()) {
 				OrderItem item = new OrderItem();
 				item.setOrder(saved);
@@ -156,6 +158,10 @@ public class OrderSyncService {
 				item.setLineTotal(itemPayload.lineTotal());
 				orderItemRepository.save(item);
 			}
+		} else if (payload.items() != null && payload.items().isEmpty()) {
+			log.warn(
+					"Order {} synced with empty line items; leaving existing order_items unchanged",
+					payload.externalOrderId());
 		}
 	}
 
@@ -163,10 +169,23 @@ public class OrderSyncService {
 		if (!StringUtils.hasText(raw)) {
 			return OrderStatus.PENDING;
 		}
+		// Lazada may return comma-separated statuses, e.g. "shipped,pending".
+		String primary = raw.trim().split(",")[0].trim().toUpperCase().replace(' ', '_');
 		try {
-			return OrderStatus.valueOf(raw.trim().toUpperCase());
+			return OrderStatus.valueOf(primary);
 		} catch (IllegalArgumentException ex) {
-			return OrderStatus.PENDING;
+			return mapLazadaStatusAlias(primary);
 		}
+	}
+
+	private static OrderStatus mapLazadaStatusAlias(String raw) {
+		return switch (raw) {
+			case "READY_TO_SHIP", "PACKED", "REPACKED", "READY_TO_SHIP_PENDING" -> OrderStatus.CONFIRMED;
+			case "SHIPPED", "SHIPPING", "IN_TRANSIT" -> OrderStatus.SHIPPED;
+			case "DELIVERED", "COMPLETED" -> OrderStatus.DELIVERED;
+			case "CANCELED", "CANCELLED", "FAILED", "RETURNED" -> OrderStatus.CANCELLED;
+			case "UNPAID", "PENDING", "PROCESSING" -> OrderStatus.PENDING;
+			default -> OrderStatus.PENDING;
+		};
 	}
 }
