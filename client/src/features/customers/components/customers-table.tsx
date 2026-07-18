@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
 import { DataTable } from "@/components/common/data-table/data-table"
+import { DataTableColumnControls } from "@/components/common/data-table/data-table-column-controls"
+import { DataTableColumnHeader } from "@/components/common/data-table/data-table-column-header"
 import { DataTableFooter } from "@/components/common/data-table/data-table-footer"
 import { useDataTable } from "@/components/common/data-table/use-data-table"
 import type { Customer } from "@/features/customers/types/customer"
@@ -69,11 +71,33 @@ export function CustomersTable({
     [navigate]
   )
 
+  const columnLabels = useMemo(() => {
+    const labels: Record<string, string> = {
+      id: t("table.columns.id"),
+      name: t("table.columns.customer_name"),
+      email: t("table.columns.email"),
+      phone: t("table.columns.phone"),
+      gender: t("table.columns.gender"),
+      address: t("table.columns.address"),
+    }
+
+    if (isAdmin) {
+      labels.store = t("table.columns.store")
+    }
+
+    return labels
+  }, [isAdmin, t])
+
   const columns = useMemo<ColumnDef<Customer>[]>(() => {
     const baseColumns: ColumnDef<Customer>[] = [
       {
         accessorKey: "id",
-        header: t("table.columns.id"),
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.id")}
+          />
+        ),
         cell: ({ getValue }) => (
           <span className="font-mono text-xs text-muted-foreground">
             {getValue<number>()}
@@ -85,7 +109,14 @@ export function CustomersTable({
     if (isAdmin) {
       baseColumns.push({
         id: "store",
-        header: t("table.columns.store"),
+        accessorFn: (row) =>
+          `${row.storeName ?? ""} ${row.marketplaceCode ?? ""} ${row.storeId ?? ""}`.trim(),
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.store")}
+          />
+        ),
         cell: ({ row }) => {
           const customer = row.original
           const storeName = customer.storeName?.trim()
@@ -115,7 +146,12 @@ export function CustomersTable({
     baseColumns.push(
       {
         accessorKey: "name",
-        header: t("table.columns.customer_name"),
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.customer_name")}
+          />
+        ),
         cell: ({ row }) => {
           const customer = row.original
 
@@ -131,14 +167,24 @@ export function CustomersTable({
       },
       {
         accessorKey: "email",
-        header: t("table.columns.email"),
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.email")}
+          />
+        ),
         cell: ({ getValue }) => (
           <span className="text-muted-foreground">{getValue<string | null>() ?? "—"}</span>
         ),
       },
       {
         accessorKey: "phone",
-        header: t("table.columns.phone"),
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.phone")}
+          />
+        ),
         cell: ({ getValue }) => (
           <span className="whitespace-nowrap text-muted-foreground">
             {getValue<string | null>() ?? "—"}
@@ -147,7 +193,12 @@ export function CustomersTable({
       },
       {
         accessorKey: "gender",
-        header: t("table.columns.gender"),
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.gender")}
+          />
+        ),
         cell: ({ getValue }) => (
           <span className="text-muted-foreground">
             {formatGenderLabel(getValue<Customer["gender"]>(), t)}
@@ -156,7 +207,12 @@ export function CustomersTable({
       },
       {
         accessorKey: "address",
-        header: t("table.columns.address"),
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.address")}
+          />
+        ),
         cell: ({ getValue }) => (
           <span className="min-w-[200px] text-muted-foreground">
             {getValue<string | null>() ?? "—"}
@@ -175,6 +231,10 @@ export function CustomersTable({
 
   return (
     <section className="border border-border bg-card shadow-sm">
+      <div className="border-b border-border px-4 py-3">
+        <DataTableColumnControls table={table} columnLabels={columnLabels} />
+      </div>
+
       <div className="overflow-x-auto">
         <DataTable
           table={table}

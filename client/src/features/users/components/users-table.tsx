@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next"
 
 import { Badge } from "@/components/ui/badge"
 import { DataTable } from "@/components/common/data-table/data-table"
+import { DataTableColumnControls } from "@/components/common/data-table/data-table-column-controls"
+import { DataTableColumnHeader } from "@/components/common/data-table/data-table-column-header"
 import { DataTableFooter } from "@/components/common/data-table/data-table-footer"
 import { useDataTable } from "@/components/common/data-table/use-data-table"
 import { UserRowActions } from "@/features/users/components/user-row-actions"
@@ -70,11 +72,27 @@ export function UsersTable({
   const { t } = useTranslation("users")
   const locale = useLocaleStore((state) => state.locale)
 
+  const columnLabels = useMemo(
+    () => ({
+      id: t("table.columns.id"),
+      fullName: t("table.columns.name"),
+      role: t("table.columns.role"),
+      active: t("table.columns.status"),
+      createdAt: t("table.columns.created_at"),
+    }),
+    [t]
+  )
+
   const columns = useMemo<ColumnDef<AdminUser>[]>(
     () => [
       {
         accessorKey: "id",
-        header: t("table.columns.id"),
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.id")}
+          />
+        ),
         cell: ({ getValue }) => (
           <span className="font-mono text-xs text-muted-foreground">
             {getValue<number>()}
@@ -82,8 +100,14 @@ export function UsersTable({
         ),
       },
       {
-        accessorKey: "fullName",
-        header: t("table.columns.name"),
+        id: "fullName",
+        accessorFn: (row) => `${row.fullName ?? ""} ${row.email}`.trim(),
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.name")}
+          />
+        ),
         cell: ({ row }) => {
           const user = row.original
           const displayName = user.fullName?.trim() || user.email
@@ -105,7 +129,12 @@ export function UsersTable({
       },
       {
         accessorKey: "role",
-        header: t("table.columns.role"),
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.role")}
+          />
+        ),
         cell: ({ getValue }) => {
           const role = getValue<UserRole>()
 
@@ -118,7 +147,12 @@ export function UsersTable({
       },
       {
         accessorKey: "active",
-        header: t("table.columns.status"),
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.status")}
+          />
+        ),
         cell: ({ getValue }) => {
           const active = getValue<boolean>()
 
@@ -128,10 +162,26 @@ export function UsersTable({
             </Badge>
           )
         },
+        filterFn: (row, columnId, filterValue) => {
+          const query = String(filterValue ?? "").toLowerCase().trim()
+          if (!query) {
+            return true
+          }
+          const active = row.getValue<boolean>(columnId)
+          const label = active
+            ? t("table.status.active")
+            : t("table.status.inactive")
+          return label.toLowerCase().includes(query)
+        },
       },
       {
         accessorKey: "createdAt",
-        header: t("table.columns.created_at"),
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.created_at")}
+          />
+        ),
         cell: ({ getValue }) => (
           <span className="whitespace-nowrap text-muted-foreground">
             {formatDateTime(getValue<string>(), locale)}
@@ -141,6 +191,9 @@ export function UsersTable({
       {
         id: "actions",
         header: t("table.columns.actions"),
+        enableSorting: false,
+        enableHiding: false,
+        enableColumnFilter: false,
         cell: ({ row }) => (
           <UserRowActions user={row.original} onVerifyOtp={onVerifyOtp} />
         ),
@@ -156,6 +209,10 @@ export function UsersTable({
 
   return (
     <section className="border border-border bg-card shadow-sm">
+      <div className="border-b border-border px-4 py-3">
+        <DataTableColumnControls table={table} columnLabels={columnLabels} />
+      </div>
+
       <div className="overflow-x-auto">
         <DataTable
           table={table}

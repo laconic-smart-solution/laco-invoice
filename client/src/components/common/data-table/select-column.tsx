@@ -35,5 +35,6 @@ export function createSelectColumn<TData>(
     ),
     enableSorting: false,
     enableHiding: false,
+    enableColumnFilter: false,
   }
 }

@@ -7,6 +7,8 @@ import { useNavigate } from "react-router-dom"
 import { ROUTES } from "@/app/constants/routes"
 import { ConfirmDialog } from "@/components/common/confirm-dialog"
 import { DataTable } from "@/components/common/data-table/data-table"
+import { DataTableColumnControls } from "@/components/common/data-table/data-table-column-controls"
+import { DataTableColumnHeader } from "@/components/common/data-table/data-table-column-header"
 import { DataTableFooter } from "@/components/common/data-table/data-table-footer"
 import { DataTableRowActions } from "@/components/common/data-table/data-table-row-actions"
 import { DataTableToolbar } from "@/components/common/data-table/data-table-toolbar"
@@ -17,6 +19,7 @@ import {
 import { StatusBadge } from "@/components/common/status-badge"
 import type { StatusBadgeVariant } from "@/components/common/status-badge"
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
+import { AuthFormError } from "@/features/auth/components/auth-form-error"
 import type { Order, OrderSyncStatus } from "@/features/orders/types/order"
 import {
   getInvoiceErrorMessage,
@@ -24,7 +27,6 @@ import {
 } from "@/shared/queries/invoice.query"
 import { useLocaleStore } from "@/shared/stores/locale-store"
 import { formatCurrency, formatDate } from "@/util/format"
-import { AuthFormError } from "@/features/auth/components/auth-form-error"
 
 const SYNC_STATUS_BADGE: Record<OrderSyncStatus, StatusBadgeVariant> = {
   synced: "synced",
@@ -133,18 +135,40 @@ export function OrdersTable({
     [navigate]
   )
 
+  const columnLabels = useMemo(
+    () => ({
+      orderId: t("table.columns.order_id"),
+      orderDate: t("table.columns.order_date"),
+      storeName: t("table.columns.store"),
+      customer: t("table.columns.customer"),
+      totalAmount: t("table.columns.total_amount"),
+      syncStatus: t("table.columns.sync_status"),
+    }),
+    [t]
+  )
+
   const columns = useMemo<ColumnDef<Order>[]>(
     () => [
       {
         accessorKey: "orderId",
-        header: t("table.columns.order_id"),
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.order_id")}
+          />
+        ),
         cell: ({ getValue }) => (
           <span className="font-medium text-foreground">{getValue<string>()}</span>
         ),
       },
       {
         accessorKey: "orderDate",
-        header: t("table.columns.order_date"),
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.order_date")}
+          />
+        ),
         cell: ({ getValue }) => {
           const value = getValue<string>()
           if (!value) {
@@ -159,7 +183,12 @@ export function OrdersTable({
       },
       {
         accessorKey: "storeName",
-        header: t("table.columns.store"),
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.store")}
+          />
+        ),
         cell: ({ row }) => (
           <div className="flex items-center gap-2">
             <span className="flex size-6 shrink-0 items-center justify-center bg-foreground text-background">
@@ -170,8 +199,15 @@ export function OrdersTable({
         ),
       },
       {
-        accessorKey: "customer",
-        header: t("table.columns.customer"),
+        id: "customer",
+        accessorFn: (row) =>
+          `${row.customer} ${row.customerPhone?.trim() ?? ""}`.trim(),
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.customer")}
+          />
+        ),
         cell: ({ row }) => {
           const phone = row.original.customerPhone?.trim()
           return (
@@ -186,13 +222,23 @@ export function OrdersTable({
       },
       {
         accessorKey: "totalAmount",
-        header: t("table.columns.total_amount"),
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.total_amount")}
+          />
+        ),
         cell: ({ row }) =>
           formatCurrency(row.original.totalAmount, locale, row.original.currency),
       },
       {
         accessorKey: "syncStatus",
-        header: t("table.columns.sync_status"),
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.sync_status")}
+          />
+        ),
         cell: ({ getValue }) => {
           const status = getValue<OrderSyncStatus>()
           return (
@@ -207,6 +253,9 @@ export function OrdersTable({
       {
         id: "action",
         header: t("table.columns.action"),
+        enableSorting: false,
+        enableHiding: false,
+        enableColumnFilter: false,
         cell: ({ row }) => (
           <OrderRowAction order={row.original} onGenerate={handleGenerateRequest} />
         ),
@@ -251,12 +300,20 @@ export function OrdersTable({
         isLoading={generateMutation.isPending}
       />
 
-      <DataTableToolbar
-        table={table}
-        selectedLabel={(count) => t("table.selected_count", { count })}
-        bulkActionLabel={t("table.bulk_generate")}
-        onBulkAction={() => undefined}
-      />
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border">
+        <DataTableToolbar
+          table={table}
+          selectedLabel={(count) => t("table.selected_count", { count })}
+          bulkActionLabel={t("table.bulk_generate")}
+          onBulkAction={() => undefined}
+          className="border-b-0"
+        />
+        <DataTableColumnControls
+          table={table}
+          columnLabels={columnLabels}
+          className="px-4 py-3"
+        />
+      </div>
 
       <div className="overflow-x-auto">
         <DataTable
