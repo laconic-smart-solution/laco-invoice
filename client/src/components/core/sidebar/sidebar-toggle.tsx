@@ -20,9 +20,9 @@ export function SidebarToggle({ className }: SidebarToggleProps) {
     <Button
       type="button"
       variant="secondary"
-      size="icon-sm"
+      size="icon"
       className={cn(
-        "size-7 rounded-full border border-border bg-background text-foreground shadow-sm hover:bg-muted hover:text-foreground dark:bg-background dark:hover:bg-card",
+        "size-10 rounded-full border border-border bg-background text-foreground shadow-sm hover:bg-muted hover:text-foreground dark:bg-background dark:hover:bg-card",
         className
       )}
       onClick={toggle}
@@ -32,9 +32,9 @@ export function SidebarToggle({ className }: SidebarToggleProps) {
       title={label}
     >
       {isCollapsed ? (
-        <ChevronRight className="size-4" aria-hidden />
+        <ChevronRight className="size-5" aria-hidden />
       ) : (
-        <ChevronLeft className="size-4" aria-hidden />
+        <ChevronLeft className="size-5" aria-hidden />
       )}
     </Button>
   )

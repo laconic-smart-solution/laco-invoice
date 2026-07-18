@@ -16,9 +16,9 @@ export function DashboardShell({ children }: DashboardShellProps) {
 
   return (
     <div className="flex min-h-svh max-h-svh bg-background">
-      <div className="relative shrink-0">
+      <div className="relative z-40 shrink-0">
         <Sidebar />
-        <SidebarToggle className="absolute top-[4.75rem] right-0 z-30 translate-x-1/2 -translate-y-1/2" />
+        <SidebarToggle className="absolute top-[4.75rem] right-0 translate-x-1/2 -translate-y-1/2" />
       </div>
       <div className="flex min-w-0 flex-1 flex-col">
         <Navbar />

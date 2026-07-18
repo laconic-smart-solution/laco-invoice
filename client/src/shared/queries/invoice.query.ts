@@ -65,6 +65,12 @@ export function useDownloadInvoicePdfMutation() {
   })
 }
 
+export function usePrintInvoicePdfMutation() {
+  return useMutation({
+    mutationFn: (id: number) => invoiceService.printPdf(id),
+  })
+}
+
 export function getInvoiceErrorMessage(error: unknown, fallback: string): string {
   const message = extractApiErrorMessage(error, fallback)
   if (message === fallback || isAxiosStatusMessage(message)) {

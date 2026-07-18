@@ -17,6 +17,7 @@ import {
 import type { InvoiceDetail, InvoiceStatus } from "@/features/invoices/types/invoice"
 import {
   useDownloadInvoicePdfMutation,
+  usePrintInvoicePdfMutation,
 } from "@/shared/queries/invoice.query"
 import { formatCurrency, formatDateTime } from "@/util/format"
 
@@ -33,10 +34,16 @@ interface InvoiceDocumentProps {
 export function InvoiceDocument({ invoice, locale }: InvoiceDocumentProps) {
   const { t } = useTranslation("invoices")
   const downloadMutation = useDownloadInvoicePdfMutation()
+  const printMutation = usePrintInvoicePdfMutation()
   const numericId = Number.parseInt(invoice.id, 10)
+  const isPdfActionPending =
+    downloadMutation.isPending || printMutation.isPending
 
   const handlePrint = () => {
-    window.print()
+    if (!Number.isFinite(numericId)) {
+      return
+    }
+    printMutation.mutate(numericId)
   }
 
   const handleDownload = () => {
@@ -51,17 +58,24 @@ export function InvoiceDocument({ invoice, locale }: InvoiceDocumentProps) {
 
   return (
     <article
-      className="border border-border bg-card shadow-sm print:border-0 print:shadow-none"
+      className="border border-border bg-card shadow-sm"
       aria-labelledby="invoice-document-title"
     >
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-6 py-4 print:hidden">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-6 py-4">
         <StatusBadge
           status={STATUS_BADGE[invoice.status]}
           label={t(`status.${invoice.status}`).toUpperCase()}
           showDot
         />
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" type="button" onClick={handlePrint}>
+          <Button
+            variant="outline"
+            size="sm"
+            type="button"
+            onClick={handlePrint}
+            disabled={isPdfActionPending}
+            aria-busy={printMutation.isPending}
+          >
             <Printer data-icon="inline-start" />
             {t("detail.actions.print")}
           </Button>
@@ -69,7 +83,7 @@ export function InvoiceDocument({ invoice, locale }: InvoiceDocumentProps) {
             size="sm"
             type="button"
             onClick={handleDownload}
-            disabled={downloadMutation.isPending}
+            disabled={isPdfActionPending}
             aria-busy={downloadMutation.isPending}
           >
             <Download data-icon="inline-start" />
