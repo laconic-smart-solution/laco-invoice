@@ -1,4 +1,9 @@
-import type { ColumnDef } from "@tanstack/react-table"
+import type {
+  ColumnDef,
+  ColumnFiltersState,
+  OnChangeFn,
+  SortingState,
+} from "@tanstack/react-table"
 import { RotateCcw } from "lucide-react"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -66,6 +71,10 @@ interface ProductsTableProps {
   canGoNext: boolean
   onPageChange: (page: number) => void
   onLimitChange: (limit: number) => void
+  sorting: SortingState
+  onSortingChange: (sorting: SortingState) => void
+  columnFilters: ColumnFiltersState
+  onColumnFiltersChange: (filters: ColumnFiltersState) => void
 }
 
 export function ProductsTable({
@@ -81,6 +90,10 @@ export function ProductsTable({
   canGoNext,
   onPageChange,
   onLimitChange,
+  sorting,
+  onSortingChange,
+  columnFilters,
+  onColumnFiltersChange,
 }: ProductsTableProps) {
   const { t } = useTranslation("products")
   const { t: tCommon } = useTranslation("common")
@@ -92,6 +105,23 @@ export function ProductsTable({
       void navigate(ROUTES.dashboard.productDetail(product.id))
     },
     [navigate]
+  )
+
+  const handleSortingChange = useCallback<OnChangeFn<SortingState>>(
+    (updater) => {
+      const next = typeof updater === "function" ? updater(sorting) : updater
+      onSortingChange(next)
+    },
+    [onSortingChange, sorting]
+  )
+
+  const handleColumnFiltersChange = useCallback<OnChangeFn<ColumnFiltersState>>(
+    (updater) => {
+      const next =
+        typeof updater === "function" ? updater(columnFilters) : updater
+      onColumnFiltersChange(next)
+    },
+    [columnFilters, onColumnFiltersChange]
   )
 
   const columnLabels = useMemo(
@@ -172,10 +202,12 @@ export function ProductsTable({
       },
       {
         accessorKey: "price",
+        enableColumnFilter: false,
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
             title={t("table.columns.price")}
+            enableSearch={false}
           />
         ),
         cell: ({ row }) => {
@@ -193,10 +225,13 @@ export function ProductsTable({
       },
       {
         accessorKey: "erpStatus",
+        enableColumnFilter: false,
+        enableSorting: false,
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
             title={t("table.columns.erp_status")}
+            enableSearch={false}
           />
         ),
         cell: ({ getValue }) => {
@@ -226,12 +261,17 @@ export function ProductsTable({
     data: products,
     columns,
     getRowId: (row) => String(row.id),
+    manualSorting: true,
+    manualFiltering: true,
+    state: { sorting, columnFilters },
+    onSortingChange: handleSortingChange,
+    onColumnFiltersChange: handleColumnFiltersChange,
   })
 
   const handleResetColumns = () => {
     table.resetColumnVisibility()
-    table.resetColumnFilters()
-    table.resetSorting()
+    onColumnFiltersChange([])
+    onSortingChange([])
   }
 
   return (

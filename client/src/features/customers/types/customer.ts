@@ -44,8 +44,10 @@ export interface CustomerPageRequest {
 
 export interface CustomerFiltersState {
   sourceKey: string
+  search: string
 }
 
 export const DEFAULT_CUSTOMER_FILTERS: CustomerFiltersState = {
   sourceKey: "",
+  search: "",
 }

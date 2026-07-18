@@ -26,6 +26,10 @@ interface UseDataTableOptions<TData>
   data: TData[]
   enableRowSelection?: boolean
   selectColumnLabels?: SelectColumnLabels
+  /** When true, sorting is handled by the server; TanStack will not re-sort rows. */
+  manualSorting?: boolean
+  /** When true, filtering is handled by the server; TanStack will not filter rows. */
+  manualFiltering?: boolean
 }
 
 export function useDataTable<TData>({
@@ -39,6 +43,8 @@ export function useDataTable<TData>({
   onSortingChange,
   onColumnFiltersChange,
   onColumnVisibilityChange,
+  manualSorting = false,
+  manualFiltering = false,
   ...options
 }: UseDataTableOptions<TData>) {
   const [sorting, setSorting] = useState<SortingState>([])
@@ -62,10 +68,12 @@ export function useDataTable<TData>({
     data,
     columns: resolvedColumns,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
+    ...(manualSorting ? {} : { getSortedRowModel: getSortedRowModel() }),
+    ...(manualFiltering ? {} : { getFilteredRowModel: getFilteredRowModel() }),
     enableRowSelection,
     getRowId,
+    manualSorting,
+    manualFiltering,
     onRowSelectionChange,
     onSortingChange: onSortingChange ?? setSorting,
     onColumnFiltersChange: onColumnFiltersChange ?? setColumnFilters,

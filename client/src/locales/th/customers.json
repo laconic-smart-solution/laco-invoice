@@ -12,7 +12,9 @@
   "filters": {
     "store_label": "ร้าน / Marketplace",
     "store_placeholder": "เลือกแหล่งที่มา",
-    "store_all": "ทุกแหล่งที่มา"
+    "store_all": "ทุกแหล่งที่มา",
+    "search_label": "ค้นหา",
+    "search_placeholder": "ค้นหาด้วยชื่อ…"
   },
   "stats": {
     "total_customers": "ลูกค้าทั้งหมด"

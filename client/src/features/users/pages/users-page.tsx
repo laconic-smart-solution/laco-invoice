@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
+import type { ColumnFiltersState, SortingState } from "@tanstack/react-table"
 
 import { ConfirmDialog } from "@/components/common/confirm-dialog"
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
@@ -14,15 +15,26 @@ import {
   PAGE_QUERY_KEY,
   usePagination,
 } from "@/shared/hooks/use-pagination"
+import { useDebounce } from "@/shared/hooks/use-debounce"
 import {
   getAdminUserErrorMessage,
   useUsersPageQuery,
   useVerifyUserOtpMutation,
 } from "@/shared/queries/admin-user.query"
 import type { UserRole } from "@/shared/types/auth.types"
+import { getColumnFilterValue } from "@/util/table-column-filters"
+import { sortingToPageSort } from "@/util/table-sort"
 
 const ROLE_QUERY_KEY = "role"
 const USER_ROLES: UserRole[] = ["ADMIN", "OWNER", "MANAGER", "STAFF"]
+
+const USER_SORT_FIELD_MAP: Record<string, string> = {
+  id: "id",
+  fullName: "fullName",
+  role: "role",
+  active: "active",
+  createdAt: "createdAt",
+}
 
 function parseRoleFilter(value: string | null): UserRoleFilter {
   if (value && USER_ROLES.includes(value as UserRole)) {
@@ -39,25 +51,46 @@ export function UsersPage() {
   const { t } = useTranslation("users")
   const [searchParams, setSearchParams] = useSearchParams()
   const roleFilter = parseRoleFilter(searchParams.get(ROLE_QUERY_KEY))
+  const [search, setSearch] = useState("")
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const debouncedColumnFilters = useDebounce(columnFilters)
   const [pendingVerifyUser, setPendingVerifyUser] = useState<AdminUser | null>(null)
   const [verifySuccessMessage, setVerifySuccessMessage] = useState<string | null>(null)
 
   const { page, limit, setPage, setLimit } = usePagination()
   const verifyOtpMutation = useVerifyUserOtpMutation()
+  const pageSort = useMemo(
+    () => sortingToPageSort(sorting, USER_SORT_FIELD_MAP),
+    [sorting]
+  )
+  const columnFullName = useMemo(
+    () => getColumnFilterValue(debouncedColumnFilters, "fullName"),
+    [debouncedColumnFilters]
+  )
 
-  const pageRequest = useMemo(
-    () => ({
+  const pageRequest = useMemo(() => {
+    const filter: {
+      role?: UserRole
+      email?: string
+      fullName?: string
+    } = {}
+
+    if (roleFilter !== "all") {
+      filter.role = roleFilter
+    }
+    const nameSearch = columnFullName || search.trim()
+    if (nameSearch) {
+      filter.fullName = nameSearch
+    }
+
+    return {
       pageNumber: page,
       pageSize: limit,
-      filter:
-        roleFilter === "all"
-          ? undefined
-          : {
-              role: roleFilter,
-            },
-    }),
-    [page, limit, roleFilter]
-  )
+      ...pageSort,
+      filter: Object.keys(filter).length > 0 ? filter : undefined,
+    }
+  }, [columnFullName, limit, page, pageSort, roleFilter, search])
 
   const { data, isLoading, isError, error } = useUsersPageQuery(pageRequest)
 
@@ -99,6 +132,7 @@ export function UsersPage() {
 
   const handleRoleChange = useCallback(
     (role: UserRoleFilter) => {
+      setPage(1)
       setSearchParams(
         (prev) => {
           const next = new URLSearchParams(prev)
@@ -115,14 +149,22 @@ export function UsersPage() {
         { replace: true }
       )
     },
-    [setSearchParams]
+    [setPage, setSearchParams]
   )
 
   return (
     <div className="space-y-6 p-6">
       <UsersHeader />
       <UsersStatCards totalUsers={totalCount} />
-      <UsersFilters role={roleFilter} onRoleChange={handleRoleChange} />
+      <UsersFilters
+        role={roleFilter}
+        search={search}
+        onRoleChange={handleRoleChange}
+        onSearchChange={(next) => {
+          setSearch(next)
+          setPage(1)
+        }}
+      />
       <AuthFormError message={loadError} />
       <AuthFormError message={verifyError} />
       {verifySuccessMessage ? (
@@ -147,6 +189,16 @@ export function UsersPage() {
         onPageChange={setPage}
         onLimitChange={setLimit}
         onVerifyOtp={handleVerifyOtpRequest}
+        sorting={sorting}
+        onSortingChange={(next) => {
+          setSorting(next)
+          setPage(1)
+        }}
+        columnFilters={columnFilters}
+        onColumnFiltersChange={(next) => {
+          setColumnFilters(next)
+          setPage(1)
+        }}
       />
 
       <ConfirmDialog

@@ -39,6 +39,8 @@
   },
   "filters": {
     "role_label": "Role",
+    "search_label": "Search",
+    "search_placeholder": "Search by name…",
     "role": {
       "all": "All roles",
       "admin": "Admin",

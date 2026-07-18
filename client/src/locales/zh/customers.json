@@ -12,7 +12,9 @@
   "filters": {
     "store_label": "店铺 / Marketplace",
     "store_placeholder": "选择来源",
-    "store_all": "全部来源"
+    "store_all": "全部来源",
+    "search_label": "搜索",
+    "search_placeholder": "按姓名搜索…"
   },
   "stats": {
     "total_customers": "客户总数"

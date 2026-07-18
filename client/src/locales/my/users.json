@@ -39,6 +39,8 @@
   },
   "filters": {
     "role_label": "အခန်းကဏ္ဍ",
+    "search_label": "ရှာရန်",
+    "search_placeholder": "အမည်ဖြင့် ရှာရန်…",
     "role": {
       "all": "အခန်းကဏ္ဍ အားလုံး",
       "admin": "Admin",

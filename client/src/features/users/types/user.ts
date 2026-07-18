@@ -16,6 +16,8 @@ export type UserRoleFilter = UserRole | "all"
 export interface UserPageRequest {
   pageNumber: number
   pageSize: number
+  sortBy?: string
+  sortOrder?: "ASC" | "DESC"
   filter?: {
     role?: UserRole
     email?: string

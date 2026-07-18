@@ -10,6 +10,8 @@
     "store_label": "Marketplace Store",
     "store_all": "All connected stores",
     "store_placeholder": "Select a store",
+    "search_label": "Order ID",
+    "search_placeholder": "Search by order ID…",
     "date_range_label": "Date Range",
     "date_range_value": "Oct 01 - Oct 24, 2023",
     "status_label": "Order Status",

@@ -6,14 +6,17 @@ import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.laconic.lacoinvoice.common.web.ApiResponse;
+import com.laconic.lacoinvoice.features.marketplaceproduct.pageable.MarketplaceProductPageRequest;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/marketplace-products")
@@ -57,6 +60,21 @@ public class MarketplaceProductController {
 				priceMax,
 				erpStatus);
 		return ApiResponse.ok("OK", result.items(), result.meta());
+	}
+
+	@PostMapping("/pageable")
+	@Operation(summary = "Paginated marketplace product search")
+	public ApiResponse<List<MarketplaceProductDto>> pageable(
+			@RequestBody @Valid MarketplaceProductPageRequest request) {
+		return service.page(request);
+	}
+
+	@GetMapping("/stats")
+	@Operation(summary = "Marketplace product ERP mapping stats for accessible sources")
+	public ApiResponse<MarketplaceProductStatsDto> stats(
+			@RequestParam(required = false) Long storeId,
+			@RequestParam(required = false) String marketplaceCode) {
+		return ApiResponse.ok("OK", service.stats(storeId, marketplaceCode));
 	}
 
 	@GetMapping("/{id}")

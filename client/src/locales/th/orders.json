@@ -10,6 +10,8 @@
     "store_label": "ร้านค้ามาร์เก็ตเพลส",
     "store_all": "ร้านที่เชื่อมต่อทั้งหมด",
     "store_placeholder": "เลือกร้านค้า",
+    "search_label": "รหัสคำสั่งซื้อ",
+    "search_placeholder": "ค้นหาด้วยรหัสคำสั่งซื้อ…",
     "date_range_label": "ช่วงวันที่",
     "date_range_value": "01 ต.ค. - 24 ต.ค. 2023",
     "status_label": "สถานะคำสั่งซื้อ",

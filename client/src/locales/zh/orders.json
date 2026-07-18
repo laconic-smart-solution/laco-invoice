@@ -10,6 +10,8 @@
     "store_label": "市场店铺",
     "store_all": "所有已连接店铺",
     "store_placeholder": "选择店铺",
+    "search_label": "订单号",
+    "search_placeholder": "按订单号搜索…",
     "date_range_label": "日期范围",
     "date_range_value": "2023年10月01日 - 10月24日",
     "status_label": "订单状态",

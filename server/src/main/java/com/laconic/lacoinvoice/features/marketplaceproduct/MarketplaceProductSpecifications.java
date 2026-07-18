@@ -1,7 +1,8 @@
 package com.laconic.lacoinvoice.features.marketplaceproduct;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.util.Collection;
+import java.util.List;
 
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
@@ -16,18 +17,35 @@ final class MarketplaceProductSpecifications {
 	private MarketplaceProductSpecifications() {
 	}
 
+	/**
+	 * List/filter marketplace products. When {@code storeId} / {@code marketplaceCode} are null,
+	 * results are limited to {@code accessibleStoreIds} (owner/admin scope).
+	 */
 	static Specification<Product> marketplaceList(
 			Long storeId,
 			String marketplaceCode,
 			String search,
 			BigDecimal priceMin,
 			BigDecimal priceMax,
-			String erpStatus) {
+			String erpStatus,
+			Collection<Long> accessibleStoreIds) {
 		return (root, query, cb) -> {
 			var predicates = new java.util.ArrayList<Predicate>();
-			predicates.add(cb.equal(root.get("store").get("id"), storeId));
-			predicates.add(cb.equal(cb.upper(root.get("marketplaceCode")), marketplaceCode.toUpperCase()));
 			predicates.add(cb.isNotNull(root.get("marketplaceCode")));
+
+			if (storeId != null) {
+				predicates.add(cb.equal(root.get("store").get("id"), storeId));
+			} else if (accessibleStoreIds != null && !accessibleStoreIds.isEmpty()) {
+				predicates.add(root.get("store").get("id").in(accessibleStoreIds));
+			} else if (accessibleStoreIds != null) {
+				predicates.add(cb.disjunction());
+			}
+
+			if (StringUtils.hasText(marketplaceCode)) {
+				predicates.add(cb.equal(
+						cb.upper(root.get("marketplaceCode")),
+						marketplaceCode.trim().toUpperCase()));
+			}
 
 			if (StringUtils.hasText(search)) {
 				String pattern = "%" + search.trim().toLowerCase() + "%";
@@ -51,6 +69,24 @@ final class MarketplaceProductSpecifications {
 			}
 			return cb.and(predicates.toArray(Predicate[]::new));
 		};
+	}
+
+	/** Backward-compatible overload for required store + marketplace list. */
+	static Specification<Product> marketplaceList(
+			Long storeId,
+			String marketplaceCode,
+			String search,
+			BigDecimal priceMin,
+			BigDecimal priceMax,
+			String erpStatus) {
+		return marketplaceList(
+				storeId,
+				marketplaceCode,
+				search,
+				priceMin,
+				priceMax,
+				erpStatus,
+				storeId != null ? List.of(storeId) : List.of());
 	}
 
 	private static Subquery<Long> erpMappingExists(

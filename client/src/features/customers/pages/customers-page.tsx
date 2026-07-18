@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import type { ColumnFiltersState, SortingState } from "@tanstack/react-table"
 
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
 import { CustomersFilters } from "@/features/customers/components/customers-filters"
@@ -25,38 +26,91 @@ import {
   getPaginationMeta,
   usePagination,
 } from "@/shared/hooks/use-pagination"
+import { useDebounce } from "@/shared/hooks/use-debounce"
+import { getColumnFilterValue } from "@/util/table-column-filters"
+import { sortingToPageSort } from "@/util/table-sort"
+
+const CUSTOMER_SORT_FIELD_MAP: Record<string, string> = {
+  id: "id",
+  name: "name",
+  email: "email",
+  phone: "phone",
+  gender: "gender",
+  address: "address",
+  store: "store.name",
+}
 
 export function CustomersPage() {
   const { t } = useTranslation("customers")
   const isAdmin = useAuthStore((state) => state.user?.role === "ADMIN")
   const [filters, setFilters] = useState<CustomerFiltersState>(DEFAULT_CUSTOMER_FILTERS)
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const debouncedColumnFilters = useDebounce(columnFilters)
 
   const { page, limit, setPage, setLimit } = usePagination()
   const { data: sources = [] } = useMarketplaceProductSourcesQuery()
 
-  // Default to "All sources" so customers synced before marketplace binding
-  // (null marketplace_id) still appear. Store filter works after re-sync.
   const selectedSourceKey = filters.sourceKey || "all"
   const parsedSource = useMemo(
     () => (filters.sourceKey ? parseProductSourceKey(filters.sourceKey) : null),
     [filters.sourceKey]
+  )
+  const pageSort = useMemo(
+    () => sortingToPageSort(sorting, CUSTOMER_SORT_FIELD_MAP),
+    [sorting]
+  )
+  const columnName = useMemo(
+    () => getColumnFilterValue(debouncedColumnFilters, "name"),
+    [debouncedColumnFilters]
+  )
+  const columnEmail = useMemo(
+    () => getColumnFilterValue(debouncedColumnFilters, "email"),
+    [debouncedColumnFilters]
+  )
+  const columnPhone = useMemo(
+    () => getColumnFilterValue(debouncedColumnFilters, "phone"),
+    [debouncedColumnFilters]
   )
 
   const pageRequest = useMemo(() => {
     const filter: {
       storeId?: number
       marketplaceCode?: string
+      name?: string
+      email?: string
+      phone?: string
     } = {}
     if (parsedSource) {
       filter.storeId = parsedSource.storeId
       filter.marketplaceCode = parsedSource.marketplaceCode
     }
+    const nameSearch = columnName || filters.search.trim()
+    if (nameSearch) {
+      filter.name = nameSearch
+    }
+    if (columnEmail) {
+      filter.email = columnEmail
+    }
+    if (columnPhone) {
+      filter.phone = columnPhone
+    }
     return {
       pageNumber: page,
       pageSize: limit,
+      ...pageSort,
       filter: Object.keys(filter).length > 0 ? filter : undefined,
     }
-  }, [limit, page, parsedSource])
+  }, [
+    columnEmail,
+    columnName,
+    columnPhone,
+    filters.search,
+    limit,
+    page,
+    pageSort,
+    parsedSource,
+  ])
 
   const { data, isLoading, isError, error } = useCustomersPageQuery(pageRequest)
   const syncMutation = useTriggerOrderSyncMutation()
@@ -113,6 +167,16 @@ export function CustomersPage() {
         isLoading={isLoading}
         onPageChange={setPage}
         onLimitChange={setLimit}
+        sorting={sorting}
+        onSortingChange={(next) => {
+          setSorting(next)
+          setPage(1)
+        }}
+        columnFilters={columnFilters}
+        onColumnFiltersChange={(next) => {
+          setColumnFilters(next)
+          setPage(1)
+        }}
       />
     </div>
   )

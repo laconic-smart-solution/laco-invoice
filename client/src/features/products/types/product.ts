@@ -88,6 +88,7 @@ export interface ProductStats {
   mappingRatePercent: number
   actionRequiredCount: number
   activeSkuCount: number
+  totalCount?: number
 }
 
 export interface MarketplaceProductStats {
@@ -104,5 +105,4 @@ export interface ProductFiltersState {
   erpStatus: ProductErpFilter
   priceMin: string
   priceMax: string
-  priceSort: ProductPriceSort
 }

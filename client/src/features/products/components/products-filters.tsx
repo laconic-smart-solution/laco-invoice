@@ -14,7 +14,6 @@ import {
 import type {
   MarketplaceProductSource,
   ProductFiltersState,
-  ProductPriceSort,
 } from "@/features/products/types/product"
 import { ERP_STATUS_FILTER_OPTIONS } from "@/features/products/util/erp-status"
 import { buildProductSourceKey } from "@/shared/services/marketplace-product.service"
@@ -27,12 +26,6 @@ interface ProductsFiltersProps {
   onChange: (value: ProductFiltersState) => void
   disabled?: boolean
 }
-
-const PRICE_SORT_OPTIONS: { value: ProductPriceSort; labelKey: string }[] = [
-  { value: "none", labelKey: "filters.price_sort.none" },
-  { value: "asc", labelKey: "filters.price_sort.asc" },
-  { value: "desc", labelKey: "filters.price_sort.desc" },
-]
 
 export function ProductsFilters({
   sources,
@@ -50,7 +43,6 @@ export function ProductsFilters({
       erpStatus: "all",
       priceMin: "",
       priceMax: "",
-      priceSort: "none",
     })
   }
 
@@ -59,7 +51,7 @@ export function ProductsFilters({
       id="products-filters"
       className="border border-border bg-card p-4 shadow-sm"
     >
-      <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_auto] xl:items-end">
+      <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,1fr)_auto] xl:items-end">
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground" htmlFor="products-search">
             {t("filters.search_label")}
@@ -158,30 +150,6 @@ export function ProductsFilters({
               disabled={disabled}
             />
           </div>
-        </div>
-
-        <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">
-            {t("filters.price_sort_label")}
-          </Label>
-          <Select
-            value={value.priceSort}
-            onValueChange={(priceSort) =>
-              onChange({ ...value, priceSort: priceSort as ProductPriceSort })
-            }
-            disabled={disabled}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={t("filters.price_sort_placeholder")} />
-            </SelectTrigger>
-            <SelectContent>
-              {PRICE_SORT_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {t(option.labelKey)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
 
         <Button className="shrink-0" onClick={handleReset} disabled={disabled}>

@@ -1,4 +1,4 @@
-import { Calendar, ListFilter } from "lucide-react"
+﻿import { ListFilter, Search } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
@@ -67,18 +67,24 @@ export function OrdersFilters({
         </div>
 
         <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">
-            {t("filters.date_range_label")}
+          <Label className="text-xs text-muted-foreground" htmlFor="orders-search">
+            {t("filters.search_label")}
           </Label>
           <div className="relative">
-            <Input
-              readOnly
-              value={t("filters.date_range_value")}
-              className="pr-9"
-            />
-            <Calendar
-              className="pointer-events-none absolute top-1/2 right-2.5 size-4 -translate-y-1/2 text-muted-foreground"
+            <Search
+              className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
               aria-hidden
+            />
+            <Input
+              id="orders-search"
+              type="search"
+              placeholder={t("filters.search_placeholder")}
+              value={value.search}
+              onChange={(event) =>
+                onChange({ ...value, search: event.target.value })
+              }
+              className="h-9 pl-8"
+              disabled={disabled}
             />
           </div>
         </div>

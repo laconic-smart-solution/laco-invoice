@@ -12,7 +12,9 @@
   "filters": {
     "store_label": "ဆိုင် / Marketplace",
     "store_placeholder": "အရင်းအမြစ် ရွေးပါ",
-    "store_all": "အားလုံး"
+    "store_all": "အားလုံး",
+    "search_label": "ရှာရန်",
+    "search_placeholder": "အမည်ဖြင့် ရှာရန်…"
   },
   "stats": {
     "total_customers": "ဖောက်သည် စုစုပေါင်း"

@@ -16,7 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.laconic.lacoinvoice.common.exception.ResourceNotFoundException;
+import com.laconic.lacoinvoice.common.pagination.SortOrder;
 import com.laconic.lacoinvoice.common.persistence.AuditUserContext;
+import com.laconic.lacoinvoice.common.web.ApiResponse;
 import com.laconic.lacoinvoice.common.web.PageMeta;
 import com.laconic.lacoinvoice.config.AuthorizationService;
 import com.laconic.lacoinvoice.domain.models.Marketplace;
@@ -31,9 +33,18 @@ import com.laconic.lacoinvoice.domain.repositories.ProductErpMappingRepository;
 import com.laconic.lacoinvoice.domain.repositories.ProductRepository;
 import com.laconic.lacoinvoice.domain.repositories.StoreMarketplaceConnectionRepository;
 import com.laconic.lacoinvoice.domain.repositories.StoreRepository;
+import com.laconic.lacoinvoice.features.marketplaceproduct.pageable.MarketplaceProductFilter;
+import com.laconic.lacoinvoice.features.marketplaceproduct.pageable.MarketplaceProductPageRequest;
 
 @Service
 public class MarketplaceProductService {
+
+	private static final java.util.Set<String> ALLOWED_SORT_FIELDS = java.util.Set.of(
+			"updatedAt",
+			"price",
+			"name",
+			"sku",
+			"externalProductId");
 
 	private final StoreRepository storeRepository;
 	private final StoreMarketplaceConnectionRepository connectionRepository;
@@ -142,11 +153,157 @@ public class MarketplaceProductService {
 				.toList();
 
 		PageMeta meta = new PageMeta(
-				productPage.getNumber(),
+				productPage.getNumber() + 1,
 				productPage.getSize(),
 				productPage.getTotalElements(),
 				productPage.getTotalPages());
 		return new MarketplaceProductPageResult(items, meta);
+	}
+
+	@Transactional(readOnly = true)
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	public ApiResponse<List<MarketplaceProductDto>> page(MarketplaceProductPageRequest request) {
+		MarketplaceProductFilter filter = request.getFilter() != null
+				? request.getFilter()
+				: new MarketplaceProductFilter();
+
+		Long storeId = filter.getStoreId();
+		String marketplaceCode = StringUtils.hasText(filter.getMarketplaceCode())
+				? filter.getMarketplaceCode().trim().toUpperCase()
+				: null;
+
+		List<Store> accessibleStores = resolveAccessibleStores();
+		List<Long> accessibleStoreIds = accessibleStores.stream()
+				.map(Store::getId)
+				.filter(Objects::nonNull)
+				.toList();
+
+		if (storeId != null) {
+			Store store = findStoreOrThrow(storeId);
+			verifyStoreOwner(store);
+			if (marketplaceCode != null) {
+				verifyConnectedSource(storeId, marketplaceCode);
+			}
+		}
+
+		int safePage = Math.max(request.getPageNumber(), 1);
+		int safeSize = Math.min(Math.max(request.getPageSize(), 1), 500);
+		PageRequest pageable = resolvePageRequest(safePage, safeSize, request.getSortBy(), request.getSortOrder());
+
+		Page<Product> productPage = productRepository.findAll(
+				MarketplaceProductSpecifications.marketplaceList(
+						storeId,
+						marketplaceCode,
+						filter.getSearch(),
+						filter.getPriceMin(),
+						filter.getPriceMax(),
+						filter.getErpStatus(),
+						accessibleStoreIds),
+				pageable);
+
+		java.util.Map<Long, Store> storeById = accessibleStores.stream()
+				.filter(store -> store.getId() != null)
+				.collect(java.util.stream.Collectors.toMap(Store::getId, store -> store, (a, b) -> a));
+
+		List<MarketplaceProductDto> items = productPage.getContent().stream()
+				.map(product -> {
+					Store store = product.getStore();
+					Long resolvedStoreId = store != null ? store.getId() : null;
+					Store resolvedStore = resolvedStoreId != null
+							? storeById.getOrDefault(resolvedStoreId, store)
+							: store;
+					String code = StringUtils.hasText(product.getMarketplaceCode())
+							? product.getMarketplaceCode().toUpperCase()
+							: "";
+					String marketplaceName = resolvedStoreId != null && StringUtils.hasText(code)
+							? resolveMarketplaceName(resolvedStoreId, code)
+							: code;
+					return toListDto(
+							product,
+							resolvedStore != null ? resolvedStore : store,
+							code,
+							marketplaceName);
+				})
+				.toList();
+
+		PageMeta meta = new PageMeta(
+				productPage.getNumber() + 1,
+				productPage.getSize(),
+				productPage.getTotalElements(),
+				productPage.getTotalPages());
+		return ApiResponse.ok("OK", items, meta);
+	}
+
+	@Transactional(readOnly = true)
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	public MarketplaceProductStatsDto stats(Long storeId, String marketplaceCode) {
+		String normalizedCode = StringUtils.hasText(marketplaceCode)
+				? marketplaceCode.trim().toUpperCase()
+				: null;
+
+		List<Store> accessibleStores = resolveAccessibleStores();
+		List<Long> accessibleStoreIds = accessibleStores.stream()
+				.map(Store::getId)
+				.filter(Objects::nonNull)
+				.toList();
+
+		if (storeId != null) {
+			Store store = findStoreOrThrow(storeId);
+			verifyStoreOwner(store);
+			if (normalizedCode != null) {
+				verifyConnectedSource(storeId, normalizedCode);
+			}
+		}
+
+		long totalCount = productRepository.count(
+				MarketplaceProductSpecifications.marketplaceList(
+						storeId,
+						normalizedCode,
+						null,
+						null,
+						null,
+						null,
+						accessibleStoreIds));
+		long syncedCount = productRepository.count(
+				MarketplaceProductSpecifications.marketplaceList(
+						storeId,
+						normalizedCode,
+						null,
+						null,
+						null,
+						"synced",
+						accessibleStoreIds));
+		long unmappedCount = productRepository.count(
+				MarketplaceProductSpecifications.marketplaceList(
+						storeId,
+						normalizedCode,
+						null,
+						null,
+						null,
+						"unmapped",
+						accessibleStoreIds));
+
+		double mappingRatePercent = totalCount > 0
+				? (syncedCount * 100.0) / totalCount
+				: 0.0;
+
+		return new MarketplaceProductStatsDto(
+				totalCount,
+				syncedCount,
+				unmappedCount,
+				mappingRatePercent);
+	}
+
+	private static PageRequest resolvePageRequest(
+			int pageNumber,
+			int pageSize,
+			String sortBy,
+			SortOrder sortOrder) {
+		String field = StringUtils.hasText(sortBy) && ALLOWED_SORT_FIELDS.contains(sortBy.trim())
+				? sortBy.trim()
+				: "updatedAt";
+		Sort.Direction direction = sortOrder == SortOrder.ASC ? Sort.Direction.ASC : Sort.Direction.DESC;
+		return PageRequest.of(pageNumber - 1, pageSize, Sort.by(direction, field));
 	}
 
 	@Transactional(readOnly = true)
@@ -194,8 +351,8 @@ public class MarketplaceProductService {
 		String erpStatus = MarketplaceProductErpSupport.erpStatusLabel(product, mappingRepository);
 		return new MarketplaceProductDto(
 				product.getId(),
-				store.getId(),
-				store.getName(),
+				store != null ? store.getId() : null,
+				store != null ? store.getName() : null,
 				marketplaceCode,
 				marketplaceName,
 				product.getExternalProductId(),

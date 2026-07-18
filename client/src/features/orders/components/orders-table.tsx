@@ -1,4 +1,9 @@
-import type { ColumnDef } from "@tanstack/react-table"
+import type {
+  ColumnDef,
+  ColumnFiltersState,
+  OnChangeFn,
+  SortingState,
+} from "@tanstack/react-table"
 import { Store } from "lucide-react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -79,6 +84,10 @@ interface OrdersTableProps {
   onPageChange: (page: number) => void
   onLimitChange: (limit: number) => void
   isLoading?: boolean
+  sorting: SortingState
+  onSortingChange: (sorting: SortingState) => void
+  columnFilters: ColumnFiltersState
+  onColumnFiltersChange: (filters: ColumnFiltersState) => void
 }
 
 export function OrdersTable({
@@ -94,6 +103,10 @@ export function OrdersTable({
   onPageChange,
   onLimitChange,
   isLoading = false,
+  sorting,
+  onSortingChange,
+  columnFilters,
+  onColumnFiltersChange,
 }: OrdersTableProps) {
   const { t } = useTranslation("orders")
   const navigate = useNavigate()
@@ -135,6 +148,23 @@ export function OrdersTable({
     [navigate]
   )
 
+  const handleSortingChange = useCallback<OnChangeFn<SortingState>>(
+    (updater) => {
+      const next = typeof updater === "function" ? updater(sorting) : updater
+      onSortingChange(next)
+    },
+    [onSortingChange, sorting]
+  )
+
+  const handleColumnFiltersChange = useCallback<OnChangeFn<ColumnFiltersState>>(
+    (updater) => {
+      const next =
+        typeof updater === "function" ? updater(columnFilters) : updater
+      onColumnFiltersChange(next)
+    },
+    [columnFilters, onColumnFiltersChange]
+  )
+
   const columnLabels = useMemo(
     () => ({
       orderId: t("table.columns.order_id"),
@@ -163,10 +193,12 @@ export function OrdersTable({
       },
       {
         accessorKey: "orderDate",
+        enableColumnFilter: false,
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
             title={t("table.columns.order_date")}
+            enableSearch={false}
           />
         ),
         cell: ({ getValue }) => {
@@ -183,10 +215,12 @@ export function OrdersTable({
       },
       {
         accessorKey: "storeName",
+        enableColumnFilter: false,
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
             title={t("table.columns.store")}
+            enableSearch={false}
           />
         ),
         cell: ({ row }) => (
@@ -202,10 +236,12 @@ export function OrdersTable({
         id: "customer",
         accessorFn: (row) =>
           `${row.customer} ${row.customerPhone?.trim() ?? ""}`.trim(),
+        enableColumnFilter: false,
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
             title={t("table.columns.customer")}
+            enableSearch={false}
           />
         ),
         cell: ({ row }) => {
@@ -222,10 +258,12 @@ export function OrdersTable({
       },
       {
         accessorKey: "totalAmount",
+        enableColumnFilter: false,
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
             title={t("table.columns.total_amount")}
+            enableSearch={false}
           />
         ),
         cell: ({ row }) =>
@@ -233,10 +271,13 @@ export function OrdersTable({
       },
       {
         accessorKey: "syncStatus",
+        enableColumnFilter: false,
+        enableSorting: false,
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
             title={t("table.columns.sync_status")}
+            enableSearch={false}
           />
         ),
         cell: ({ getValue }) => {
@@ -269,12 +310,16 @@ export function OrdersTable({
     columns,
     getRowId: (row) => row.id,
     enableRowSelection: true,
+    manualSorting: true,
+    manualFiltering: true,
     selectColumnLabels: {
       selectAll: t("table.select_all"),
       selectRow: t("table.select_row"),
     },
-    state: { rowSelection },
+    state: { rowSelection, sorting, columnFilters },
     onRowSelectionChange: setRowSelection,
+    onSortingChange: handleSortingChange,
+    onColumnFiltersChange: handleColumnFiltersChange,
   })
 
   return (

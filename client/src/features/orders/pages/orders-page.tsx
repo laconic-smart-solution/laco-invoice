@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import type { ColumnFiltersState, SortingState } from "@tanstack/react-table"
 
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
 import { OrdersFilters } from "@/features/orders/components/orders-filters"
@@ -12,6 +13,7 @@ import {
 import { mapOrderDtoToOrder } from "@/features/orders/util/map-order"
 import type { ApiOrderStatus } from "@/shared/services/order.service"
 import { getPaginationMeta, usePagination } from "@/shared/hooks/use-pagination"
+import { useDebounce } from "@/shared/hooks/use-debounce"
 import {
   getOrderErrorMessage,
   useOrdersPageQuery,
@@ -22,11 +24,24 @@ import {
   buildProductSourceKey,
   parseProductSourceKey,
 } from "@/shared/services/marketplace-product.service"
+import { getColumnFilterValue } from "@/util/table-column-filters"
+import { sortingToPageSort } from "@/util/table-sort"
+
+const ORDER_SORT_FIELD_MAP: Record<string, string> = {
+  orderId: "externalOrderId",
+  orderDate: "orderDate",
+  storeName: "store.name",
+  customer: "customer.name",
+  totalAmount: "totalAmount",
+}
 
 export function OrdersPage() {
   const { t } = useTranslation("orders")
   const { page, limit, setPage, setLimit } = usePagination()
   const [filters, setFilters] = useState<OrderFiltersState>(DEFAULT_ORDER_FILTERS)
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const debouncedColumnFilters = useDebounce(columnFilters)
 
   const { data: sources = [], isLoading: sourcesLoading } =
     useMarketplaceProductSourcesQuery()
@@ -47,12 +62,21 @@ export function OrdersPage() {
     () => (filters.sourceKey ? parseProductSourceKey(filters.sourceKey) : null),
     [filters.sourceKey]
   )
+  const pageSort = useMemo(
+    () => sortingToPageSort(sorting, ORDER_SORT_FIELD_MAP),
+    [sorting]
+  )
+  const columnOrderId = useMemo(
+    () => getColumnFilterValue(debouncedColumnFilters, "orderId"),
+    [debouncedColumnFilters]
+  )
 
   const pageRequest = useMemo(() => {
     const filter: {
       storeId?: number
       marketplaceCode?: string
       orderStatus?: ApiOrderStatus
+      externalOrderId?: string
     } = {}
 
     if (parsedSource) {
@@ -64,12 +88,26 @@ export function OrdersPage() {
       filter.orderStatus = filters.orderStatus as ApiOrderStatus
     }
 
+    const orderSearch = columnOrderId || filters.search.trim()
+    if (orderSearch) {
+      filter.externalOrderId = orderSearch
+    }
+
     return {
       pageNumber: page,
       pageSize: limit,
+      ...pageSort,
       ...(Object.keys(filter).length > 0 ? { filter } : {}),
     }
-  }, [filters.orderStatus, limit, page, parsedSource])
+  }, [
+    columnOrderId,
+    filters.orderStatus,
+    filters.search,
+    limit,
+    page,
+    pageSort,
+    parsedSource,
+  ])
 
   const { data, isLoading, isError, error } = useOrdersPageQuery(pageRequest)
   const syncMutation = useTriggerOrderSyncMutation()
@@ -128,6 +166,16 @@ export function OrdersPage() {
         isLoading={isLoading}
         onPageChange={setPage}
         onLimitChange={setLimit}
+        sorting={sorting}
+        onSortingChange={(next) => {
+          setSorting(next)
+          setPage(1)
+        }}
+        columnFilters={columnFilters}
+        onColumnFiltersChange={(next) => {
+          setColumnFilters(next)
+          setPage(1)
+        }}
       />
     </div>
   )

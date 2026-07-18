@@ -1,11 +1,13 @@
 export interface OrderFiltersState {
   sourceKey: string
   orderStatus: string
+  search: string
 }
 
 export const DEFAULT_ORDER_FILTERS: OrderFiltersState = {
   sourceKey: "",
   orderStatus: "all",
+  search: "",
 }
 
 export const ORDER_STATUS_FILTER_OPTIONS = [

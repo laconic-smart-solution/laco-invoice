@@ -39,6 +39,8 @@
   },
   "filters": {
     "role_label": "บทบาท",
+    "search_label": "ค้นหา",
+    "search_placeholder": "ค้นหาด้วยชื่อ…",
     "role": {
       "all": "ทุกบทบาท",
       "admin": "ผู้ดูแลระบบ",

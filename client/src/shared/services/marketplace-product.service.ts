@@ -4,6 +4,7 @@ import type {
   MarketplaceProductDetail,
   MarketplaceProductSource,
   MarketplaceProductSyncRun,
+  ProductStats,
 } from "@/features/products/types/product"
 import { normalizeProductErpStatus } from "@/features/products/util/erp-status"
 import { apiClient } from "@/app/api/client"
@@ -19,9 +20,45 @@ export interface MarketplaceProductListParams {
   priceMax?: number
 }
 
+export interface MarketplaceProductPageRequest {
+  pageNumber: number
+  pageSize: number
+  sortBy?: string
+  sortOrder?: "ASC" | "DESC"
+  filter?: {
+    storeId?: number
+    marketplaceCode?: string
+    search?: string
+    priceMin?: number
+    priceMax?: number
+    erpStatus?: string
+  }
+}
+
 export interface MarketplaceProductSyncParams {
   storeId: number
   marketplaceCode: MarketplaceCode
+}
+
+export interface MarketplaceProductStatsParams {
+  storeId?: number
+  marketplaceCode?: string
+}
+
+interface ApiMarketplaceProductStatsDto {
+  totalCount: number
+  syncedCount: number
+  unmappedCount: number
+  mappingRatePercent: number
+}
+
+function mapProducts(
+  products: Array<Omit<MarketplaceProduct, "erpStatus"> & { erpStatus?: string }>
+): MarketplaceProduct[] {
+  return products.map((product) => ({
+    ...product,
+    erpStatus: normalizeProductErpStatus(product.erpStatus),
+  }))
 }
 
 export const marketplaceProductService = {
@@ -47,11 +84,37 @@ export const marketplaceProductService = {
       },
     })
     return {
-      items: (response.data.data ?? []).map((product) => ({
-        ...product,
-        erpStatus: normalizeProductErpStatus(product.erpStatus),
-      })),
+      items: mapProducts(response.data.data ?? []),
       total: response.data.meta?.totalElements ?? 0,
+    }
+  },
+
+  pageProducts: async (request: MarketplaceProductPageRequest) => {
+    const response = await apiClient.post<
+      ApiResponse<Array<Omit<MarketplaceProduct, "erpStatus"> & { erpStatus?: string }>>
+    >("/v1/marketplace-products/pageable", request)
+    return {
+      ...response.data,
+      data: mapProducts(response.data.data ?? []),
+    }
+  },
+
+  getStats: async (params: MarketplaceProductStatsParams = {}): Promise<ProductStats> => {
+    const response = await apiClient.get<ApiResponse<ApiMarketplaceProductStatsDto>>(
+      "/v1/marketplace-products/stats",
+      {
+        params: {
+          storeId: params.storeId,
+          marketplaceCode: params.marketplaceCode,
+        },
+      }
+    )
+    const data = response.data.data
+    return {
+      mappingRatePercent: data?.mappingRatePercent ?? 0,
+      actionRequiredCount: data?.unmappedCount ?? 0,
+      activeSkuCount: data?.syncedCount ?? 0,
+      totalCount: data?.totalCount ?? 0,
     }
   },
 

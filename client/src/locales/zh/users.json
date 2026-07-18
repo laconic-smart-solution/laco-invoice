@@ -39,6 +39,8 @@
   },
   "filters": {
     "role_label": "角色",
+    "search_label": "搜索",
+    "search_placeholder": "按姓名搜索…",
     "role": {
       "all": "全部角色",
       "admin": "管理员",

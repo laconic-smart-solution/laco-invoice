@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { useQueryClient } from "@tanstack/react-query"
+import type { ColumnFiltersState, SortingState } from "@tanstack/react-table"
 
 import { ROUTES } from "@/app/constants/routes"
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
@@ -9,22 +10,24 @@ import { ProductsFilters } from "@/features/products/components/products-filters
 import { ProductsHeader } from "@/features/products/components/products-header"
 import { ProductsStatCards } from "@/features/products/components/products-stat-cards"
 import { ProductsTable } from "@/features/products/components/products-table"
-import type { ProductFiltersState, ProductStats } from "@/features/products/types/product"
+import type { ProductFiltersState } from "@/features/products/types/product"
 import { Button } from "@/components/ui/button"
 import { DEFAULT_LIMIT, DEFAULT_PAGE, getPaginationMeta } from "@/shared/hooks/use-pagination"
+import { useDebounce } from "@/shared/hooks/use-debounce"
 import {
   marketplaceProductKeys,
   useMarketplaceProductSourcesQuery,
+  useMarketplaceProductStatsQuery,
   useMarketplaceProductSyncStatusQuery,
-  useMarketplaceProductsAcrossSourcesQuery,
-  useMarketplaceProductsQuery,
+  useMarketplaceProductsPageQuery,
   useStartMarketplaceProductSyncMutation,
 } from "@/shared/queries/marketplace-product.query"
 import {
-  buildProductSourceKey,
   parseProductSourceKey,
 } from "@/shared/services/marketplace-product.service"
 import { useMarketplaceProductSyncSubscription } from "@/shared/hooks/use-marketplace-product-sync-subscription"
+import { getFirstColumnFilterValue } from "@/util/table-column-filters"
+import { sortingToPageSort } from "@/util/table-sort"
 
 const DEFAULT_FILTERS: ProductFiltersState = {
   sourceKey: "",
@@ -32,12 +35,14 @@ const DEFAULT_FILTERS: ProductFiltersState = {
   erpStatus: "all",
   priceMin: "",
   priceMax: "",
-  priceSort: "none",
 }
 
-function parseProductPrice(price: string): number {
-  const parsed = Number.parseFloat(price)
-  return Number.isFinite(parsed) ? parsed : 0
+const PRODUCT_SORT_FIELD_MAP: Record<string, string> = {
+  name: "name",
+  price: "price",
+  product_sku: "sku",
+  store_marketplace: "name",
+  erpStatus: "updatedAt",
 }
 
 export function ProductsPage() {
@@ -46,6 +51,9 @@ export function ProductsPage() {
   const [page, setPage] = useState(DEFAULT_PAGE)
   const [limit, setLimit] = useState(DEFAULT_LIMIT)
   const [filters, setFilters] = useState<ProductFiltersState>(DEFAULT_FILTERS)
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const debouncedColumnFilters = useDebounce(columnFilters)
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
   const [activeSyncRunId, setActiveSyncRunId] = useState<number | null>(null)
   const [syncMessage, setSyncMessage] = useState<string | null>(null)
@@ -61,11 +69,10 @@ export function ProductsPage() {
 
   const activeSource = useMemo(
     () =>
-      sources.find(
-        (source) =>
-          buildProductSourceKey(source.storeId, source.marketplaceCode) ===
-          filters.sourceKey
-      ) ?? null,
+      sources.find((source) => {
+        const key = `${source.storeId}:${source.marketplaceCode}`
+        return key === filters.sourceKey
+      }) ?? null,
     [filters.sourceKey, sources]
   )
 
@@ -78,36 +85,80 @@ export function ProductsPage() {
   const priceMax = filters.priceMax ? Number.parseFloat(filters.priceMax) : undefined
   const resolvedPriceMin = Number.isFinite(priceMin) ? priceMin : undefined
   const resolvedPriceMax = Number.isFinite(priceMax) ? priceMax : undefined
+  const pageSort = useMemo(
+    () => sortingToPageSort(sorting, PRODUCT_SORT_FIELD_MAP),
+    [sorting]
+  )
+  const columnSearch = useMemo(
+    () =>
+      getFirstColumnFilterValue(debouncedColumnFilters, [
+        "name",
+        "product_sku",
+        "store_marketplace",
+      ]),
+    [debouncedColumnFilters]
+  )
+  const resolvedSearch = columnSearch || filters.search.trim()
+
+  const pageRequest = useMemo(() => {
+    const filter: NonNullable<
+      import("@/shared/services/marketplace-product.service").MarketplaceProductPageRequest["filter"]
+    > = {}
+
+    if (parsedSource) {
+      filter.storeId = parsedSource.storeId
+      filter.marketplaceCode = parsedSource.marketplaceCode
+    }
+    if (resolvedSearch) {
+      filter.search = resolvedSearch
+    }
+    if (filters.erpStatus !== "all") {
+      filter.erpStatus = filters.erpStatus
+    }
+    if (resolvedPriceMin != null) {
+      filter.priceMin = resolvedPriceMin
+    }
+    if (resolvedPriceMax != null) {
+      filter.priceMax = resolvedPriceMax
+    }
+
+    return {
+      pageNumber: page,
+      pageSize: limit,
+      ...pageSort,
+      ...(Object.keys(filter).length > 0 ? { filter } : {}),
+    }
+  }, [
+    filters.erpStatus,
+    limit,
+    page,
+    pageSort,
+    parsedSource,
+    resolvedPriceMax,
+    resolvedPriceMin,
+    resolvedSearch,
+  ])
 
   const {
-    data: productResult,
+    data: productPage,
     isLoading: productsLoading,
     error: productsError,
-  } = useMarketplaceProductsQuery(
-    parsedSource
-      ? {
-          storeId: parsedSource.storeId,
-          marketplaceCode: parsedSource.marketplaceCode,
-          page,
-          limit,
-          priceMin: resolvedPriceMin,
-          priceMax: resolvedPriceMax,
-        }
-      : null,
-    !isAllSources && sources.length > 0
+  } = useMarketplaceProductsPageQuery(pageRequest, sources.length > 0)
+
+  const statsParams = useMemo(
+    () =>
+      parsedSource
+        ? {
+            storeId: parsedSource.storeId,
+            marketplaceCode: parsedSource.marketplaceCode,
+          }
+        : {},
+    [parsedSource]
   )
 
-  const {
-    data: allProductsResult,
-    isLoading: allProductsLoading,
-    error: allProductsError,
-  } = useMarketplaceProductsAcrossSourcesQuery(
-    sources,
-    {
-      priceMin: resolvedPriceMin,
-      priceMax: resolvedPriceMax,
-    },
-    isAllSources && sources.length > 0
+  const { data: stats } = useMarketplaceProductStatsQuery(
+    statsParams,
+    sources.length > 0
   )
 
   const startSyncMutation = useStartMarketplaceProductSyncMutation()
@@ -159,62 +210,8 @@ export function ProductsPage() {
     }
   }, [isSyncRunning, parsedSource, startSyncMutation, t])
 
-  const products = isAllSources
-    ? (allProductsResult?.items ?? [])
-    : (productResult?.items ?? [])
-
-  const filteredProducts = useMemo(() => {
-    const searchTerm = filters.search.trim().toLowerCase()
-
-    let next = products
-
-    if (searchTerm) {
-      next = next.filter((product) => {
-        const haystack = [
-          product.name,
-          product.sku,
-          product.externalProductId,
-          product.storeName,
-          product.marketplaceName,
-        ]
-          .join(" ")
-          .toLowerCase()
-        return haystack.includes(searchTerm)
-      })
-    }
-
-    if (filters.erpStatus !== "all") {
-      next = next.filter((product) => product.erpStatus === filters.erpStatus)
-    }
-
-    if (filters.priceSort === "asc" || filters.priceSort === "desc") {
-      const direction = filters.priceSort === "asc" ? 1 : -1
-      next = [...next].sort(
-        (a, b) =>
-          (parseProductPrice(a.price) - parseProductPrice(b.price)) * direction
-      )
-    }
-
-    return next
-  }, [filters.erpStatus, filters.priceSort, filters.search, products])
-
-  const hasClientFilters =
-    filters.search.trim().length > 0 ||
-    filters.erpStatus !== "all" ||
-    filters.priceSort !== "none"
-
-  const pagedProducts = useMemo(() => {
-    if (!isAllSources) {
-      return filteredProducts
-    }
-    const startIndex = (page - 1) * limit
-    return filteredProducts.slice(startIndex, startIndex + limit)
-  }, [filteredProducts, isAllSources, limit, page])
-
-  const totalCount =
-    isAllSources || hasClientFilters
-      ? filteredProducts.length
-      : (productResult?.total ?? 0)
+  const products = productPage?.data ?? []
+  const totalCount = productPage?.meta?.totalElements ?? 0
   const pagination = getPaginationMeta(page, limit, totalCount)
 
   useEffect(() => {
@@ -225,28 +222,13 @@ export function ProductsPage() {
     filters.erpStatus,
     filters.priceMin,
     filters.priceMax,
-    filters.priceSort,
+    debouncedColumnFilters,
   ])
-
-  const stats: ProductStats = useMemo(() => {
-    const syncedCount = products.filter((product) => product.erpStatus === "synced").length
-    const unmappedCount = products.filter((product) => product.erpStatus === "unmapped").length
-    const totalOnPage = products.length
-
-    return {
-      mappingRatePercent: totalOnPage > 0 ? (syncedCount / totalOnPage) * 100 : 0,
-      actionRequiredCount: unmappedCount,
-      activeSkuCount: syncedCount,
-    }
-  }, [products])
-
-  const isProductsLoading = isAllSources ? allProductsLoading : productsLoading
-  const productsRequestError = isAllSources ? allProductsError : productsError
 
   const requestError =
     sourcesError != null
       ? t("errors.load_sources_failed")
-      : productsRequestError != null
+      : productsError != null
         ? t("errors.load_products_failed")
         : null
 
@@ -254,7 +236,7 @@ export function ProductsPage() {
   const showNeverSynced =
     !isAllSources &&
     !sourcesLoading &&
-    !isProductsLoading &&
+    !productsLoading &&
     activeSource != null &&
     activeSource.syncStatus == null &&
     totalCount === 0
@@ -287,19 +269,30 @@ export function ProductsPage() {
         </div>
       ) : (
         <>
-          <ProductsStatCards stats={stats} />
+          <ProductsStatCards
+            stats={
+              stats ?? {
+                mappingRatePercent: 0,
+                actionRequiredCount: 0,
+                activeSkuCount: 0,
+              }
+            }
+          />
           {isFiltersOpen ? (
             <ProductsFilters
               sources={sources}
               value={filters}
               selectedSourceKey={selectedSourceKey}
-              onChange={setFilters}
+              onChange={(next) => {
+                setFilters(next)
+                setPage(1)
+              }}
               disabled={sourcesLoading}
             />
           ) : null}
           <ProductsTable
-            products={pagedProducts}
-            isLoading={sourcesLoading || isProductsLoading}
+            products={products}
+            isLoading={sourcesLoading || productsLoading}
             totalCount={totalCount}
             page={pagination.page}
             limit={pagination.limit}
@@ -313,6 +306,13 @@ export function ProductsPage() {
               setLimit(nextLimit)
               setPage(1)
             }}
+            sorting={sorting}
+            onSortingChange={(next) => {
+              setSorting(next)
+              setPage(1)
+            }}
+            columnFilters={columnFilters}
+            onColumnFiltersChange={setColumnFilters}
           />
         </>
       )}

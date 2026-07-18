@@ -1,4 +1,9 @@
-import type { ColumnDef } from "@tanstack/react-table"
+import type {
+  ColumnDef,
+  ColumnFiltersState,
+  OnChangeFn,
+  SortingState,
+} from "@tanstack/react-table"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
@@ -44,6 +49,10 @@ interface CustomersTableProps {
   isLoading?: boolean
   onPageChange: (page: number) => void
   onLimitChange: (limit: number) => void
+  sorting: SortingState
+  onSortingChange: (sorting: SortingState) => void
+  columnFilters: ColumnFiltersState
+  onColumnFiltersChange: (filters: ColumnFiltersState) => void
 }
 
 export function CustomersTable({
@@ -60,6 +69,10 @@ export function CustomersTable({
   isLoading = false,
   onPageChange,
   onLimitChange,
+  sorting,
+  onSortingChange,
+  columnFilters,
+  onColumnFiltersChange,
 }: CustomersTableProps) {
   const { t } = useTranslation("customers")
   const navigate = useNavigate()
@@ -69,6 +82,23 @@ export function CustomersTable({
       navigate(ROUTES.dashboard.customerEdit(String(customer.id)))
     },
     [navigate]
+  )
+
+  const handleSortingChange = useCallback<OnChangeFn<SortingState>>(
+    (updater) => {
+      const next = typeof updater === "function" ? updater(sorting) : updater
+      onSortingChange(next)
+    },
+    [onSortingChange, sorting]
+  )
+
+  const handleColumnFiltersChange = useCallback<OnChangeFn<ColumnFiltersState>>(
+    (updater) => {
+      const next =
+        typeof updater === "function" ? updater(columnFilters) : updater
+      onColumnFiltersChange(next)
+    },
+    [columnFilters, onColumnFiltersChange]
   )
 
   const columnLabels = useMemo(() => {
@@ -92,10 +122,12 @@ export function CustomersTable({
     const baseColumns: ColumnDef<Customer>[] = [
       {
         accessorKey: "id",
+        enableColumnFilter: false,
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
             title={t("table.columns.id")}
+            enableSearch={false}
           />
         ),
         cell: ({ getValue }) => (
@@ -111,10 +143,12 @@ export function CustomersTable({
         id: "store",
         accessorFn: (row) =>
           `${row.storeName ?? ""} ${row.marketplaceCode ?? ""} ${row.storeId ?? ""}`.trim(),
+        enableColumnFilter: false,
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
             title={t("table.columns.store")}
+            enableSearch={false}
           />
         ),
         cell: ({ row }) => {
@@ -193,10 +227,12 @@ export function CustomersTable({
       },
       {
         accessorKey: "gender",
+        enableColumnFilter: false,
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
             title={t("table.columns.gender")}
+            enableSearch={false}
           />
         ),
         cell: ({ getValue }) => (
@@ -207,10 +243,12 @@ export function CustomersTable({
       },
       {
         accessorKey: "address",
+        enableColumnFilter: false,
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
             title={t("table.columns.address")}
+            enableSearch={false}
           />
         ),
         cell: ({ getValue }) => (
@@ -227,6 +265,11 @@ export function CustomersTable({
   const table = useDataTable({
     data: customers,
     columns,
+    manualSorting: true,
+    manualFiltering: true,
+    state: { sorting, columnFilters },
+    onSortingChange: handleSortingChange,
+    onColumnFiltersChange: handleColumnFiltersChange,
   })
 
   return (

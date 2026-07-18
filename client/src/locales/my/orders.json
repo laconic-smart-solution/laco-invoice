@@ -10,6 +10,8 @@
     "store_label": "Marketplace ဆိုင်",
     "store_all": "ချိတ်ဆက်ထားသော ဆိုင်အားလုံး",
     "store_placeholder": "ဆိုင်ရွေးပါ",
+    "search_label": "အော်ဒါ ID",
+    "search_placeholder": "အော်ဒါ ID ဖြင့် ရှာရန်…",
     "date_range_label": "ရက်စွဲ အကွာအဝေး",
     "date_range_value": "Oct 01 - Oct 24, 2023",
     "status_label": "အော်ဒါ အခြေအနေ",

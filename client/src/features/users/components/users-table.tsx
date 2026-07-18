@@ -1,5 +1,10 @@
-import type { ColumnDef } from "@tanstack/react-table"
-import { useMemo } from "react"
+import type {
+  ColumnDef,
+  ColumnFiltersState,
+  OnChangeFn,
+  SortingState,
+} from "@tanstack/react-table"
+import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Badge } from "@/components/ui/badge"
@@ -52,6 +57,10 @@ interface UsersTableProps {
   onPageChange: (page: number) => void
   onLimitChange: (limit: number) => void
   onVerifyOtp: (user: AdminUser) => void
+  sorting: SortingState
+  onSortingChange: (sorting: SortingState) => void
+  columnFilters: ColumnFiltersState
+  onColumnFiltersChange: (filters: ColumnFiltersState) => void
 }
 
 export function UsersTable({
@@ -68,9 +77,30 @@ export function UsersTable({
   onPageChange,
   onLimitChange,
   onVerifyOtp,
+  sorting,
+  onSortingChange,
+  columnFilters,
+  onColumnFiltersChange,
 }: UsersTableProps) {
   const { t } = useTranslation("users")
   const locale = useLocaleStore((state) => state.locale)
+
+  const handleSortingChange = useCallback<OnChangeFn<SortingState>>(
+    (updater) => {
+      const next = typeof updater === "function" ? updater(sorting) : updater
+      onSortingChange(next)
+    },
+    [onSortingChange, sorting]
+  )
+
+  const handleColumnFiltersChange = useCallback<OnChangeFn<ColumnFiltersState>>(
+    (updater) => {
+      const next =
+        typeof updater === "function" ? updater(columnFilters) : updater
+      onColumnFiltersChange(next)
+    },
+    [columnFilters, onColumnFiltersChange]
+  )
 
   const columnLabels = useMemo(
     () => ({
@@ -87,10 +117,12 @@ export function UsersTable({
     () => [
       {
         accessorKey: "id",
+        enableColumnFilter: false,
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
             title={t("table.columns.id")}
+            enableSearch={false}
           />
         ),
         cell: ({ getValue }) => (
@@ -129,10 +161,12 @@ export function UsersTable({
       },
       {
         accessorKey: "role",
+        enableColumnFilter: false,
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
             title={t("table.columns.role")}
+            enableSearch={false}
           />
         ),
         cell: ({ getValue }) => {
@@ -147,10 +181,12 @@ export function UsersTable({
       },
       {
         accessorKey: "active",
+        enableColumnFilter: false,
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
             title={t("table.columns.status")}
+            enableSearch={false}
           />
         ),
         cell: ({ getValue }) => {
@@ -162,24 +198,15 @@ export function UsersTable({
             </Badge>
           )
         },
-        filterFn: (row, columnId, filterValue) => {
-          const query = String(filterValue ?? "").toLowerCase().trim()
-          if (!query) {
-            return true
-          }
-          const active = row.getValue<boolean>(columnId)
-          const label = active
-            ? t("table.status.active")
-            : t("table.status.inactive")
-          return label.toLowerCase().includes(query)
-        },
       },
       {
         accessorKey: "createdAt",
+        enableColumnFilter: false,
         header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
             title={t("table.columns.created_at")}
+            enableSearch={false}
           />
         ),
         cell: ({ getValue }) => (
@@ -205,6 +232,11 @@ export function UsersTable({
   const table = useDataTable({
     data: users,
     columns,
+    manualSorting: true,
+    manualFiltering: true,
+    state: { sorting, columnFilters },
+    onSortingChange: handleSortingChange,
+    onColumnFiltersChange: handleColumnFiltersChange,
   })
 
   return (
