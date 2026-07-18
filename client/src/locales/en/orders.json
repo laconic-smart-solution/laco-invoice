@@ -93,6 +93,7 @@
   },
   "errors": {
     "load_failed": "Unable to load orders. Please try again.",
-    "sync_failed": "Unable to sync orders. Please try again."
+    "sync_failed": "Unable to sync orders. Please try again.",
+    "generate_invoice_failed": "Unable to generate invoice. Please try again."
   }
 }

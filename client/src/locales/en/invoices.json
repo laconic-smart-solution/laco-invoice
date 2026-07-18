@@ -12,7 +12,7 @@
     "marketplace_shopee": "Shopee",
     "marketplace_tiktok": "TikTok Shop",
     "date_range_label": "Date Range",
-    "date_range_value": "Oct 01 - Oct 24, 2023",
+    "date_range_placeholder": "All dates",
     "status_label": "Invoice Status",
     "status_all": "All Statuses",
     "more_filters": "More filters"
@@ -27,7 +27,7 @@
       "store": "Store",
       "grand_total": "Grand Total",
       "status": "Status",
-      "created_at": "Created At",
+      "created_at": "Issued At",
       "action": "Action"
     },
     "actions": {
@@ -36,65 +36,61 @@
     }
   },
   "status": {
-    "paid": "Paid",
-    "pending": "Pending",
-    "overdue": "Overdue",
-    "draft": "Draft"
+    "ISSUED": "Issued",
+    "VOID": "Void"
+  },
+  "errors": {
+    "load_failed": "Unable to load invoices. Please try again.",
+    "void_failed": "Unable to void invoice. Please try again.",
+    "download_failed": "Unable to download PDF. Please try again."
+  },
+  "confirm": {
+    "void": {
+      "title": "Void invoice?",
+      "description": "Invoice {{invoiceNo}} will be marked as void. This cannot be undone."
+    }
   },
   "detail": {
+    "loading": "Loading invoice…",
     "back_to_invoices": "Back to Invoices",
     "not_found_title": "Invoice not found",
     "not_found_description": "The invoice you are looking for does not exist or may have been removed.",
     "actions": {
       "print": "Print",
-      "download": "Download PDF"
+      "download": "Download PDF",
+      "void": "Void invoice"
     },
     "document": {
-      "vat": "VAT {{number}}",
+      "title": "Tax Invoice / Receipt",
+      "title_th": "ใบกำกับภาษี / ใบเสร็จรับเงิน",
+      "vat_rate": "VAT {{percent}}%",
       "invoice_number": "Invoice Number",
       "issued_at": "Issued At",
-      "due_date": "Due Date",
+      "order_ref": "Order reference",
       "bill_to": "Bill To",
-      "attn": "Attn: {{name}}",
+      "parties": "Invoice parties",
       "marketplace_source": "Marketplace Source",
+      "line_items_caption": "Invoice line items",
+      "no_line_items": "No line items on this invoice.",
       "columns": {
         "description": "Description",
+        "sku": "SKU",
         "qty": "QTY",
         "unit_price": "Unit Price",
         "total": "Total"
       },
-      "bank_details": "Bank Details",
-      "iban": "IBAN: {{value}}",
-      "swift": "SWIFT/BIC: {{value}}",
-      "footer_note": "Thank you for your business. Payment is due within {{days}} days of the invoice date.",
       "subtotal": "Subtotal",
+      "shipping": "Shipping",
       "vat_line": "VAT ({{percent}}%)",
-      "grand_total": "Grand Total"
+      "grand_total": "Grand Total",
+      "footer_vat_note": "VAT {{percent}}% is calculated on subtotal plus shipping."
     },
     "sidebar": {
-      "timeline": "Invoice Timeline",
-      "external_systems": "External Systems",
-      "erp_voucher": "SAP ERP Voucher",
-      "view_in_erp": "View in SAP Business One",
+      "label": "Invoice details",
+      "summary": "Summary",
       "marketplace": "Marketplace",
       "order_ref": "Order #{{orderId}}",
-      "skus": "SKUs: {{count}}",
-      "country": "Country: {{code}}",
-      "add_note": "Add Note or Attachment"
-    },
-    "timeline": {
-      "generated": {
-        "title": "Invoice Generated",
-        "pending": "Pending generation"
-      },
-      "synced": {
-        "title": "Synced to Marketplace",
-        "pending": "Waiting for sync..."
-      },
-      "exported": {
-        "title": "Printed / Exported",
-        "pending": "Waiting for action..."
-      }
+      "skus": "Line items: {{count}}"
     }
   }
 }

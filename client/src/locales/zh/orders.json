@@ -93,6 +93,7 @@
   },
   "errors": {
     "load_failed": "无法加载订单列表，请重试。",
-    "sync_failed": "无法同步订单，请重试。"
+    "sync_failed": "无法同步订单，请重试。",
+    "generate_invoice_failed": "无法生成发票，请重试。"
   }
 }

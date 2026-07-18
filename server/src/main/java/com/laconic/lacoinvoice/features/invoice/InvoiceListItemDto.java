@@ -12,7 +12,12 @@ public record InvoiceListItemDto(
 		Long id,
 		Long orderId,
 		String invoiceNo,
+		String storeName,
+		String marketplaceCode,
+		String customerName,
+		String currency,
 		BigDecimal grandTotal,
+		Integer vatPercentage,
 		InvoiceStatus status,
 		Instant issuedAt) {
 }

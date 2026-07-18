@@ -15,5 +15,7 @@ public interface InvoiceService {
 
 	InvoiceDto voidInvoice(Long id);
 
-	String getPdfUrl(Long id);
+	byte[] renderPdf(Long id);
+
+	String pdfFilename(Long id);
 }

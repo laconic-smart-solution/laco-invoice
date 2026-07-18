@@ -93,12 +93,14 @@ app:
     detail-request-delay-ms: 300
   communication:
     gateway-url: ${COMMUNICATION_GATEWAY_URL:http://192.168.0.242:8084}
-    lazada-base-path: ${COMMUNICATION_LAZADA_BASE_PATH:}
-    shopee-base-path: ${COMMUNICATION_SHOPEE_BASE_PATH:}
-    tiktok-base-path: ${COMMUNICATION_TIKTOK_BASE_PATH:}
+    lazada-base-path: ${COMMUNICATION_LAZADA_BASE_PATH:/comms/lazada}
+    shopee-base-path: ${COMMUNICATION_SHOPEE_BASE_PATH:/comms/shopee}
+    tiktok-base-path: ${COMMUNICATION_TIKTOK_BASE_PATH:/comms/tiktok}
     gateway-secret: ${GATEWAY_SECRET:hello}
     lazada-app-key: ${LAZADA_APP_KEY:}
     lazada-app-secret: ${LAZADA_APP_SECRET:}
+    tiktok-app-key: ${TIKTOK_APP_KEY:}
+    tiktok-app-secret: ${TIKTOK_APP_SECRET:}
 
 sso:
   url: ${SSO_URL:https://api-auths.laconic.co.th}

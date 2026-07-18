@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Link, useParams } from "react-router-dom"
+import { Link, useNavigate, useParams } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
@@ -11,6 +11,10 @@ import { OrderDetailInfo } from "@/features/orders/components/order-detail-info"
 import { OrderLineItems } from "@/features/orders/components/order-line-items"
 import { mapOrderDetailDtoToOrderDetail } from "@/features/orders/util/map-order"
 import {
+  getInvoiceErrorMessage,
+  useGenerateInvoiceMutation,
+} from "@/shared/queries/invoice.query"
+import {
   getOrderErrorMessage,
   useOrderDetailQuery,
   useTriggerOrderSyncMutation,
@@ -19,6 +23,7 @@ import { useLocaleStore } from "@/shared/stores/locale-store"
 
 export function OrderDetailPage() {
   const { t } = useTranslation("orders")
+  const navigate = useNavigate()
   const { orderId = "" } = useParams()
   const locale = useLocaleStore((state) => state.locale)
   const [isGenerateOpen, setIsGenerateOpen] = useState(false)
@@ -31,15 +36,22 @@ export function OrderDetailPage() {
     error,
   } = useOrderDetailQuery(Number.isFinite(numericOrderId) ? numericOrderId : null)
   const syncMutation = useTriggerOrderSyncMutation()
+  const generateMutation = useGenerateInvoiceMutation()
 
   const order = useMemo(
     () => (orderDetail ? mapOrderDetailDtoToOrderDetail(orderDetail) : null),
     [orderDetail]
   )
 
-  const handleConfirmGenerate = useCallback(() => {
+  const handleConfirmGenerate = useCallback(async () => {
+    if (!Number.isFinite(numericOrderId)) {
+      setIsGenerateOpen(false)
+      return
+    }
+    const invoice = await generateMutation.mutateAsync(numericOrderId)
     setIsGenerateOpen(false)
-  }, [])
+    void navigate(ROUTES.dashboard.invoiceDetail(String(invoice.id)))
+  }, [generateMutation, navigate, numericOrderId])
 
   const loadError =
     isError && error
@@ -49,6 +61,14 @@ export function OrderDetailPage() {
   const syncError =
     syncMutation.isError && syncMutation.error
       ? getOrderErrorMessage(syncMutation.error, t("errors.sync_failed"))
+      : null
+
+  const generateError =
+    generateMutation.isError && generateMutation.error
+      ? getInvoiceErrorMessage(
+          generateMutation.error,
+          t("errors.generate_invoice_failed")
+        )
       : null
 
   if (isLoading) {
@@ -77,22 +97,31 @@ export function OrderDetailPage() {
   return (
     <div className="space-y-6 p-6">
       <AuthFormError message={syncError} />
+      <AuthFormError message={generateError} />
 
       <ConfirmDialog
         open={isGenerateOpen}
-        onOpenChange={setIsGenerateOpen}
+        onOpenChange={(open) => {
+          if (!open && !generateMutation.isPending) {
+            setIsGenerateOpen(false)
+          } else {
+            setIsGenerateOpen(open)
+          }
+        }}
         title={t("confirm.generate.title")}
         description={t("confirm.generate.description", {
           orderId: order.orderId,
         })}
         confirmLabel={t("table.actions.generate")}
         onConfirm={handleConfirmGenerate}
+        isLoading={generateMutation.isPending}
       />
 
       <OrderDetailHeader
         order={order}
         locale={locale}
         onGenerate={() => setIsGenerateOpen(true)}
+        isGenerating={generateMutation.isPending}
         onSync={() => syncMutation.mutate()}
         isSyncing={syncMutation.isPending}
       />

@@ -1,9 +1,10 @@
 package com.laconic.lacoinvoice.features.invoice;
 
 import java.util.List;
-import java.util.Map;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -50,8 +51,13 @@ public class InvoiceController {
 	}
 
 	@GetMapping("/{id}/pdf")
-	@Operation(summary = "Get invoice PDF URL stub")
-	public ApiResponse<Map<String, String>> getPdf(@PathVariable Long id) {
-		return ApiResponse.ok("OK", Map.of("pdfUrl", service.getPdfUrl(id)));
+	@Operation(summary = "Download invoice PDF")
+	public ResponseEntity<byte[]> getPdf(@PathVariable Long id) {
+		byte[] pdf = service.renderPdf(id);
+		String filename = service.pdfFilename(id);
+		return ResponseEntity.status(HttpStatus.OK)
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+				.contentType(MediaType.APPLICATION_PDF)
+				.body(pdf);
 	}
 }
