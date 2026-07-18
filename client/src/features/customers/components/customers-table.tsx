@@ -176,17 +176,13 @@ export function CustomersTable({
   return (
     <section className="border border-border bg-card shadow-sm">
       <div className="overflow-x-auto">
-        {isLoading ? (
-          <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
-            {t("table.loading")}
-          </div>
-        ) : (
-          <DataTable
-            table={table}
-            emptyMessage={t("table.empty")}
-            onRowClick={handleRowClick}
-          />
-        )}
+        <DataTable
+          table={table}
+          emptyMessage={t("table.empty")}
+          isLoading={isLoading}
+          skeletonRowCount={limit}
+          onRowClick={handleRowClick}
+        />
       </div>
 
       <DataTableFooter

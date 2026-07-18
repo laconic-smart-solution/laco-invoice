@@ -19,6 +19,9 @@
     "next": "နောက်တစ်ခု",
     "showing_range": "{{total}} ခုအနက် {{start}} မှ {{end}} ကို ပြနေသည်"
   },
+  "table": {
+    "open_menu": "မီနူးဖွင့်ရန်"
+  },
   "time": {
     "minutes_ago_one": "{{count}} မိနစ်အကြာ",
     "minutes_ago_other": "{{count}} မိနစ်အကြာ"

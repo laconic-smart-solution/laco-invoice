@@ -19,10 +19,10 @@ export function SidebarToggle({ className }: SidebarToggleProps) {
   return (
     <Button
       type="button"
-      variant="outline"
+      variant="secondary"
       size="icon-sm"
       className={cn(
-        "size-7 rounded-full border-border bg-background text-muted-foreground shadow-sm hover:bg-accent hover:text-foreground",
+        "size-7 rounded-full border border-border bg-background text-foreground shadow-sm hover:bg-muted hover:text-foreground dark:bg-background dark:hover:bg-card",
         className
       )}
       onClick={toggle}

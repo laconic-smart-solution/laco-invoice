@@ -19,6 +19,9 @@
     "next": "ถัดไป",
     "showing_range": "แสดง {{start}} ถึง {{end}} จาก {{total}}"
   },
+  "table": {
+    "open_menu": "เปิดเมนู"
+  },
   "time": {
     "minutes_ago_one": "{{count}} นาทีที่แล้ว",
     "minutes_ago_other": "{{count}} นาทีที่แล้ว"

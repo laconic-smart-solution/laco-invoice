@@ -7,10 +7,11 @@ import { Link, useNavigate } from "react-router-dom"
 import { ROUTES } from "@/app/constants/routes"
 import { DataTable } from "@/components/common/data-table/data-table"
 import { DataTableFooter } from "@/components/common/data-table/data-table-footer"
+import { DataTableRowActions } from "@/components/common/data-table/data-table-row-actions"
 import { useDataTable } from "@/components/common/data-table/use-data-table"
 import { StatusBadge } from "@/components/common/status-badge"
 import type { StatusBadgeVariant } from "@/components/common/status-badge"
-import { Button } from "@/components/ui/button"
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import type { InvoiceListItem, InvoiceStatus } from "@/features/invoices/types/invoice"
 import { useLocaleStore } from "@/shared/stores/locale-store"
 import { formatCurrency, formatDateTime } from "@/util/format"
@@ -30,30 +31,25 @@ function InvoiceRowAction({ invoice }: InvoiceRowActionProps) {
   const { t } = useTranslation("invoices")
 
   return (
-    <div
-      className="flex items-center gap-2"
-      onClick={(event) => event.stopPropagation()}
-    >
+    <DataTableRowActions>
       {invoice.pdfUrl ? (
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          aria-label={t("table.actions.download")}
-        >
-          <Download />
-        </Button>
+        <DropdownMenuItem onSelect={() => undefined}>
+          <Download aria-hidden />
+          {t("table.actions.download")}
+        </DropdownMenuItem>
       ) : null}
-      <Button variant="link" className="h-auto p-0 text-info" asChild>
+      <DropdownMenuItem asChild>
         <Link to={ROUTES.dashboard.orderDetail(invoice.orderId)}>
           {t("table.actions.view_order")}
         </Link>
-      </Button>
-    </div>
+      </DropdownMenuItem>
+    </DataTableRowActions>
   )
 }
 
 interface InvoicesTableProps {
   invoices: InvoiceListItem[]
+  isLoading?: boolean
   totalCount: number
   page: number
   limit: number
@@ -68,6 +64,7 @@ interface InvoicesTableProps {
 
 export function InvoicesTable({
   invoices,
+  isLoading = false,
   totalCount,
   page,
   limit,
@@ -172,6 +169,8 @@ export function InvoicesTable({
         <DataTable
           table={table}
           emptyMessage={t("table.empty")}
+          isLoading={isLoading}
+          skeletonRowCount={limit}
           onRowClick={handleRowClick}
         />
       </div>

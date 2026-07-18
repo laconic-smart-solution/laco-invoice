@@ -4,11 +4,12 @@ import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { DataTable } from "@/components/common/data-table/data-table"
 import { DataTableFooter } from "@/components/common/data-table/data-table-footer"
+import { DataTableRowActions } from "@/components/common/data-table/data-table-row-actions"
 import { useDataTable } from "@/components/common/data-table/use-data-table"
+import { Badge } from "@/components/ui/badge"
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import type { Store } from "@/features/stores/types/store"
 import { useLocaleStore } from "@/shared/stores/locale-store"
 import { formatDateTime } from "@/util/format"
@@ -81,11 +82,13 @@ export function StoresTable({
         id: "actions",
         header: t("table.columns.actions"),
         cell: ({ row }) => (
-          <Button variant="outline" size="sm" asChild>
-            <Link to={ROUTES.dashboard.storeDetail(row.original.id)}>
-              {t("table.actions.view")}
-            </Link>
-          </Button>
+          <DataTableRowActions>
+            <DropdownMenuItem asChild>
+              <Link to={ROUTES.dashboard.storeDetail(row.original.id)}>
+                {t("table.actions.view")}
+              </Link>
+            </DropdownMenuItem>
+          </DataTableRowActions>
         ),
       },
     ],
@@ -101,13 +104,12 @@ export function StoresTable({
   return (
     <section className="border border-border bg-card shadow-sm">
       <div className="overflow-x-auto">
-        {isLoading ? (
-          <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
-            {t("table.loading")}
-          </div>
-        ) : (
-          <DataTable table={table} emptyMessage={t("table.empty")} />
-        )}
+        <DataTable
+          table={table}
+          emptyMessage={t("table.empty")}
+          isLoading={isLoading}
+          skeletonRowCount={limit}
+        />
       </div>
 
       <DataTableFooter

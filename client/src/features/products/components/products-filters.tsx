@@ -86,7 +86,7 @@ export function ProductsFilters({
                   value.erpStatus !== option.value && "text-muted-foreground"
                 )}
                 onClick={() => onChange({ ...value, erpStatus: option.value })}
-                disabled={disabled}
+                disabled
               >
                 {t(option.labelKey)}
               </Button>

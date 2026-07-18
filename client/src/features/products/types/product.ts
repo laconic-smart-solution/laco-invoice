@@ -30,11 +30,10 @@ export interface MarketplaceProduct {
   price: string
   currency: string
   status: string
-}
-
-export interface ProductTableRow extends MarketplaceProduct {
   erpStatus: ProductErpStatus
 }
+
+export type ProductTableRow = MarketplaceProduct
 
 export interface MarketplaceProductVariant {
   sku: string

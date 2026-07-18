@@ -4,6 +4,7 @@ import { RouterProvider } from "react-router-dom"
 
 import i18n from "@/app/i18n"
 import { ThemeProvider } from "@/components/theme-provider"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { router } from "@/app/routes"
 import { AuthHydrate } from "@/features/auth/components/auth-hydrate"
 import { queryClient } from "@/shared/queries/query-client"
@@ -28,9 +29,11 @@ export function AppProviders({ children }: AppProvidersProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <AuthHydrate />
-        <LocaleSync />
-        {children ?? <RouterProvider router={router} />}
+        <TooltipProvider>
+          <AuthHydrate />
+          <LocaleSync />
+          {children ?? <RouterProvider router={router} />}
+        </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
   )

@@ -1,14 +1,15 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Download, History, Pencil, RefreshCw } from "lucide-react"
-import { useMemo } from "react"
+import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
 import { DataTableCard } from "@/components/common/data-table/data-table-card"
+import { DataTableRowActions } from "@/components/common/data-table/data-table-row-actions"
 import { useDataTable } from "@/components/common/data-table/use-data-table"
 import { StatusBadge } from "@/components/common/status-badge"
-import { Button } from "@/components/ui/button"
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { MOCK_RECENT_ORDERS } from "@/features/dashboard/data/mock-dashboard"
 import type { OrderStatus, RecentOrder } from "@/features/dashboard/types/dashboard"
 import { useLocaleStore } from "@/shared/stores/locale-store"
@@ -21,48 +22,46 @@ interface OrderRowActionProps {
 function OrderRowAction({ order }: OrderRowActionProps) {
   const { t } = useTranslation("dashboard")
 
-  switch (order.status) {
-    case "synced":
-      return (
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          aria-label={t("recent_orders.actions.download")}
-        >
-          <Download />
-        </Button>
-      )
-    case "pending":
-      return (
-        <Button size="xs" className="uppercase">
+  return (
+    <DataTableRowActions>
+      {order.status === "synced" ? (
+        <DropdownMenuItem onSelect={() => undefined}>
+          <Download aria-hidden />
+          {t("recent_orders.actions.download")}
+        </DropdownMenuItem>
+      ) : null}
+      {order.status === "pending" ? (
+        <DropdownMenuItem onSelect={() => undefined}>
           {t("recent_orders.actions.generate")}
-        </Button>
-      )
-    case "error":
-      return (
-        <Button variant="link" size="sm" className="h-auto p-0 text-destructive uppercase">
-          <RefreshCw data-icon="inline-start" />
+        </DropdownMenuItem>
+      ) : null}
+      {order.status === "error" ? (
+        <DropdownMenuItem variant="destructive" onSelect={() => undefined}>
+          <RefreshCw aria-hidden />
           {t("recent_orders.actions.retry_sync")}
-        </Button>
-      )
-    case "draft":
-      return (
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          aria-label={t("recent_orders.actions.edit")}
-        >
-          <Pencil />
-        </Button>
-      )
-    default:
-      return null
-  }
+        </DropdownMenuItem>
+      ) : null}
+      {order.status === "draft" ? (
+        <DropdownMenuItem onSelect={() => undefined}>
+          <Pencil aria-hidden />
+          {t("recent_orders.actions.edit")}
+        </DropdownMenuItem>
+      ) : null}
+    </DataTableRowActions>
+  )
 }
 
 export function RecentOrdersTable() {
   const { t } = useTranslation("dashboard")
+  const navigate = useNavigate()
   const locale = useLocaleStore((state) => state.locale)
+
+  const handleRowClick = useCallback(
+    (order: RecentOrder) => {
+      void navigate(ROUTES.dashboard.orderDetail(order.id))
+    },
+    [navigate]
+  )
 
   const columns = useMemo<ColumnDef<RecentOrder>[]>(
     () => [
@@ -124,6 +123,7 @@ export function RecentOrdersTable() {
       }
       table={table}
       emptyMessage={t("recent_orders.empty")}
+      onRowClick={handleRowClick}
     />
   )
 }
