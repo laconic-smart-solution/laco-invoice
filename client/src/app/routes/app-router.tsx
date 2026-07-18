@@ -17,13 +17,13 @@ import {
   ProductDetailPage,
   RegisterPage,
   ResetPasswordPage,
-  SectionPlaceholderPage,
   UsersPage,
   CreateUserPage,
   StoresPage,
   CreateStorePage,
   StoreDetailPage,
   MarketplaceOAuthCallbackPage,
+  ProfilePage,
 } from "@/app/constants/lazyload"
 import { AdminRoute } from "@/components/common/admin-route"
 import { GuestRoute } from "@/components/common/guest-route"
@@ -113,8 +113,12 @@ export const router = createBrowserRouter([
                 ],
               },
               {
+                path: ROUTES.dashboard.profile,
+                element: <ProfilePage />,
+              },
+              {
                 path: ROUTES.dashboard.settings,
-                element: <SectionPlaceholderPage />,
+                element: <ProfilePage />,
               },
             ],
           },

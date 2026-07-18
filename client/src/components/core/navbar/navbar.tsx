@@ -1,6 +1,6 @@
 import { Bell, CircleHelp, CirclePlus, LogOut, Search } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
 import { NavbarLanguageToggle } from "@/components/core/navbar/navbar-language-toggle"
@@ -101,14 +101,17 @@ export function Navbar() {
 
         {displayName ? (
           <div className="hidden items-center gap-2 border-l border-border pl-3 md:flex">
-            <span className="max-w-40 truncate text-sm text-muted-foreground">
+            <Link
+              to={ROUTES.dashboard.profile}
+              className="max-w-40 truncate text-sm text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label={t("view_profile")}
+            >
               {displayName}
-            </span>
+            </Link>
             <Button
               type="button"
-              variant="ghost"
+              variant="destructive"
               size="icon-sm"
-              className="text-muted-foreground"
               aria-label={t("logout")}
               onClick={handleLogout}
             >

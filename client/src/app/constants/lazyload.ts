@@ -1,7 +1,6 @@
 import { lazy } from "react"
 
 import { PageLoader } from "@/components/core/page-loader"
-import { SectionPlaceholderPage } from "@/features/dashboard/pages/section-placeholder-page"
 
 export const DashboardPage = PageLoader(
   lazy(() =>
@@ -79,6 +78,14 @@ export const CreateUserPage = PageLoader(
   lazy(() =>
     import("@/features/users/pages/create-user-page").then((module) => ({
       default: module.CreateUserPage,
+    }))
+  )
+)
+
+export const ProfilePage = PageLoader(
+  lazy(() =>
+    import("@/features/profile/pages/profile-page").then((module) => ({
+      default: module.ProfilePage,
     }))
   )
 )
@@ -172,5 +179,3 @@ export const ResetPasswordPage = PageLoader(
     }))
   )
 )
-
-export { SectionPlaceholderPage }

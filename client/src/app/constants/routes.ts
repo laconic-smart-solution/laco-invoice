@@ -20,6 +20,7 @@ export const ROUTES = {
     customerEdit: (customerId: string) => `/customers/${customerId}/edit`,
     users: "/users",
     userCreate: "/users/new",
+    profile: "/profile",
     settings: "/settings",
   },
   auth: {
