@@ -196,14 +196,7 @@ public abstract class AbstractMarketplaceGatewayClient implements MarketplaceGat
 	}
 
 	private GatewayOrderData toOrderData(GatewayOrderItemData item) {
-		java.time.Instant orderedAt = null;
-		if (item.orderedAt() != null && !item.orderedAt().isBlank()) {
-			try {
-				orderedAt = java.time.Instant.parse(item.orderedAt());
-			} catch (Exception ignored) {
-				orderedAt = null;
-			}
-		}
+		java.time.Instant orderedAt = parseOrderedAt(item.orderedAt());
 		List<GatewayOrderLineItem> lineItems = List.of();
 		if (item.items() != null && !item.items().isEmpty()) {
 			lineItems = item.items().stream().map(this::toOrderLineItem).toList();
@@ -246,6 +239,55 @@ public abstract class AbstractMarketplaceGatewayClient implements MarketplaceGat
 		} catch (NumberFormatException ex) {
 			return BigDecimal.ZERO;
 		}
+	}
+
+	/**
+	 * Parses marketplace {@code ordered_at} values. Accepts Instant ISO-8601,
+	 * offset date-times with or without a colon in the offset (+07:00 / +0700),
+	 * and unix epoch seconds / milliseconds as a numeric string.
+	 */
+	static java.time.Instant parseOrderedAt(String raw) {
+		if (raw == null || raw.isBlank()) {
+			return null;
+		}
+		String value = raw.trim();
+		try {
+			return java.time.Instant.parse(value);
+		} catch (Exception ignored) {
+			// fall through
+		}
+		try {
+			return java.time.OffsetDateTime.parse(value).toInstant();
+		} catch (Exception ignored) {
+			// fall through
+		}
+		java.time.format.DateTimeFormatter[] formatters = {
+				java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss[.SSS]XX"),
+				java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss[.SSS]XXX"),
+				java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS] XX"),
+				java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS] XXX"),
+				java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS]XX"),
+				java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS]XXX")
+		};
+		for (java.time.format.DateTimeFormatter formatter : formatters) {
+			try {
+				return java.time.OffsetDateTime.parse(value, formatter).toInstant();
+			} catch (Exception ignored) {
+				// try next
+			}
+		}
+		try {
+			long epoch = Long.parseLong(value);
+			if (epoch > 1_000_000_000_000L) {
+				return java.time.Instant.ofEpochMilli(epoch);
+			}
+			if (epoch > 1_000_000_000L) {
+				return java.time.Instant.ofEpochSecond(epoch);
+			}
+		} catch (NumberFormatException ignored) {
+			// not numeric
+		}
+		return null;
 	}
 
 	protected <T> T exchange(
