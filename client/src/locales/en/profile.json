@@ -1,0 +1,64 @@
+{
+  "title": "Profile",
+  "subtitle": "View your account details and update sign-in credentials.",
+  "overview": {
+    "title": "Account information",
+    "subtitle": "These details come from your current session.",
+    "full_name": "Full name",
+    "email": "Email",
+    "role": "Role",
+    "status": "Status",
+    "status_active": "Active",
+    "status_inactive": "Inactive",
+    "empty_value": "—"
+  },
+  "roles": {
+    "owner": "Owner",
+    "manager": "Manager",
+    "staff": "Staff",
+    "admin": "Admin"
+  },
+  "username_email": {
+    "title": "Username and email",
+    "subtitle": "Update your login email and display username.",
+    "new_email_label": "New email",
+    "new_email_placeholder": "name@company.com",
+    "new_username_label": "New username",
+    "new_username_placeholder": "jane.doe",
+    "current_password_label": "Current password",
+    "current_password_placeholder": "Enter your current password",
+    "submit": "Save changes",
+    "submitting": "Saving…",
+    "success": "Username and email updated successfully.",
+    "validation": {
+      "current_password_required": "Current password is required",
+      "invalid_email": "Enter a valid email address",
+      "username_min": "Username must be at least 3 characters",
+      "at_least_one_change": "Provide a new email or a new username"
+    }
+  },
+  "password": {
+    "title": "Password",
+    "subtitle": "Change your account password.",
+    "current_password_label": "Current password",
+    "current_password_placeholder": "Enter current password",
+    "new_password_label": "New password",
+    "new_password_placeholder": "Enter new password",
+    "submit": "Save changes",
+    "submitting": "Saving…",
+    "validation": {
+      "current_password_required": "Current password is required",
+      "new_password_min": "Password must be at least 8 characters"
+    }
+  },
+  "load_error": {
+    "title": "Unable to load profile",
+    "description": "We could not load your account details. Check your connection and try again.",
+    "retry": "Retry",
+    "back_home": "Back to dashboard"
+  },
+  "errors": {
+    "credentials_failed": "Could not update username or email. Check your password and try again.",
+    "password_failed": "Could not update password. Please try again."
+  }
+}

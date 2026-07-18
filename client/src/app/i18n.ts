@@ -13,6 +13,7 @@ import enInvoices from "@/locales/en/invoices.json"
 import enNavbar from "@/locales/en/navbar.json"
 import enOrders from "@/locales/en/orders.json"
 import enProducts from "@/locales/en/products.json"
+import enProfile from "@/locales/en/profile.json"
 import enSidebar from "@/locales/en/sidebar.json"
 import myAuth from "@/locales/my/auth.json"
 import myBreadcrumb from "@/locales/my/breadcrumb.json"
@@ -26,6 +27,7 @@ import myInvoices from "@/locales/my/invoices.json"
 import myNavbar from "@/locales/my/navbar.json"
 import myOrders from "@/locales/my/orders.json"
 import myProducts from "@/locales/my/products.json"
+import myProfile from "@/locales/my/profile.json"
 import mySidebar from "@/locales/my/sidebar.json"
 import thAuth from "@/locales/th/auth.json"
 import thBreadcrumb from "@/locales/th/breadcrumb.json"
@@ -39,6 +41,7 @@ import thInvoices from "@/locales/th/invoices.json"
 import thNavbar from "@/locales/th/navbar.json"
 import thOrders from "@/locales/th/orders.json"
 import thProducts from "@/locales/th/products.json"
+import thProfile from "@/locales/th/profile.json"
 import thSidebar from "@/locales/th/sidebar.json"
 import zhAuth from "@/locales/zh/auth.json"
 import zhBreadcrumb from "@/locales/zh/breadcrumb.json"
@@ -52,6 +55,7 @@ import zhInvoices from "@/locales/zh/invoices.json"
 import zhNavbar from "@/locales/zh/navbar.json"
 import zhOrders from "@/locales/zh/orders.json"
 import zhProducts from "@/locales/zh/products.json"
+import zhProfile from "@/locales/zh/profile.json"
 import zhSidebar from "@/locales/zh/sidebar.json"
 
 export const SUPPORTED_LOCALES = ["en", "th", "zh", "my"] as const
@@ -74,6 +78,7 @@ void i18n.use(initReactI18next).init({
       users: enUsers,
       stores: enStores,
       products: enProducts,
+      profile: enProfile,
     },
     th: {
       common: thCommon,
@@ -89,6 +94,7 @@ void i18n.use(initReactI18next).init({
       users: thUsers,
       stores: thStores,
       products: thProducts,
+      profile: thProfile,
     },
     zh: {
       common: zhCommon,
@@ -104,6 +110,7 @@ void i18n.use(initReactI18next).init({
       users: zhUsers,
       stores: zhStores,
       products: zhProducts,
+      profile: zhProfile,
     },
     my: {
       common: myCommon,
@@ -119,6 +126,7 @@ void i18n.use(initReactI18next).init({
       users: myUsers,
       stores: myStores,
       products: myProducts,
+      profile: myProfile,
     },
   },
   lng: "en",

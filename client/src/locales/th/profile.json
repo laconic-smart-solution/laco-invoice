@@ -1,0 +1,64 @@
+{
+  "title": "โปรไฟล์",
+  "subtitle": "ดูข้อมูลบัญชีและอัปเดตข้อมูลสำหรับเข้าสู่ระบบ",
+  "overview": {
+    "title": "ข้อมูลบัญชี",
+    "subtitle": "รายละเอียดเหล่านี้มาจากเซสชันปัจจุบันของคุณ",
+    "full_name": "ชื่อ-นามสกุล",
+    "email": "อีเมล",
+    "role": "บทบาท",
+    "status": "สถานะ",
+    "status_active": "ใช้งาน",
+    "status_inactive": "ปิดใช้งาน",
+    "empty_value": "—"
+  },
+  "roles": {
+    "owner": "เจ้าของ",
+    "manager": "ผู้จัดการ",
+    "staff": "พนักงาน",
+    "admin": "ผู้ดูแลระบบ"
+  },
+  "username_email": {
+    "title": "ชื่อผู้ใช้และอีเมล",
+    "subtitle": "อัปเดตอีเมลเข้าสู่ระบบและชื่อผู้ใช้ที่แสดง",
+    "new_email_label": "อีเมลใหม่",
+    "new_email_placeholder": "name@company.com",
+    "new_username_label": "ชื่อผู้ใช้ใหม่",
+    "new_username_placeholder": "jane.doe",
+    "current_password_label": "รหัสผ่านปัจจุบัน",
+    "current_password_placeholder": "กรอกรหัสผ่านปัจจุบันของคุณ",
+    "submit": "บันทึกการเปลี่ยนแปลง",
+    "submitting": "กำลังบันทึก…",
+    "success": "อัปเดตชื่อผู้ใช้และอีเมลเรียบร้อยแล้ว",
+    "validation": {
+      "current_password_required": "ต้องกรอกรหัสผ่านปัจจุบัน",
+      "invalid_email": "กรอกที่อยู่อีเมลให้ถูกต้อง",
+      "username_min": "ชื่อผู้ใช้ต้องมีอย่างน้อย 3 ตัวอักษร",
+      "at_least_one_change": "กรอกอีเมลใหม่หรือชื่อผู้ใช้ใหม่"
+    }
+  },
+  "password": {
+    "title": "รหัสผ่าน",
+    "subtitle": "เปลี่ยนรหัสผ่านบัญชีของคุณ",
+    "current_password_label": "รหัสผ่านปัจจุบัน",
+    "current_password_placeholder": "กรอกรหัสผ่านปัจจุบัน",
+    "new_password_label": "รหัสผ่านใหม่",
+    "new_password_placeholder": "กรอกรหัสผ่านใหม่",
+    "submit": "บันทึกการเปลี่ยนแปลง",
+    "submitting": "กำลังบันทึก…",
+    "validation": {
+      "current_password_required": "ต้องกรอกรหัสผ่านปัจจุบัน",
+      "new_password_min": "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร"
+    }
+  },
+  "load_error": {
+    "title": "โหลดโปรไฟล์ไม่สำเร็จ",
+    "description": "ไม่สามารถโหลดข้อมูลบัญชีได้ โปรดตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
+    "retry": "ลองอีกครั้ง",
+    "back_home": "กลับไปแดชบอร์ด"
+  },
+  "errors": {
+    "credentials_failed": "อัปเดตชื่อผู้ใช้หรืออีเมลไม่สำเร็จ โปรดตรวจสอบรหัสผ่านแล้วลองอีกครั้ง",
+    "password_failed": "อัปเดตรหัสผ่านไม่สำเร็จ โปรดลองอีกครั้ง"
+  }
+}

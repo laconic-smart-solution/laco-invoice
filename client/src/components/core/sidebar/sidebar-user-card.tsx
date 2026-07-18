@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next"
+import { NavLink } from "react-router-dom"
 
+import { ROUTES } from "@/app/constants/routes"
 import { cn } from "@/lib/utils"
 import type { UserRole } from "@/shared/types/auth.types"
 import { useAuthStore } from "@/shared/stores/auth-store"
@@ -36,13 +38,14 @@ export function SidebarUserCard({ className, isCollapsed = false }: SidebarUserC
     : t(getRoleLabelKey(user.role))
 
   return (
-    <div
+    <NavLink
+      to={ROUTES.dashboard.profile}
       className={cn(
-        "flex items-center border border-border bg-card",
+        "flex items-center border border-border bg-card outline-none transition-colors hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring",
         isCollapsed ? "justify-center p-2" : "gap-3 p-3",
         className
       )}
-      title={isCollapsed ? displayName : undefined}
+      title={isCollapsed ? displayName : t("nav.profile")}
     >
       <div
         aria-hidden
@@ -60,6 +63,6 @@ export function SidebarUserCard({ className, isCollapsed = false }: SidebarUserC
         <p className="truncate text-sm font-medium text-foreground">{displayName}</p>
         <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
       </div>
-    </div>
+    </NavLink>
   )
 }
