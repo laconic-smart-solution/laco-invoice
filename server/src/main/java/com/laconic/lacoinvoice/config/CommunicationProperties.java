@@ -12,6 +12,8 @@ public class CommunicationProperties {
 	private String gatewaySecret = "hello";
 	private String lazadaAppKey = "";
 	private String lazadaAppSecret = "";
+	private String tiktokAppKey = "";
+	private String tiktokAppSecret = "";
 
 	public String getGatewayUrl() {
 		return gatewayUrl;
@@ -67,5 +69,21 @@ public class CommunicationProperties {
 
 	public void setLazadaAppSecret(String lazadaAppSecret) {
 		this.lazadaAppSecret = lazadaAppSecret;
+	}
+
+	public String getTiktokAppKey() {
+		return tiktokAppKey;
+	}
+
+	public void setTiktokAppKey(String tiktokAppKey) {
+		this.tiktokAppKey = tiktokAppKey;
+	}
+
+	public String getTiktokAppSecret() {
+		return tiktokAppSecret;
+	}
+
+	public void setTiktokAppSecret(String tiktokAppSecret) {
+		this.tiktokAppSecret = tiktokAppSecret;
 	}
 }

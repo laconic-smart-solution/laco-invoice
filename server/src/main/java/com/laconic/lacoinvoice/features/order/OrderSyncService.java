@@ -222,7 +222,8 @@ public class OrderSyncService {
 
 	private static OrderStatus mapLazadaStatusAlias(String raw) {
 		return switch (raw) {
-			case "READY_TO_SHIP", "PACKED", "REPACKED", "READY_TO_SHIP_PENDING" -> OrderStatus.CONFIRMED;
+			case "READY_TO_SHIP", "PACKED", "REPACKED", "READY_TO_SHIP_PENDING",
+					"AWAITING_SHIPMENT", "AWAITING_COLLECTION", "PARTIALLY_SHIPPING" -> OrderStatus.CONFIRMED;
 			case "SHIPPED", "SHIPPING", "IN_TRANSIT" -> OrderStatus.SHIPPED;
 			case "DELIVERED", "COMPLETED" -> OrderStatus.DELIVERED;
 			case "CANCELED", "CANCELLED", "FAILED", "RETURNED" -> OrderStatus.CANCELLED;
