@@ -1,11 +1,19 @@
-import { Bell, CircleHelp, CirclePlus, LogOut, Search } from "lucide-react"
+import { Bell, CircleHelp, CirclePlus, LogOut, Search, UserRound } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
 import { NavbarLanguageToggle } from "@/components/core/navbar/navbar-language-toggle"
 import { NavbarThemeToggle } from "@/components/core/navbar/navbar-theme-toggle"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   InputGroup,
   InputGroupAddon,
@@ -16,6 +24,15 @@ import { useAuthStore } from "@/shared/stores/auth-store"
 
 interface NavbarSearchProps {
   className?: string
+}
+
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase()
 }
 
 function NavbarSearch({ className }: NavbarSearchProps) {
@@ -100,23 +117,37 @@ export function Navbar() {
         </Button>
 
         {displayName ? (
-          <div className="hidden items-center gap-2 border-l border-border pl-3 md:flex">
-            <Link
-              to={ROUTES.dashboard.profile}
-              className="max-w-40 truncate text-sm text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-              aria-label={t("view_profile")}
-            >
-              {displayName}
-            </Link>
-            <Button
-              type="button"
-              variant="destructive"
-              size="icon-sm"
-              aria-label={t("logout")}
-              onClick={handleLogout}
-            >
-              <LogOut className="size-4" aria-hidden />
-            </Button>
+          <div className="flex items-center border-l border-border pl-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="h-9 gap-2 px-2 text-muted-foreground hover:text-foreground"
+                  aria-label={t("view_profile")}
+                >
+                  <Avatar size="sm">
+                    <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
+                  </Avatar>
+                  <span className="hidden max-w-40 truncate text-sm md:inline">
+                    {displayName}
+                  </span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link to={ROUTES.dashboard.profile}>
+                    <UserRound aria-hidden />
+                    {t("profile")}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem variant="destructive" onClick={handleLogout}>
+                  <LogOut aria-hidden />
+                  {t("logout")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         ) : null}
       </div>

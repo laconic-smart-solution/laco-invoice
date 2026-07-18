@@ -19,6 +19,7 @@ import {
   ResetPasswordPage,
   UsersPage,
   CreateUserPage,
+  UserDetailPage,
   StoresPage,
   CreateStorePage,
   StoreDetailPage,
@@ -109,6 +110,10 @@ export const router = createBrowserRouter([
                   {
                     path: ROUTES.dashboard.userCreate,
                     element: <CreateUserPage />,
+                  },
+                  {
+                    path: `${ROUTES.dashboard.users}/:userId`,
+                    element: <UserDetailPage />,
                   },
                 ],
               },

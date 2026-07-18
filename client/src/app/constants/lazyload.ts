@@ -82,6 +82,14 @@ export const CreateUserPage = PageLoader(
   )
 )
 
+export const UserDetailPage = PageLoader(
+  lazy(() =>
+    import("@/features/users/pages/user-detail-page").then((module) => ({
+      default: module.UserDetailPage,
+    }))
+  )
+)
+
 export const ProfilePage = PageLoader(
   lazy(() =>
     import("@/features/profile/pages/profile-page").then((module) => ({

@@ -49,6 +49,19 @@
       "staff": "员工"
     }
   },
+  "detail": {
+    "loading": "正在加载用户...",
+    "back_to_users": "返回用户列表",
+    "not_found_title": "未找到用户",
+    "not_found_description": "该用户不存在，或您没有访问权限。",
+    "empty_value": "—",
+    "fields": {
+      "email": "电子邮箱",
+      "full_name": "姓名",
+      "joined": "加入时间",
+      "last_updated": "最后更新"
+    }
+  },
   "errors": {
     "load_failed": "无法加载用户列表，请重试。",
     "save_failed": "无法创建用户，请重试。",

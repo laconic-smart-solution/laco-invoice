@@ -14,12 +14,21 @@ export const adminUserKeys = {
   all: ["admin-users"] as const,
   lists: () => [...adminUserKeys.all, "list"] as const,
   list: (request: UserPageRequest) => [...adminUserKeys.lists(), request] as const,
+  detail: (id: number) => [...adminUserKeys.all, "detail", id] as const,
 }
 
 export function useUsersPageQuery(request: UserPageRequest) {
   return useQuery({
     queryKey: adminUserKeys.list(request),
     queryFn: () => adminUserService.pageUsers(request),
+  })
+}
+
+export function useAdminUserDetailQuery(id: number) {
+  return useQuery({
+    queryKey: adminUserKeys.detail(id),
+    queryFn: () => adminUserService.getUser(id),
+    enabled: id > 0,
   })
 }
 
@@ -39,8 +48,9 @@ export function useVerifyUserOtpMutation() {
 
   return useMutation({
     mutationFn: (userId: number) => adminUserService.verifyOtp(userId),
-    onSuccess: () => {
+    onSuccess: (_data, userId) => {
       void queryClient.invalidateQueries({ queryKey: adminUserKeys.lists() })
+      void queryClient.invalidateQueries({ queryKey: adminUserKeys.detail(userId) })
     },
   })
 }

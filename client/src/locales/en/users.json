@@ -49,6 +49,19 @@
       "staff": "Staff"
     }
   },
+  "detail": {
+    "loading": "Loading user...",
+    "back_to_users": "Back to users",
+    "not_found_title": "User not found",
+    "not_found_description": "This user does not exist or you do not have access.",
+    "empty_value": "—",
+    "fields": {
+      "email": "Email",
+      "full_name": "Full name",
+      "joined": "Joined",
+      "last_updated": "Last updated"
+    }
+  },
   "errors": {
     "load_failed": "Unable to load users. Please try again.",
     "save_failed": "Unable to create user. Please try again.",
