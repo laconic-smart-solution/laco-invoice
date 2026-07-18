@@ -49,6 +49,19 @@
       "staff": "Staff"
     }
   },
+  "detail": {
+    "loading": "အသုံးပြုသူ ဖတ်နေသည်...",
+    "back_to_users": "အသုံးပြုသူစာရင်းသို့ ပြန်သွားရန်",
+    "not_found_title": "အသုံးပြုသူ မတွေ့ပါ",
+    "not_found_description": "ဤအသုံးပြုသူ မရှိပါ သို့မဟုတ် သင့်တွင် ဝင်ရောက်ခွင့် မရှိပါ။",
+    "empty_value": "—",
+    "fields": {
+      "email": "အီးမေးလ်",
+      "full_name": "အမည် အပြည့်အစုံ",
+      "joined": "ဝင်ရောက်သည့်အချိန်",
+      "last_updated": "နောက်ဆုံး ပြင်ဆင်သည့်အချိန်"
+    }
+  },
   "errors": {
     "load_failed": "အသုံးပြုသူများကို မဖတ်နိုင်ပါ။ ထပ်ကြိုးစားပါ။",
     "save_failed": "Unable to create user. Please try again.",

@@ -12,9 +12,12 @@ interface SidebarToggleProps {
 export function SidebarToggle({ className }: SidebarToggleProps) {
   const { t } = useTranslation("sidebar")
   const isCollapsed = useSidebarStore((state) => state.isCollapsed)
-  const toggle = useSidebarStore((state) => state.toggle)
 
   const label = isCollapsed ? t("toggle.expand") : t("toggle.collapse")
+
+  const handleToggle = () => {
+    useSidebarStore.getState().toggle()
+  }
 
   return (
     <Button
@@ -25,7 +28,7 @@ export function SidebarToggle({ className }: SidebarToggleProps) {
         "size-10 rounded-full border border-border bg-background text-foreground shadow-sm hover:bg-muted hover:text-foreground dark:bg-background dark:hover:bg-card",
         className
       )}
-      onClick={toggle}
+      onClick={handleToggle}
       aria-expanded={!isCollapsed}
       aria-controls="app-sidebar"
       aria-label={label}

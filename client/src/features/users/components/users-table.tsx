@@ -6,7 +6,9 @@ import type {
 } from "@tanstack/react-table"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
 
+import { ROUTES } from "@/app/constants/routes"
 import { Badge } from "@/components/ui/badge"
 import { DataTable } from "@/components/common/data-table/data-table"
 import { DataTableColumnControls } from "@/components/common/data-table/data-table-column-controls"
@@ -83,7 +85,15 @@ export function UsersTable({
   onColumnFiltersChange,
 }: UsersTableProps) {
   const { t } = useTranslation("users")
+  const navigate = useNavigate()
   const locale = useLocaleStore((state) => state.locale)
+
+  const handleRowClick = useCallback(
+    (user: AdminUser) => {
+      void navigate(ROUTES.dashboard.userDetail(user.id))
+    },
+    [navigate]
+  )
 
   const handleSortingChange = useCallback<OnChangeFn<SortingState>>(
     (updater) => {
@@ -251,6 +261,7 @@ export function UsersTable({
           emptyMessage={t("table.empty")}
           isLoading={isLoading}
           skeletonRowCount={limit}
+          onRowClick={handleRowClick}
         />
       </div>
 

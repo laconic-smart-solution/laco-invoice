@@ -21,6 +21,11 @@ export const adminUserService = {
     return response.data
   },
 
+  getUser: async (id: number) => {
+    const response = await apiClient.get<ApiResponse<AdminUser>>(`/v1/users/${id}`)
+    return response.data.data
+  },
+
   createUser: async (payload: AdminUserCreateInput) => {
     const response = await apiClient.post<ApiResponse<AdminUser>>("/v1/users", {
       role: payload.role,

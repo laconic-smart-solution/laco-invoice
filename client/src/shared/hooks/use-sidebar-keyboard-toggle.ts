@@ -3,8 +3,6 @@ import { useEffect } from "react"
 import { useSidebarStore } from "@/shared/stores/sidebar-store"
 
 export function useSidebarKeyboardToggle() {
-  const toggle = useSidebarStore((state) => state.toggle)
-
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key.toLowerCase() !== "b" || !(event.metaKey || event.ctrlKey)) {
@@ -23,10 +21,10 @@ export function useSidebarKeyboardToggle() {
       }
 
       event.preventDefault()
-      toggle()
+      useSidebarStore.getState().toggle()
     }
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [toggle])
+  }, [])
 }
