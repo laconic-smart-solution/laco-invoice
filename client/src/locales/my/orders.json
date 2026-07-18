@@ -66,6 +66,8 @@
     "last_synced": "နောက်ဆုံး Sync",
     "invoice_id": "ငွေတောင်းခံလွှာ ID",
     "customer_email": "အီးမေးလ်",
+    "customer_phone": "ဖုန်း",
+    "customer_gender": "ကျား/မ",
     "shipping_address": "ပို့ဆောင်ရမည့် လိပ်စာ",
     "not_found_title": "အော်ဒါ မတွေ့ပါ",
     "not_found_description": "ရှာဖွေသော အော်ဒါ မရှိတော့ပါ သို့မဟုတ် ဖယ်ရှားခံရပါပြီ။",

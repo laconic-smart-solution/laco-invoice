@@ -5,8 +5,14 @@
   "sync_status": "Real-time sync လုပ်နေသည်",
   "actions": {
     "add_customer": "ဖောက်သည် ထည့်ရန်",
+    "sync_customers": "ဖောက်သည် Sync",
     "filter_marketplace": "Marketplace Filter",
     "export_csv": "CSV ထုတ်ရန်"
+  },
+  "filters": {
+    "store_label": "ဆိုင် / Marketplace",
+    "store_placeholder": "အရင်းအမြစ် ရွေးပါ",
+    "store_all": "အားလုံး"
   },
   "stats": {
     "total_customers": "ဖောက်သည် စုစုပေါင်း"
@@ -48,7 +54,8 @@
   "errors": {
     "load_failed": "ဖောက်သည်စာရင်း မတင်နိုင်ပါ။ ထပ်ကြိုးစားပါ။",
     "save_failed": "ဖောက်သည်ကို မသိမ်းနိုင်ပါ။ ထပ်ကြိုးစားပါ။",
-    "delete_failed": "ဖောက်သည်ကို မဖျက်နိုင်ပါ။ ထပ်ကြိုးစားပါ။"
+    "delete_failed": "ဖောက်သည်ကို မဖျက်နိုင်ပါ။ ထပ်ကြိုးစားပါ။",
+    "sync_failed": "ဖောက်သည် Sync မလုပ်နိုင်ပါ။ ထပ်ကြိုးစားပါ။"
   },
   "table": {
     "empty": "ဖောက်သည် မရှိသေးပါ။",

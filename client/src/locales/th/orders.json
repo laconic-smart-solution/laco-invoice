@@ -66,6 +66,8 @@
     "last_synced": "ซิงก์ล่าสุด",
     "invoice_id": "รหัสใบแจ้งหนี้",
     "customer_email": "อีเมล",
+    "customer_phone": "โทรศัพท์",
+    "customer_gender": "เพศ",
     "shipping_address": "ที่อยู่จัดส่ง",
     "not_found_title": "ไม่พบคำสั่งซื้อ",
     "not_found_description": "ไม่พบคำสั่งซื้อที่คุณต้องการ หรืออาจถูกลบไปแล้ว",

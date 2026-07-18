@@ -218,6 +218,7 @@ public abstract class AbstractMarketplaceGatewayClient implements MarketplaceGat
 				item.customerEmail(),
 				item.customerPhone(),
 				item.customerAddress(),
+				item.externalCustomerId(),
 				lineItems);
 	}
 

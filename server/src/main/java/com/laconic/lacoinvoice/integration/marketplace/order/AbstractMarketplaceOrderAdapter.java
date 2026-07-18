@@ -97,6 +97,7 @@ public abstract class AbstractMarketplaceOrderAdapter implements MarketplaceOrde
 				order.customerPhone(),
 				null,
 				order.customerAddress(),
+				order.externalCustomerId(),
 				items);
 	}
 }

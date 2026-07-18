@@ -16,6 +16,7 @@ public record OrderDto(
 		String marketplaceCode,
 		Long customerId,
 		String customerName,
+		String customerPhone,
 		String externalOrderId,
 		OrderStatus orderStatus,
 		BigDecimal subtotal,
