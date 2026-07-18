@@ -17,6 +17,7 @@ export interface Order {
   customer: string
   customerId?: string
   customerPhone?: string
+  invoiceId?: string
   totalAmount: number
   currency: string
   syncStatus: OrderSyncStatus

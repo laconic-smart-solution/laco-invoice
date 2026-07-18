@@ -13,14 +13,13 @@ import { StatusBadge } from "@/components/common/status-badge"
 import type { StatusBadgeVariant } from "@/components/common/status-badge"
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import type { InvoiceListItem, InvoiceStatus } from "@/features/invoices/types/invoice"
+import { useDownloadInvoicePdfMutation } from "@/shared/queries/invoice.query"
 import { useLocaleStore } from "@/shared/stores/locale-store"
 import { formatCurrency, formatDateTime } from "@/util/format"
 
 const INVOICE_STATUS_BADGE: Record<InvoiceStatus, StatusBadgeVariant> = {
-  paid: "paid",
-  pending: "pending",
-  overdue: "overdue",
-  draft: "draft",
+  ISSUED: "paid",
+  VOID: "draft",
 }
 
 interface InvoiceRowActionProps {
@@ -29,20 +28,33 @@ interface InvoiceRowActionProps {
 
 function InvoiceRowAction({ invoice }: InvoiceRowActionProps) {
   const { t } = useTranslation("invoices")
+  const downloadMutation = useDownloadInvoicePdfMutation()
+  const numericId = Number.parseInt(invoice.id, 10)
 
   return (
     <DataTableRowActions>
-      {invoice.pdfUrl ? (
-        <DropdownMenuItem onSelect={() => undefined}>
-          <Download aria-hidden />
-          {t("table.actions.download")}
+      <DropdownMenuItem
+        disabled={!Number.isFinite(numericId) || downloadMutation.isPending}
+        onSelect={() => {
+          if (!Number.isFinite(numericId)) {
+            return
+          }
+          downloadMutation.mutate({
+            id: numericId,
+            filename: `${invoice.invoiceNo}.pdf`,
+          })
+        }}
+      >
+        <Download aria-hidden />
+        {t("table.actions.download")}
+      </DropdownMenuItem>
+      {invoice.orderId ? (
+        <DropdownMenuItem asChild>
+          <Link to={ROUTES.dashboard.orderDetail(invoice.orderId)}>
+            {t("table.actions.view_order")}
+          </Link>
         </DropdownMenuItem>
       ) : null}
-      <DropdownMenuItem asChild>
-        <Link to={ROUTES.dashboard.orderDetail(invoice.orderId)}>
-          {t("table.actions.view_order")}
-        </Link>
-      </DropdownMenuItem>
     </DataTableRowActions>
   )
 }
@@ -97,13 +109,6 @@ export function InvoicesTable({
         ),
       },
       {
-        accessorKey: "externalOrderId",
-        header: t("table.columns.order_id"),
-        cell: ({ getValue }) => (
-          <span className="text-muted-foreground">{getValue<string>()}</span>
-        ),
-      },
-      {
         accessorKey: "customerName",
         header: t("table.columns.customer"),
       },
@@ -118,7 +123,7 @@ export function InvoicesTable({
             <div className="min-w-0">
               <p className="truncate text-sm">{row.original.storeName}</p>
               <p className="truncate text-xs text-muted-foreground">
-                {row.original.marketplaceName}
+                {row.original.marketplaceCode}
               </p>
             </div>
           </div>
@@ -127,7 +132,12 @@ export function InvoicesTable({
       {
         accessorKey: "grandTotal",
         header: t("table.columns.grand_total"),
-        cell: ({ getValue }) => formatCurrency(getValue<number>(), locale),
+        cell: ({ row }) =>
+          formatCurrency(
+            row.original.grandTotal,
+            locale,
+            row.original.currency
+          ),
       },
       {
         accessorKey: "status",
@@ -144,9 +154,12 @@ export function InvoicesTable({
         },
       },
       {
-        accessorKey: "createdAt",
+        accessorKey: "issuedAt",
         header: t("table.columns.created_at"),
-        cell: ({ getValue }) => formatDateTime(getValue<string>(), locale),
+        cell: ({ getValue }) => {
+          const value = getValue<string | null>()
+          return value ? formatDateTime(value, locale) : "—"
+        },
       },
       {
         id: "action",

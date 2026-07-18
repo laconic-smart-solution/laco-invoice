@@ -5,7 +5,6 @@ import { useLocation, useParams } from "react-router-dom"
 import { ROUTES } from "@/app/constants/routes"
 import { SIDEBAR_NAV_ITEMS } from "@/constants/navigation"
 import { getMockOrderById } from "@/features/orders/data/mock-orders"
-import { getMockInvoiceById } from "@/features/invoices/data/mock-invoices"
 
 export interface BreadcrumbItem {
   label: string
@@ -49,12 +48,10 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
     }
 
     if (invoiceId && pathname.startsWith(`${ROUTES.dashboard.invoices}/`)) {
-      const invoice = getMockInvoiceById(invoiceId)
-
       return [
         { label: t("sidebar:nav.dashboard"), href: ROUTES.dashboard.root },
         { label: t("sidebar:nav.invoices"), href: ROUTES.dashboard.invoices },
-        { label: invoice?.invoiceNo ?? invoiceId },
+        { label: invoiceId },
       ]
     }
 

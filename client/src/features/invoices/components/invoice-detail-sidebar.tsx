@@ -1,12 +1,18 @@
-import { Check, Clock, ExternalLink, Plus, Store } from "lucide-react"
+import { Store } from "lucide-react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
 import type { Locale } from "@/app/i18n"
+import { ConfirmDialog } from "@/components/common/confirm-dialog"
+import { AuthFormError } from "@/features/auth/components/auth-form-error"
 import { Button } from "@/components/ui/button"
 import type { InvoiceDetail } from "@/features/invoices/types/invoice"
-import { cn } from "@/lib/utils"
+import {
+  getInvoiceErrorMessage,
+  useVoidInvoiceMutation,
+} from "@/shared/queries/invoice.query"
 import { formatDateTime } from "@/util/format"
 
 interface InvoiceDetailSidebarProps {
@@ -16,88 +22,62 @@ interface InvoiceDetailSidebarProps {
 
 export function InvoiceDetailSidebar({ invoice, locale }: InvoiceDetailSidebarProps) {
   const { t } = useTranslation("invoices")
+  const [isVoidOpen, setIsVoidOpen] = useState(false)
+  const voidMutation = useVoidInvoiceMutation()
+  const numericId = Number.parseInt(invoice.id, 10)
+
+  const voidError =
+    voidMutation.isError && voidMutation.error
+      ? getInvoiceErrorMessage(voidMutation.error, t("errors.void_failed"))
+      : null
 
   return (
-    <aside className="space-y-4">
+    <aside className="space-y-4" aria-label={t("detail.sidebar.label")}>
+      <AuthFormError message={voidError} />
+
       <section className="border border-border bg-card p-5 shadow-sm">
         <h2 className="font-heading text-sm font-semibold">
-          {t("detail.sidebar.timeline")}
+          {t("detail.sidebar.summary")}
         </h2>
-        <ol className="mt-4 space-y-4">
-          {invoice.timeline.map((event, index) => {
-            const isCompleted = event.status === "completed"
-            const isLast = index === invoice.timeline.length - 1
-
-            return (
-              <li key={event.id} className="flex gap-3">
-                <div className="flex flex-col items-center">
-                  <span
-                    className={cn(
-                      "flex size-6 shrink-0 items-center justify-center rounded-full border",
-                      isCompleted
-                        ? "border-success bg-success/10 text-success"
-                        : "border-border bg-muted text-muted-foreground"
-                    )}
-                  >
-                    {isCompleted ? (
-                      <Check className="size-3.5" aria-hidden />
-                    ) : (
-                      <Clock className="size-3.5" aria-hidden />
-                    )}
-                  </span>
-                  {!isLast ? (
-                    <span className="mt-1 w-px flex-1 bg-border" aria-hidden />
-                  ) : null}
-                </div>
-                <div className="min-w-0 pb-1">
-                  <p className="text-sm font-medium">
-                    {t(`detail.timeline.${event.type}.title`)}
-                  </p>
-                  {event.timestamp ? (
-                    <p className="text-xs text-muted-foreground">
-                      {formatDateTime(event.timestamp, locale)}
-                    </p>
-                  ) : (
-                    <p className="text-xs text-muted-foreground">
-                      {t(`detail.timeline.${event.type}.pending`)}
-                    </p>
-                  )}
-                  {event.meta ? (
-                    <p className="text-xs text-muted-foreground">{event.meta}</p>
-                  ) : null}
-                </div>
-              </li>
-            )
-          })}
-        </ol>
+        <dl className="mt-4 space-y-3 text-sm">
+          <div>
+            <dt className="text-xs text-muted-foreground uppercase">
+              {t("detail.document.invoice_number")}
+            </dt>
+            <dd className="font-medium">{invoice.invoiceNo}</dd>
+          </div>
+          <div>
+            <dt className="text-xs text-muted-foreground uppercase">
+              {t("detail.document.issued_at")}
+            </dt>
+            <dd>
+              {invoice.issuedAt
+                ? formatDateTime(invoice.issuedAt, locale)
+                : "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs text-muted-foreground uppercase">
+              {t("table.columns.status")}
+            </dt>
+            <dd className="font-medium uppercase">
+              {t(`status.${invoice.status}`)}
+            </dd>
+          </div>
+        </dl>
+        {invoice.status === "ISSUED" ? (
+          <Button
+            variant="outline"
+            className="mt-4 w-full"
+            type="button"
+            onClick={() => setIsVoidOpen(true)}
+          >
+            {t("detail.actions.void")}
+          </Button>
+        ) : null}
       </section>
 
-      {invoice.erpVoucher ? (
-        <section className="border border-border bg-accent/30 p-5 shadow-sm">
-          <h2 className="font-heading text-sm font-semibold">
-            {t("detail.sidebar.external_systems")}
-          </h2>
-          <div className="mt-3 space-y-1">
-            <p className="text-xs tracking-wide text-muted-foreground uppercase">
-              {t("detail.sidebar.erp_voucher")}
-            </p>
-            <p className="text-sm font-medium">{invoice.erpVoucher.id}</p>
-            <Button variant="link" className="h-auto p-0 text-info">
-              <ExternalLink data-icon="inline-start" />
-              {t("detail.sidebar.view_in_erp")}
-            </Button>
-          </div>
-        </section>
-      ) : null}
-
-      <section className="relative border border-border bg-card p-5 shadow-sm">
-        <span
-          className={cn(
-            "absolute top-4 right-4 size-2 rounded-full",
-            invoice.status === "overdue" ? "bg-destructive" : "bg-success"
-          )}
-          aria-hidden
-        />
+      <section className="border border-border bg-card p-5 shadow-sm">
         <h2 className="font-heading text-sm font-semibold">
           {t("detail.sidebar.marketplace")}
         </h2>
@@ -106,35 +86,45 @@ export function InvoiceDetailSidebar({ invoice, locale }: InvoiceDetailSidebarPr
             <Store className="size-4" aria-hidden />
           </span>
           <div>
-            <p className="text-sm font-medium">{invoice.marketplaceName}</p>
-            <p className="text-xs text-muted-foreground">
-              {t("detail.sidebar.order_ref", {
-                orderId: invoice.marketplaceMeta.orderRef,
-              })}
-            </p>
+            <p className="text-sm font-medium">{invoice.storeName}</p>
+            <p className="text-xs text-muted-foreground">{invoice.marketplaceCode}</p>
           </div>
         </div>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <span className="border border-border bg-muted/50 px-2 py-1 text-[10px] font-semibold tracking-wide uppercase">
-            {t("detail.sidebar.skus", { count: invoice.marketplaceMeta.skuCount })}
-          </span>
-          <span className="border border-border bg-muted/50 px-2 py-1 text-[10px] font-semibold tracking-wide uppercase">
-            {t("detail.sidebar.country", {
-              code: invoice.marketplaceMeta.countryCode,
-            })}
-          </span>
-        </div>
-        <Button variant="link" className="mt-3 h-auto p-0 text-info" asChild>
-          <Link to={ROUTES.dashboard.orderDetail(invoice.orderId)}>
-            {t("table.actions.view_order")}
-          </Link>
-        </Button>
+        <p className="mt-3 text-xs text-muted-foreground">
+          {t("detail.sidebar.order_ref", {
+            orderId: invoice.externalOrderId,
+          })}
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          {t("detail.sidebar.skus", { count: invoice.lineItems.length })}
+        </p>
+        {invoice.orderId ? (
+          <Button variant="link" className="mt-3 h-auto p-0 text-info" asChild>
+            <Link to={ROUTES.dashboard.orderDetail(invoice.orderId)}>
+              {t("table.actions.view_order")}
+            </Link>
+          </Button>
+        ) : null}
       </section>
 
-      <Button variant="outline" className="w-full border-dashed">
-        <Plus data-icon="inline-start" />
-        {t("detail.sidebar.add_note")}
-      </Button>
+      <ConfirmDialog
+        open={isVoidOpen}
+        onOpenChange={setIsVoidOpen}
+        title={t("confirm.void.title")}
+        description={t("confirm.void.description", {
+          invoiceNo: invoice.invoiceNo,
+        })}
+        confirmLabel={t("detail.actions.void")}
+        isLoading={voidMutation.isPending}
+        onConfirm={async () => {
+          if (!Number.isFinite(numericId)) {
+            setIsVoidOpen(false)
+            return
+          }
+          await voidMutation.mutateAsync(numericId)
+          setIsVoidOpen(false)
+        }}
+      />
     </aside>
   )
 }

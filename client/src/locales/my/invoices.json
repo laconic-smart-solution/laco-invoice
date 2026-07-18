@@ -8,11 +8,11 @@
   "filters": {
     "marketplace_label": "Marketplace",
     "marketplace_all": "Marketplace အားလုံး",
+    "marketplace_lazada": "Lazada",
+    "marketplace_shopee": "Shopee",
     "marketplace_tiktok": "TikTok Shop",
-    "marketplace_shopify": "Shopify",
-    "marketplace_amazon": "Amazon",
     "date_range_label": "ရက်စွဲ အကွာအဝေး",
-    "date_range_value": "Oct 01 - Oct 24, 2023",
+    "date_range_placeholder": "ရက်စွဲအားလုံး",
     "status_label": "ငွေတောင်းခံလွှာ အခြေအနေ",
     "status_all": "အခြေအနေ အားလုံး",
     "more_filters": "Filter ထပ်ထည့်ရန်"
@@ -27,7 +27,7 @@
       "store": "ဆိုင်",
       "grand_total": "စုစုပေါင်း",
       "status": "အခြေအနေ",
-      "created_at": "ဖန်တီးသည့်ရက်",
+      "created_at": "ထုတ်သည့်ရက်",
       "action": "လုပ်ဆောင်ချက်"
     },
     "actions": {
@@ -36,65 +36,61 @@
     }
   },
   "status": {
-    "paid": "ပေးချေပြီး",
-    "pending": "စောင့်ဆိုင်းနေ",
-    "overdue": "ရက်လွန်ပြီး",
-    "draft": "Draft"
+    "ISSUED": "ထုတ်ပြီး",
+    "VOID": "ပယ်ဖျက်ပြီး"
+  },
+  "errors": {
+    "load_failed": "ငွေတောင်းခံလွှာများ မတင်နိုင်ပါ။ ထပ်ကြိုးစားပါ။",
+    "void_failed": "ငွေတောင်းခံလွှာ ပယ်ဖျက်မရပါ။ ထပ်ကြိုးစားပါ။",
+    "download_failed": "PDF ဒေါင်းလုဒ် မရပါ။ ထပ်ကြိုးစားပါ။"
+  },
+  "confirm": {
+    "void": {
+      "title": "ငွေတောင်းခံလွှာ ပယ်ဖျက်မလား?",
+      "description": "ငွေတောင်းခံလွှာ {{invoiceNo}} ကို ပယ်ဖျက်အဖြစ် မှတ်သားမည်။ ပြန်ပြင်၍ မရပါ။"
+    }
   },
   "detail": {
+    "loading": "ငွေတောင်းခံလွှာ တင်နေသည်…",
     "back_to_invoices": "ငွေတောင်းခံလွှာစာရင်းသို့ ပြန်သွားရန်",
     "not_found_title": "ငွေတောင်းခံလွှာ မတွေ့ပါ",
     "not_found_description": "ရှာဖွေသော ငွေတောင်းခံလွှာ မရှိတော့ပါ သို့မဟုတ် ဖယ်ရှားခံရပါပြီ။",
     "actions": {
       "print": "Print",
-      "download": "PDF ဒေါင်းလုဒ်"
+      "download": "PDF ဒေါင်းလုဒ်",
+      "void": "ငွေတောင်းခံလွှာ ပယ်ဖျက်ရန်"
     },
     "document": {
-      "vat": "VAT {{number}}",
+      "title": "Tax Invoice / Receipt",
+      "title_th": "ใบกำกับภาษี / ใบเสร็จรับเงิน",
+      "vat_rate": "VAT {{percent}}%",
       "invoice_number": "ငွေတောင်းခံလွှာ နံပါတ်",
-      "issued_at": "ထုတ်ပေးသည့်ရက်",
-      "due_date": "ပေးချေရမည့်ရက်",
-      "bill_to": "Bill To",
-      "attn": "Attn: {{name}}",
-      "marketplace_source": "Marketplace ရင်းမြစ်",
+      "issued_at": "ထုတ်သည့်ရက်",
+      "order_ref": "အော်ဒါ ကိုးကား",
+      "bill_to": "ပေးချေသူ",
+      "parties": "ငွေတောင်းခံလွှာ နှစ်ဖက်",
+      "marketplace_source": "Marketplace အရင်းအမြစ်",
+      "line_items_caption": "ငွေတောင်းခံလွှာ စာရင်းများ",
+      "no_line_items": "ဤငွေတောင်းခံလွှာတွင် စာရင်းမရှိပါ။",
       "columns": {
         "description": "ဖော်ပြချက်",
-        "qty": "Qty",
-        "unit_price": "တစ်ခုဈေး",
+        "sku": "SKU",
+        "qty": "အရေအတွက်",
+        "unit_price": "ယူနစ်ဈေး",
         "total": "စုစုပေါင်း"
       },
-      "bank_details": "ဘဏ်အချက်အလက်",
-      "iban": "IBAN: {{value}}",
-      "swift": "SWIFT/BIC: {{value}}",
-      "footer_note": "ကျေးဇူးတင်ပါသည်။ ငွေတောင်းခံလွှာ ရက်စွဲမှ {{days}} ရက်အတွင်း ပေးချေရန်။",
       "subtotal": "ခွဲစုစုပေါင်း",
+      "shipping": "ပို့ဆောင်ခ",
       "vat_line": "VAT ({{percent}}%)",
-      "grand_total": "စုစုပေါင်း"
+      "grand_total": "စုစုပေါင်း",
+      "footer_vat_note": "VAT {{percent}}% ကို ခွဲစုစုပေါင်းနှင့် ပို့ဆောင်ခပေါ်တွင် တွက်သည်။"
     },
     "sidebar": {
-      "timeline": "ငွေတောင်းခံလွှာ Timeline",
-      "external_systems": "External Systems",
-      "erp_voucher": "SAP ERP Voucher",
-      "view_in_erp": "SAP Business One တွင် ကြည့်ရန်",
+      "label": "ငွေတောင်းခံလွှာ အသေးစိတ်",
+      "summary": "အနှစ်ချုပ်",
       "marketplace": "Marketplace",
-      "order_ref": "Order #{{orderId}}",
-      "skus": "SKU: {{count}} ခု",
-      "country": "နိုင်ငံ: {{code}}",
-      "add_note": "မှတ်ချက်/Attachment ထည့်ရန်"
-    },
-    "timeline": {
-      "generated": {
-        "title": "ငွေတောင်းခံလွှာ ထုတ်ပြီး",
-        "pending": "ထုတ်ရန် စောင့်နေသည်"
-      },
-      "synced": {
-        "title": "Marketplace သို့ Sync ပြီး",
-        "pending": "Sync စောင့်နေသည်..."
-      },
-      "exported": {
-        "title": "Print / Export ပြီး",
-        "pending": "လုပ်ဆောင်ရန် စောင့်နေသည်..."
-      }
+      "order_ref": "အော်ဒါ #{{orderId}}",
+      "skus": "စာရင်းများ: {{count}}"
     }
   }
 }

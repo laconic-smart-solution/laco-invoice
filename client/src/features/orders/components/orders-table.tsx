@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { RefreshCw, Store } from "lucide-react"
+import { Store } from "lucide-react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
@@ -18,8 +18,13 @@ import { StatusBadge } from "@/components/common/status-badge"
 import type { StatusBadgeVariant } from "@/components/common/status-badge"
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import type { Order, OrderSyncStatus } from "@/features/orders/types/order"
+import {
+  getInvoiceErrorMessage,
+  useGenerateInvoiceMutation,
+} from "@/shared/queries/invoice.query"
 import { useLocaleStore } from "@/shared/stores/locale-store"
 import { formatCurrency, formatDate } from "@/util/format"
+import { AuthFormError } from "@/features/auth/components/auth-form-error"
 
 const SYNC_STATUS_BADGE: Record<OrderSyncStatus, StatusBadgeVariant> = {
   synced: "synced",
@@ -34,33 +39,27 @@ interface OrderRowActionProps {
 
 function OrderRowAction({ order, onGenerate }: OrderRowActionProps) {
   const { t } = useTranslation("orders")
+  const navigate = useNavigate()
 
-  if (
-    order.syncStatus !== "synced" &&
-    order.syncStatus !== "pending" &&
-    order.syncStatus !== "failed"
-  ) {
-    return null
+  if (order.invoiceId) {
+    return (
+      <DataTableRowActions>
+        <DropdownMenuItem
+          onSelect={() => {
+            void navigate(ROUTES.dashboard.invoiceDetail(order.invoiceId as string))
+          }}
+        >
+          {t("table.actions.view_invoice")}
+        </DropdownMenuItem>
+      </DataTableRowActions>
+    )
   }
 
   return (
     <DataTableRowActions>
-      {order.syncStatus === "synced" ? (
-        <DropdownMenuItem onSelect={() => undefined}>
-          {t("table.actions.view_invoice")}
-        </DropdownMenuItem>
-      ) : null}
-      {order.syncStatus === "pending" ? (
-        <DropdownMenuItem onSelect={() => onGenerate(order)}>
-          {t("table.actions.generate")}
-        </DropdownMenuItem>
-      ) : null}
-      {order.syncStatus === "failed" ? (
-        <DropdownMenuItem variant="destructive" onSelect={() => undefined}>
-          <RefreshCw aria-hidden />
-          {t("table.actions.retry")}
-        </DropdownMenuItem>
-      ) : null}
+      <DropdownMenuItem onSelect={() => onGenerate(order)}>
+        {t("table.actions.generate")}
+      </DropdownMenuItem>
     </DataTableRowActions>
   )
 }
@@ -99,19 +98,33 @@ export function OrdersTable({
   const locale = useLocaleStore((state) => state.locale)
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
   const [orderToGenerate, setOrderToGenerate] = useState<Order | null>(null)
+  const generateMutation = useGenerateInvoiceMutation()
 
   const handleGenerateRequest = useCallback((order: Order) => {
     setOrderToGenerate(order)
   }, [])
 
-  const handleConfirmGenerate = useCallback(() => {
+  const handleConfirmGenerate = useCallback(async () => {
     if (!orderToGenerate) {
       return
     }
-
-    // TODO: wire invoice generation mutation
+    const orderId = Number.parseInt(orderToGenerate.id, 10)
+    if (!Number.isFinite(orderId)) {
+      setOrderToGenerate(null)
+      return
+    }
+    const invoice = await generateMutation.mutateAsync(orderId)
     setOrderToGenerate(null)
-  }, [orderToGenerate])
+    void navigate(ROUTES.dashboard.invoiceDetail(String(invoice.id)))
+  }, [generateMutation, navigate, orderToGenerate])
+
+  const generateError =
+    generateMutation.isError && generateMutation.error
+      ? getInvoiceErrorMessage(
+          generateMutation.error,
+          t("errors.generate_invoice_failed")
+        )
+      : null
 
   const handleRowClick = useCallback(
     (order: Order) => {
@@ -217,10 +230,11 @@ export function OrdersTable({
 
   return (
     <section className="border border-border bg-card shadow-sm">
+      <AuthFormError message={generateError} />
       <ConfirmDialog
         open={orderToGenerate !== null}
         onOpenChange={(open) => {
-          if (!open) {
+          if (!open && !generateMutation.isPending) {
             setOrderToGenerate(null)
           }
         }}
@@ -234,6 +248,7 @@ export function OrdersTable({
         }
         confirmLabel={t("table.actions.generate")}
         onConfirm={handleConfirmGenerate}
+        isLoading={generateMutation.isPending}
       />
 
       <DataTableToolbar

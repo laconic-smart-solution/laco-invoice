@@ -8,11 +8,11 @@
   "filters": {
     "marketplace_label": "มาร์เก็ตเพลส",
     "marketplace_all": "มาร์เก็ตเพลสทั้งหมด",
+    "marketplace_lazada": "Lazada",
+    "marketplace_shopee": "Shopee",
     "marketplace_tiktok": "TikTok Shop",
-    "marketplace_shopify": "Shopify",
-    "marketplace_amazon": "Amazon",
     "date_range_label": "ช่วงวันที่",
-    "date_range_value": "01 ต.ค. - 24 ต.ค. 2023",
+    "date_range_placeholder": "ทุกวันที่",
     "status_label": "สถานะใบแจ้งหนี้",
     "status_all": "ทุกสถานะ",
     "more_filters": "ตัวกรองเพิ่มเติม"
@@ -27,7 +27,7 @@
       "store": "ร้านค้า",
       "grand_total": "ยอดรวม",
       "status": "สถานะ",
-      "created_at": "วันที่สร้าง",
+      "created_at": "วันที่ออก",
       "action": "การดำเนินการ"
     },
     "actions": {
@@ -36,53 +36,61 @@
     }
   },
   "status": {
-    "paid": "ชำระแล้ว",
-    "pending": "รอดำเนินการ",
-    "overdue": "เกินกำหนด",
-    "draft": "แบบร่าง"
+    "ISSUED": "ออกแล้ว",
+    "VOID": "ยกเลิก"
+  },
+  "errors": {
+    "load_failed": "โหลดใบแจ้งหนี้ไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "void_failed": "ยกเลิกใบแจ้งหนี้ไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "download_failed": "ดาวน์โหลด PDF ไม่สำเร็จ กรุณาลองอีกครั้ง"
+  },
+  "confirm": {
+    "void": {
+      "title": "ยกเลิกใบแจ้งหนี้?",
+      "description": "ใบแจ้งหนี้ {{invoiceNo}} จะถูกทำเครื่องหมายว่ายกเลิก การดำเนินการนี้ไม่สามารถย้อนกลับได้"
+    }
   },
   "detail": {
+    "loading": "กำลังโหลดใบแจ้งหนี้…",
     "back_to_invoices": "กลับไปใบแจ้งหนี้",
     "not_found_title": "ไม่พบใบแจ้งหนี้",
     "not_found_description": "ไม่พบใบแจ้งหนี้ที่คุณต้องการ หรืออาจถูกลบไปแล้ว",
-    "actions": { "print": "พิมพ์", "download": "ดาวน์โหลด PDF" },
+    "actions": {
+      "print": "พิมพ์",
+      "download": "ดาวน์โหลด PDF",
+      "void": "ยกเลิกใบแจ้งหนี้"
+    },
     "document": {
-      "vat": "VAT {{number}}",
+      "title": "Tax Invoice / Receipt",
+      "title_th": "ใบกำกับภาษี / ใบเสร็จรับเงิน",
+      "vat_rate": "VAT {{percent}}%",
       "invoice_number": "เลขที่ใบแจ้งหนี้",
       "issued_at": "วันที่ออก",
-      "due_date": "วันครบกำหนด",
+      "order_ref": "อ้างอิงคำสั่งซื้อ",
       "bill_to": "เรียกเก็บจาก",
-      "attn": "ถึง: {{name}}",
+      "parties": "คู่สัญญาในใบแจ้งหนี้",
       "marketplace_source": "แหล่งมาร์เก็ตเพลส",
+      "line_items_caption": "รายการในใบแจ้งหนี้",
+      "no_line_items": "ไม่มีรายการในใบแจ้งหนี้นี้",
       "columns": {
         "description": "รายละเอียด",
+        "sku": "SKU",
         "qty": "จำนวน",
         "unit_price": "ราคาต่อหน่วย",
         "total": "รวม"
       },
-      "bank_details": "รายละเอียดธนาคาร",
-      "iban": "IBAN: {{value}}",
-      "swift": "SWIFT/BIC: {{value}}",
-      "footer_note": "ขอบคุณสำหรับธุรกิจของคุณ การชำระเงินครบกำหนดภายใน {{days}} วัน",
       "subtotal": "ยอดรวมย่อย",
+      "shipping": "ค่าจัดส่ง",
       "vat_line": "VAT ({{percent}}%)",
-      "grand_total": "ยอดรวมทั้งสิ้น"
+      "grand_total": "ยอดรวมทั้งสิ้น",
+      "footer_vat_note": "VAT {{percent}}% คำนวณจากยอดรวมย่อยบวกค่าจัดส่ง"
     },
     "sidebar": {
-      "timeline": "ไทม์ไลน์ใบแจ้งหนี้",
-      "external_systems": "ระบบภายนอก",
-      "erp_voucher": "SAP ERP Voucher",
-      "view_in_erp": "ดูใน SAP Business One",
+      "label": "รายละเอียดใบแจ้งหนี้",
+      "summary": "สรุป",
       "marketplace": "มาร์เก็ตเพลส",
       "order_ref": "คำสั่งซื้อ #{{orderId}}",
-      "skus": "SKU: {{count}}",
-      "country": "ประเทศ: {{code}}",
-      "add_note": "เพิ่มบันทึกหรือไฟล์แนบ"
-    },
-    "timeline": {
-      "generated": { "title": "สร้างใบแจ้งหนี้แล้ว", "pending": "รอสร้าง" },
-      "synced": { "title": "ซิงก์ไปมาร์เก็ตเพลสแล้ว", "pending": "รอซิงก์..." },
-      "exported": { "title": "พิมพ์ / ส่งออกแล้ว", "pending": "รอดำเนินการ..." }
+      "skus": "รายการ: {{count}}"
     }
   }
 }

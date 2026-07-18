@@ -55,6 +55,7 @@ export function mapOrderDtoToOrder(dto: ApiOrderDto): Order {
     customer: formatCustomerName(dto.customerName),
     customerId: dto.customerId != null ? String(dto.customerId) : undefined,
     customerPhone: dto.customerPhone?.trim() || undefined,
+    invoiceId: dto.invoiceId != null ? String(dto.invoiceId) : undefined,
     totalAmount: dto.totalAmount,
     currency: resolveCurrency(dto),
     syncStatus: mapOrderStatusToSyncBadge(dto.orderStatus),

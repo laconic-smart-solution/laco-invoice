@@ -1,72 +1,47 @@
-export type InvoiceStatus = "paid" | "pending" | "overdue" | "draft"
-
-export type InvoiceTimelineEventType = "generated" | "synced" | "exported"
+export type InvoiceStatus = "ISSUED" | "VOID"
 
 export interface InvoiceLineItem {
   id: string
-  description: string
-  subDescription?: string
+  sku: string
+  productName: string
   quantity: number
   unitPrice: number
+  lineTotal: number
 }
 
-export interface InvoiceTimelineEvent {
-  id: string
-  type: InvoiceTimelineEventType
-  status: "completed" | "pending"
-  timestamp?: string
-  meta?: string
-}
-
-export interface InvoiceErpVoucher {
-  id: string
-}
-
-export interface Invoice {
+export interface InvoiceListItem {
   id: string
   orderId: string
   invoiceNo: string
-  subtotal: number
-  vatAmount: number
-  vatPercentage: number
-  grandTotal: number
-  status: InvoiceStatus
-  pdfUrl?: string
-  createdAt: string
-}
-
-export interface InvoiceListItem extends Invoice {
-  externalOrderId: string
-  customerName: string
   storeName: string
-  marketplaceName: string
-  orderDate: string
+  marketplaceCode: string
+  customerName: string
+  currency: string
+  grandTotal: number
+  vatPercentage: number
+  status: InvoiceStatus
+  issuedAt: string | null
+  pdfUrl?: string
 }
 
 export interface InvoiceDetail extends InvoiceListItem {
-  dueAt: string
-  currency: string
-  issuer: {
-    name: string
-    vatNumber: string
-    address: string
-  }
-  billTo: {
-    name: string
-    attention: string
-    address: string
-  }
+  subtotal: number
+  vatAmount: number
+  shippingFee: number
+  externalOrderId: string
+  customerEmail: string
+  customerPhone: string
+  customerAddress: string
   lineItems: InvoiceLineItem[]
-  bankDetails: {
-    iban: string
-    swift: string
-  }
-  paymentTermsDays: number
-  timeline: InvoiceTimelineEvent[]
-  erpVoucher?: InvoiceErpVoucher
-  marketplaceMeta: {
-    orderRef: string
-    skuCount: number
-    countryCode: string
+  createdAt: string | null
+}
+
+export interface InvoicePageRequest {
+  pageNumber: number
+  pageSize: number
+  sortBy?: string
+  sortOrder?: "ASC" | "DESC"
+  filter?: {
+    status?: InvoiceStatus
   }
 }

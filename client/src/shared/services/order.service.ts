@@ -17,6 +17,7 @@ export interface ApiOrderDto {
   customerId: number | null
   customerName: string | null
   customerPhone: string | null
+  invoiceId: number | null
   externalOrderId: string
   orderStatus: ApiOrderStatus
   subtotal: number
