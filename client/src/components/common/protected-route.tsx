@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
+import { Loader } from "@/components/core/loader"
 import { useAuthStore } from "@/shared/stores/auth-store"
 
 export function ProtectedRoute() {
@@ -9,7 +10,7 @@ export function ProtectedRoute() {
   const location = useLocation()
 
   if (!isHydrated) {
-    return null
+    return <Loader />
   }
 
   if (!isAuthenticated) {

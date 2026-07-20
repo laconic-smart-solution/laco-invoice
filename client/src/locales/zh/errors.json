@@ -25,5 +25,19 @@
     "go_home": "返回仪表盘",
     "go_login": "前往登录",
     "go_back": "返回上一页"
+  },
+  "server_error": {
+    "page_title": "服务器不可用 | Laco Invoice",
+    "status_label": "连接中断",
+    "code_label": "502 · Bad gateway",
+    "code": "500",
+    "title": "服务器不可用",
+    "description": "与服务器之间的信号已中断。服务器可能正在重启或暂时无法访问——通常很快就会恢复。",
+    "details_label": "错误详情",
+    "unreachable": "无法连接到服务器。",
+    "try_again": "重试",
+    "go_home": "返回仪表盘",
+    "go_login": "前往登录",
+    "go_back": "返回上一页"
   }
 }

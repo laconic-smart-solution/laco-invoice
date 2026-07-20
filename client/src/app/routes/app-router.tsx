@@ -32,6 +32,7 @@ import { ProtectedRoute } from "@/components/common/protected-route"
 import { AuthLayout } from "@/components/layouts/auth-layout"
 import { DashboardLayout } from "@/components/layouts/dashboard-layout"
 import { NotFoundPage } from "@/features/errors/pages/not-found-page"
+import { ServerErrorPage } from "@/features/errors/pages/server-error-page"
 import { SomethingWentWrongPage } from "@/features/errors/pages/something-went-wrong-page"
 
 export const router = createBrowserRouter([
@@ -158,6 +159,10 @@ export const router = createBrowserRouter([
             ],
           },
         ],
+      },
+      {
+        path: ROUTES.errors.serverError,
+        element: <ServerErrorPage />,
       },
       {
         path: "*",

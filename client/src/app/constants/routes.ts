@@ -31,4 +31,7 @@ export const ROUTES = {
     resetPassword: "/reset-password",
     otpVerify: "/otp-verify",
   },
+  errors: {
+    serverError: "/500",
+  },
 } as const

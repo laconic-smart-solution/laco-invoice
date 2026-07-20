@@ -25,5 +25,19 @@
     "go_home": "Go to dashboard",
     "go_login": "Go to sign in",
     "go_back": "Go back"
+  },
+  "server_error": {
+    "page_title": "Server unavailable | Laco Invoice",
+    "status_label": "Connection lost",
+    "code_label": "502 · Bad gateway",
+    "code": "500",
+    "title": "Server unavailable",
+    "description": "The signal dropped between here and the server. It may be restarting or temporarily unreachable — this is usually resolved within a minute.",
+    "details_label": "Error details",
+    "unreachable": "Unable to reach the server.",
+    "try_again": "Try again",
+    "go_home": "Go to dashboard",
+    "go_login": "Go to sign in",
+    "go_back": "Go back"
   }
 }

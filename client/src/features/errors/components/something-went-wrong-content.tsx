@@ -10,15 +10,19 @@ import { cn } from "@/lib/utils"
 import { useReducedMotion } from "@/shared/hooks/use-reduced-motion"
 import { defaultTransition, fadeIn } from "@/shared/motion-variants"
 
+type ErrorCopyKey = "something_went_wrong" | "server_error"
+
 interface SomethingWentWrongContentProps {
   isAuthenticated: boolean
   variant?: "standalone" | "embedded"
+  copyKey?: ErrorCopyKey
   errorMessage?: string | null
 }
 
 export function SomethingWentWrongContent({
   isAuthenticated,
   variant = "embedded",
+  copyKey = "something_went_wrong",
   errorMessage = null,
 }: SomethingWentWrongContentProps) {
   const { t } = useTranslation("errors")
@@ -30,9 +34,9 @@ export function SomethingWentWrongContent({
   const detailsId = "something-went-wrong-details"
 
   useEffect(() => {
-    document.title = t("something_went_wrong.page_title")
+    document.title = t(`${copyKey}.page_title`)
     headingRef.current?.focus()
-  }, [t])
+  }, [copyKey, t])
 
   const handleGoBack = () => {
     if (window.history.length > 1) {
@@ -72,7 +76,7 @@ export function SomethingWentWrongContent({
           aria-hidden
           className="pointer-events-none select-none font-heading text-[7rem] font-bold leading-none tracking-tighter text-muted-foreground/15 sm:text-[9rem]"
         >
-          {t("something_went_wrong.code")}
+          {t(`${copyKey}.code`)}
         </p>
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
           <div className="flex size-14 items-center justify-center border border-border bg-card text-destructive shadow-sm">
@@ -87,14 +91,14 @@ export function SomethingWentWrongContent({
         tabIndex={-1}
         className="font-heading text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
       >
-        {t("something_went_wrong.title")}
+        {t(`${copyKey}.title`)}
       </h1>
 
       <p
         id={descriptionId}
         className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground sm:text-base"
       >
-        {t("something_went_wrong.description")}
+        {t(`${copyKey}.description`)}
       </p>
 
       {errorMessage ? (
@@ -103,7 +107,7 @@ export function SomethingWentWrongContent({
           className="mt-6 w-full max-w-md border border-border bg-muted/30 px-4 py-3 text-left"
         >
           <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-            {t("something_went_wrong.details_label")}
+            {t(`${copyKey}.details_label`)}
           </p>
           <p className="mt-1 break-all font-mono text-sm text-foreground">
             {errorMessage}
@@ -114,19 +118,19 @@ export function SomethingWentWrongContent({
       <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
         <Button type="button" size="lg" onClick={handleTryAgain}>
           <RefreshCw data-icon="inline-start" aria-hidden />
-          {t("something_went_wrong.try_again")}
+          {t(`${copyKey}.try_again`)}
         </Button>
         <Button asChild variant="outline" size="lg">
           <Link to={isAuthenticated ? ROUTES.dashboard.root : ROUTES.auth.login}>
             <Home data-icon="inline-start" aria-hidden />
             {isAuthenticated
-              ? t("something_went_wrong.go_home")
-              : t("something_went_wrong.go_login")}
+              ? t(`${copyKey}.go_home`)
+              : t(`${copyKey}.go_login`)}
           </Link>
         </Button>
         <Button type="button" variant="ghost" size="lg" onClick={handleGoBack}>
           <ArrowLeft data-icon="inline-start" aria-hidden />
-          {t("something_went_wrong.go_back")}
+          {t(`${copyKey}.go_back`)}
         </Button>
       </div>
     </motion.section>
