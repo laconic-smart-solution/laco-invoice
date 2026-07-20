@@ -138,7 +138,10 @@ public class OrderSyncService {
 		order.setShippingFee(payload.shippingFee());
 		order.setTotalAmount(payload.totalAmount());
 		order.setCurrency(payload.currency());
-		order.setOrderDate(payload.orderDate());
+		// Keep an existing order date when the marketplace payload omitted/failed to parse one.
+		if (payload.orderDate() != null) {
+			order.setOrderDate(payload.orderDate());
+		}
 		Order saved = orderRepository.save(order);
 
 		// Only replace line items when the marketplace returned some.

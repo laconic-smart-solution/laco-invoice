@@ -31,9 +31,12 @@ app:
       auth-server-user-id: ${DEFAULT_ADMIN_AUTH_SERVER_USER_ID:f14b9e92-0acf-42d3-9a85-cabc7d994c93}
   # Marketplace Open Platform credentials (caller-owned; forwarded as vendor headers)
   communication:
-    lazada-base-path: ${COMMUNICATION_LAZADA_BASE_PATH:/comms/lazada}
-    shopee-base-path: ${COMMUNICATION_SHOPEE_BASE_PATH:/comms/shopee}
-    tiktok-base-path: ${COMMUNICATION_TIKTOK_BASE_PATH:/comms/tiktok}
+    gateway-url: ${COMMUNICATION_GATEWAY_URL:http://192.168.0.242:8084}
+    # Empty when calling marketplace services directly. Set /comms/lazada etc. only if
+    # gateway-url points at Spring Cloud Gateway (:8080).
+    lazada-base-path: ${COMMUNICATION_LAZADA_BASE_PATH:}
+    shopee-base-path: ${COMMUNICATION_SHOPEE_BASE_PATH:}
+    tiktok-base-path: ${COMMUNICATION_TIKTOK_BASE_PATH:}
     lazada-app-key: ${LAZADA_APP_KEY:139411}
     lazada-app-secret: ${LAZADA_APP_SECRET:JGDsqR9i0CvXXgdqNOW9tdFuUeBXZmXe}
     # Set real Partner Center values (or env) before connecting TikTok Shop
