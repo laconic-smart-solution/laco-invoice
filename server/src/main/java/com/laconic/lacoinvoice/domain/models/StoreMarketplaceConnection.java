@@ -51,6 +51,14 @@ public class StoreMarketplaceConnection extends MasterEntity {
 	@Column(name = "token_expiry")
 	private Instant tokenExpiry;
 
+	/**
+	 * Optional Playwright storage_state JSON for TikTok scrape mode
+	 * ({@code TIKTOK_SHOP_SCRAPPING=true}). Primary session store is
+	 * {@code tiktok_seller_sessions} in laco-invoice DB.
+	 */
+	@Column(name = "scrape_session_json", columnDefinition = "CLOB")
+	private String scrapeSessionJson;
+
 	@Column(name = "status", nullable = false)
 	private MarketplaceConnectionStatus status;
 }

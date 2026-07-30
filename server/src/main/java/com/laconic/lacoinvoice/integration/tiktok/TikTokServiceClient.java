@@ -19,7 +19,11 @@ public class TikTokServiceClient extends AbstractMarketplaceGatewayClient {
 	public TikTokServiceClient(
 			@Qualifier("marketplaceRestClient") RestClient restClient,
 			CommunicationProperties properties) {
-		super(restClient, properties, "TikTok service", properties.getTiktokBasePath());
+		super(
+				restClient,
+				properties,
+				properties.isTiktokShopScraping() ? "TikTok scrape service" : "TikTok service",
+				properties.isTiktokShopScraping() ? "" : properties.getTiktokBasePath());
 	}
 
 	@Override
@@ -28,8 +32,27 @@ public class TikTokServiceClient extends AbstractMarketplaceGatewayClient {
 	}
 
 	@Override
+	protected String resolveBaseUrl() {
+		CommunicationProperties props = properties();
+		if (props.isTiktokShopScraping()) {
+			String scrapeUrl = props.getTiktokScrapeUrl();
+			if (!StringUtils.hasText(scrapeUrl)) {
+				throw new BadGatewayException(
+						"TIKTOK_SHOP_SCRAPPING is true but tiktok-scrape-url is empty. "
+								+ "Set TIKTOK_SCRAPE_URL (e.g. http://localhost:8090).");
+			}
+			return scrapeUrl.trim().replaceAll("/$", "");
+		}
+		return super.resolveBaseUrl();
+	}
+
+	@Override
 	protected RestClient.RequestHeadersSpec<?> applyVendorHeaders(RestClient.RequestHeadersSpec<?> request) {
 		CommunicationProperties props = properties();
+		if (props.isTiktokShopScraping()) {
+			// Scrape sidecar does not need Partner app credentials.
+			return request;
+		}
 		String appKey = props.getTiktokAppKey();
 		String appSecret = props.getTiktokAppSecret();
 		if (!StringUtils.hasText(appKey) || !StringUtils.hasText(appSecret)) {

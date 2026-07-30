@@ -103,6 +103,8 @@ app:
     lazada-app-secret: ${LAZADA_APP_SECRET:}
     tiktok-app-key: ${TIKTOK_APP_KEY:}
     tiktok-app-secret: ${TIKTOK_APP_SECRET:}
+    tiktok-shop-scraping: ${TIKTOK_SHOP_SCRAPPING:false}
+    tiktok-scrape-url: ${TIKTOK_SCRAPE_URL:http://localhost:8090}
 
 sso:
   url: ${SSO_URL:https://api-auths.laconic.co.th}

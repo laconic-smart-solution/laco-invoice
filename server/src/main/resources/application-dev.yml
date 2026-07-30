@@ -42,3 +42,6 @@ app:
     # Set real Partner Center values (or env) before connecting TikTok Shop
     tiktok-app-key: ${TIKTOK_APP_KEY:}
     tiktok-app-secret: ${TIKTOK_APP_SECRET:}
+    # Temporary: true → tiktok-shop-scrape (Playwright); false → Partner tiktok-service
+    tiktok-shop-scraping: ${TIKTOK_SHOP_SCRAPPING:false}
+    tiktok-scrape-url: ${TIKTOK_SCRAPE_URL:http://localhost:8090}

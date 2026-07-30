@@ -14,6 +14,10 @@ public class CommunicationProperties {
 	private String lazadaAppSecret = "";
 	private String tiktokAppKey = "";
 	private String tiktokAppSecret = "";
+	/** When true, TikTok sync calls tiktok-shop-scrape instead of Partner tiktok-service. */
+	private boolean tiktokShopScraping = false;
+	/** Base URL of tiktok-shop-scrape (e.g. http://localhost:8090). */
+	private String tiktokScrapeUrl = "http://localhost:8090";
 
 	public String getGatewayUrl() {
 		return gatewayUrl;
@@ -85,5 +89,21 @@ public class CommunicationProperties {
 
 	public void setTiktokAppSecret(String tiktokAppSecret) {
 		this.tiktokAppSecret = tiktokAppSecret;
+	}
+
+	public boolean isTiktokShopScraping() {
+		return tiktokShopScraping;
+	}
+
+	public void setTiktokShopScraping(boolean tiktokShopScraping) {
+		this.tiktokShopScraping = tiktokShopScraping;
+	}
+
+	public String getTiktokScrapeUrl() {
+		return tiktokScrapeUrl;
+	}
+
+	public void setTiktokScrapeUrl(String tiktokScrapeUrl) {
+		this.tiktokScrapeUrl = tiktokScrapeUrl;
 	}
 }

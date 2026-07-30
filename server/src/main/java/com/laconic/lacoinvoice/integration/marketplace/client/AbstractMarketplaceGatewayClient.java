@@ -335,8 +335,16 @@ public abstract class AbstractMarketplaceGatewayClient implements MarketplaceGat
 		return properties;
 	}
 
-	String resolveApiUrl(String path) {
-		String base = properties.getGatewayUrl().replaceAll("/$", "");
+	/**
+	 * Base URL before marketplace path prefix (gateway or direct service).
+	 * Subclasses may override (e.g. TikTok scrape sidecar).
+	 */
+	protected String resolveBaseUrl() {
+		return properties.getGatewayUrl().replaceAll("/$", "");
+	}
+
+	protected String resolveApiUrl(String path) {
+		String base = resolveBaseUrl();
 		String prefix = basePathProperty;
 		if (prefix != null && !prefix.isBlank()) {
 			String normalized = prefix.startsWith("/") ? prefix : "/" + prefix;

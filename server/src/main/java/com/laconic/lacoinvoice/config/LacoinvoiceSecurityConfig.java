@@ -62,6 +62,8 @@ public class LacoinvoiceSecurityConfig {
 						"/api/v1/auth/refresh",
 						"/api/v1/auth/logout")
 					.permitAll()
+				.requestMatchers("/api/v1/internal/tiktok-seller-sessions", "/api/v1/internal/tiktok-seller-sessions/**")
+					.permitAll()
 				.anyRequest()
 				.authenticated());
 		return http.build();
