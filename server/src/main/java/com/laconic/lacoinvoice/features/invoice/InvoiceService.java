@@ -32,10 +32,17 @@ public interface InvoiceService {
 	String bulkPdfZipFilename();
 
 	/**
-	 * Generate invoices for selected/matching orders (skip if already invoiced)
-	 * and return their PDFs as a ZIP archive.
+	 * Resolve order IDs for bulk generate (selected ids or exportAll + filter).
 	 */
-	byte[] bulkGenerateZip(com.laconic.lacoinvoice.features.order.OrderExportRequest request);
+	java.util.List<Long> resolveOrderIdsForBulkGenerate(
+			com.laconic.lacoinvoice.features.order.OrderExportRequest request,
+			int maxRows);
 
-	String bulkGenerateZipFilename();
+	/**
+	 * Ensure an invoice exists for the order and render its PDF.
+	 */
+	OrderInvoicePdf buildPdfForOrder(Long orderId);
+
+	record OrderInvoicePdf(String filename, byte[] content) {
+	}
 }

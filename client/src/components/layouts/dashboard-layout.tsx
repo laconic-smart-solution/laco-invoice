@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 import { Outlet } from "react-router-dom"
 
+import { OrderBulkGeneratePanel } from "@/components/common/order-bulk-generate-panel"
 import { AppBreadcrumb } from "@/components/core/app-breadcrumb"
 import { Navbar } from "@/components/core/navbar/navbar"
 import { Sidebar } from "@/components/core/sidebar/sidebar"
@@ -39,6 +40,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
           {children}
         </main>
       </div>
+      <OrderBulkGeneratePanel />
     </div>
   )
 }

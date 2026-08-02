@@ -84,7 +84,7 @@
     },
     "bulk_generate_all": {
       "title": "Generate invoices for all matching orders?",
-      "description": "You selected every order on this page. This will generate invoices for up to 100 orders matching your filters and download their PDFs as a ZIP file. Large batches may take a few minutes.",
+      "description": "You selected every order on this page. This will start a background job for up to 2000 orders matching your filters, then download their PDFs as a ZIP when ready.",
       "confirm": "Yes, generate all"
     }
   },
@@ -132,7 +132,26 @@
     "select_to_export": "Select at least one order to export.",
     "export_preview_failed": "Unable to load export preview. Please try again.",
     "bulk_generate_failed": "Unable to generate invoices. Please try again.",
-    "select_to_bulk_generate": "Select at least one order to generate invoices."
+    "select_to_bulk_generate": "Select at least one order to generate invoices.",
+    "bulk_generate_download_failed": "Invoices were generated, but the ZIP download failed. Try again from the job status."
+  },
+  "bulk_generate": {
+    "started": "Generating invoices for {{count}} orders…",
+    "completed": "Generated {{count}} invoices. Downloading ZIP…",
+    "panel": {
+      "generating_title": "Generating invoices…",
+      "downloading_title": "Downloading ZIP…",
+      "completed_title": "Invoices ready",
+      "failed_title": "Generation failed",
+      "download_failed_title": "Download failed",
+      "progress_detail": "{{processed}} of {{total}} orders",
+      "completed_detail": "{{count}} invoices generated",
+      "percent": "{{percent}}%",
+      "minimize": "Minimize",
+      "expand": "Expand",
+      "dismiss": "Dismiss",
+      "retry_download": "Retry download"
+    }
   },
   "export": {
     "preview_title": "Excel export preview",

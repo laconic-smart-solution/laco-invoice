@@ -16,12 +16,15 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 	private final LacoinvoiceCorsProperties corsProperties;
 	private final MarketplaceProductSyncStompChannelInterceptor syncStompChannelInterceptor;
+	private final OrderBulkGenerateStompChannelInterceptor bulkGenerateStompChannelInterceptor;
 
 	public WebSocketConfig(
 			LacoinvoiceCorsProperties corsProperties,
-			MarketplaceProductSyncStompChannelInterceptor syncStompChannelInterceptor) {
+			MarketplaceProductSyncStompChannelInterceptor syncStompChannelInterceptor,
+			OrderBulkGenerateStompChannelInterceptor bulkGenerateStompChannelInterceptor) {
 		this.corsProperties = corsProperties;
 		this.syncStompChannelInterceptor = syncStompChannelInterceptor;
+		this.bulkGenerateStompChannelInterceptor = bulkGenerateStompChannelInterceptor;
 	}
 
 	@Override
@@ -44,6 +47,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	public void configureClientInboundChannel(ChannelRegistration registration) {
 		registration.interceptors(
 				new SecurityContextChannelInterceptor(),
-				syncStompChannelInterceptor);
+				syncStompChannelInterceptor,
+				bulkGenerateStompChannelInterceptor);
 	}
 }

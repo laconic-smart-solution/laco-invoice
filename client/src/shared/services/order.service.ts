@@ -99,6 +99,21 @@ export interface OrderStats {
   invoiceCoveragePercent: number
 }
 
+export type OrderBulkGenerateStatus = "RUNNING" | "COMPLETED" | "FAILED"
+
+export interface OrderBulkGenerateRun {
+  id: number
+  status: OrderBulkGenerateStatus
+  totalCount: number
+  processedCount: number
+  successCount: number
+  failedCount: number
+  zipFilename: string | null
+  errorMessage: string | null
+  startedAt: string
+  completedAt: string | null
+}
+
 export interface OrderExportRequest {
   ids?: number[]
   exportAll?: boolean
@@ -188,11 +203,27 @@ export const orderService = {
     }
   },
 
-  bulkGenerateZip: async (request: OrderExportRequest) => {
+  startBulkGenerate: async (request: OrderExportRequest) => {
+    const response = await apiClient.post<ApiResponse<OrderBulkGenerateRun>>(
+      "/v1/orders/bulk-generate",
+      request
+    )
+    return response.data.data
+  },
+
+  getBulkGenerateRun: async (runId: number) => {
+    const response = await apiClient.get<ApiResponse<OrderBulkGenerateRun>>(
+      `/v1/orders/bulk-generate/${runId}`
+    )
+    return response.data.data
+  },
+
+  downloadBulkGenerateZip: async (runId: number) => {
     try {
-      const response = await apiClient.post<Blob>("/v1/orders/bulk-generate", request, {
-        responseType: "blob",
-      })
+      const response = await apiClient.get<Blob>(
+        `/v1/orders/bulk-generate/${runId}/download`,
+        { responseType: "blob" }
+      )
       const filename = filenameFromContentDisposition(
         response.headers["content-disposition"] as string | undefined,
         "orders-invoices.zip"

@@ -25,12 +25,16 @@ import { useExportSelection } from "@/shared/hooks/use-export-selection"
 import { getPaginationMeta, usePagination } from "@/shared/hooks/use-pagination"
 import {
   getOrderErrorMessage,
-  useBulkGenerateOrdersMutation,
   useOrderStatsQuery,
   useOrdersPageQuery,
+  useStartBulkGenerateOrdersMutation,
   useTriggerOrderSyncMutation,
 } from "@/shared/queries/order.query"
 import { useStoresPageQuery } from "@/shared/queries/store.query"
+import {
+  selectIsBulkGenerateRunning,
+  useOrderBulkGenerateStore,
+} from "@/shared/stores/order-bulk-generate-store"
 import { getColumnFilterValue } from "@/util/table-column-filters"
 import { sortingToPageSort } from "@/util/table-sort"
 
@@ -61,6 +65,9 @@ export function OrdersPage() {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const debouncedColumnFilters = useDebounce(columnFilters)
+
+  const startBulkRun = useOrderBulkGenerateStore((state) => state.startRun)
+  const isBulkRunActive = useOrderBulkGenerateStore(selectIsBulkGenerateRunning)
 
   const { data: storesResponse, isLoading: storesLoading } =
     useStoresPageQuery(STORES_LIST_REQUEST)
@@ -118,7 +125,10 @@ export function OrdersPage() {
 
   const { data, isLoading, isError, error } = useOrdersPageQuery(pageRequest)
   const syncMutation = useTriggerOrderSyncMutation()
-  const bulkGenerateMutation = useBulkGenerateOrdersMutation()
+  const startBulkGenerateMutation = useStartBulkGenerateOrdersMutation()
+
+  const isBulkGenerating =
+    startBulkGenerateMutation.isPending || isBulkRunActive
 
   const statsStoreId = useMemo(() => {
     if (!filters.storeId) {
@@ -176,7 +186,10 @@ export function OrdersPage() {
   const runBulkGenerate = useCallback(
     async (request: OrderExportRequest) => {
       try {
-        await bulkGenerateMutation.mutateAsync(request)
+        const run = await startBulkGenerateMutation.mutateAsync(request)
+        if (run?.id) {
+          startBulkRun(run)
+        }
       } catch (err) {
         setActionError(
           getOrderErrorMessage(err, t("errors.bulk_generate_failed"))
@@ -184,7 +197,7 @@ export function OrdersPage() {
         throw err
       }
     },
-    [bulkGenerateMutation, setActionError, t]
+    [setActionError, startBulkGenerateMutation, startBulkRun, t]
   )
 
   const handleExportCsv = () => {
@@ -236,7 +249,7 @@ export function OrdersPage() {
         onImport={() => setIsImportOpen(true)}
         onExportCsv={handleExportCsv}
         onBulkGenerate={handleBulkGenerate}
-        isBulkGenerating={bulkGenerateMutation.isPending}
+        isBulkGenerating={isBulkGenerating}
       />
       <OrderExportPreviewDialog
         open={exportPreviewOpen}
@@ -252,7 +265,7 @@ export function OrdersPage() {
       <ConfirmDialog
         open={confirmAction === "bulk"}
         onOpenChange={(open) => {
-          if (!open && !bulkGenerateMutation.isPending) {
+          if (!open && !isBulkGenerating) {
             closeConfirm()
           }
         }}
@@ -263,7 +276,7 @@ export function OrdersPage() {
         confirmLabel={t("confirm.bulk_generate_all.confirm")}
         cancelLabel={t("confirm.export_all.cancel")}
         onConfirm={handleConfirmBulkAll}
-        isLoading={bulkGenerateMutation.isPending}
+        isLoading={isBulkGenerating}
       />
       <AuthFormError message={syncError} />
       <OrdersFilters
@@ -308,7 +321,7 @@ export function OrdersPage() {
         }}
         onSelectionChange={setSelection}
         onBulkGenerate={handleBulkGenerate}
-        isBulkGenerating={bulkGenerateMutation.isPending}
+        isBulkGenerating={isBulkGenerating}
       />
     </div>
   )

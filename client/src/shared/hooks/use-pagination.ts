@@ -43,21 +43,25 @@ export function getPaginationMeta(
   limit: number,
   total: number
 ): PaginationMeta {
-  const totalPages = Math.max(1, Math.ceil(total / limit))
-  const safePage = Math.min(Math.max(page, 1), totalPages)
-  const offset = (safePage - 1) * limit
+  const safeLimit = Math.max(1, limit)
+  const totalPages = Math.max(1, Math.ceil(total / safeLimit))
+  // When total is unknown (0 before the first fetch), trust the URL page so
+  // pagination clicks actually change the request instead of clamping to 1.
+  const safePage =
+    total <= 0 ? Math.max(page, 1) : Math.min(Math.max(page, 1), totalPages)
+  const offset = (safePage - 1) * safeLimit
   const start = total === 0 ? 0 : offset + 1
-  const end = Math.min(offset + limit, total)
+  const end = Math.min(offset + safeLimit, total)
 
   return {
     page: safePage,
-    limit,
+    limit: safeLimit,
     offset,
     totalPages,
     start,
     end,
     canGoPrev: safePage > 1,
-    canGoNext: safePage < totalPages,
+    canGoNext: total > 0 && safePage < totalPages,
   }
 }
 

@@ -289,29 +289,19 @@ public class InvoiceServiceImpl implements InvoiceService {
 
 	@Override
 	@Transactional
-	@PreAuthorize("@authz.isOwnerOrAdmin()")
-	public byte[] bulkGenerateZip(OrderExportRequest request) {
-		List<Long> orderIds = resolveOrderIdsForBulkGenerate(request);
-		if (orderIds.isEmpty()) {
-			throw new BusinessRuleException("No orders found to generate invoices for.");
-		}
-
-		List<ZipExportWriter.ZipFileEntry> entries = new ArrayList<>(orderIds.size());
-		for (Long orderId : orderIds) {
-			Invoice invoice = ensureInvoiceForOrder(orderId);
-			Invoice detailed = invoiceRepository.findDetailById(invoice.getId())
-					.orElseThrow(() -> new ResourceNotFoundException("Invoice not found: id=" + invoice.getId()));
-			byte[] pdf = invoicePdfService.renderPdf(toDetailDto(detailed));
-			String filename = sanitizeFilename(detailed.getInvoiceNo(), detailed.getId()) + ".pdf";
-			entries.add(new ZipExportWriter.ZipFileEntry(filename, pdf));
-		}
-		return ZipExportWriter.write(entries);
+	public OrderInvoicePdf buildPdfForOrder(Long orderId) {
+		Invoice invoice = ensureInvoiceForOrder(orderId);
+		Invoice detailed = invoiceRepository.findDetailById(invoice.getId())
+				.orElseThrow(() -> new ResourceNotFoundException("Invoice not found: id=" + invoice.getId()));
+		byte[] pdf = invoicePdfService.renderPdf(toDetailDto(detailed));
+		String filename = sanitizeFilename(detailed.getInvoiceNo(), detailed.getId()) + ".pdf";
+		return new OrderInvoicePdf(filename, pdf);
 	}
 
 	@Override
-	@PreAuthorize("@authz.isOwnerOrAdmin()")
-	public String bulkGenerateZipFilename() {
-		return "orders-invoices-" + LocalDate.now().format(EXPORT_DATE) + ".zip";
+	@Transactional(readOnly = true)
+	public List<Long> resolveOrderIdsForBulkGenerate(OrderExportRequest request, int maxRows) {
+		return resolveOrderIdsForBulkGenerateInternal(request, maxRows);
 	}
 
 	private Invoice ensureInvoiceForOrder(Long orderId) {
@@ -324,7 +314,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 				});
 	}
 
-	private List<Long> resolveOrderIdsForBulkGenerate(OrderExportRequest request) {
+	private List<Long> resolveOrderIdsForBulkGenerateInternal(OrderExportRequest request, int maxRows) {
 		if (request == null) {
 			throw new BusinessRuleException("Bulk generate request is required.");
 		}
@@ -334,9 +324,9 @@ public class InvoiceServiceImpl implements InvoiceService {
 				: request.getIds().stream().filter(Objects::nonNull).distinct().toList();
 
 		if (!ids.isEmpty()) {
-			if (ids.size() > MAX_BULK_PDF) {
+			if (ids.size() > maxRows) {
 				throw new BusinessRuleException(
-						"Bulk generate is limited to " + MAX_BULK_PDF
+						"Bulk generate is limited to " + maxRows
 								+ " orders. Narrow your selection.");
 			}
 			return ids;
@@ -348,8 +338,8 @@ public class InvoiceServiceImpl implements InvoiceService {
 					Order.class,
 					request.getFilter(),
 					ORDER_FILTER_FIELD_PATHS,
-					MAX_BULK_PDF,
-					"Bulk generate is limited to " + MAX_BULK_PDF
+					maxRows,
+					"Bulk generate is limited to " + maxRows
 							+ " orders. Apply filters to reduce the set.")
 					.stream()
 					.map(Order::getId)

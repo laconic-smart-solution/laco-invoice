@@ -84,7 +84,7 @@
     },
     "bulk_generate_all": {
       "title": "为所有符合条件的订单生成发票？",
-      "description": "您已选中本页全部订单。系统将为最多 100 个符合筛选条件的订单生成发票，并以 ZIP 下载 PDF。大批量可能需要几分钟。",
+      "description": "您已选中本页全部订单。系统将启动后台任务（最多 2000 个符合筛选的订单），完成后下载 PDF ZIP。",
       "confirm": "是，全部生成"
     }
   },
@@ -132,7 +132,26 @@
     "select_to_export": "请至少选择一个订单进行导出。",
     "export_preview_failed": "无法加载导出预览，请重试。",
     "bulk_generate_failed": "无法生成发票，请重试。",
-    "select_to_bulk_generate": "请至少选择一个订单以生成发票。"
+    "select_to_bulk_generate": "请至少选择一个订单以生成发票。",
+    "bulk_generate_download_failed": "发票已生成，但 ZIP 下载失败。"
+  },
+  "bulk_generate": {
+    "started": "正在为 {{count}} 个订单生成发票…",
+    "completed": "已生成 {{count}} 张发票，正在下载 ZIP…",
+    "panel": {
+      "generating_title": "正在生成发票…",
+      "downloading_title": "正在下载 ZIP…",
+      "completed_title": "发票已就绪",
+      "failed_title": "生成失败",
+      "download_failed_title": "下载失败",
+      "progress_detail": "已处理 {{processed}} / {{total}} 个订单",
+      "completed_detail": "已生成 {{count}} 张发票",
+      "percent": "{{percent}}%",
+      "minimize": "最小化",
+      "expand": "展开",
+      "dismiss": "关闭",
+      "retry_download": "重试下载"
+    }
   },
   "export": {
     "preview_title": "Excel 导出预览",
