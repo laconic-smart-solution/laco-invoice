@@ -1,14 +1,23 @@
 {
   "title": "ภาพรวมธุรกิจ",
   "subtitle": "ประสิทธิภาพแบบเรียลไทม์จากทุกช่องทางมาร์เก็ตเพลส",
+  "subtitle_hongta": "คลิกตัวเลขเพื่อเปิดรายการที่เกี่ยวข้อง",
   "actions": {
     "sync_all_stores": "ซิงก์ร้านค้าทั้งหมด",
     "bulk_invoices": "ออกใบแจ้งหนี้แบบกลุ่ม"
   },
   "stats": {
     "total_revenue": "รายได้รวม",
+    "total_billed": "ยอดวางบิลรวม",
     "total_orders": "คำสั่งซื้อทั้งหมด",
+    "awaiting_invoice": "รอออกใบแจ้งหนี้",
     "invoices_issued": "ใบแจ้งหนี้ที่ออกแล้ว",
+    "stores": "ร้านค้า",
+    "products": "สินค้า",
+    "customers": "ลูกค้า",
+    "users": "ผู้ใช้",
+    "hint_click": "เปิดรายการ",
+    "invoice_coverage": "ความครอบคลุม {{percent}}% · ออกแล้ว {{invoiced}}",
     "last_sync": "ซิงก์ล่าสุด: {{time}} จาก {{count}} ช่องทาง",
     "synced_count": "ซิงก์แล้ว {{count}}",
     "pending_count": "รอดำเนินการ {{count}}",
@@ -19,7 +28,7 @@
     "invoices_of_total": "{{issued}} จาก {{total}}"
   },
   "recent_orders": {
-    "title": "คำสั่งซื้อ TikTok Shop ล่าสุด",
+    "title": "คำสั่งซื้อล่าสุด",
     "view_all": "ดูคำสั่งซื้อทั้งหมด",
     "empty": "ไม่พบคำสั่งซื้อ",
     "columns": {
@@ -45,9 +54,11 @@
   "marketplaces": {
     "title": "มาร์เก็ตเพลสที่ใช้งาน",
     "connect_channel": "เชื่อมต่อช่องทาง",
-    "tiktok": "TikTok Shop",
-    "shopify": "Shopify",
-    "amazon": "Amazon"
+    "channels": {
+      "lazada": "Lazada",
+      "shopee": "Shopee",
+      "tiktok": "TikTok Shop"
+    }
   },
   "promo": {
     "title": "เพิ่มประสิทธิภาพกระแสเงินสด",

@@ -15,6 +15,7 @@ interface StatCardProps {
   }
   children?: ReactNode
   className?: string
+  onClick?: () => void
 }
 
 export function StatCard({
@@ -26,14 +27,10 @@ export function StatCard({
   trend,
   children,
   className,
+  onClick,
 }: StatCardProps) {
-  return (
-    <div
-      className={cn(
-        "flex flex-col gap-4 border border-border bg-card p-5 shadow-sm",
-        className
-      )}
-    >
+  const content = (
+    <>
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1">
           <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
@@ -69,6 +66,23 @@ export function StatCard({
       {footer ? (
         <p className="text-xs text-muted-foreground">{footer}</p>
       ) : null}
-    </div>
+    </>
   )
+
+  const cardClassName = cn(
+    "flex flex-col gap-4 border border-border bg-card p-5 text-left shadow-sm",
+    onClick &&
+      "cursor-pointer transition-colors hover:border-primary/40 hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+    className
+  )
+
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className={cardClassName}>
+        {content}
+      </button>
+    )
+  }
+
+  return <div className={cardClassName}>{content}</div>
 }

@@ -21,10 +21,11 @@ export const adminUserKeys = {
   ) => [...adminUserKeys.all, "export-preview", request] as const,
 }
 
-export function useUsersPageQuery(request: UserPageRequest) {
+export function useUsersPageQuery(request: UserPageRequest, enabled = true) {
   return useQuery({
     queryKey: adminUserKeys.list(request),
     queryFn: () => adminUserService.pageUsers(request),
+    enabled,
   })
 }
 

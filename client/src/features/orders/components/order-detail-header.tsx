@@ -32,6 +32,7 @@ interface OrderDetailHeaderProps {
   isGenerating?: boolean
   onSync?: () => void
   isSyncing?: boolean
+  variant?: "page" | "sheet"
 }
 
 export function OrderDetailHeader({
@@ -41,8 +42,10 @@ export function OrderDetailHeader({
   isGenerating = false,
   onSync,
   isSyncing = false,
+  variant = "page",
 }: OrderDetailHeaderProps) {
   const { t } = useTranslation("orders")
+  const isSheet = variant === "sheet"
 
   const orderDateLabel = (() => {
     if (!order.orderDate) {
@@ -56,10 +59,16 @@ export function OrderDetailHeader({
   })()
 
   return (
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-      <div className="space-y-2">
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="font-heading text-2xl font-semibold tracking-tight">
+    <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="min-w-0 space-y-2">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <h1
+            className={
+              isSheet
+                ? "font-heading text-lg font-semibold tracking-tight break-all"
+                : "font-heading text-2xl font-semibold tracking-tight"
+            }
+          >
             {order.orderId}
           </h1>
           <StatusBadge
@@ -74,7 +83,7 @@ export function OrderDetailHeader({
             ).toUpperCase()}
           />
         </div>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground break-words">
           {t("detail.placed_on", {
             date: orderDateLabel,
           })}
@@ -83,9 +92,10 @@ export function OrderDetailHeader({
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex shrink-0 flex-wrap items-center gap-2">
         <Button
           variant="outline"
+          size={isSheet ? "sm" : "default"}
           className="border-primary text-primary"
           onClick={onSync}
           disabled={isSyncing || !onSync}
@@ -97,14 +107,18 @@ export function OrderDetailHeader({
           {t("actions.sync_orders")}
         </Button>
         {order.invoiceId ? (
-          <Button variant="outline" asChild>
+          <Button variant="outline" size={isSheet ? "sm" : "default"} asChild>
             <Link to={ROUTES.dashboard.invoiceDetail(order.invoiceId)}>
               <FileText data-icon="inline-start" />
               {t("detail.view_invoice")}
             </Link>
           </Button>
         ) : (
-          <Button onClick={onGenerate} disabled={isGenerating}>
+          <Button
+            size={isSheet ? "sm" : "default"}
+            onClick={onGenerate}
+            disabled={isGenerating}
+          >
             <Zap data-icon="inline-start" />
             {t("table.actions.generate")}
           </Button>

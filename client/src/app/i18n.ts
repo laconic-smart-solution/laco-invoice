@@ -3,6 +3,7 @@ import { initReactI18next } from "react-i18next"
 
 import enAuth from "@/locales/en/auth.json"
 import enBreadcrumb from "@/locales/en/breadcrumb.json"
+import enClassic from "@/locales/en/classic.json"
 import enCommon from "@/locales/en/common.json"
 import enDashboard from "@/locales/en/dashboard.json"
 import enCustomers from "@/locales/en/customers.json"
@@ -18,6 +19,7 @@ import enShortcuts from "@/locales/en/shortcuts.json"
 import enSidebar from "@/locales/en/sidebar.json"
 import myAuth from "@/locales/my/auth.json"
 import myBreadcrumb from "@/locales/my/breadcrumb.json"
+import myClassic from "@/locales/my/classic.json"
 import myCommon from "@/locales/my/common.json"
 import myDashboard from "@/locales/my/dashboard.json"
 import myCustomers from "@/locales/my/customers.json"
@@ -33,6 +35,7 @@ import myShortcuts from "@/locales/my/shortcuts.json"
 import mySidebar from "@/locales/my/sidebar.json"
 import thAuth from "@/locales/th/auth.json"
 import thBreadcrumb from "@/locales/th/breadcrumb.json"
+import thClassic from "@/locales/th/classic.json"
 import thCommon from "@/locales/th/common.json"
 import thDashboard from "@/locales/th/dashboard.json"
 import thCustomers from "@/locales/th/customers.json"
@@ -48,6 +51,7 @@ import thShortcuts from "@/locales/th/shortcuts.json"
 import thSidebar from "@/locales/th/sidebar.json"
 import zhAuth from "@/locales/zh/auth.json"
 import zhBreadcrumb from "@/locales/zh/breadcrumb.json"
+import zhClassic from "@/locales/zh/classic.json"
 import zhCommon from "@/locales/zh/common.json"
 import zhDashboard from "@/locales/zh/dashboard.json"
 import zhCustomers from "@/locales/zh/customers.json"
@@ -72,6 +76,7 @@ void i18n.use(initReactI18next).init({
       common: enCommon,
       auth: enAuth,
       breadcrumb: enBreadcrumb,
+      classic: enClassic,
       sidebar: enSidebar,
       navbar: enNavbar,
       dashboard: enDashboard,
@@ -89,6 +94,7 @@ void i18n.use(initReactI18next).init({
       common: thCommon,
       auth: thAuth,
       breadcrumb: thBreadcrumb,
+      classic: thClassic,
       sidebar: thSidebar,
       navbar: thNavbar,
       dashboard: thDashboard,
@@ -106,6 +112,7 @@ void i18n.use(initReactI18next).init({
       common: zhCommon,
       auth: zhAuth,
       breadcrumb: zhBreadcrumb,
+      classic: zhClassic,
       sidebar: zhSidebar,
       navbar: zhNavbar,
       dashboard: zhDashboard,
@@ -123,6 +130,7 @@ void i18n.use(initReactI18next).init({
       common: myCommon,
       auth: myAuth,
       breadcrumb: myBreadcrumb,
+      classic: myClassic,
       sidebar: mySidebar,
       navbar: myNavbar,
       dashboard: myDashboard,

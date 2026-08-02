@@ -12,7 +12,9 @@ export function DashboardHeader() {
         <h1 className="font-heading text-2xl font-semibold tracking-tight">
           {t("title")}
         </h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {t("subtitle_hongta")}
+        </p>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">

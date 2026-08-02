@@ -1,14 +1,23 @@
 {
   "title": "Business Overview",
   "subtitle": "Real-time performance across all marketplace channels.",
+  "subtitle_hongta": "Click a count to open the matching list",
   "actions": {
     "sync_all_stores": "Sync All Stores",
     "bulk_invoices": "Bulk Invoices"
   },
   "stats": {
     "total_revenue": "Total Revenue",
+    "total_billed": "Total billed",
     "total_orders": "Total Orders",
+    "awaiting_invoice": "Awaiting invoice",
     "invoices_issued": "Invoices Issued",
+    "stores": "Stores",
+    "products": "Products",
+    "customers": "Customers",
+    "users": "Users",
+    "hint_click": "Open list",
+    "invoice_coverage": "{{percent}}% coverage · {{invoiced}} invoiced",
     "last_sync": "Last sync: {{time}} from {{count}} channels.",
     "synced_count": "{{count}} SYNCED",
     "pending_count": "{{count}} PENDING",
@@ -19,7 +28,7 @@
     "invoices_of_total": "{{issued}} OF {{total}}"
   },
   "recent_orders": {
-    "title": "Recent TikTok Shop Orders",
+    "title": "Recent orders",
     "view_all": "View All Orders",
     "empty": "No orders found.",
     "columns": {

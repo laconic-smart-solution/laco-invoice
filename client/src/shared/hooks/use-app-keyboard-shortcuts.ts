@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
 import { useShortcutActionsStore } from "@/shared/stores/shortcut-actions-store"
+import { useUiModeStore } from "@/shared/stores/ui-mode-store"
 
 const GO_CHORD_TIMEOUT_MS = 1000
 const SHORTCUT_SEARCH_SELECTOR = "[data-shortcut-search]"
@@ -52,6 +53,8 @@ function focusShortcutSearch() {
 
 /**
  * App-wide dashboard shortcuts:
+ * - Ctrl/⌘+Shift+M modern UI shell (Ctrl+N is reserved by the browser)
+ * - Ctrl/⌘+Shift+O classic (Hongta-style top-nav) shell
  * - `?` open shortcuts page
  * - `g` then letter: navigate (h/o/p/i/c/s/u/k)
  * - `/` focus list search
@@ -77,13 +80,33 @@ export function useAppKeyboardShortcuts() {
         return
       }
 
-      // Sidebar uses Ctrl/Cmd+B; leave other modified shortcuts alone.
-      if (event.metaKey || event.ctrlKey || event.altKey) {
+      const key = event.key
+      const lower = key.length === 1 ? key.toLowerCase() : key
+      const hasMod = event.metaKey || event.ctrlKey
+
+      // UI shell toggle — use Shift so we don't fight browser New Window / Open File.
+      if (
+        hasMod &&
+        event.shiftKey &&
+        !event.altKey &&
+        (lower === "m" || lower === "o")
+      ) {
+        if (isEditableTarget(event.target)) {
+          return
+        }
+        event.preventDefault()
+        if (lower === "m") {
+          useUiModeStore.getState().setModern()
+        } else {
+          useUiModeStore.getState().setClassic()
+        }
         return
       }
 
-      const key = event.key
-      const lower = key.length === 1 ? key.toLowerCase() : key
+      // Sidebar uses Ctrl/Cmd+B; leave other modified shortcuts alone.
+      if (hasMod || event.altKey) {
+        return
+      }
 
       if (goPendingRef.current) {
         clearGoPending()

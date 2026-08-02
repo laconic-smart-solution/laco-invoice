@@ -21,6 +21,18 @@ export const APP_SHORTCUTS: AppShortcut[] = [
     descriptionKey: "items.toggle_sidebar",
   },
   {
+    id: "ui-modern",
+    keys: ["Ctrl", "Shift", "M"],
+    macKeys: ["⌘", "Shift", "M"],
+    descriptionKey: "items.ui_modern",
+  },
+  {
+    id: "ui-classic",
+    keys: ["Ctrl", "Shift", "O"],
+    macKeys: ["⌘", "Shift", "O"],
+    descriptionKey: "items.ui_classic",
+  },
+  {
     id: "open-shortcuts",
     keys: ["?"],
     descriptionKey: "items.open_shortcuts",

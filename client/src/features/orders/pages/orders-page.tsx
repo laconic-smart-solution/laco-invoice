@@ -5,6 +5,8 @@ import type { ColumnFiltersState, SortingState } from "@tanstack/react-table"
 import { ConfirmDialog } from "@/components/common/confirm-dialog"
 import { EMPTY_TABLE_SELECTION } from "@/components/common/data-table/types"
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
+import { useIsClassicEmbed } from "@/features/classic-spa/classic-embed-context"
+import { useClassicWorkspaceStore } from "@/shared/stores/classic-workspace-store"
 import { OrderExportPreviewDialog } from "@/features/orders/components/order-export-preview-dialog"
 import { OrderImportDialog } from "@/features/orders/components/order-import-dialog"
 import { OrdersFilters } from "@/features/orders/components/orders-filters"
@@ -57,6 +59,13 @@ const STORES_LIST_REQUEST = {
 
 export function OrdersPage() {
   const { t } = useTranslation("orders")
+  const isClassic = useIsClassicEmbed()
+  const awaitingInvoiceFocus = useClassicWorkspaceStore(
+    (state) => state.panelFilter.ordersAwaitingInvoice === true
+  )
+  const clearPanelFilter = useClassicWorkspaceStore(
+    (state) => state.clearPanelFilter
+  )
   const { page, limit, setPage, setLimit } = usePagination()
   const [filters, setFilters] = useState<OrderFiltersState>(DEFAULT_ORDER_FILTERS)
   const [isImportOpen, setIsImportOpen] = useState(false)
@@ -303,6 +312,21 @@ export function OrdersPage() {
         onChange={handleFiltersChange}
         disabled={storesLoading}
       />
+      {isClassic && awaitingInvoiceFocus ? (
+        <div className="flex items-center justify-between gap-2 border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+          <span>
+            {t("stats.awaiting_invoice")}:{" "}
+            {stats?.awaitingInvoice ?? 0}
+          </span>
+          <button
+            type="button"
+            className="font-medium text-foreground underline-offset-2 hover:underline"
+            onClick={() => clearPanelFilter()}
+          >
+            {t("filters.status_all")}
+          </button>
+        </div>
+      ) : null}
       <OrdersStatCards
         stats={
           stats ?? {

@@ -3,9 +3,14 @@
   "subtitle": "အကွက်ထဲတွင် မရိုက်နေသည့်အခါ အက်ပ်အတွင်း ဤခလုတ်များကို သုံးနိုင်သည်။",
   "note": "Input၊ textarea သို့မဟုတ် select တွင် အာရုံစိုက်နေစဉ် shortcut များ အလုပ်မလုပ်ပါ။ G ကို နှိပ်ပြီး တစ်စက္ကန့်အတွင်း နောက်ခလုတ်ဖြင့် သွားနိုင်သည်။",
   "chord_then": "ပြီးမှ",
+  "classic_shell": {
+    "hint": "Classic top-nav layout · Ctrl+Shift+M modern · Ctrl+Shift+O classic"
+  },
   "items": {
     "toggle_theme": "Dark / light mode ပြောင်းရန်",
     "toggle_sidebar": "Sidebar ချုံ့/ချဲ့ရန်",
+    "ui_modern": "Modern UI သို့ ပြောင်းရန် (sidebar layout)",
+    "ui_classic": "Classic UI သို့ ပြောင်းရန် (Hongta-style top nav)",
     "open_shortcuts": "ဤ shortcuts စာမျက်နှာကို ဖွင့်ရန်",
     "focus_search": "စာရင်း ရှာရန် အကွက်ကို အာရုံစိုက်ရန်",
     "export": "လက်ရှိ စာရင်းကို Export လုပ်ရန် (Excel)",

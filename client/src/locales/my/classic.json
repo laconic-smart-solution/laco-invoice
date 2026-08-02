@@ -1,0 +1,49 @@
+{
+  "panels": {
+    "overview": "Overview",
+    "orders": "Orders",
+    "products": "Products",
+    "stores": "Stores",
+    "invoices": "Invoices",
+    "customers": "Customers",
+    "users": "Users"
+  },
+  "overview": {
+    "title": "Control tower",
+    "subtitle": "Count ကို နှိပ်ပြီး ဆက်စပ်စာရင်းကို ဖွင့်ပါ။ Chrome မပြောင်းဘဲ table သာ ပြောင်းသည်။",
+    "stats": {
+      "orders": "Orders",
+      "awaiting_invoice": "Awaiting invoice",
+      "invoices": "Invoices issued",
+      "stores": "Stores",
+      "products": "Products",
+      "customers": "Customers",
+      "users": "Users"
+    },
+    "hint_click": "စာရင်းဖွင့်ရန်"
+  },
+  "toolbar": {
+    "setup_store": "Store setup",
+    "add_store": "Store ထည့်ရန်"
+  },
+  "setup": {
+    "store_title": "Store setup",
+    "store_description": "ဤစာမျက်နှာမှ မထွက်ဘဲ store ဖန်တီးနိုင်သည်။",
+    "customer_title": "Customer ထည့်ရန်",
+    "customer_description": "ဤစာမျက်နှာမှ မထွက်ဘဲ customer ဖန်တီးနိုင်သည်။"
+  },
+  "detail": {
+    "order": "Order detail",
+    "product": "Product detail",
+    "store": "Store detail",
+    "invoice": "Invoice detail",
+    "customer": "Customer",
+    "user": "User detail",
+    "close": "ပိတ်ရန်"
+  },
+  "empty_stores": {
+    "title": "Store မရှိသေးပါ",
+    "description": "Orders နှင့် products sync လုပ်ရန် store setup လုပ်ပါ။",
+    "action": "Store setup"
+  }
+}

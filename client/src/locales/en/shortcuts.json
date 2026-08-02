@@ -3,9 +3,14 @@
   "subtitle": "Use these keys anywhere in the app when you are not typing in a field.",
   "note": "Shortcuts are ignored while focus is in an input, textarea, or select. Press G then another key within one second to navigate.",
   "chord_then": "then",
+  "classic_shell": {
+    "hint": "Classic top-nav layout · Ctrl+Shift+M modern · Ctrl+Shift+O classic"
+  },
   "items": {
     "toggle_theme": "Toggle dark / light mode",
     "toggle_sidebar": "Collapse or expand the sidebar",
+    "ui_modern": "Switch to modern UI (sidebar layout)",
+    "ui_classic": "Switch to classic UI (Hongta-style top nav)",
     "open_shortcuts": "Open this shortcuts page",
     "focus_search": "Focus the list search box",
     "export": "Export the current list (Excel)",

@@ -4,6 +4,7 @@ import { Link } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
 import { Button } from "@/components/ui/button"
+import { useIsClassicEmbed } from "@/features/classic-spa/classic-embed-context"
 import { cn } from "@/lib/utils"
 
 interface CustomersHeaderProps {
@@ -22,6 +23,47 @@ export function CustomersHeader({
   onExportCsv,
 }: CustomersHeaderProps) {
   const { t } = useTranslation("customers")
+  const isClassic = useIsClassicEmbed()
+
+  const actions = (
+    <div className="flex flex-wrap items-center gap-2">
+      <Button
+        variant="outline"
+        size={isClassic ? "sm" : "default"}
+        className="border-primary text-primary"
+        onClick={onSync}
+        disabled={isSyncing || !onSync}
+      >
+        <RefreshCw
+          data-icon="inline-start"
+          className={isSyncing ? "animate-spin" : undefined}
+        />
+        {t("actions.sync_customers")}
+      </Button>
+      <Button
+        type="button"
+        variant="outline"
+        size={isClassic ? "sm" : "default"}
+        onClick={onExportCsv}
+        disabled={!onExportCsv}
+      >
+        <Download data-icon="inline-start" />
+        {t("actions.export_csv")}
+      </Button>
+      {!isAdmin ? (
+        <Button size={isClassic ? "sm" : "default"} asChild>
+          <Link to={ROUTES.dashboard.customerCreate}>
+            <Plus data-icon="inline-start" />
+            {t("actions.add_customer")}
+          </Link>
+        </Button>
+      ) : null}
+    </div>
+  )
+
+  if (isClassic) {
+    return actions
+  }
 
   return (
     <div
@@ -38,38 +80,7 @@ export function CustomersHeader({
           {isAdmin ? t("subtitle_admin") : t("subtitle")}
         </p>
       </div>
-
-      <div className="flex flex-wrap items-center gap-2">
-        <Button
-          variant="outline"
-          className="border-primary text-primary"
-          onClick={onSync}
-          disabled={isSyncing || !onSync}
-        >
-          <RefreshCw
-            data-icon="inline-start"
-            className={isSyncing ? "animate-spin" : undefined}
-          />
-          {t("actions.sync_customers")}
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onExportCsv}
-          disabled={!onExportCsv}
-        >
-          <Download data-icon="inline-start" />
-          {t("actions.export_csv")}
-        </Button>
-        {!isAdmin ? (
-          <Button asChild>
-            <Link to={ROUTES.dashboard.customerCreate}>
-              <Plus data-icon="inline-start" />
-              {t("actions.add_customer")}
-            </Link>
-          </Button>
-        ) : null}
-      </div>
+      {actions}
     </div>
   )
 }

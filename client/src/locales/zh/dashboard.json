@@ -1,14 +1,23 @@
 {
   "title": "业务概览",
   "subtitle": "跨所有市场渠道的实时表现。",
+  "subtitle_hongta": "点击数字打开对应列表",
   "actions": {
     "sync_all_stores": "同步所有店铺",
     "bulk_invoices": "批量开票"
   },
   "stats": {
     "total_revenue": "总收入",
+    "total_billed": "已开票总额",
     "total_orders": "总订单",
+    "awaiting_invoice": "待开票",
     "invoices_issued": "已开发票",
+    "stores": "店铺",
+    "products": "商品",
+    "customers": "客户",
+    "users": "用户",
+    "hint_click": "打开列表",
+    "invoice_coverage": "覆盖率 {{percent}}% · 已开票 {{invoiced}}",
     "last_sync": "上次同步：{{time}}，来自 {{count}} 个渠道。",
     "synced_count": "已同步 {{count}}",
     "pending_count": "待处理 {{count}}",
@@ -19,7 +28,7 @@
     "invoices_of_total": "{{issued}} / {{total}}"
   },
   "recent_orders": {
-    "title": "最近 TikTok Shop 订单",
+    "title": "最近订单",
     "view_all": "查看全部订单",
     "empty": "暂无订单。",
     "columns": {
@@ -45,9 +54,11 @@
   "marketplaces": {
     "title": "活跃市场",
     "connect_channel": "连接渠道",
-    "tiktok": "TikTok Shop",
-    "shopify": "Shopify",
-    "amazon": "Amazon"
+    "channels": {
+      "lazada": "Lazada",
+      "shopee": "Shopee",
+      "tiktok": "TikTok Shop"
+    }
   },
   "promo": {
     "title": "优化现金流。",

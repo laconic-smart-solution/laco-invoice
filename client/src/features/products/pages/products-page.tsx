@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useQueryClient } from "@tanstack/react-query"
 import type { ColumnFiltersState, SortingState } from "@tanstack/react-table"
 
 import { ROUTES } from "@/app/constants/routes"
 import { EMPTY_TABLE_SELECTION } from "@/components/common/data-table/types"
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
+import { useIsClassicEmbed } from "@/features/classic-spa/classic-embed-context"
 import { ProductExportPreviewDialog } from "@/features/products/components/product-export-preview-dialog"
 import { ProductsFilters } from "@/features/products/components/products-filters"
 import { ProductsHeader } from "@/features/products/components/products-header"
@@ -56,7 +57,9 @@ const PRODUCT_SORT_FIELD_MAP: Record<string, string> = {
 }
 
 export function ProductsPage() {
-  const { t } = useTranslation("products")
+  const { t } = useTranslation(["products", "classic"])
+  const isClassic = useIsClassicEmbed()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [page, setPage] = useState(DEFAULT_PAGE)
   const [limit, setLimit] = useState(DEFAULT_LIMIT)
@@ -326,10 +329,27 @@ export function ProductsPage() {
         <>
           <AuthFormError message={requestError ?? actionError} />
           <div className="rounded-lg border border-dashed border-border bg-card p-8 text-center">
-            <p className="text-sm text-muted-foreground">{t("empty.no_connections")}</p>
-            <Button asChild className="mt-4">
-              <Link to={ROUTES.dashboard.stores}>{t("empty.go_to_stores")}</Link>
-            </Button>
+            <p className="text-sm text-muted-foreground">
+              {isClassic
+                ? t("classic:empty_stores.description")
+                : t("products:empty.no_connections")}
+            </p>
+            {isClassic ? (
+              <Button
+                className="mt-4"
+                onClick={() => {
+                  void navigate(ROUTES.dashboard.storeCreate, { replace: true })
+                }}
+              >
+                {t("classic:empty_stores.action")}
+              </Button>
+            ) : (
+              <Button asChild className="mt-4">
+                <Link to={ROUTES.dashboard.stores}>
+                  {t("products:empty.go_to_stores")}
+                </Link>
+              </Button>
+            )}
           </div>
         </>
       ) : showNeverSynced ? (
@@ -354,10 +374,10 @@ export function ProductsPage() {
           />
           <AuthFormError message={requestError ?? actionError} />
           <div className="rounded-lg border border-dashed border-border bg-card p-8 text-center">
-            <p className="text-sm text-muted-foreground">{t("empty.never_synced")}</p>
-            <p className="mt-2 text-sm text-muted-foreground">{t("empty.sync_now_prompt")}</p>
+            <p className="text-sm text-muted-foreground">{t("products:empty.never_synced")}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{t("products:empty.sync_now_prompt")}</p>
             <Button className="mt-4" onClick={() => void handleSync()} disabled={isSyncRunning}>
-              {t("actions.sync_now")}
+              {t("products:actions.sync_now")}
             </Button>
           </div>
         </>

@@ -41,18 +41,27 @@ function DetailField({ icon: Icon, label, value, href }: DetailFieldProps) {
 interface OrderDetailInfoProps {
   order: OrderDetail
   locale: Locale
+  variant?: "page" | "sheet"
 }
 
-export function OrderDetailInfo({ order, locale }: OrderDetailInfoProps) {
+export function OrderDetailInfo({
+  order,
+  locale,
+  variant = "page",
+}: OrderDetailInfoProps) {
   const { t } = useTranslation("orders")
+  const isSheet = variant === "sheet"
   const customerHref =
     order.customerId && order.customer !== "—"
       ? ROUTES.dashboard.customerEdit(order.customerId)
       : undefined
+  const sectionPad = isSheet ? "p-3" : "p-5"
 
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
-      <section className="space-y-4 border border-border bg-card p-5 shadow-sm">
+    <div className="grid min-w-0 gap-3 sm:grid-cols-2 sm:gap-4">
+      <section
+        className={`min-w-0 space-y-3 border border-border bg-card shadow-sm ${sectionPad} ${isSheet ? "shadow-none" : ""}`}
+      >
         <h2 className="font-heading text-sm font-semibold">
           {t("detail.sections.order_info")}
         </h2>
@@ -90,7 +99,9 @@ export function OrderDetailInfo({ order, locale }: OrderDetailInfoProps) {
         </div>
       </section>
 
-      <section className="space-y-4 border border-border bg-card p-5 shadow-sm">
+      <section
+        className={`min-w-0 space-y-3 border border-border bg-card shadow-sm ${sectionPad} ${isSheet ? "shadow-none" : ""}`}
+      >
         <h2 className="font-heading text-sm font-semibold">
           {t("detail.sections.customer_info")}
         </h2>
