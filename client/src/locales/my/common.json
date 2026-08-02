@@ -21,6 +21,7 @@
   },
   "table": {
     "open_menu": "မီနူးဖွင့်ရန်",
+    "showing_total": "မှတ်တမ်း {{count}} ခု",
     "column": {
       "search_placeholder": "ရှာဖွေရန်...",
       "search_aria": "{{column}} ကို ရှာရန်",
@@ -33,6 +34,11 @@
       "toggle_columns": "ကော်လံ ပြ/ဖျောက်",
       "reset_columns": "Reset column"
     }
+  },
+  "export_preview": {
+    "column_hint": "ဖျောက်ထားသော ကော်လံများကို Excel ဖိုင်တွင် ထည့်မည် မဟုတ်ပါ။",
+    "download": "Excel ဒေါင်းလုဒ်",
+    "exporting": "ထုတ်နေသည်…"
   },
   "time": {
     "minutes_ago_one": "{{count}} မိနစ်အကြာ",

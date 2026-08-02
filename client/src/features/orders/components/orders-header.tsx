@@ -1,4 +1,4 @@
-import { Download, RefreshCw, Zap } from "lucide-react"
+import { Download, RefreshCw, Upload, Zap } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
@@ -6,10 +6,24 @@ import { Button } from "@/components/ui/button"
 interface OrdersHeaderProps {
   onSync?: () => void
   isSyncing?: boolean
+  onImport?: () => void
+  onExportCsv?: () => void
+  isExporting?: boolean
+  onBulkGenerate?: () => void
+  isBulkGenerating?: boolean
 }
 
-export function OrdersHeader({ onSync, isSyncing = false }: OrdersHeaderProps) {
+export function OrdersHeader({
+  onSync,
+  isSyncing = false,
+  onImport,
+  onExportCsv,
+  isExporting = false,
+  onBulkGenerate,
+  isBulkGenerating = false,
+}: OrdersHeaderProps) {
   const { t } = useTranslation("orders")
+  const busy = isExporting || isBulkGenerating
 
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -22,21 +36,48 @@ export function OrdersHeader({ onSync, isSyncing = false }: OrdersHeaderProps) {
 
       <div className="flex flex-wrap items-center gap-2">
         <Button
+          type="button"
           variant="outline"
           className="border-primary text-primary"
           onClick={onSync}
-          disabled={isSyncing || !onSync}
+          disabled={isSyncing || !onSync || busy}
         >
-          <RefreshCw data-icon="inline-start" className={isSyncing ? "animate-spin" : undefined} />
+          <RefreshCw
+            data-icon="inline-start"
+            className={isSyncing ? "animate-spin" : undefined}
+          />
           {t("actions.sync_orders")}
         </Button>
-        <Button variant="outline">
-          <Download data-icon="inline-start" />
-          {t("actions.export_csv")}
+        <Button
+          type="button"
+          variant="outline"
+          className="border-primary text-primary"
+          onClick={onImport}
+          disabled={!onImport || busy}
+        >
+          <Upload data-icon="inline-start" />
+          {t("actions.import_excel")}
         </Button>
-        <Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onExportCsv}
+          disabled={busy || !onExportCsv}
+          aria-busy={isExporting}
+        >
+          <Download data-icon="inline-start" />
+          {isExporting ? t("actions.exporting") : t("actions.export_csv")}
+        </Button>
+        <Button
+          type="button"
+          onClick={onBulkGenerate}
+          disabled={busy || !onBulkGenerate}
+          aria-busy={isBulkGenerating}
+        >
           <Zap data-icon="inline-start" />
-          {t("actions.bulk_generate")}
+          {isBulkGenerating
+            ? t("actions.bulk_generating")
+            : t("actions.bulk_generate")}
         </Button>
       </div>
     </div>

@@ -1,8 +1,13 @@
 package com.laconic.lacoinvoice.features.user;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,13 +18,19 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.laconic.lacoinvoice.common.aspect.Loggable;
+import com.laconic.lacoinvoice.common.exception.BusinessRuleException;
 import com.laconic.lacoinvoice.common.exception.ResourceConflictException;
 import com.laconic.lacoinvoice.common.exception.ResourceNotFoundException;
+import com.laconic.lacoinvoice.common.export.ExcelExportWriter;
+import com.laconic.lacoinvoice.common.export.ExportColumnSelector;
+import com.laconic.lacoinvoice.common.export.ExportPreviewPaging;
 import com.laconic.lacoinvoice.common.mapper.BaseMapper;
 import com.laconic.lacoinvoice.common.pagination.PageQuerySupport;
+import com.laconic.lacoinvoice.common.pagination.SpecQuerySupport;
 import com.laconic.lacoinvoice.common.service.BaseServiceImpl;
 import com.laconic.lacoinvoice.common.util.ObjectMapUtils;
 import com.laconic.lacoinvoice.common.web.ApiResponse;
+import com.laconic.lacoinvoice.common.web.PageMeta;
 import com.laconic.lacoinvoice.config.SsoProperties;
 import com.laconic.lacoinvoice.domain.models.User;
 import com.laconic.lacoinvoice.domain.repositories.UserRepository;
@@ -36,6 +47,24 @@ import com.laconic.lacoinvoice.integration.sso.dto.LcnSsoUserResponse;
 public class UserServiceImpl extends BaseServiceImpl<User, UserDto, CreateRequest, UpdateRequest> implements UserService {
 
 	private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+	private static final int MAX_EXPORT_ROWS = 10_000;
+	private static final DateTimeFormatter EXPORT_DATE = DateTimeFormatter.BASIC_ISO_DATE;
+
+	private static final LinkedHashMap<String, ExportColumnSelector.ColumnDef<UserDto>> EXPORT_COLUMNS =
+			createExportColumns();
+
+	private static LinkedHashMap<String, ExportColumnSelector.ColumnDef<UserDto>> createExportColumns() {
+		LinkedHashMap<String, ExportColumnSelector.ColumnDef<UserDto>> columns = new LinkedHashMap<>();
+		columns.put("id", new ExportColumnSelector.ColumnDef<>("ID", UserDto::getId));
+		columns.put("fullName", new ExportColumnSelector.ColumnDef<>("Full Name", UserDto::getFullName));
+		columns.put("email", new ExportColumnSelector.ColumnDef<>("Email", UserDto::getEmail));
+		columns.put("role", new ExportColumnSelector.ColumnDef<>("Role", dto ->
+				dto.getRole() != null ? dto.getRole().name() : null));
+		columns.put("active", new ExportColumnSelector.ColumnDef<>("Active", UserDto::isActive));
+		columns.put("authServerUserId", new ExportColumnSelector.ColumnDef<>("Auth Server User ID", UserDto::getAuthServerUserId));
+		columns.put("createdAt", new ExportColumnSelector.ColumnDef<>("Created At", UserDto::getCreatedAt));
+		return columns;
+	}
 
 	private final UserRepository repository;
 	private final UserMapper mapper;
@@ -155,6 +184,111 @@ public class UserServiceImpl extends BaseServiceImpl<User, UserDto, CreateReques
 				User.class,
 				ObjectMapUtils.toMap(request.getFilter()),
 				null);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	@PreAuthorize("@authz.isAdmin()")
+	public byte[] exportExcel(UserExportRequest request) {
+		List<UserDto> users = resolveUsersForExport(request);
+		if (users.isEmpty()) {
+			throw new BusinessRuleException("No users found to export.");
+		}
+
+		ExportColumnSelector.SelectedColumns<UserDto> columns =
+				ExportColumnSelector.select(EXPORT_COLUMNS, request.getColumns());
+		return ExcelExportWriter.write(
+				"Users",
+				columns.headers(),
+				ExportColumnSelector.mapRows(columns, users));
+	}
+
+	@Override
+	@PreAuthorize("@authz.isAdmin()")
+	public String exportFilename() {
+		return "users-export-" + LocalDate.now().format(EXPORT_DATE) + ".xlsx";
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	@PreAuthorize("@authz.isAdmin()")
+	public ApiResponse<List<UserDto>> exportPreview(UserExportRequest request) {
+		int pageNumber = request.getPageNumber() != null ? request.getPageNumber() : 1;
+		int pageSize = request.getPageSize() != null ? request.getPageSize() : 10;
+
+		List<Long> allIds = resolveUserIdsForExport(request);
+		if (allIds.isEmpty()) {
+			return ExportPreviewPaging.empty(pageNumber, pageSize);
+		}
+
+		List<Long> pageIds = ExportPreviewPaging.pageIds(allIds, pageNumber, pageSize);
+		if (pageIds.isEmpty()) {
+			return ApiResponse.ok("OK", List.of(), ExportPreviewPaging.meta(pageNumber, pageSize, allIds.size()));
+		}
+
+		List<User> entities = repository.findAllById(pageIds);
+		Map<Long, User> byId = entities.stream()
+				.filter(user -> user.getId() != null)
+				.collect(Collectors.toMap(User::getId, user -> user, (a, b) -> a));
+
+		List<UserDto> ordered = pageIds.stream()
+				.map(byId::get)
+				.filter(Objects::nonNull)
+				.map(mapper::toDto)
+				.toList();
+		PageMeta meta = ExportPreviewPaging.meta(pageNumber, pageSize, allIds.size());
+		return ApiResponse.ok("OK", ordered, meta);
+	}
+
+	private List<UserDto> resolveUsersForExport(UserExportRequest request) {
+		List<Long> userIds = resolveUserIdsForExport(request);
+		if (userIds.isEmpty()) {
+			return List.of();
+		}
+
+		List<User> entities = repository.findAllById(userIds);
+		Map<Long, User> byId = entities.stream()
+				.filter(user -> user.getId() != null)
+				.collect(Collectors.toMap(User::getId, user -> user, (a, b) -> a));
+
+		return userIds.stream()
+				.map(byId::get)
+				.filter(Objects::nonNull)
+				.map(mapper::toDto)
+				.toList();
+	}
+
+	private List<Long> resolveUserIdsForExport(UserExportRequest request) {
+		if (request == null) {
+			throw new BusinessRuleException("Export request is required.");
+		}
+
+		List<Long> ids = request.getIds() == null
+				? List.of()
+				: request.getIds().stream().filter(Objects::nonNull).distinct().toList();
+
+		if (!ids.isEmpty()) {
+			if (ids.size() > MAX_EXPORT_ROWS) {
+				throw new BusinessRuleException(
+						"Export is limited to " + MAX_EXPORT_ROWS + " users. Narrow your selection.");
+			}
+			return ids;
+		}
+
+		if (request.isExportAll()) {
+			return SpecQuerySupport.findAllWithMap(
+					repository,
+					User.class,
+					ObjectMapUtils.toMap(request.getFilter()),
+					MAX_EXPORT_ROWS,
+					"Export is limited to " + MAX_EXPORT_ROWS + " users. Apply filters to reduce the set.")
+					.stream()
+					.map(User::getId)
+					.filter(Objects::nonNull)
+					.toList();
+		}
+
+		throw new BusinessRuleException("Select users to export, or confirm export all.");
 	}
 
 	@Override

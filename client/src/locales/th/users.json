@@ -2,7 +2,8 @@
   "title": "จัดการผู้ใช้",
   "subtitle": "ดูและจัดการบัญชีผู้ใช้ทั้งหมดในระบบ",
   "actions": {
-    "add_user": "เพิ่มผู้ใช้"
+    "add_user": "เพิ่มผู้ใช้",
+    "export_csv": "ส่งออก CSV"
   },
   "stats": {
     "total_users": "ผู้ใช้ทั้งหมด"
@@ -65,7 +66,22 @@
   "errors": {
     "load_failed": "ไม่สามารถโหลดรายชื่อผู้ใช้ได้ กรุณาลองอีกครั้ง",
     "save_failed": "ไม่สามารถสร้างผู้ใช้ได้ กรุณาลองอีกครั้ง",
-    "verify_otp_failed": "ไม่สามารถยืนยัน OTP ได้ กรุณาลองอีกครั้ง"
+    "verify_otp_failed": "ไม่สามารถยืนยัน OTP ได้ กรุณาลองอีกครั้ง",
+    "export_failed": "ส่งออกผู้ใช้ไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "select_to_export": "เลือกอย่างน้อยหนึ่งผู้ใช้เพื่อส่งออก",
+    "export_preview_failed": "โหลดตัวอย่างการส่งออกไม่สำเร็จ กรุณาลองอีกครั้ง"
+  },
+  "export": {
+    "preview_title": "ตัวอย่างการส่งออก Excel",
+    "preview_description": "ตรวจสอบแถวและเลือกคอลัมน์ที่ต้องการใส่ในไฟล์",
+    "preview_loading": "กำลังโหลดตัวอย่าง…",
+    "preview_loading_more": "กำลังโหลดเพิ่ม…",
+    "preview_empty": "ไม่มีผู้ใช้ให้ส่งออก",
+    "preview_end": "ถึงท้ายรายการตัวอย่างแล้ว",
+    "columns": {
+      "email": "อีเมล",
+      "auth_server_user_id": "รหัสผู้ใช้ใน Auth Server"
+    }
   },
   "verify_otp": {
     "confirm_title": "ทำเครื่องหมาย OTP ว่ายืนยันแล้ว?",
@@ -76,6 +92,10 @@
   "table": {
     "empty": "ไม่พบผู้ใช้",
     "loading": "กำลังโหลดผู้ใช้...",
+    "select_all": "เลือกทั้งหมด",
+    "select_row": "เลือกแถว",
+    "selected_count_one": "เลือก {{count}} ผู้ใช้",
+    "selected_count_other": "เลือก {{count}} ผู้ใช้",
     "showing": "แสดง {{start}}-{{end}} จาก {{total}} ผู้ใช้",
     "columns": {
       "id": "รหัส",

@@ -6,6 +6,7 @@ import type { ColumnFiltersState, SortingState } from "@tanstack/react-table"
 
 import { ROUTES } from "@/app/constants/routes"
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
+import { ProductExportPreviewDialog } from "@/features/products/components/product-export-preview-dialog"
 import { ProductsFilters } from "@/features/products/components/products-filters"
 import { ProductsHeader } from "@/features/products/components/products-header"
 import { ProductsStatCards } from "@/features/products/components/products-stat-cards"
@@ -14,6 +15,7 @@ import type { ProductFiltersState } from "@/features/products/types/product"
 import { Button } from "@/components/ui/button"
 import { DEFAULT_LIMIT, DEFAULT_PAGE, getPaginationMeta } from "@/shared/hooks/use-pagination"
 import { useDebounce } from "@/shared/hooks/use-debounce"
+import { useExportSelection } from "@/shared/hooks/use-export-selection"
 import {
   marketplaceProductKeys,
   useMarketplaceProductSourcesQuery,
@@ -22,19 +24,25 @@ import {
   useMarketplaceProductsPageQuery,
   useStartMarketplaceProductSyncMutation,
 } from "@/shared/queries/marketplace-product.query"
-import {
-  parseProductSourceKey,
-} from "@/shared/services/marketplace-product.service"
+import { useStoresPageQuery } from "@/shared/queries/store.query"
+import type { MarketplaceProductExportRequest } from "@/shared/services/marketplace-product.service"
 import { useMarketplaceProductSyncSubscription } from "@/shared/hooks/use-marketplace-product-sync-subscription"
 import { getFirstColumnFilterValue } from "@/util/table-column-filters"
 import { sortingToPageSort } from "@/util/table-sort"
 
 const DEFAULT_FILTERS: ProductFiltersState = {
-  sourceKey: "",
+  storeId: "",
   search: "",
   erpStatus: "all",
   priceMin: "",
   priceMax: "",
+}
+
+const STORES_LIST_REQUEST = {
+  pageNumber: 1,
+  pageSize: 500,
+  sortBy: "name",
+  sortOrder: "ASC" as const,
 }
 
 const PRODUCT_SORT_FIELD_MAP: Record<string, string> = {
@@ -57,29 +65,33 @@ export function ProductsPage() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
   const [activeSyncRunId, setActiveSyncRunId] = useState<number | null>(null)
   const [syncMessage, setSyncMessage] = useState<string | null>(null)
+  const [exportPreviewOpen, setExportPreviewOpen] = useState(false)
+  const [exportScope, setExportScope] = useState<
+    Omit<MarketplaceProductExportRequest, "pageNumber" | "pageSize" | "columns">
+  >({ exportAll: false })
 
   const {
-    data: sources = [],
-    isLoading: sourcesLoading,
-    error: sourcesError,
-  } = useMarketplaceProductSourcesQuery()
+    data: storesResponse,
+    isLoading: storesLoading,
+    error: storesError,
+  } = useStoresPageQuery(STORES_LIST_REQUEST)
+  const stores = Array.isArray(storesResponse?.data) ? storesResponse.data : []
 
-  const isAllSources = !filters.sourceKey
-  const selectedSourceKey = filters.sourceKey || "all"
+  const { data: sources = [], error: sourcesError } = useMarketplaceProductSourcesQuery()
 
-  const activeSource = useMemo(
-    () =>
-      sources.find((source) => {
-        const key = `${source.storeId}:${source.marketplaceCode}`
-        return key === filters.sourceKey
-      }) ?? null,
-    [filters.sourceKey, sources]
-  )
+  const isAllStores = !filters.storeId
+  const selectedStoreId = filters.storeId
+    ? Number(filters.storeId)
+    : null
 
-  const parsedSource = useMemo(
-    () => (filters.sourceKey ? parseProductSourceKey(filters.sourceKey) : null),
-    [filters.sourceKey]
-  )
+  const storeSources = useMemo(() => {
+    if (selectedStoreId == null || !Number.isFinite(selectedStoreId)) {
+      return []
+    }
+    return sources.filter((source) => source.storeId === selectedStoreId)
+  }, [selectedStoreId, sources])
+
+  const syncTarget = storeSources[0] ?? null
 
   const priceMin = filters.priceMin ? Number.parseFloat(filters.priceMin) : undefined
   const priceMax = filters.priceMax ? Number.parseFloat(filters.priceMax) : undefined
@@ -101,13 +113,10 @@ export function ProductsPage() {
   const resolvedSearch = columnSearch || filters.search.trim()
 
   const pageRequest = useMemo(() => {
-    const filter: NonNullable<
-      import("@/shared/services/marketplace-product.service").MarketplaceProductPageRequest["filter"]
-    > = {}
+    const filter: NonNullable<MarketplaceProductExportRequest["filter"]> = {}
 
-    if (parsedSource) {
-      filter.storeId = parsedSource.storeId
-      filter.marketplaceCode = parsedSource.marketplaceCode
+    if (selectedStoreId != null && Number.isFinite(selectedStoreId) && selectedStoreId > 0) {
+      filter.storeId = selectedStoreId
     }
     if (resolvedSearch) {
       filter.search = resolvedSearch
@@ -133,33 +142,29 @@ export function ProductsPage() {
     limit,
     page,
     pageSort,
-    parsedSource,
     resolvedPriceMax,
     resolvedPriceMin,
     resolvedSearch,
+    selectedStoreId,
   ])
+
+  const exportFilter = pageRequest.filter
 
   const {
     data: productPage,
     isLoading: productsLoading,
     error: productsError,
-  } = useMarketplaceProductsPageQuery(pageRequest, sources.length > 0)
+  } = useMarketplaceProductsPageQuery(pageRequest, !storesLoading)
 
   const statsParams = useMemo(
     () =>
-      parsedSource
-        ? {
-            storeId: parsedSource.storeId,
-            marketplaceCode: parsedSource.marketplaceCode,
-          }
+      selectedStoreId != null && Number.isFinite(selectedStoreId) && selectedStoreId > 0
+        ? { storeId: selectedStoreId }
         : {},
-    [parsedSource]
+    [selectedStoreId]
   )
 
-  const { data: stats } = useMarketplaceProductStatsQuery(
-    statsParams,
-    sources.length > 0
-  )
+  const { data: stats } = useMarketplaceProductStatsQuery(statsParams, !storesLoading)
 
   const startSyncMutation = useStartMarketplaceProductSyncMutation()
 
@@ -176,7 +181,7 @@ export function ProductsPage() {
   const isSyncRunning =
     startSyncMutation.isPending ||
     syncRun?.status === "RUNNING" ||
-    activeSource?.syncStatus === "RUNNING"
+    storeSources.some((source) => source.syncStatus === "RUNNING")
 
   useEffect(() => {
     if (!syncRun) {
@@ -193,14 +198,14 @@ export function ProductsPage() {
   }, [queryClient, syncRun, t])
 
   const handleSync = useCallback(async () => {
-    if (!parsedSource || isSyncRunning) {
+    if (!syncTarget || isSyncRunning) {
       return
     }
     setSyncMessage(null)
     try {
       const run = await startSyncMutation.mutateAsync({
-        storeId: parsedSource.storeId,
-        marketplaceCode: parsedSource.marketplaceCode,
+        storeId: syncTarget.storeId,
+        marketplaceCode: syncTarget.marketplaceCode,
       })
       if (run?.id) {
         setActiveSyncRunId(run.id)
@@ -208,16 +213,58 @@ export function ProductsPage() {
     } catch {
       setSyncMessage(t("sync.start_failed"))
     }
-  }, [isSyncRunning, parsedSource, startSyncMutation, t])
+  }, [isSyncRunning, startSyncMutation, syncTarget, t])
 
   const products = productPage?.data ?? []
   const totalCount = productPage?.meta?.totalElements ?? 0
   const pagination = getPaginationMeta(page, limit, totalCount)
 
+  const {
+    setSelection,
+    closeConfirm,
+    requestAction,
+    actionError,
+    setActionError,
+  } = useExportSelection({ totalCount })
+
+  const openExportPreview = useCallback(
+    (
+      scope: Omit<
+        MarketplaceProductExportRequest,
+        "pageNumber" | "pageSize" | "columns"
+      >
+    ) => {
+      setExportScope(scope)
+      setExportPreviewOpen(true)
+    },
+    []
+  )
+
+  const handleExportCsv = () => {
+    const result = requestAction("export")
+    if (result.kind === "need_selection") {
+      setActionError(t("errors.select_to_export"))
+      return
+    }
+    if (result.kind === "confirm_all") {
+      openExportPreview({
+        exportAll: true,
+        filter: exportFilter,
+      })
+      closeConfirm()
+      return
+    }
+    if (result.kind === "selected") {
+      openExportPreview({
+        ids: result.ids.map((id) => Number(id)).filter(Number.isFinite),
+      })
+    }
+  }
+
   useEffect(() => {
     setPage(1)
   }, [
-    filters.sourceKey,
+    filters.storeId,
     filters.search,
     filters.erpStatus,
     filters.priceMin,
@@ -226,33 +273,41 @@ export function ProductsPage() {
   ])
 
   const requestError =
-    sourcesError != null
+    storesError != null
       ? t("errors.load_sources_failed")
-      : productsError != null
-        ? t("errors.load_products_failed")
-        : null
+      : sourcesError != null
+        ? t("errors.load_sources_failed")
+        : productsError != null
+          ? t("errors.load_products_failed")
+          : null
 
-  const showEmptyConnections = !sourcesLoading && sources.length === 0
+  const showEmptyStores = !storesLoading && stores.length === 0
   const showNeverSynced =
-    !isAllSources &&
-    !sourcesLoading &&
+    !isAllStores &&
+    !storesLoading &&
     !productsLoading &&
-    activeSource != null &&
-    activeSource.syncStatus == null &&
+    syncTarget != null &&
+    syncTarget.syncStatus == null &&
     totalCount === 0
 
   return (
     <div className="space-y-6 p-6">
       <ProductsHeader
         isSyncing={isSyncRunning}
-        canSync={parsedSource != null && !showEmptyConnections}
+        canSync={syncTarget != null && !showEmptyStores}
         isFiltersOpen={isFiltersOpen}
         onSync={() => void handleSync()}
         onToggleFilters={() => setIsFiltersOpen((open) => !open)}
+        onExportCsv={handleExportCsv}
       />
-      <AuthFormError message={requestError ?? syncMessage} />
+      <ProductExportPreviewDialog
+        open={exportPreviewOpen}
+        onOpenChange={setExportPreviewOpen}
+        scope={exportScope}
+      />
+      <AuthFormError message={requestError ?? syncMessage ?? actionError} />
 
-      {showEmptyConnections ? (
+      {showEmptyStores ? (
         <div className="rounded-lg border border-dashed border-border bg-card p-8 text-center">
           <p className="text-sm text-muted-foreground">{t("empty.no_connections")}</p>
           <Button asChild className="mt-4">
@@ -260,13 +315,24 @@ export function ProductsPage() {
           </Button>
         </div>
       ) : showNeverSynced ? (
-        <div className="rounded-lg border border-dashed border-border bg-card p-8 text-center">
-          <p className="text-sm text-muted-foreground">{t("empty.never_synced")}</p>
-          <p className="mt-2 text-sm text-muted-foreground">{t("empty.sync_now_prompt")}</p>
-          <Button className="mt-4" onClick={() => void handleSync()} disabled={isSyncRunning}>
-            {t("actions.sync_now")}
-          </Button>
-        </div>
+        <>
+          <ProductsFilters
+            stores={stores}
+            value={filters}
+            onChange={(next) => {
+              setFilters(next)
+              setPage(1)
+            }}
+            disabled={storesLoading}
+          />
+          <div className="rounded-lg border border-dashed border-border bg-card p-8 text-center">
+            <p className="text-sm text-muted-foreground">{t("empty.never_synced")}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{t("empty.sync_now_prompt")}</p>
+            <Button className="mt-4" onClick={() => void handleSync()} disabled={isSyncRunning}>
+              {t("actions.sync_now")}
+            </Button>
+          </div>
+        </>
       ) : (
         <>
           <ProductsStatCards
@@ -278,21 +344,19 @@ export function ProductsPage() {
               }
             }
           />
-          {isFiltersOpen ? (
-            <ProductsFilters
-              sources={sources}
-              value={filters}
-              selectedSourceKey={selectedSourceKey}
-              onChange={(next) => {
-                setFilters(next)
-                setPage(1)
-              }}
-              disabled={sourcesLoading}
-            />
-          ) : null}
+          <ProductsFilters
+            stores={stores}
+            value={filters}
+            onChange={(next) => {
+              setFilters(next)
+              setPage(1)
+            }}
+            showAdvanced={isFiltersOpen}
+            disabled={storesLoading}
+          />
           <ProductsTable
             products={products}
-            isLoading={sourcesLoading || productsLoading}
+            isLoading={storesLoading || productsLoading}
             totalCount={totalCount}
             page={pagination.page}
             limit={pagination.limit}
@@ -313,6 +377,7 @@ export function ProductsPage() {
             }}
             columnFilters={columnFilters}
             onColumnFiltersChange={setColumnFilters}
+            onSelectionChange={setSelection}
           />
         </>
       )}

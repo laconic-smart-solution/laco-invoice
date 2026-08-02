@@ -14,7 +14,8 @@ import com.laconic.lacoinvoice.domain.models.Marketplace;
 import com.laconic.lacoinvoice.domain.models.MarketplaceConnectionStatus;
 import com.laconic.lacoinvoice.domain.models.Order;
 import com.laconic.lacoinvoice.domain.models.OrderItem;
-import com.laconic.lacoinvoice.domain.models.OrderStatus;
+import com.laconic.lacoinvoice.domain.models.OrderSourceType;
+import com.laconic.lacoinvoice.features.order.import_.OrderStatusTextMapper;
 import com.laconic.lacoinvoice.domain.models.Product;
 import com.laconic.lacoinvoice.domain.models.Store;
 import com.laconic.lacoinvoice.domain.models.StoreMarketplaceConnection;
@@ -133,10 +134,18 @@ public class OrderSyncService {
 		order.setCustomer(customer);
 		order.setExternalOrderId(payload.externalOrderId());
 		order.setExternalOrderDetailJson(payload.externalOrderDetailJson());
-		order.setOrderStatus(parseStatus(payload.orderStatus()));
+		order.setOrderStatus(OrderStatusTextMapper.parse(payload.orderStatus()));
+		order.setSourceType(OrderSourceType.API);
+		order.setSourceId(null);
 		order.setSubtotal(payload.subtotal());
 		order.setShippingFee(payload.shippingFee());
 		order.setTotalAmount(payload.totalAmount());
+		OrderMoneyCalculator.VatBreakdown vat = OrderMoneyCalculator.fromInclusiveTotal(payload.totalAmount());
+		order.setAmountExVat(vat.amountExVat());
+		order.setVatAmount(vat.vatAmount());
+		if (vat.vatAmount() != null) {
+			order.setTaxes(vat.vatAmount());
+		}
 		order.setCurrency(payload.currency());
 		// Keep an existing order date when the marketplace payload omitted/failed to parse one.
 		if (payload.orderDate() != null) {
@@ -170,6 +179,8 @@ public class OrderSyncService {
 				item.setPrice(itemPayload.price());
 				item.setQuantity(itemPayload.quantity());
 				item.setLineTotal(itemPayload.lineTotal());
+				item.setSourceType(OrderSourceType.API);
+				item.setSourceId(null);
 				orderItemRepository.save(item);
 			}
 		} else if (payload.items() != null && payload.items().isEmpty()) {
@@ -210,28 +221,4 @@ public class OrderSyncService {
 		return new CustomerInfo();
 	}
 
-	private static OrderStatus parseStatus(String raw) {
-		if (!StringUtils.hasText(raw)) {
-			return OrderStatus.PENDING;
-		}
-		// Lazada may return comma-separated statuses, e.g. "shipped,pending".
-		String primary = raw.trim().split(",")[0].trim().toUpperCase().replace(' ', '_');
-		try {
-			return OrderStatus.valueOf(primary);
-		} catch (IllegalArgumentException ex) {
-			return mapLazadaStatusAlias(primary);
-		}
-	}
-
-	private static OrderStatus mapLazadaStatusAlias(String raw) {
-		return switch (raw) {
-			case "READY_TO_SHIP", "PACKED", "REPACKED", "READY_TO_SHIP_PENDING",
-					"AWAITING_SHIPMENT", "AWAITING_COLLECTION", "PARTIALLY_SHIPPING" -> OrderStatus.CONFIRMED;
-			case "SHIPPED", "SHIPPING", "IN_TRANSIT" -> OrderStatus.SHIPPED;
-			case "DELIVERED", "COMPLETED" -> OrderStatus.DELIVERED;
-			case "CANCELED", "CANCELLED", "FAILED", "RETURNED" -> OrderStatus.CANCELLED;
-			case "UNPAID", "PENDING", "PROCESSING" -> OrderStatus.PENDING;
-			default -> OrderStatus.PENDING;
-		};
-	}
 }

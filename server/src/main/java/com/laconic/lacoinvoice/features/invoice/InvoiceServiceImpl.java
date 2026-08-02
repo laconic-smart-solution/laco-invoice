@@ -3,10 +3,15 @@ package com.laconic.lacoinvoice.features.invoice;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -16,8 +21,15 @@ import com.laconic.lacoinvoice.common.aspect.Loggable;
 import com.laconic.lacoinvoice.common.exception.BusinessRuleException;
 import com.laconic.lacoinvoice.common.exception.ResourceConflictException;
 import com.laconic.lacoinvoice.common.exception.ResourceNotFoundException;
+import com.laconic.lacoinvoice.common.export.ExcelExportWriter;
+import com.laconic.lacoinvoice.common.export.ExportColumnSelector;
+import com.laconic.lacoinvoice.common.export.ExportPreviewPaging;
+import com.laconic.lacoinvoice.common.export.ZipExportWriter;
 import com.laconic.lacoinvoice.common.pagination.PageQuerySupport;
+import com.laconic.lacoinvoice.common.pagination.SpecQuerySupport;
+import com.laconic.lacoinvoice.common.util.ObjectMapUtils;
 import com.laconic.lacoinvoice.common.web.ApiResponse;
+import com.laconic.lacoinvoice.common.web.PageMeta;
 import com.laconic.lacoinvoice.domain.models.CustomerInfo;
 import com.laconic.lacoinvoice.domain.models.Invoice;
 import com.laconic.lacoinvoice.domain.models.InvoiceStatus;
@@ -25,12 +37,41 @@ import com.laconic.lacoinvoice.domain.models.Order;
 import com.laconic.lacoinvoice.domain.repositories.InvoiceRepository;
 import com.laconic.lacoinvoice.domain.repositories.OrderRepository;
 import com.laconic.lacoinvoice.features.invoice.pageable.InvoicePageRequest;
+import com.laconic.lacoinvoice.features.order.OrderExportRequest;
 
 @Service
 public class InvoiceServiceImpl implements InvoiceService {
 
 	private static final int DEFAULT_VAT_PERCENTAGE = 7;
+	private static final int MAX_EXPORT_ROWS = 10_000;
+	private static final int MAX_BULK_PDF = 100;
 	private static final DateTimeFormatter INVOICE_MONTH_FORMAT = DateTimeFormatter.ofPattern("yyyyMM");
+	private static final DateTimeFormatter EXPORT_DATE = DateTimeFormatter.BASIC_ISO_DATE;
+	private static final Map<String, String> INVOICE_FILTER_FIELD_PATHS = Map.of(
+			"storeId", "order.store.id",
+			"orderId", "order.id");
+	private static final Map<String, String> ORDER_FILTER_FIELD_PATHS = Map.of(
+			"storeId", "store.id",
+			"marketplaceId", "marketplace.id",
+			"marketplaceCode", "marketplace.code");
+
+	private static final LinkedHashMap<String, ExportColumnSelector.ColumnDef<InvoiceListItemDto>> EXPORT_COLUMNS =
+			createExportColumns();
+
+	private static LinkedHashMap<String, ExportColumnSelector.ColumnDef<InvoiceListItemDto>> createExportColumns() {
+		LinkedHashMap<String, ExportColumnSelector.ColumnDef<InvoiceListItemDto>> columns = new LinkedHashMap<>();
+		columns.put("invoiceNo", new ExportColumnSelector.ColumnDef<>("Invoice No", InvoiceListItemDto::invoiceNo));
+		columns.put("orderId", new ExportColumnSelector.ColumnDef<>("Order ID", InvoiceListItemDto::orderId));
+		columns.put("storeName", new ExportColumnSelector.ColumnDef<>("Store", InvoiceListItemDto::storeName));
+		columns.put("marketplaceCode", new ExportColumnSelector.ColumnDef<>("Marketplace", InvoiceListItemDto::marketplaceCode));
+		columns.put("customerName", new ExportColumnSelector.ColumnDef<>("Customer", InvoiceListItemDto::customerName));
+		columns.put("grandTotal", new ExportColumnSelector.ColumnDef<>("Grand Total", InvoiceListItemDto::grandTotal));
+		columns.put("currency", new ExportColumnSelector.ColumnDef<>("Currency", InvoiceListItemDto::currency));
+		columns.put("vatPercentage", new ExportColumnSelector.ColumnDef<>("VAT %", InvoiceListItemDto::vatPercentage));
+		columns.put("status", new ExportColumnSelector.ColumnDef<>("Status", InvoiceListItemDto::status));
+		columns.put("issuedAt", new ExportColumnSelector.ColumnDef<>("Issued At", InvoiceListItemDto::issuedAt));
+		return columns;
+	}
 
 	private final InvoiceRepository invoiceRepository;
 	private final OrderRepository orderRepository;
@@ -101,7 +142,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 				mapper,
 				request.toPageAndFilter(),
 				Invoice.class,
-				com.laconic.lacoinvoice.common.util.ObjectMapUtils.toMap(request.getFilter()),
+				ObjectMapUtils.toMap(request.getFilter(), INVOICE_FILTER_FIELD_PATHS),
 				null);
 
 		List<InvoiceDto> data = response.getData();
@@ -121,6 +162,21 @@ public class InvoiceServiceImpl implements InvoiceService {
 				.filter(java.util.Objects::nonNull)
 				.toList();
 		return ApiResponse.ok(response.getMessage(), ordered, response.getMeta());
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	public InvoiceStatsDto stats(Long storeId) {
+		long issuedCount = invoiceRepository.countByStatusAndOptionalStoreId(InvoiceStatus.ISSUED, storeId);
+		long voidedCount = invoiceRepository.countByStatusAndOptionalStoreId(InvoiceStatus.VOID, storeId);
+		BigDecimal issuedGrandTotal = invoiceRepository.sumGrandTotalByStatusAndOptionalStoreId(
+				InvoiceStatus.ISSUED,
+				storeId);
+		return new InvoiceStatsDto(
+				issuedCount,
+				voidedCount,
+				issuedGrandTotal != null ? issuedGrandTotal : BigDecimal.ZERO);
 	}
 
 	@Override
@@ -151,8 +207,207 @@ public class InvoiceServiceImpl implements InvoiceService {
 	public String pdfFilename(Long id) {
 		Invoice invoice = invoiceRepository.findDetailById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Invoice not found: id=" + id));
-		String no = invoice.getInvoiceNo() != null ? invoice.getInvoiceNo() : ("invoice-" + id);
-		return no.replaceAll("[^A-Za-z0-9._-]", "_") + ".pdf";
+		return sanitizeFilename(invoice.getInvoiceNo(), id) + ".pdf";
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	public byte[] exportExcel(InvoiceExportRequest request) {
+		List<InvoiceListItemDto> invoices = resolveInvoicesForExport(request, MAX_EXPORT_ROWS);
+		if (invoices.isEmpty()) {
+			throw new BusinessRuleException("No invoices found to export.");
+		}
+
+		ExportColumnSelector.SelectedColumns<InvoiceListItemDto> columns =
+				ExportColumnSelector.select(EXPORT_COLUMNS, request.getColumns());
+		return ExcelExportWriter.write(
+				"Invoices",
+				columns.headers(),
+				ExportColumnSelector.mapRows(columns, invoices));
+	}
+
+	@Override
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	public String exportFilename() {
+		return "invoices-export-" + LocalDate.now().format(EXPORT_DATE) + ".xlsx";
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	public ApiResponse<List<InvoiceListItemDto>> exportPreview(InvoiceExportRequest request) {
+		int pageNumber = request.getPageNumber() != null ? request.getPageNumber() : 1;
+		int pageSize = request.getPageSize() != null ? request.getPageSize() : 10;
+
+		List<Long> allIds = resolveInvoiceIdsForExport(request, MAX_EXPORT_ROWS);
+		if (allIds.isEmpty()) {
+			return ExportPreviewPaging.empty(pageNumber, pageSize);
+		}
+
+		List<Long> pageIds = ExportPreviewPaging.pageIds(allIds, pageNumber, pageSize);
+		if (pageIds.isEmpty()) {
+			return ApiResponse.ok("OK", List.of(), ExportPreviewPaging.meta(pageNumber, pageSize, allIds.size()));
+		}
+
+		Map<Long, InvoiceListItemDto> byId = invoiceRepository.findAllDetailedByIdIn(pageIds).stream()
+				.map(mapper::toListItemDto)
+				.collect(java.util.stream.Collectors.toMap(InvoiceListItemDto::id, item -> item, (a, b) -> a));
+		List<InvoiceListItemDto> ordered = pageIds.stream()
+				.map(byId::get)
+				.filter(Objects::nonNull)
+				.toList();
+		PageMeta meta = ExportPreviewPaging.meta(pageNumber, pageSize, allIds.size());
+		return ApiResponse.ok("OK", ordered, meta);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	public byte[] bulkPdfZip(InvoiceExportRequest request) {
+		List<InvoiceListItemDto> invoices = resolveInvoicesForExport(request, MAX_BULK_PDF);
+		if (invoices.isEmpty()) {
+			throw new BusinessRuleException("No invoices found to download.");
+		}
+
+		List<ZipExportWriter.ZipFileEntry> entries = new ArrayList<>(invoices.size());
+		for (InvoiceListItemDto item : invoices) {
+			Invoice invoice = invoiceRepository.findDetailById(item.id())
+					.orElseThrow(() -> new ResourceNotFoundException("Invoice not found: id=" + item.id()));
+			byte[] pdf = invoicePdfService.renderPdf(toDetailDto(invoice));
+			String filename = sanitizeFilename(invoice.getInvoiceNo(), invoice.getId()) + ".pdf";
+			entries.add(new ZipExportWriter.ZipFileEntry(filename, pdf));
+		}
+		return ZipExportWriter.write(entries);
+	}
+
+	@Override
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	public String bulkPdfZipFilename() {
+		return "invoices-pdf-" + LocalDate.now().format(EXPORT_DATE) + ".zip";
+	}
+
+	@Override
+	@Transactional
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	public byte[] bulkGenerateZip(OrderExportRequest request) {
+		List<Long> orderIds = resolveOrderIdsForBulkGenerate(request);
+		if (orderIds.isEmpty()) {
+			throw new BusinessRuleException("No orders found to generate invoices for.");
+		}
+
+		List<ZipExportWriter.ZipFileEntry> entries = new ArrayList<>(orderIds.size());
+		for (Long orderId : orderIds) {
+			Invoice invoice = ensureInvoiceForOrder(orderId);
+			Invoice detailed = invoiceRepository.findDetailById(invoice.getId())
+					.orElseThrow(() -> new ResourceNotFoundException("Invoice not found: id=" + invoice.getId()));
+			byte[] pdf = invoicePdfService.renderPdf(toDetailDto(detailed));
+			String filename = sanitizeFilename(detailed.getInvoiceNo(), detailed.getId()) + ".pdf";
+			entries.add(new ZipExportWriter.ZipFileEntry(filename, pdf));
+		}
+		return ZipExportWriter.write(entries);
+	}
+
+	@Override
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	public String bulkGenerateZipFilename() {
+		return "orders-invoices-" + LocalDate.now().format(EXPORT_DATE) + ".zip";
+	}
+
+	private Invoice ensureInvoiceForOrder(Long orderId) {
+		return invoiceRepository.findByOrder_Id(orderId)
+				.orElseGet(() -> {
+					InvoiceDto created = generateForOrder(orderId);
+					return invoiceRepository.findById(created.id())
+							.orElseThrow(() -> new ResourceNotFoundException(
+									"Invoice not found after generate: id=" + created.id()));
+				});
+	}
+
+	private List<Long> resolveOrderIdsForBulkGenerate(OrderExportRequest request) {
+		if (request == null) {
+			throw new BusinessRuleException("Bulk generate request is required.");
+		}
+
+		List<Long> ids = request.getIds() == null
+				? List.of()
+				: request.getIds().stream().filter(Objects::nonNull).distinct().toList();
+
+		if (!ids.isEmpty()) {
+			if (ids.size() > MAX_BULK_PDF) {
+				throw new BusinessRuleException(
+						"Bulk generate is limited to " + MAX_BULK_PDF
+								+ " orders. Narrow your selection.");
+			}
+			return ids;
+		}
+
+		if (request.isExportAll()) {
+			return SpecQuerySupport.findAll(
+					orderRepository,
+					Order.class,
+					request.getFilter(),
+					ORDER_FILTER_FIELD_PATHS,
+					MAX_BULK_PDF,
+					"Bulk generate is limited to " + MAX_BULK_PDF
+							+ " orders. Apply filters to reduce the set.")
+					.stream()
+					.map(Order::getId)
+					.filter(Objects::nonNull)
+					.toList();
+		}
+
+		throw new BusinessRuleException("Select orders to generate, or confirm generate all.");
+	}
+
+	private List<InvoiceListItemDto> resolveInvoicesForExport(InvoiceExportRequest request, int maxRows) {
+		List<Long> resolvedIds = resolveInvoiceIdsForExport(request, maxRows);
+		if (resolvedIds.isEmpty()) {
+			return List.of();
+		}
+
+		Map<Long, InvoiceListItemDto> byId = invoiceRepository.findAllDetailedByIdIn(resolvedIds).stream()
+				.map(mapper::toListItemDto)
+				.collect(java.util.stream.Collectors.toMap(InvoiceListItemDto::id, item -> item, (a, b) -> a));
+		return resolvedIds.stream()
+				.map(byId::get)
+				.filter(Objects::nonNull)
+				.toList();
+	}
+
+	private List<Long> resolveInvoiceIdsForExport(InvoiceExportRequest request, int maxRows) {
+		if (request == null) {
+			throw new BusinessRuleException("Export request is required.");
+		}
+
+		List<Long> ids = request.getIds() == null
+				? List.of()
+				: request.getIds().stream().filter(Objects::nonNull).distinct().toList();
+
+		if (!ids.isEmpty()) {
+			if (ids.size() > maxRows) {
+				throw new BusinessRuleException(
+						"This action is limited to " + maxRows + " invoices. Narrow your selection.");
+			}
+			return ids;
+		}
+
+		if (request.isExportAll()) {
+			List<Invoice> entities = SpecQuerySupport.findAllWithMap(
+					invoiceRepository,
+					Invoice.class,
+					ObjectMapUtils.toMap(request.getFilter(), INVOICE_FILTER_FIELD_PATHS),
+					maxRows,
+					"This action is limited to " + maxRows + " invoices. Apply filters to reduce the set.");
+			return entities.stream().map(Invoice::getId).filter(Objects::nonNull).toList();
+		}
+
+		throw new BusinessRuleException("Select invoices first, or confirm export all.");
+	}
+
+	private static String sanitizeFilename(String invoiceNo, Long id) {
+		String no = invoiceNo != null && !invoiceNo.isBlank() ? invoiceNo : ("invoice-" + id);
+		return no.replaceAll("[^A-Za-z0-9._-]", "_");
 	}
 
 	private InvoiceDetailDto toDetailDto(Invoice invoice) {

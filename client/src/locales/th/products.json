@@ -20,6 +20,9 @@
     "marketplace_label": "แหล่ง Marketplace",
     "marketplace_placeholder": "เลือกร้านค้าที่เชื่อมต่อแล้ว",
     "marketplace_all": "ทั้งหมด",
+    "store_label": "ร้านค้า",
+    "store_placeholder": "เลือกร้านค้า",
+    "store_all": "ร้านค้าทั้งหมด",
     "erp_status_label": "สถานะ ERP",
     "erp_status": {
       "all": "ทั้งหมด",
@@ -54,11 +57,36 @@
   "errors": {
     "load_sources_failed": "โหลดแหล่ง marketplace ไม่สำเร็จ",
     "load_products_failed": "โหลดสินค้า marketplace ไม่สำเร็จ",
-    "load_detail_failed": "โหลดรายละเอียดสินค้าไม่สำเร็จ"
+    "load_detail_failed": "โหลดรายละเอียดสินค้าไม่สำเร็จ",
+    "export_failed": "ส่งออกสินค้าไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "select_to_export": "เลือกอย่างน้อยหนึ่งสินค้าเพื่อส่งออก",
+    "export_preview_failed": "โหลดตัวอย่างการส่งออกไม่สำเร็จ กรุณาลองอีกครั้ง"
+  },
+  "export": {
+    "preview_title": "ตัวอย่างการส่งออก Excel",
+    "preview_description": "ตรวจสอบแถวและเลือกคอลัมน์ที่ต้องการใส่ในไฟล์",
+    "preview_loading": "กำลังโหลดตัวอย่าง…",
+    "preview_loading_more": "กำลังโหลดเพิ่ม…",
+    "preview_empty": "ไม่มีสินค้าให้ส่งออก",
+    "preview_end": "ถึงท้ายรายการตัวอย่างแล้ว",
+    "columns": {
+      "id": "ID",
+      "store": "ร้านค้า",
+      "marketplace_code": "รหัส Marketplace",
+      "marketplace_name": "ชื่อ Marketplace",
+      "external_product_id": "รหัสสินค้าภายนอก",
+      "sku": "SKU",
+      "currency": "สกุลเงิน",
+      "status": "สถานะ"
+    }
   },
   "table": {
     "empty": "ไม่พบสินค้า",
     "loading": "กำลังโหลดสินค้า...",
+    "select_all": "เลือกทั้งหมด",
+    "select_row": "เลือกแถว",
+    "selected_count_one": "เลือก {{count}} สินค้า",
+    "selected_count_other": "เลือก {{count}} สินค้า",
     "showing": "แสดง {{start}}-{{end}} จาก {{total}} สินค้า",
     "store_label": "ร้านค้า: {{id}}",
     "marketplace_label": "Marketplace: {{id}}",

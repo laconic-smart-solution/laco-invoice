@@ -3,12 +3,22 @@
   "subtitle": "Marketplace အော်ဒါများကို စီမံပြီး ငွေတောင်းခံလွှာ အလိုအလျောက် ထုတ်ပါ။",
   "actions": {
     "export_csv": "CSV ထုတ်ရန်",
+    "exporting": "ထုတ်နေသည်…",
     "sync_orders": "အော်ဒါ Sync လုပ်ရန်",
-    "bulk_generate": "အစုလိုက် ထုတ်ရန်"
+    "import_excel": "Excel တင်သွင်းရန်",
+    "bulk_generate": "အစုလိုက် ထုတ်ရန်",
+    "bulk_generating": "ZIP ပြင်ဆင်နေသည်…"
+  },
+  "stats": {
+    "invoice_coverage": "ငွေတောင်းခံလွှာ လွှမ်းခြုံမှု",
+    "awaiting_invoice": "ငွေတောင်းခံလွှာ စောင့်ဆိုင်း",
+    "awaiting_invoice_value": "အော်ဒါ {{count}} ခု",
+    "total_orders": "အော်ဒါ စုစုပေါင်း",
+    "total_orders_value": "အော်ဒါ {{count}} ခု"
   },
   "filters": {
-    "store_label": "Marketplace ဆိုင်",
-    "store_all": "ချိတ်ဆက်ထားသော ဆိုင်အားလုံး",
+    "store_label": "ဆိုင်",
+    "store_all": "ဆိုင်အားလုံး",
     "store_placeholder": "ဆိုင်ရွေးပါ",
     "search_label": "အော်ဒါ ID",
     "search_placeholder": "အော်ဒါ ID ဖြင့် ရှာရန်…",
@@ -16,6 +26,8 @@
     "date_range_value": "Oct 01 - Oct 24, 2023",
     "status_label": "အော်ဒါ အခြေအနေ",
     "status_all": "အခြေအနေ အားလုံး",
+    "source_label": "ရင်းမြစ်",
+    "source_all": "ရင်းမြစ် အားလုံး",
     "more_filters": "Filter ထပ်ထည့်ရန်"
   },
   "table": {
@@ -34,6 +46,7 @@
       "customer": "ဖောက်သည်",
       "total_amount": "စုစုပေါင်း",
       "sync_status": "Sync အခြေအနေ",
+      "source": "ရင်းမြစ်",
       "action": "လုပ်ဆောင်ချက်"
     },
     "actions": {
@@ -47,6 +60,10 @@
     "pending": "စောင့်ဆိုင်းနေ",
     "failed": "မအောင်မြင်"
   },
+  "source_type": {
+    "api": "API",
+    "import": "IMPORT"
+  },
   "order_status": {
     "pending": "Pending",
     "confirmed": "Confirmed",
@@ -58,6 +75,17 @@
     "generate": {
       "title": "ငွေတောင်းခံလွှာ ထုတ်မလား?",
       "description": "အော်ဒါ {{orderId}} အတွက် ငွေတောင်းခံလွှာ ဖန်တီးပါမည်။ ဆက်လုပ်မလား?"
+    },
+    "export_all": {
+      "title": "ကိုက်ညီသော အော်ဒါအားလုံး ထုတ်မလား?",
+      "description": "ဤစာမျက်နှာရှိ အတန်းအားလုံးကို ရွေးထားသည်။ လက်ရှိ စစ်ထုတ်ချက်နှင့် ကိုက်ညီသော အော်ဒါ {{count}} ခုလုံးကို Excel အဖြစ် ထုတ်မည်။ အချိန်အနည်းငယ် ကြာနိုင်သည်။",
+      "confirm": "ဟုတ်ကဲ့၊ အားလုံး ထုတ်မည်",
+      "cancel": "ပယ်ဖျက်"
+    },
+    "bulk_generate_all": {
+      "title": "ကိုက်ညီသော အော်ဒါအားလုံးအတွက် ငွေတောင်းခံလွှာ ထုတ်မလား?",
+      "description": "ဤစာမျက်နှာရှိ အတန်းအားလုံးကို ရွေးထားသည်။ စစ်ထုတ်ချက်နှင့် ကိုက်ညီသော အော်ဒါ အများဆုံး ၁၀၀ ခုအတွက် ငွေတောင်းခံလွှာ ထုတ်ပြီး PDF များကို ZIP အဖြစ် ဒေါင်းလုဒ်လုပ်မည်။ အရေအတွက် များပါက မိနစ်အနည်းငယ် ကြာနိုင်သည်။",
+      "confirm": "ဟုတ်ကဲ့၊ အားလုံး ထုတ်မည်"
     }
   },
   "detail": {
@@ -89,6 +117,8 @@
       "subtotal": "ခွဲစုစုပေါင်း",
       "tax": "အခွန်",
       "shipping": "ပို့ဆောင်ခ",
+      "ex_vat": "EX.VAT",
+      "vat": "VAT",
       "free": "အခမဲ့",
       "total": "စုစုပေါင်း"
     }
@@ -96,6 +126,60 @@
   "errors": {
     "load_failed": "အော်ဒါများ မတင်နိုင်ပါ။ ထပ်ကြိုးစားပါ။",
     "sync_failed": "အော်ဒါများ sync မလုပ်နိုင်ပါ။ ထပ်ကြိုးစားပါ။",
-    "generate_invoice_failed": "ငွေတောင်းခံလွှာ မထုတ်နိုင်ပါ။ ထပ်ကြိုးစားပါ။"
+    "import_failed": "အော်ဒါများ တင်သွင်း မရပါ။ ထပ်ကြိုးစားပါ။",
+    "generate_invoice_failed": "ငွေတောင်းခံလွှာ မထုတ်နိုင်ပါ။ ထပ်ကြိုးစားပါ။",
+    "export_failed": "အော်ဒါများ မထုတ်နိုင်ပါ။ ထပ်ကြိုးစားပါ။",
+    "select_to_export": "ထုတ်ရန် အော်ဒါ အနည်းဆုံး တစ်ခု ရွေးပါ။",
+    "export_preview_failed": "Export preview မတင်နိုင်ပါ။ ထပ်ကြိုးစားပါ။",
+    "bulk_generate_failed": "ငွေတောင်းခံလွှာများ မထုတ်နိုင်ပါ။ ထပ်ကြိုးစားပါ။",
+    "select_to_bulk_generate": "ငွေတောင်းခံလွှာ ထုတ်ရန် အော်ဒါ အနည်းဆုံး တစ်ခု ရွေးပါ။"
+  },
+  "export": {
+    "preview_title": "Excel ထုတ်ရန် အကြိုကြည့်",
+    "preview_description": "အတန်းများကို စစ်ဆေးပြီး ထည့်မည့် ကော်လံများကို ရွေးပါ။",
+    "preview_loading": "အကြိုကြည့် တင်နေသည်…",
+    "preview_loading_more": "ထပ်မံ တင်နေသည်…",
+    "preview_empty": "ထုတ်ရန် အော်ဒါ မရှိပါ။",
+    "preview_end": "အကြိုကြည့် အဆုံးသို့ ရောက်ပါပြီ။",
+    "columns": {
+      "id": "ID",
+      "marketplace": "Marketplace",
+      "customer_phone": "ဖောက်သည် ဖုန်း",
+      "invoice_id": "ငွေတောင်းခံလွှာ ID",
+      "subtotal": "Subtotal",
+      "shipping": "ပို့ဆောင်ခ",
+      "ex_vat": "EX.VAT",
+      "vat": "VAT",
+      "currency": "ငွေကြေး",
+      "created_at": "ဖန်တီးချိန်"
+    }
+  },
+  "import": {
+    "title": "Excel မှ အော်ဒါ တင်သွင်းရန်",
+    "description": "TikTok Shop OrderSKUList (.xlsx) ကို တင်ပါ။ Order ID ဖြင့် ကိုက်ညီပါမည်။",
+    "store_label": "ဆိုင်",
+    "store_placeholder": "ဆိုင် ရွေးပါ",
+    "marketplace_label": "Marketplace",
+    "marketplace_placeholder": "Marketplace ရွေးပါ",
+    "file_label": "Excel ဖိုင်",
+    "file_placeholder": ".xlsx ဖိုင် ရွေးပါ",
+    "file_hint": "OrderSKUList ပုံစံ ဖြစ်ရပါမည်။",
+    "sample_title": "နမူနာ template လိုပါသလား?",
+    "download_sample": "နမူနာ ဒေါင်းလုဒ်",
+    "download_sample_aria": "OrderSKUList Excel နမူနာ ဖိုင် ဒေါင်းလုဒ်လုပ်ရန် — ကော်လံခေါင်းစဉ်အားလုံးနှင့် အော်ဒါ နမူနာ တစ်ကြောင်း",
+    "download_sample_hint": "Sheet တစ်ခု၊ လိုအပ်သော ကော်လံအားလုံးနှင့် အော်ဒါ နမူနာ တစ်ကြောင်း။ တင်သွင်းမီ သင့်ဒေတာဖြင့် အစားထိုးပါ။",
+    "submit": "တင်သွင်းရန်",
+    "importing": "တင်သွင်းနေသည်…",
+    "result_title": "တင်သွင်းမှု ရလဒ်",
+    "result_orders": "အော်ဒါ {{count}} ခု တင်သွင်းပြီး",
+    "result_items": "ပစ္စည်းအတန်း {{count}} ခု",
+    "result_rows": "အတန်း {{count}} ခု လုပ်ဆောင်ပြီး",
+    "status_completed": "အောင်မြင်စွာ တင်သွင်းပြီး",
+    "status_partial": "တစ်စိတ်တစ်ပိုင်း — အော်ဒါ အချို့ မအောင်မြင်ပါ",
+    "status_failed": "တင်သွင်းမှု မအောင်မြင်ပါ",
+    "errors_title": "အမှားများ",
+    "no_file": "Excel ဖိုင် ရွေးပေးပါ။",
+    "no_store": "ဆိုင် ရွေးပေးပါ။",
+    "close": "ပိတ်ရန်"
   }
 }

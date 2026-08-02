@@ -159,15 +159,71 @@ CREATE TABLE LACO_INVOICE.ORDER_TAX_INVOICES (
 );
 
 CREATE SEQUENCE LACO_INVOICE.SEQ_ORDER_TAX_INVOICES START WITH 1 INCREMENT BY 1;
+
+-- ============================================================
+-- ORDER_IMPORT_FILES: audit trail for Excel imports
+-- ============================================================
+CREATE TABLE LACO_INVOICE.ORDER_IMPORT_FILES (
+  ID                    NUMBER(19) NOT NULL,
+  STORE_ID              NUMBER(19) NOT NULL,
+  MARKETPLACE_ID        NUMBER(19) NOT NULL,
+  ORIGINAL_FILENAME     VARCHAR2(500) NOT NULL,
+  SHEET_NAME            VARCHAR2(200),
+  ROW_COUNT             NUMBER(10),
+  IMPORTED_ORDERS       NUMBER(10),
+  IMPORTED_ITEMS        NUMBER(10),
+  STATUS                VARCHAR2(20) DEFAULT 'COMPLETED' NOT NULL,
+  CREATED_AT            TIMESTAMP(9) WITH TIME ZONE NOT NULL,
+  UPDATED_AT            TIMESTAMP(9) WITH TIME ZONE,
+  CONSTRAINT PK_ORDER_IMPORT_FILES PRIMARY KEY (ID),
+  CONSTRAINT FK_IMPORT_FILE_STORE FOREIGN KEY (STORE_ID)
+    REFERENCES LACO_INVOICE.STORES(ID),
+  CONSTRAINT FK_IMPORT_FILE_MARKETPLACE FOREIGN KEY (MARKETPLACE_ID)
+    REFERENCES LACO_INVOICE.MARKETPLACES(ID)
+);
+
+CREATE SEQUENCE LACO_INVOICE.SEQ_ORDER_IMPORT_FILES START WITH 1 INCREMENT BY 1;
+
+-- ============================================================
+-- Source tracking: API sync vs Excel import
+-- When SOURCE_TYPE = 'IMPORT', SOURCE_ID = ORDER_IMPORT_FILES.ID
+-- Oracle ORA-01758: cannot add NOT NULL to a non-empty table in one step.
+-- ============================================================
+ALTER TABLE LACO_INVOICE.LCO_ORDERS ADD (
+  SOURCE_TYPE             VARCHAR2(20),
+  SOURCE_ID               NUMBER(19)
+);
+UPDATE LACO_INVOICE.LCO_ORDERS SET SOURCE_TYPE = 'API' WHERE SOURCE_TYPE IS NULL;
+ALTER TABLE LACO_INVOICE.LCO_ORDERS MODIFY (SOURCE_TYPE VARCHAR2(20) DEFAULT 'API' NOT NULL);
+
+ALTER TABLE LACO_INVOICE.ORDER_ITEMS ADD (
+  SOURCE_TYPE             VARCHAR2(20),
+  SOURCE_ID               NUMBER(19)
+);
+UPDATE LACO_INVOICE.ORDER_ITEMS SET SOURCE_TYPE = 'API' WHERE SOURCE_TYPE IS NULL;
+ALTER TABLE LACO_INVOICE.ORDER_ITEMS MODIFY (SOURCE_TYPE VARCHAR2(20) DEFAULT 'API' NOT NULL);
+
+-- ============================================================
+-- VAT breakdown from Order Amount (VAT-inclusive, Thailand 7%)
+-- EX.VAT = TOTAL_AMOUNT / 1.07, VAT = TOTAL_AMOUNT - EX.VAT
+-- ============================================================
+ALTER TABLE LACO_INVOICE.LCO_ORDERS ADD (
+  AMOUNT_EX_VAT             NUMBER(18,2),
+  VAT_AMOUNT                NUMBER(18,2)
+);
 ```
 
 ---
 
-## 3. Open items before writing the importer
+## 3. Importer notes
 
-1. **`ORDER_STATUS` enum mapping.** The sheet gives free text (`已完成`, etc.) but the column is `NUMBER(10)`. Needs a status-code lookup table or a `Map<String,Integer>` in the import code. Worth pulling more sample rows to see the full set of status strings the platform can send — the sample file only showed one value.
-2. **Upsert logic for FKs.** `ORDER_ITEMS.PRODUCT_ID` and `LCO_ORDERS.CUSTOMER_ID` / `MARKETPLACE_ID` are `NOT NULL` with no direct ID in the sheet. The importer must match-or-create:
-   - `PRODUCTS` row by `Seller SKU` (or `SKU ID`)
-   - `CUSTOMERS_INFO` row by `Buyer Username` (→ `EXTERNAL_CUSTOMER_ID`) + `MARKETPLACE_ID`
-3. **De-duplication.** The sheet is one row per SKU, so multiple rows share the same `Order ID`. Order-level fields (status, timestamps, shipping, address, payment, tax info) should be read once per Order ID when building the `LCO_ORDERS` / `CUSTOMERS_INFO` / `ORDER_TAX_INVOICES` records; only the SKU-level fields go per-row into `ORDER_ITEMS`.
-4. **Currency.** Not present in the sheet — confirm whether to default `LCO_ORDERS.CURRENCY` to `THB` or derive it from the marketplace/store.
+1. **`ORDER_STATUS` mapping** — handled by `OrderStatusTextMapper` (Chinese + English aliases).
+2. **Upsert logic** — products matched by `Seller SKU`; customers by `Buyer Username` or phone.
+3. **De-duplication** — Excel rows grouped by `Order ID` in `OrderSkuListExcelParser`.
+4. **Currency** — defaults to `THB` when not present in the sheet.
+5. **Source tracking** — `SOURCE_TYPE` = `IMPORT` and `SOURCE_ID` = `order_import_files.id` on `LCO_ORDERS` and `ORDER_ITEMS`; API sync sets `SOURCE_TYPE` = `API` and `SOURCE_ID` = null.
+6. **Example-sheet fallbacks** — when Excel leaves blanks:
+   - `SKU Subtotal Before Discount` = Unit Original Price × Quantity
+   - `SKU Seller Discount` = Before Discount − Platform Discount − After Discount
+   - `Shipping Fee After Discount` = Original Shipping − Seller Disc − Platform Disc
+7. **EX.VAT / VAT** — computed from `Order Amount` (`TOTAL_AMOUNT`) as VAT-inclusive using 7%: `AMOUNT_EX_VAT = TOTAL / 1.07`, `VAT_AMOUNT = TOTAL − AMOUNT_EX_VAT`. Applied on both Excel import and API sync.

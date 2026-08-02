@@ -3,12 +3,22 @@
   "subtitle": "จัดการและออกใบแจ้งหนี้คำสั่งซื้อจากมาร์เก็ตเพลสอัตโนมัติ",
   "actions": {
     "export_csv": "ส่งออก CSV",
+    "exporting": "กำลังส่งออก…",
     "sync_orders": "ซิงก์คำสั่งซื้อ",
-    "bulk_generate": "สร้างแบบกลุ่ม"
+    "import_excel": "นำเข้า Excel",
+    "bulk_generate": "สร้างแบบกลุ่ม",
+    "bulk_generating": "กำลังเตรียม ZIP…"
+  },
+  "stats": {
+    "invoice_coverage": "ความครอบคลุมใบแจ้งหนี้",
+    "awaiting_invoice": "รอออกใบแจ้งหนี้",
+    "awaiting_invoice_value": "{{count}} คำสั่งซื้อ",
+    "total_orders": "คำสั่งซื้อทั้งหมด",
+    "total_orders_value": "{{count}} คำสั่งซื้อ"
   },
   "filters": {
-    "store_label": "ร้านค้ามาร์เก็ตเพลส",
-    "store_all": "ร้านที่เชื่อมต่อทั้งหมด",
+    "store_label": "ร้านค้า",
+    "store_all": "ร้านค้าทั้งหมด",
     "store_placeholder": "เลือกร้านค้า",
     "search_label": "รหัสคำสั่งซื้อ",
     "search_placeholder": "ค้นหาด้วยรหัสคำสั่งซื้อ…",
@@ -16,6 +26,8 @@
     "date_range_value": "01 ต.ค. - 24 ต.ค. 2023",
     "status_label": "สถานะคำสั่งซื้อ",
     "status_all": "ทุกสถานะ",
+    "source_label": "แหล่งที่มา",
+    "source_all": "ทุกแหล่งที่มา",
     "more_filters": "ตัวกรองเพิ่มเติม"
   },
   "table": {
@@ -34,6 +46,7 @@
       "customer": "ลูกค้า",
       "total_amount": "ยอดรวม",
       "sync_status": "สถานะซิงก์",
+      "source": "แหล่งที่มา",
       "action": "การดำเนินการ"
     },
     "actions": {
@@ -47,6 +60,10 @@
     "pending": "รอดำเนินการ",
     "failed": "ล้มเหลว"
   },
+  "source_type": {
+    "api": "API",
+    "import": "IMPORT"
+  },
   "order_status": {
     "pending": "รอดำเนินการ",
     "confirmed": "ยืนยันแล้ว",
@@ -58,6 +75,17 @@
     "generate": {
       "title": "สร้างใบแจ้งหนี้?",
       "description": "ระบบจะสร้างใบแจ้งหนี้สำหรับคำสั่งซื้อ {{orderId}} ต้องการดำเนินการต่อหรือไม่?"
+    },
+    "export_all": {
+      "title": "ส่งออกคำสั่งซื้อทั้งหมดที่ตรงเงื่อนไข?",
+      "description": "คุณเลือกทุกแถวในหน้านี้ ระบบจะส่งออกคำสั่งซื้อทั้งหมด {{count}} รายการที่ตรงกับตัวกรองปัจจุบันเป็นไฟล์ Excel อาจใช้เวลาสักครู่",
+      "confirm": "ใช่ ส่งออกทั้งหมด",
+      "cancel": "ยกเลิก"
+    },
+    "bulk_generate_all": {
+      "title": "สร้างใบแจ้งหนี้สำหรับคำสั่งซื้อทั้งหมดที่ตรงเงื่อนไข?",
+      "description": "คุณเลือกทุกแถวในหน้านี้ ระบบจะสร้างใบแจ้งหนี้สูงสุด 100 รายการที่ตรงกับตัวกรอง และดาวน์โหลด PDF เป็นไฟล์ ZIP ชุดใหญ่อาจใช้เวลาสักครู่",
+      "confirm": "ใช่ สร้างทั้งหมด"
     }
   },
   "detail": {
@@ -89,6 +117,8 @@
       "subtotal": "ยอดรวมย่อย",
       "tax": "ภาษี",
       "shipping": "ค่าจัดส่ง",
+      "ex_vat": "EX.VAT",
+      "vat": "VAT",
       "free": "ฟรี",
       "total": "ยอดรวม"
     }
@@ -96,6 +126,60 @@
   "errors": {
     "load_failed": "โหลดคำสั่งซื้อไม่สำเร็จ กรุณาลองอีกครั้ง",
     "sync_failed": "ซิงก์คำสั่งซื้อไม่สำเร็จ กรุณาลองอีกครั้ง",
-    "generate_invoice_failed": "สร้างใบแจ้งหนี้ไม่สำเร็จ กรุณาลองอีกครั้ง"
+    "import_failed": "นำเข้าคำสั่งซื้อไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "generate_invoice_failed": "สร้างใบแจ้งหนี้ไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "export_failed": "ส่งออกคำสั่งซื้อไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "select_to_export": "เลือกอย่างน้อยหนึ่งคำสั่งซื้อเพื่อส่งออก",
+    "export_preview_failed": "โหลดตัวอย่างการส่งออกไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "bulk_generate_failed": "สร้างใบแจ้งหนี้ไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "select_to_bulk_generate": "เลือกอย่างน้อยหนึ่งคำสั่งซื้อเพื่อสร้างใบแจ้งหนี้"
+  },
+  "export": {
+    "preview_title": "ตัวอย่างการส่งออก Excel",
+    "preview_description": "ตรวจสอบแถวและเลือกคอลัมน์ที่ต้องการใส่ในไฟล์",
+    "preview_loading": "กำลังโหลดตัวอย่าง…",
+    "preview_loading_more": "กำลังโหลดเพิ่ม…",
+    "preview_empty": "ไม่มีคำสั่งซื้อให้ส่งออก",
+    "preview_end": "ถึงท้ายรายการตัวอย่างแล้ว",
+    "columns": {
+      "id": "ID",
+      "marketplace": "Marketplace",
+      "customer_phone": "เบอร์โทรลูกค้า",
+      "invoice_id": "รหัสใบแจ้งหนี้",
+      "subtotal": "Subtotal",
+      "shipping": "ค่าจัดส่ง",
+      "ex_vat": "EX.VAT",
+      "vat": "VAT",
+      "currency": "สกุลเงิน",
+      "created_at": "สร้างเมื่อ"
+    }
+  },
+  "import": {
+    "title": "นำเข้าคำสั่งซื้อจาก Excel",
+    "description": "อัปโหลดไฟล์ OrderSKUList จาก TikTok Shop (.xlsx) ระบบจับคู่ด้วย Order ID",
+    "store_label": "ร้านค้า",
+    "store_placeholder": "เลือกร้านค้า",
+    "marketplace_label": "มาร์เก็ตเพลส",
+    "marketplace_placeholder": "เลือกมาร์เก็ตเพลส",
+    "file_label": "ไฟล์ Excel",
+    "file_placeholder": "เลือกไฟล์ .xlsx",
+    "file_hint": "ต้องเป็นรูปแบบ OrderSKUList",
+    "sample_title": "ต้องการเทมเพลตไหม?",
+    "download_sample": "ดาวน์โหลดตัวอย่าง",
+    "download_sample_aria": "ดาวน์โหลดไฟล์ Excel ตัวอย่าง OrderSKUList พร้อมหัวคอลัมน์ทั้งหมดและตัวอย่างคำสั่งซื้อ 1 แถว",
+    "download_sample_hint": "หนึ่งชีต ครบทุกคอลัมน์ที่ต้องใช้ และตัวอย่างคำสั่งซื้อ 1 แถว แทนที่ด้วยข้อมูลของคุณก่อนนำเข้า",
+    "submit": "นำเข้า",
+    "importing": "กำลังนำเข้า…",
+    "result_title": "ผลการนำเข้า",
+    "result_orders": "นำเข้า {{count}} คำสั่งซื้อ",
+    "result_items": "{{count}} รายการสินค้า",
+    "result_rows": "ประมวลผล {{count}} แถว",
+    "status_completed": "นำเข้าสำเร็จ",
+    "status_partial": "นำเข้าบางส่วน — มีคำสั่งซื้อที่ล้มเหลว",
+    "status_failed": "นำเข้าไม่สำเร็จ",
+    "errors_title": "ข้อผิดพลาด",
+    "no_file": "กรุณาเลือกไฟล์ Excel",
+    "no_store": "กรุณาเลือกร้านค้า",
+    "close": "ปิด"
   }
 }

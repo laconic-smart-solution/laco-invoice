@@ -3,9 +3,21 @@
   "subtitle": "查看和管理从市场订单生成的发票。",
   "actions": {
     "export_csv": "导出 CSV",
-    "bulk_download": "批量下载"
+    "exporting": "正在导出…",
+    "bulk_download": "批量下载",
+    "bulk_downloading": "正在准备 ZIP…"
+  },
+  "stats": {
+    "issued": "已开具发票",
+    "issued_value": "{{count}} 张",
+    "total_billed": "开票总额",
+    "voided": "已作废",
+    "voided_value": "{{count}} 张"
   },
   "filters": {
+    "store_label": "店铺",
+    "store_placeholder": "选择店铺",
+    "store_all": "全部店铺",
     "marketplace_label": "市场平台",
     "marketplace_all": "所有市场",
     "marketplace_lazada": "Lazada",
@@ -19,6 +31,10 @@
   },
   "table": {
     "empty": "暂无发票。",
+    "select_all": "全选",
+    "select_row": "选择行",
+    "selected_count_one": "已选择 {{count}} 张发票",
+    "selected_count_other": "已选择 {{count}} 张发票",
     "showing": "显示第 {{start}}-{{end}} 条，共 {{total}} 条发票",
     "columns": {
       "invoice_no": "发票号",
@@ -42,12 +58,41 @@
   "errors": {
     "load_failed": "无法加载发票，请重试。",
     "void_failed": "无法作废发票，请重试。",
-    "download_failed": "无法下载 PDF，请重试。"
+    "download_failed": "无法下载 PDF，请重试。",
+    "export_failed": "无法导出发票，请重试。",
+    "bulk_download_failed": "无法下载发票 PDF，请重试。",
+    "select_to_export": "请至少选择一张发票进行导出。",
+    "select_to_bulk_download": "请至少选择一张发票进行下载。",
+    "export_preview_failed": "无法加载导出预览，请重试。"
+  },
+  "export": {
+    "preview_title": "Excel 导出预览",
+    "preview_description": "核对数据并选择要包含的列。",
+    "preview_loading": "正在加载预览…",
+    "preview_loading_more": "正在加载更多…",
+    "preview_empty": "没有可导出的发票。",
+    "preview_end": "已到预览末尾。",
+    "columns": {
+      "marketplace": "平台",
+      "currency": "货币",
+      "vat": "VAT %"
+    }
   },
   "confirm": {
     "void": {
       "title": "作废发票？",
       "description": "发票 {{invoiceNo}} 将被标记为作废，此操作无法撤销。"
+    },
+    "export_all": {
+      "title": "导出所有符合条件的发票？",
+      "description": "您已选中本页全部发票。系统将导出符合当前筛选条件的全部 {{count}} 张发票为 Excel 文件，可能需要一些时间。",
+      "confirm": "是，全部导出",
+      "cancel": "取消"
+    },
+    "bulk_download_all": {
+      "title": "下载所有符合条件的发票 PDF？",
+      "description": "您已选中本页全部发票。系统将把符合当前筛选条件的全部 {{count}} 张发票 PDF 打包为 ZIP 下载，大批量可能需要几分钟。",
+      "confirm": "是，全部下载"
     }
   },
   "detail": {

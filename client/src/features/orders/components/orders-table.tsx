@@ -5,7 +5,7 @@ import type {
   SortingState,
 } from "@tanstack/react-table"
 import { Store } from "lucide-react"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 
@@ -17,6 +17,7 @@ import { DataTableColumnHeader } from "@/components/common/data-table/data-table
 import { DataTableFooter } from "@/components/common/data-table/data-table-footer"
 import { DataTableRowActions } from "@/components/common/data-table/data-table-row-actions"
 import { DataTableToolbar } from "@/components/common/data-table/data-table-toolbar"
+import type { DataTableSelection } from "@/components/common/data-table/types"
 import {
   useDataTable,
   type RowSelectionState,
@@ -25,7 +26,11 @@ import { StatusBadge } from "@/components/common/status-badge"
 import type { StatusBadgeVariant } from "@/components/common/status-badge"
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
-import type { Order, OrderSyncStatus } from "@/features/orders/types/order"
+import type {
+  Order,
+  OrderSourceType,
+  OrderSyncStatus,
+} from "@/features/orders/types/order"
 import {
   getInvoiceErrorMessage,
   useGenerateInvoiceMutation,
@@ -37,6 +42,11 @@ const SYNC_STATUS_BADGE: Record<OrderSyncStatus, StatusBadgeVariant> = {
   synced: "synced",
   pending: "pending",
   failed: "failed",
+}
+
+const SOURCE_TYPE_BADGE: Record<OrderSourceType, StatusBadgeVariant> = {
+  API: "synced",
+  IMPORT: "draft",
 }
 
 interface OrderRowActionProps {
@@ -88,6 +98,9 @@ interface OrdersTableProps {
   onSortingChange: (sorting: SortingState) => void
   columnFilters: ColumnFiltersState
   onColumnFiltersChange: (filters: ColumnFiltersState) => void
+  onSelectionChange?: (selection: DataTableSelection) => void
+  onBulkGenerate?: () => void
+  isBulkGenerating?: boolean
 }
 
 export function OrdersTable({
@@ -107,13 +120,38 @@ export function OrdersTable({
   onSortingChange,
   columnFilters,
   onColumnFiltersChange,
+  onSelectionChange,
+  onBulkGenerate,
+  isBulkGenerating = false,
 }: OrdersTableProps) {
   const { t } = useTranslation("orders")
   const navigate = useNavigate()
   const locale = useLocaleStore((state) => state.locale)
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
+  const [isAllMatchingSelected, setIsAllMatchingSelected] = useState(false)
   const [orderToGenerate, setOrderToGenerate] = useState<Order | null>(null)
   const generateMutation = useGenerateInvoiceMutation()
+
+  const pageRowIdsKey = useMemo(
+    () => orders.map((order) => order.id).join(","),
+    [orders]
+  )
+
+  useEffect(() => {
+    setRowSelection({})
+    setIsAllMatchingSelected(false)
+  }, [totalCount])
+
+  useEffect(() => {
+    if (!isAllMatchingSelected || orders.length === 0) {
+      return
+    }
+    const next: RowSelectionState = {}
+    for (const order of orders) {
+      next[order.id] = true
+    }
+    setRowSelection(next)
+  }, [isAllMatchingSelected, orders, pageRowIdsKey])
 
   const handleGenerateRequest = useCallback((order: Order) => {
     setOrderToGenerate(order)
@@ -173,6 +211,7 @@ export function OrdersTable({
       customer: t("table.columns.customer"),
       totalAmount: t("table.columns.total_amount"),
       syncStatus: t("table.columns.sync_status"),
+      sourceType: t("table.columns.source"),
     }),
     [t]
   )
@@ -292,6 +331,27 @@ export function OrdersTable({
         },
       },
       {
+        accessorKey: "sourceType",
+        enableColumnFilter: false,
+        enableSorting: false,
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.source")}
+            enableSearch={false}
+          />
+        ),
+        cell: ({ getValue }) => {
+          const sourceType = getValue<OrderSourceType>()
+          return (
+            <StatusBadge
+              status={SOURCE_TYPE_BADGE[sourceType]}
+              label={t(`source_type.${sourceType === "IMPORT" ? "import" : "api"}`).toUpperCase()}
+            />
+          )
+        },
+      },
+      {
         id: "action",
         header: t("table.columns.action"),
         enableSorting: false,
@@ -320,7 +380,31 @@ export function OrdersTable({
     onRowSelectionChange: setRowSelection,
     onSortingChange: handleSortingChange,
     onColumnFiltersChange: handleColumnFiltersChange,
+    meta: {
+      selectAllMatching: {
+        enabled: true,
+        isSelected: isAllMatchingSelected,
+        onChange: setIsAllMatchingSelected,
+      },
+    },
   })
+
+  useEffect(() => {
+    if (!onSelectionChange) {
+      return
+    }
+    const ids = Object.keys(rowSelection).filter((id) => rowSelection[id])
+    const pageRowCount = orders.length
+    onSelectionChange({
+      ids,
+      isAllPageSelected: pageRowCount > 0 && ids.length === pageRowCount,
+      isAllMatchingSelected,
+    })
+  }, [isAllMatchingSelected, onSelectionChange, orders.length, rowSelection])
+
+  const toolbarSelectedCount = isAllMatchingSelected
+    ? totalCount
+    : Object.keys(rowSelection).filter((id) => rowSelection[id]).length
 
   return (
     <section className="border border-border bg-card shadow-sm">
@@ -348,9 +432,14 @@ export function OrdersTable({
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border">
         <DataTableToolbar
           table={table}
+          selectedCount={toolbarSelectedCount}
           selectedLabel={(count) => t("table.selected_count", { count })}
-          bulkActionLabel={t("table.bulk_generate")}
-          onBulkAction={() => undefined}
+          bulkActionLabel={
+            isBulkGenerating
+              ? t("actions.bulk_generating")
+              : t("table.bulk_generate")
+          }
+          onBulkAction={onBulkGenerate}
           className="border-b-0"
         />
         <DataTableColumnControls

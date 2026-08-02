@@ -3,12 +3,22 @@
   "subtitle": "管理和自动化各 marketplace 订单开票。",
   "actions": {
     "export_csv": "导出 CSV",
+    "exporting": "正在导出…",
     "sync_orders": "同步订单",
-    "bulk_generate": "批量生成"
+    "import_excel": "导入 Excel",
+    "bulk_generate": "批量生成",
+    "bulk_generating": "正在准备 ZIP…"
+  },
+  "stats": {
+    "invoice_coverage": "开票覆盖率",
+    "awaiting_invoice": "待开票",
+    "awaiting_invoice_value": "{{count}} 个订单",
+    "total_orders": "订单总数",
+    "total_orders_value": "{{count}} 个订单"
   },
   "filters": {
-    "store_label": "市场店铺",
-    "store_all": "所有已连接店铺",
+    "store_label": "店铺",
+    "store_all": "全部店铺",
     "store_placeholder": "选择店铺",
     "search_label": "订单号",
     "search_placeholder": "按订单号搜索…",
@@ -16,6 +26,8 @@
     "date_range_value": "2023年10月01日 - 10月24日",
     "status_label": "订单状态",
     "status_all": "全部状态",
+    "source_label": "来源",
+    "source_all": "全部来源",
     "more_filters": "更多筛选"
   },
   "table": {
@@ -34,6 +46,7 @@
       "customer": "客户",
       "total_amount": "总金额",
       "sync_status": "同步状态",
+      "source": "来源",
       "action": "操作"
     },
     "actions": {
@@ -47,6 +60,10 @@
     "pending": "待处理",
     "failed": "失败"
   },
+  "source_type": {
+    "api": "API",
+    "import": "IMPORT"
+  },
   "order_status": {
     "pending": "待处理",
     "confirmed": "已确认",
@@ -58,6 +75,17 @@
     "generate": {
       "title": "生成发票？",
       "description": "将为订单 {{orderId}} 创建发票。是否继续？"
+    },
+    "export_all": {
+      "title": "导出所有符合条件的订单？",
+      "description": "您已选中本页全部订单。系统将导出符合当前筛选条件的全部 {{count}} 个订单为 Excel 文件，可能需要一些时间。",
+      "confirm": "是，全部导出",
+      "cancel": "取消"
+    },
+    "bulk_generate_all": {
+      "title": "为所有符合条件的订单生成发票？",
+      "description": "您已选中本页全部订单。系统将为最多 100 个符合筛选条件的订单生成发票，并以 ZIP 下载 PDF。大批量可能需要几分钟。",
+      "confirm": "是，全部生成"
     }
   },
   "detail": {
@@ -89,6 +117,8 @@
       "subtotal": "小计",
       "tax": "税费",
       "shipping": "运费",
+      "ex_vat": "EX.VAT",
+      "vat": "VAT",
       "free": "免费",
       "total": "合计"
     }
@@ -96,6 +126,60 @@
   "errors": {
     "load_failed": "无法加载订单列表，请重试。",
     "sync_failed": "无法同步订单，请重试。",
-    "generate_invoice_failed": "无法生成发票，请重试。"
+    "import_failed": "无法导入订单，请重试。",
+    "generate_invoice_failed": "无法生成发票，请重试。",
+    "export_failed": "无法导出订单，请重试。",
+    "select_to_export": "请至少选择一个订单进行导出。",
+    "export_preview_failed": "无法加载导出预览，请重试。",
+    "bulk_generate_failed": "无法生成发票，请重试。",
+    "select_to_bulk_generate": "请至少选择一个订单以生成发票。"
+  },
+  "export": {
+    "preview_title": "Excel 导出预览",
+    "preview_description": "核对数据并选择要包含的列。",
+    "preview_loading": "正在加载预览…",
+    "preview_loading_more": "正在加载更多…",
+    "preview_empty": "没有可导出的订单。",
+    "preview_end": "已到预览末尾。",
+    "columns": {
+      "id": "ID",
+      "marketplace": "平台",
+      "customer_phone": "客户电话",
+      "invoice_id": "发票 ID",
+      "subtotal": "小计",
+      "shipping": "运费",
+      "ex_vat": "EX.VAT",
+      "vat": "VAT",
+      "currency": "货币",
+      "created_at": "创建时间"
+    }
+  },
+  "import": {
+    "title": "从 Excel 导入订单",
+    "description": "上传 TikTok Shop 的 OrderSKUList 导出文件（.xlsx），系统按订单号匹配。",
+    "store_label": "店铺",
+    "store_placeholder": "选择店铺",
+    "marketplace_label": "平台",
+    "marketplace_placeholder": "选择平台",
+    "file_label": "Excel 文件",
+    "file_placeholder": "选择 .xlsx 文件",
+    "file_hint": "须为 OrderSKUList 格式。",
+    "sample_title": "需要模板？",
+    "download_sample": "下载示例",
+    "download_sample_aria": "下载 OrderSKUList 示例 Excel，包含全部列标题和一行示例订单",
+    "download_sample_hint": "仅一个工作表，包含全部必填列和一行示例订单。导入前请替换为您的数据。",
+    "submit": "导入",
+    "importing": "正在导入…",
+    "result_title": "导入结果",
+    "result_orders": "已导入 {{count}} 个订单",
+    "result_items": "{{count}} 个商品行",
+    "result_rows": "处理了 {{count}} 行",
+    "status_completed": "导入成功",
+    "status_partial": "部分完成 — 部分订单导入失败",
+    "status_failed": "导入失败",
+    "errors_title": "错误",
+    "no_file": "请选择 Excel 文件。",
+    "no_store": "请选择店铺。",
+    "close": "关闭"
   }
 }

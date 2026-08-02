@@ -100,7 +100,7 @@ export interface MarketplaceProductStats {
 export type ProductPriceSort = "none" | "asc" | "desc"
 
 export interface ProductFiltersState {
-  sourceKey: string
+  storeId: string
   search: string
   erpStatus: ProductErpFilter
   priceMin: string

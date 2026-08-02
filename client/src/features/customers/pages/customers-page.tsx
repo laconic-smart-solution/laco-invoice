@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import type { ColumnFiltersState, SortingState } from "@tanstack/react-table"
 
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
+import { CustomerExportPreviewDialog } from "@/features/customers/components/customer-export-preview-dialog"
 import { CustomersFilters } from "@/features/customers/components/customers-filters"
 import { CustomersHeader } from "@/features/customers/components/customers-header"
 import { CustomersStatCards } from "@/features/customers/components/customers-stat-cards"
@@ -20,8 +21,9 @@ import {
   getOrderErrorMessage,
   useTriggerOrderSyncMutation,
 } from "@/shared/queries/order.query"
-import { useMarketplaceProductSourcesQuery } from "@/shared/queries/marketplace-product.query"
-import { parseProductSourceKey } from "@/shared/services/marketplace-product.service"
+import { useStoresPageQuery } from "@/shared/queries/store.query"
+import type { CustomerExportRequest } from "@/shared/services/customer.service"
+import { useExportSelection } from "@/shared/hooks/use-export-selection"
 import {
   getPaginationMeta,
   usePagination,
@@ -40,6 +42,13 @@ const CUSTOMER_SORT_FIELD_MAP: Record<string, string> = {
   store: "store.name",
 }
 
+const STORES_LIST_REQUEST = {
+  pageNumber: 1,
+  pageSize: 500,
+  sortBy: "name",
+  sortOrder: "ASC" as const,
+}
+
 export function CustomersPage() {
   const { t } = useTranslation("customers")
   const isAdmin = useAuthStore((state) => state.user?.role === "ADMIN")
@@ -47,15 +56,16 @@ export function CustomersPage() {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const debouncedColumnFilters = useDebounce(columnFilters)
+  const [exportPreviewOpen, setExportPreviewOpen] = useState(false)
+  const [exportScope, setExportScope] = useState<
+    Omit<CustomerExportRequest, "pageNumber" | "pageSize" | "columns">
+  >({ exportAll: false })
 
   const { page, limit, setPage, setLimit } = usePagination()
-  const { data: sources = [] } = useMarketplaceProductSourcesQuery()
+  const { data: storesResponse, isLoading: storesLoading } =
+    useStoresPageQuery(STORES_LIST_REQUEST)
+  const stores = Array.isArray(storesResponse?.data) ? storesResponse.data : []
 
-  const selectedSourceKey = filters.sourceKey || "all"
-  const parsedSource = useMemo(
-    () => (filters.sourceKey ? parseProductSourceKey(filters.sourceKey) : null),
-    [filters.sourceKey]
-  )
   const pageSort = useMemo(
     () => sortingToPageSort(sorting, CUSTOMER_SORT_FIELD_MAP),
     [sorting]
@@ -73,18 +83,16 @@ export function CustomersPage() {
     [debouncedColumnFilters]
   )
 
-  const pageRequest = useMemo(() => {
-    const filter: {
-      storeId?: number
-      marketplaceCode?: string
-      name?: string
-      email?: string
-      phone?: string
-    } = {}
-    if (parsedSource) {
-      filter.storeId = parsedSource.storeId
-      filter.marketplaceCode = parsedSource.marketplaceCode
+  const exportFilter = useMemo(() => {
+    const filter: NonNullable<CustomerExportRequest["filter"]> = {}
+
+    if (filters.storeId) {
+      const storeId = Number(filters.storeId)
+      if (Number.isFinite(storeId) && storeId > 0) {
+        filter.storeId = storeId
+      }
     }
+
     const nameSearch = columnName || filters.search.trim()
     if (nameSearch) {
       filter.name = nameSearch
@@ -95,22 +103,18 @@ export function CustomersPage() {
     if (columnPhone) {
       filter.phone = columnPhone
     }
+
+    return Object.keys(filter).length > 0 ? filter : undefined
+  }, [columnEmail, columnName, columnPhone, filters.search, filters.storeId])
+
+  const pageRequest = useMemo(() => {
     return {
       pageNumber: page,
       pageSize: limit,
       ...pageSort,
-      filter: Object.keys(filter).length > 0 ? filter : undefined,
+      ...(exportFilter ? { filter: exportFilter } : {}),
     }
-  }, [
-    columnEmail,
-    columnName,
-    columnPhone,
-    filters.search,
-    limit,
-    page,
-    pageSort,
-    parsedSource,
-  ])
+  }, [exportFilter, limit, page, pageSort])
 
   const { data, isLoading, isError, error } = useCustomersPageQuery(pageRequest)
   const syncMutation = useTriggerOrderSyncMutation()
@@ -123,6 +127,14 @@ export function CustomersPage() {
     totalCount
   )
 
+  const {
+    setSelection,
+    closeConfirm,
+    requestAction,
+    actionError,
+    setActionError,
+  } = useExportSelection({ totalCount })
+
   const loadError =
     isError && error
       ? getCustomerErrorMessage(error, t("errors.load_failed"))
@@ -133,26 +145,60 @@ export function CustomersPage() {
       ? getOrderErrorMessage(syncMutation.error, t("errors.sync_failed"))
       : null
 
+  const openExportPreview = useCallback(
+    (scope: Omit<CustomerExportRequest, "pageNumber" | "pageSize" | "columns">) => {
+      setExportScope(scope)
+      setExportPreviewOpen(true)
+    },
+    []
+  )
+
+  const handleExportCsv = () => {
+    const result = requestAction("export")
+    if (result.kind === "need_selection") {
+      setActionError(t("errors.select_to_export"))
+      return
+    }
+    if (result.kind === "confirm_all") {
+      openExportPreview({
+        exportAll: true,
+        filter: exportFilter,
+      })
+      closeConfirm()
+      return
+    }
+    if (result.kind === "selected") {
+      openExportPreview({
+        ids: result.ids.map((id) => Number(id)).filter(Number.isFinite),
+      })
+    }
+  }
+
   return (
     <div className="space-y-6 p-6">
       <CustomersHeader
         isAdmin={isAdmin}
         onSync={() => syncMutation.mutate()}
         isSyncing={syncMutation.isPending}
+        onExportCsv={handleExportCsv}
+      />
+      <CustomerExportPreviewDialog
+        open={exportPreviewOpen}
+        onOpenChange={setExportPreviewOpen}
+        scope={exportScope}
       />
       <AuthFormError message={syncError} />
       <CustomersStatCards totalCustomers={totalCount} />
       <CustomersFilters
-        sources={sources}
+        stores={stores}
         value={filters}
-        selectedSourceKey={selectedSourceKey}
         onChange={(next) => {
           setFilters(next)
           setPage(1)
         }}
-        disabled={isLoading}
+        disabled={storesLoading || isLoading}
       />
-      <AuthFormError message={loadError} />
+      <AuthFormError message={loadError ?? actionError} />
       <CustomersTable
         customers={customers}
         isAdmin={isAdmin}
@@ -177,6 +223,7 @@ export function CustomersPage() {
           setColumnFilters(next)
           setPage(1)
         }}
+        onSelectionChange={setSelection}
       />
     </div>
   )

@@ -21,6 +21,7 @@
   },
   "table": {
     "open_menu": "เปิดเมนู",
+    "showing_total": "{{count}} รายการ",
     "column": {
       "search_placeholder": "ค้นหา...",
       "search_aria": "ค้นหา {{column}}",
@@ -33,6 +34,11 @@
       "toggle_columns": "แสดง/ซ่อนคอลัมน์",
       "reset_columns": "รีเซ็ตคอลัมน์"
     }
+  },
+  "export_preview": {
+    "column_hint": "คอลัมน์ที่ซ่อนจะไม่ถูกใส่ในไฟล์ Excel",
+    "download": "ดาวน์โหลด Excel",
+    "exporting": "กำลังส่งออก…"
   },
   "time": {
     "minutes_ago_one": "{{count}} นาทีที่แล้ว",

@@ -1,5 +1,6 @@
 package com.laconic.lacoinvoice.features.order.pageable;
 
+import com.laconic.lacoinvoice.domain.models.OrderSourceType;
 import com.laconic.lacoinvoice.domain.models.OrderStatus;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,6 +15,8 @@ import lombok.Setter;
 public class OrderFilter {
 
 	private OrderStatus orderStatus;
+
+	private OrderSourceType sourceType;
 
 	private String externalOrderId;
 

@@ -1,17 +1,22 @@
 import { motion } from "framer-motion"
-import { RefreshCw } from "lucide-react"
-import { useEffect, useRef } from "react"
+import { Loader2, RefreshCw } from "lucide-react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { useNavigate } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
 import { ConnectionLostSignal } from "@/features/errors/components/connection-lost-signal"
+import { consumeServerErrorReturnPath } from "@/features/errors/util/server-error-return-path"
 import { useReducedMotion } from "@/shared/hooks/use-reduced-motion"
 import { defaultTransition, fadeIn, slideUp } from "@/shared/motion-variants"
+import { waitForApplicationHealth } from "@/shared/services/health.service"
 
 export function ServerErrorContent() {
   const { t } = useTranslation("errors")
+  const navigate = useNavigate()
   const headingRef = useRef<HTMLHeadingElement>(null)
   const prefersReducedMotion = useReducedMotion()
+  const [isChecking, setIsChecking] = useState(false)
 
   const descriptionId = "server-error-description"
 
@@ -20,9 +25,21 @@ export function ServerErrorContent() {
     headingRef.current?.focus()
   }, [t])
 
-  const handleTryAgain = () => {
-    window.location.reload()
-  }
+  const attemptRecovery = useCallback(async () => {
+    setIsChecking(true)
+    try {
+      const recovered = await waitForApplicationHealth()
+      if (recovered) {
+        navigate(consumeServerErrorReturnPath(), { replace: true })
+      }
+    } finally {
+      setIsChecking(false)
+    }
+  }, [navigate])
+
+  useEffect(() => {
+    void attemptRecovery()
+  }, [attemptRecovery])
 
   const containerMotion = prefersReducedMotion
     ? {}
@@ -76,9 +93,19 @@ export function ServerErrorContent() {
       </p>
 
       <div className="mt-10">
-        <Button type="button" size="lg" className="min-w-36 px-5" onClick={handleTryAgain}>
-          <RefreshCw data-icon="inline-start" aria-hidden />
-          {t("server_error.try_again")}
+        <Button
+          type="button"
+          size="lg"
+          className="min-w-36 px-5"
+          onClick={() => void attemptRecovery()}
+          disabled={isChecking}
+        >
+          {isChecking ? (
+            <Loader2 data-icon="inline-start" className="animate-spin" aria-hidden />
+          ) : (
+            <RefreshCw data-icon="inline-start" aria-hidden />
+          )}
+          {isChecking ? t("server_error.checking") : t("server_error.try_again")}
         </Button>
       </div>
     </motion.section>

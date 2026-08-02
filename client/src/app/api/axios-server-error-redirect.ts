@@ -1,6 +1,7 @@
 import type { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from "axios"
 
 import { ROUTES } from "@/app/constants/routes"
+import { rememberServerErrorReturnPath } from "@/features/errors/util/server-error-return-path"
 
 type ServerErrorConfig = InternalAxiosRequestConfig & {
   skipServerErrorRedirect?: boolean
@@ -75,6 +76,8 @@ async function redirectToServerErrorPage(message?: string): Promise<void> {
   redirectInFlight = true
 
   try {
+    rememberServerErrorReturnPath()
+
     const { router } = await import("@/app/routes/app-router")
 
     await router.navigate(ROUTES.errors.serverError, {

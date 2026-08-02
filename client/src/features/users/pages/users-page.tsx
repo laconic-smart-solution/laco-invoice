@@ -5,11 +5,13 @@ import type { ColumnFiltersState, SortingState } from "@tanstack/react-table"
 
 import { ConfirmDialog } from "@/components/common/confirm-dialog"
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
+import { UserExportPreviewDialog } from "@/features/users/components/user-export-preview-dialog"
 import { UsersFilters } from "@/features/users/components/users-filters"
 import { UsersHeader } from "@/features/users/components/users-header"
 import { UsersStatCards } from "@/features/users/components/users-stat-cards"
 import { UsersTable } from "@/features/users/components/users-table"
 import type { AdminUser, UserRoleFilter } from "@/features/users/types/user"
+import { useExportSelection } from "@/shared/hooks/use-export-selection"
 import {
   getPaginationMeta,
   PAGE_QUERY_KEY,
@@ -21,6 +23,7 @@ import {
   useUsersPageQuery,
   useVerifyUserOtpMutation,
 } from "@/shared/queries/admin-user.query"
+import type { UserExportRequest } from "@/shared/services/admin-user.service"
 import type { UserRole } from "@/shared/types/auth.types"
 import { getColumnFilterValue } from "@/util/table-column-filters"
 import { sortingToPageSort } from "@/util/table-sort"
@@ -57,6 +60,10 @@ export function UsersPage() {
   const debouncedColumnFilters = useDebounce(columnFilters)
   const [pendingVerifyUser, setPendingVerifyUser] = useState<AdminUser | null>(null)
   const [verifySuccessMessage, setVerifySuccessMessage] = useState<string | null>(null)
+  const [exportPreviewOpen, setExportPreviewOpen] = useState(false)
+  const [exportScope, setExportScope] = useState<
+    Omit<UserExportRequest, "pageNumber" | "pageSize" | "columns">
+  >({ exportAll: false })
 
   const { page, limit, setPage, setLimit } = usePagination()
   const verifyOtpMutation = useVerifyUserOtpMutation()
@@ -69,12 +76,8 @@ export function UsersPage() {
     [debouncedColumnFilters]
   )
 
-  const pageRequest = useMemo(() => {
-    const filter: {
-      role?: UserRole
-      email?: string
-      fullName?: string
-    } = {}
+  const exportFilter = useMemo(() => {
+    const filter: NonNullable<UserExportRequest["filter"]> = {}
 
     if (roleFilter !== "all") {
       filter.role = roleFilter
@@ -84,13 +87,17 @@ export function UsersPage() {
       filter.fullName = nameSearch
     }
 
+    return Object.keys(filter).length > 0 ? filter : undefined
+  }, [columnFullName, roleFilter, search])
+
+  const pageRequest = useMemo(() => {
     return {
       pageNumber: page,
       pageSize: limit,
       ...pageSort,
-      filter: Object.keys(filter).length > 0 ? filter : undefined,
+      ...(exportFilter ? { filter: exportFilter } : {}),
     }
-  }, [columnFullName, limit, page, pageSort, roleFilter, search])
+  }, [exportFilter, limit, page, pageSort])
 
   const { data, isLoading, isError, error } = useUsersPageQuery(pageRequest)
 
@@ -102,6 +109,14 @@ export function UsersPage() {
     totalCount
   )
 
+  const {
+    setSelection,
+    closeConfirm,
+    requestAction,
+    actionError,
+    setActionError,
+  } = useExportSelection({ totalCount })
+
   const loadError =
     isError && error
       ? getAdminUserErrorMessage(error, t("errors.load_failed"))
@@ -111,6 +126,35 @@ export function UsersPage() {
     verifyOtpMutation.isError && verifyOtpMutation.error
       ? getAdminUserErrorMessage(verifyOtpMutation.error, t("errors.verify_otp_failed"))
       : null
+
+  const openExportPreview = useCallback(
+    (scope: Omit<UserExportRequest, "pageNumber" | "pageSize" | "columns">) => {
+      setExportScope(scope)
+      setExportPreviewOpen(true)
+    },
+    []
+  )
+
+  const handleExportCsv = () => {
+    const result = requestAction("export")
+    if (result.kind === "need_selection") {
+      setActionError(t("errors.select_to_export"))
+      return
+    }
+    if (result.kind === "confirm_all") {
+      openExportPreview({
+        exportAll: true,
+        filter: exportFilter,
+      })
+      closeConfirm()
+      return
+    }
+    if (result.kind === "selected") {
+      openExportPreview({
+        ids: result.ids.map((id) => Number(id)).filter(Number.isFinite),
+      })
+    }
+  }
 
   const handleVerifyOtpRequest = useCallback((user: AdminUser) => {
     setVerifySuccessMessage(null)
@@ -154,7 +198,12 @@ export function UsersPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <UsersHeader />
+      <UsersHeader onExportCsv={handleExportCsv} />
+      <UserExportPreviewDialog
+        open={exportPreviewOpen}
+        onOpenChange={setExportPreviewOpen}
+        scope={exportScope}
+      />
       <UsersStatCards totalUsers={totalCount} />
       <UsersFilters
         role={roleFilter}
@@ -165,7 +214,7 @@ export function UsersPage() {
           setPage(1)
         }}
       />
-      <AuthFormError message={loadError} />
+      <AuthFormError message={loadError ?? actionError} />
       <AuthFormError message={verifyError} />
       {verifySuccessMessage ? (
         <p
@@ -199,6 +248,7 @@ export function UsersPage() {
           setColumnFilters(next)
           setPage(1)
         }}
+        onSelectionChange={setSelection}
       />
 
       <ConfirmDialog

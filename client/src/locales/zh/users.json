@@ -2,7 +2,8 @@
   "title": "用户管理",
   "subtitle": "查看和管理平台中的所有用户账户。",
   "actions": {
-    "add_user": "添加用户"
+    "add_user": "添加用户",
+    "export_csv": "导出 CSV"
   },
   "stats": {
     "total_users": "用户总数"
@@ -65,7 +66,22 @@
   "errors": {
     "load_failed": "无法加载用户列表，请重试。",
     "save_failed": "无法创建用户，请重试。",
-    "verify_otp_failed": "无法验证 OTP，请重试。"
+    "verify_otp_failed": "无法验证 OTP，请重试。",
+    "export_failed": "无法导出用户，请重试。",
+    "select_to_export": "请至少选择一位用户进行导出。",
+    "export_preview_failed": "无法加载导出预览，请重试。"
+  },
+  "export": {
+    "preview_title": "Excel 导出预览",
+    "preview_description": "核对数据并选择要包含的列。",
+    "preview_loading": "正在加载预览…",
+    "preview_loading_more": "正在加载更多…",
+    "preview_empty": "没有可导出的用户。",
+    "preview_end": "已到预览末尾。",
+    "columns": {
+      "email": "电子邮箱",
+      "auth_server_user_id": "身份服务器用户 ID"
+    }
   },
   "verify_otp": {
     "confirm_title": "标记 OTP 为已验证？",
@@ -76,6 +92,10 @@
   "table": {
     "empty": "未找到用户。",
     "loading": "正在加载用户...",
+    "select_all": "全选",
+    "select_row": "选择行",
+    "selected_count_one": "已选择 {{count}} 个用户",
+    "selected_count_other": "已选择 {{count}} 个用户",
     "showing": "显示第 {{start}}-{{end}} 条，共 {{total}} 条用户",
     "columns": {
       "id": "ID",

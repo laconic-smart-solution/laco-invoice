@@ -36,6 +36,7 @@
     "details_label": "错误详情",
     "unreachable": "无法连接到服务器。",
     "try_again": "重试",
+    "checking": "正在检查连接…",
     "go_home": "返回仪表盘",
     "go_login": "前往登录",
     "go_back": "返回上一页"

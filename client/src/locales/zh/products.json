@@ -20,6 +20,9 @@
     "marketplace_label": "Marketplace 来源",
     "marketplace_placeholder": "选择已连接的店铺",
     "marketplace_all": "全部",
+    "store_label": "店铺",
+    "store_placeholder": "选择店铺",
+    "store_all": "全部店铺",
     "erp_status_label": "ERP 状态",
     "erp_status": {
       "all": "全部",
@@ -54,11 +57,36 @@
   "errors": {
     "load_sources_failed": "加载 marketplace 来源失败。",
     "load_products_failed": "加载 marketplace 商品失败。",
-    "load_detail_failed": "加载商品详情失败。"
+    "load_detail_failed": "加载商品详情失败。",
+    "export_failed": "无法导出商品，请重试。",
+    "select_to_export": "请至少选择一个商品进行导出。",
+    "export_preview_failed": "无法加载导出预览，请重试。"
+  },
+  "export": {
+    "preview_title": "Excel 导出预览",
+    "preview_description": "核对数据并选择要包含的列。",
+    "preview_loading": "正在加载预览…",
+    "preview_loading_more": "正在加载更多…",
+    "preview_empty": "没有可导出的商品。",
+    "preview_end": "已到预览末尾。",
+    "columns": {
+      "id": "ID",
+      "store": "店铺",
+      "marketplace_code": "平台代码",
+      "marketplace_name": "平台名称",
+      "external_product_id": "外部商品 ID",
+      "sku": "SKU",
+      "currency": "货币",
+      "status": "状态"
+    }
   },
   "table": {
     "empty": "未找到商品。",
     "loading": "正在加载商品...",
+    "select_all": "全选",
+    "select_row": "选择行",
+    "selected_count_one": "已选择 {{count}} 个商品",
+    "selected_count_other": "已选择 {{count}} 个商品",
     "showing": "显示第 {{start}}-{{end}} 条，共 {{total}} 条商品",
     "store_label": "店铺：{{id}}",
     "marketplace_label": "Marketplace：{{id}}",

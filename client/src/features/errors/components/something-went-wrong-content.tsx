@@ -16,14 +16,12 @@ interface SomethingWentWrongContentProps {
   isAuthenticated: boolean
   variant?: "standalone" | "embedded"
   copyKey?: ErrorCopyKey
-  errorMessage?: string | null
 }
 
 export function SomethingWentWrongContent({
   isAuthenticated,
   variant = "embedded",
   copyKey = "something_went_wrong",
-  errorMessage = null,
 }: SomethingWentWrongContentProps) {
   const { t } = useTranslation("errors")
   const navigate = useNavigate()
@@ -31,7 +29,6 @@ export function SomethingWentWrongContent({
   const prefersReducedMotion = useReducedMotion()
 
   const descriptionId = "something-went-wrong-description"
-  const detailsId = "something-went-wrong-details"
 
   useEffect(() => {
     document.title = t(`${copyKey}.page_title`)
@@ -63,9 +60,7 @@ export function SomethingWentWrongContent({
     <motion.section
       {...motionProps}
       aria-labelledby="something-went-wrong-title"
-      aria-describedby={
-        errorMessage ? `${descriptionId} ${detailsId}` : descriptionId
-      }
+      aria-describedby={descriptionId}
       className={cn(
         "flex flex-col items-center justify-center px-6 py-12 text-center",
         variant === "standalone" ? "min-h-svh" : "min-h-[calc(100svh-8rem)]"
@@ -100,20 +95,6 @@ export function SomethingWentWrongContent({
       >
         {t(`${copyKey}.description`)}
       </p>
-
-      {errorMessage ? (
-        <div
-          id={detailsId}
-          className="mt-6 w-full max-w-md border border-border bg-muted/30 px-4 py-3 text-left"
-        >
-          <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-            {t(`${copyKey}.details_label`)}
-          </p>
-          <p className="mt-1 break-all font-mono text-sm text-foreground">
-            {errorMessage}
-          </p>
-        </div>
-      ) : null}
 
       <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
         <Button type="button" size="lg" onClick={handleTryAgain}>

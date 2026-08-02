@@ -43,5 +43,14 @@ export interface InvoicePageRequest {
   sortOrder?: "ASC" | "DESC"
   filter?: {
     status?: InvoiceStatus
+    storeId?: number
+    invoiceNo?: string
+    orderId?: number
   }
+}
+
+export interface InvoiceStats {
+  issuedCount: number
+  voidedCount: number
+  issuedGrandTotal: number
 }

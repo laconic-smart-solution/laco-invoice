@@ -3,9 +3,23 @@ import type {
   InvoiceDetail,
   InvoiceListItem,
   InvoicePageRequest,
+  InvoiceStats,
   InvoiceStatus,
 } from "@/features/invoices/types/invoice"
 import type { ApiResponse } from "@/shared/types/api-response"
+import { downloadBlob, filenameFromContentDisposition, rethrowBlobApiError } from "@/util/download-blob"
+
+export interface InvoiceExportRequest {
+  ids?: number[]
+  exportAll?: boolean
+  filter?: {
+    status?: InvoiceStatus
+    storeId?: number
+  }
+  columns?: string[]
+  pageNumber?: number
+  pageSize?: number
+}
 
 export interface ApiInvoiceDto {
   id: number
@@ -122,6 +136,39 @@ export const invoiceService = {
     }
   },
 
+  previewExport: async (request: InvoiceExportRequest) => {
+    const response = await apiClient.post<ApiResponse<ApiInvoiceListItemDto[]>>(
+      "/v1/invoices/export/preview",
+      {
+        ...request,
+        pageNumber: request.pageNumber ?? 1,
+        pageSize: request.pageSize ?? 10,
+      }
+    )
+    return {
+      ...response.data,
+      data: (response.data.data ?? []).map(mapListItem),
+    }
+  },
+
+  getStats: async (storeId?: number): Promise<InvoiceStats> => {
+    const response = await apiClient.get<
+      ApiResponse<{
+        issuedCount: number
+        voidedCount: number
+        issuedGrandTotal: number
+      }>
+    >("/v1/invoices/stats", {
+      params: storeId != null ? { storeId } : undefined,
+    })
+    const data = response.data.data
+    return {
+      issuedCount: data?.issuedCount ?? 0,
+      voidedCount: data?.voidedCount ?? 0,
+      issuedGrandTotal: Number(data?.issuedGrandTotal ?? 0),
+    }
+  },
+
   getInvoice: async (id: number) => {
     const response = await apiClient.get<ApiResponse<ApiInvoiceDetailDto>>(
       `/v1/invoices/${id}`
@@ -221,5 +268,35 @@ export const invoiceService = {
     printWindow.addEventListener("afterprint", cleanup, { once: true })
     // Fallback if afterprint never fires (some PDF viewers)
     window.setTimeout(cleanup, 60_000)
+  },
+
+  exportExcel: async (request: InvoiceExportRequest) => {
+    try {
+      const response = await apiClient.post<Blob>("/v1/invoices/export", request, {
+        responseType: "blob",
+      })
+      const filename = filenameFromContentDisposition(
+        response.headers["content-disposition"] as string | undefined,
+        "invoices-export.xlsx"
+      )
+      downloadBlob(response.data, filename)
+    } catch (error) {
+      await rethrowBlobApiError(error)
+    }
+  },
+
+  bulkDownloadPdf: async (request: InvoiceExportRequest) => {
+    try {
+      const response = await apiClient.post<Blob>("/v1/invoices/bulk-pdf", request, {
+        responseType: "blob",
+      })
+      const filename = filenameFromContentDisposition(
+        response.headers["content-disposition"] as string | undefined,
+        "invoices-pdf.zip"
+      )
+      downloadBlob(response.data, filename)
+    } catch (error) {
+      await rethrowBlobApiError(error)
+    }
   },
 }

@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.laconic.lacoinvoice.common.mapper.BaseMapper;
 import com.laconic.lacoinvoice.domain.models.CustomerInfo;
+import com.laconic.lacoinvoice.domain.models.OrderSourceType;
 import com.laconic.lacoinvoice.domain.models.Order;
 import com.laconic.lacoinvoice.domain.models.OrderItem;
 
@@ -26,6 +27,7 @@ public class OrderMapper implements BaseMapper<Order, OrderDto> {
 		Long customerId = entity.getCustomer() != null ? entity.getCustomer().getId() : null;
 		String customerName = entity.getCustomer() != null ? entity.getCustomer().getName() : null;
 		String customerPhone = entity.getCustomer() != null ? entity.getCustomer().getPhone() : null;
+		OrderMoneyCalculator.VatBreakdown vat = resolveVat(entity);
 		return new OrderDto(
 				entity.getId(),
 				storeId,
@@ -38,12 +40,22 @@ public class OrderMapper implements BaseMapper<Order, OrderDto> {
 				invoiceId,
 				entity.getExternalOrderId(),
 				entity.getOrderStatus(),
+				entity.getSourceType() != null ? entity.getSourceType() : OrderSourceType.API,
 				entity.getSubtotal(),
 				entity.getShippingFee(),
+				vat.amountExVat(),
+				vat.vatAmount(),
 				entity.getTotalAmount(),
 				entity.getCurrency(),
 				entity.getOrderDate(),
 				entity.getCreatedAt());
+	}
+
+	private static OrderMoneyCalculator.VatBreakdown resolveVat(Order entity) {
+		if (entity.getAmountExVat() != null && entity.getVatAmount() != null) {
+			return new OrderMoneyCalculator.VatBreakdown(entity.getAmountExVat(), entity.getVatAmount());
+		}
+		return OrderMoneyCalculator.fromInclusiveTotal(entity.getTotalAmount());
 	}
 
 	public CustomerInfoDto toCustomerDto(CustomerInfo entity) {

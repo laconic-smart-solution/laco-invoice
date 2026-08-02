@@ -1,5 +1,6 @@
 package com.laconic.lacoinvoice.domain.repositories;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import com.laconic.lacoinvoice.common.persistence.BaseRepository;
 import com.laconic.lacoinvoice.domain.models.Invoice;
+import com.laconic.lacoinvoice.domain.models.InvoiceStatus;
 
 @Repository
 public interface InvoiceRepository extends BaseRepository<Invoice> {
@@ -41,4 +43,22 @@ public interface InvoiceRepository extends BaseRepository<Invoice> {
 			WHERE i.id IN :ids
 			""")
 	List<Invoice> findAllDetailedByIdIn(@Param("ids") Collection<Long> ids);
+
+	@Query("""
+			SELECT COUNT(i) FROM Invoice i
+			WHERE i.status = :status
+			  AND (:storeId IS NULL OR i.order.store.id = :storeId)
+			""")
+	long countByStatusAndOptionalStoreId(
+			@Param("status") InvoiceStatus status,
+			@Param("storeId") Long storeId);
+
+	@Query("""
+			SELECT COALESCE(SUM(i.grandTotal), 0) FROM Invoice i
+			WHERE i.status = :status
+			  AND (:storeId IS NULL OR i.order.store.id = :storeId)
+			""")
+	BigDecimal sumGrandTotalByStatusAndOptionalStoreId(
+			@Param("status") InvoiceStatus status,
+			@Param("storeId") Long storeId);
 }

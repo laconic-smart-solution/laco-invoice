@@ -4,7 +4,7 @@ import type {
   OnChangeFn,
   SortingState,
 } from "@tanstack/react-table"
-import { useCallback, useMemo } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 
@@ -14,7 +14,12 @@ import { DataTable } from "@/components/common/data-table/data-table"
 import { DataTableColumnControls } from "@/components/common/data-table/data-table-column-controls"
 import { DataTableColumnHeader } from "@/components/common/data-table/data-table-column-header"
 import { DataTableFooter } from "@/components/common/data-table/data-table-footer"
-import { useDataTable } from "@/components/common/data-table/use-data-table"
+import { DataTableToolbar } from "@/components/common/data-table/data-table-toolbar"
+import {
+  useDataTable,
+  type RowSelectionState,
+} from "@/components/common/data-table/use-data-table"
+import type { DataTableSelection } from "@/components/common/data-table/types"
 import { UserRowActions } from "@/features/users/components/user-row-actions"
 import type { AdminUser } from "@/features/users/types/user"
 import { useLocaleStore } from "@/shared/stores/locale-store"
@@ -63,6 +68,7 @@ interface UsersTableProps {
   onSortingChange: (sorting: SortingState) => void
   columnFilters: ColumnFiltersState
   onColumnFiltersChange: (filters: ColumnFiltersState) => void
+  onSelectionChange?: (selection: DataTableSelection) => void
 }
 
 export function UsersTable({
@@ -83,10 +89,34 @@ export function UsersTable({
   onSortingChange,
   columnFilters,
   onColumnFiltersChange,
+  onSelectionChange,
 }: UsersTableProps) {
   const { t } = useTranslation("users")
   const navigate = useNavigate()
   const locale = useLocaleStore((state) => state.locale)
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
+  const [isAllMatchingSelected, setIsAllMatchingSelected] = useState(false)
+
+  const pageRowIdsKey = useMemo(
+    () => users.map((user) => user.id).join(","),
+    [users]
+  )
+
+  useEffect(() => {
+    setRowSelection({})
+    setIsAllMatchingSelected(false)
+  }, [totalCount])
+
+  useEffect(() => {
+    if (!isAllMatchingSelected || users.length === 0) {
+      return
+    }
+    const next: RowSelectionState = {}
+    for (const user of users) {
+      next[String(user.id)] = true
+    }
+    setRowSelection(next)
+  }, [isAllMatchingSelected, pageRowIdsKey, users])
 
   const handleRowClick = useCallback(
     (user: AdminUser) => {
@@ -242,17 +272,58 @@ export function UsersTable({
   const table = useDataTable({
     data: users,
     columns,
+    getRowId: (row) => String(row.id),
+    enableRowSelection: true,
     manualSorting: true,
     manualFiltering: true,
-    state: { sorting, columnFilters },
+    selectColumnLabels: {
+      selectAll: t("table.select_all"),
+      selectRow: t("table.select_row"),
+    },
+    state: { rowSelection, sorting, columnFilters },
+    onRowSelectionChange: setRowSelection,
     onSortingChange: handleSortingChange,
     onColumnFiltersChange: handleColumnFiltersChange,
+    meta: {
+      selectAllMatching: {
+        enabled: true,
+        isSelected: isAllMatchingSelected,
+        onChange: setIsAllMatchingSelected,
+      },
+    },
   })
+
+  useEffect(() => {
+    if (!onSelectionChange) {
+      return
+    }
+    const ids = Object.keys(rowSelection).filter((id) => rowSelection[id])
+    const pageRowCount = users.length
+    onSelectionChange({
+      ids,
+      isAllPageSelected: pageRowCount > 0 && ids.length === pageRowCount,
+      isAllMatchingSelected,
+    })
+  }, [isAllMatchingSelected, onSelectionChange, rowSelection, users.length])
+
+  const toolbarSelectedCount = isAllMatchingSelected
+    ? totalCount
+    : Object.keys(rowSelection).filter((id) => rowSelection[id]).length
 
   return (
     <section className="border border-border bg-card shadow-sm">
-      <div className="border-b border-border px-4 py-3">
-        <DataTableColumnControls table={table} columnLabels={columnLabels} />
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border">
+        <DataTableToolbar
+          table={table}
+          selectedLabel={(count) => t("table.selected_count", { count })}
+          selectedCount={toolbarSelectedCount}
+          className="border-b-0"
+        />
+        <DataTableColumnControls
+          table={table}
+          columnLabels={columnLabels}
+          className="px-4 py-3"
+        />
       </div>
 
       <div className="overflow-x-auto">

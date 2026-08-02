@@ -1,12 +1,17 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import type { MarketplaceProductSyncStatus } from "@/features/products/types/product"
 import type {
+  MarketplaceProductExportRequest,
   MarketplaceProductPageRequest,
   MarketplaceProductStatsParams,
   MarketplaceProductSyncParams,
 } from "@/shared/services/marketplace-product.service"
 import { marketplaceProductService } from "@/shared/services/marketplace-product.service"
+import {
+  extractApiErrorMessage,
+  isAxiosStatusMessage,
+} from "@/shared/api/extract-api-error-message"
 
 const SYNC_POLL_INTERVAL_MS = 2000
 
@@ -22,6 +27,9 @@ export const marketplaceProductKeys = {
     [...marketplaceProductKeys.all, "stats", params] as const,
   detail: (productId: number) => [...marketplaceProductKeys.all, "detail", productId] as const,
   sync: (syncRunId: number) => [...marketplaceProductKeys.all, "sync", syncRunId] as const,
+  exportPreview: (
+    request: Omit<MarketplaceProductExportRequest, "pageNumber" | "pageSize" | "columns">
+  ) => [...marketplaceProductKeys.all, "export-preview", request] as const,
 }
 
 export function useMarketplaceProductSourcesQuery() {
@@ -107,4 +115,47 @@ export function useMarketplaceProductSyncStatusQuery(
       return SYNC_POLL_INTERVAL_MS
     },
   })
+}
+
+export function useMarketplaceProductExportPreviewQuery(
+  request: Omit<MarketplaceProductExportRequest, "pageNumber" | "pageSize" | "columns">,
+  enabled: boolean
+) {
+  return useInfiniteQuery({
+    queryKey: marketplaceProductKeys.exportPreview(request),
+    queryFn: ({ pageParam }) =>
+      marketplaceProductService.previewExport({
+        ...request,
+        pageNumber: pageParam,
+        pageSize: 10,
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const page = lastPage.meta?.page ?? 1
+      const totalPages = lastPage.meta?.totalPages ?? 0
+      if (page >= totalPages) {
+        return undefined
+      }
+      return page + 1
+    },
+    enabled,
+  })
+}
+
+export function useExportMarketplaceProductsMutation() {
+  return useMutation({
+    mutationFn: (request: MarketplaceProductExportRequest) =>
+      marketplaceProductService.exportExcel(request),
+  })
+}
+
+export function getMarketplaceProductErrorMessage(
+  error: unknown,
+  fallback: string
+): string {
+  const message = extractApiErrorMessage(error, fallback)
+  if (message === fallback || isAxiosStatusMessage(message)) {
+    return fallback
+  }
+  return message
 }

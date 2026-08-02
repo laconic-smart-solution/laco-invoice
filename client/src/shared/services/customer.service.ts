@@ -6,6 +6,7 @@ import type {
   CustomerUpdateInput,
 } from "@/features/customers/types/customer"
 import type { ApiResponse } from "@/shared/types/api-response"
+import { downloadBlob, filenameFromContentDisposition, rethrowBlobApiError } from "@/util/download-blob"
 
 function normalizeOptional(value?: string): string | undefined {
   const trimmed = value?.trim()
@@ -23,6 +24,15 @@ function normalizePayload<T extends CustomerCreateInput>(payload: T): T {
   }
 }
 
+export interface CustomerExportRequest {
+  ids?: number[]
+  exportAll?: boolean
+  filter?: CustomerPageRequest["filter"]
+  columns?: string[]
+  pageNumber?: number
+  pageSize?: number
+}
+
 export const customerService = {
   pageCustomers: async (request: CustomerPageRequest) => {
     const response = await apiClient.post<ApiResponse<Customer[]>>(
@@ -30,6 +40,33 @@ export const customerService = {
       request
     )
     return response.data
+  },
+
+  previewExport: async (request: CustomerExportRequest) => {
+    const response = await apiClient.post<ApiResponse<Customer[]>>(
+      "/v1/customers/export/preview",
+      {
+        ...request,
+        pageNumber: request.pageNumber ?? 1,
+        pageSize: request.pageSize ?? 10,
+      }
+    )
+    return response.data
+  },
+
+  exportExcel: async (request: CustomerExportRequest) => {
+    try {
+      const response = await apiClient.post<Blob>("/v1/customers/export", request, {
+        responseType: "blob",
+      })
+      const filename = filenameFromContentDisposition(
+        response.headers["content-disposition"] as string | undefined,
+        "customers-export.xlsx"
+      )
+      downloadBlob(response.data, filename)
+    } catch (error) {
+      await rethrowBlobApiError(error)
+    }
   },
 
   getCustomer: async (id: number) => {

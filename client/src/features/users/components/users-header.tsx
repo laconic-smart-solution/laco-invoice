@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react"
+import { Download, Plus } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 
@@ -8,9 +8,10 @@ import { cn } from "@/lib/utils"
 
 interface UsersHeaderProps {
   className?: string
+  onExportCsv?: () => void
 }
 
-export function UsersHeader({ className }: UsersHeaderProps) {
+export function UsersHeader({ className, onExportCsv }: UsersHeaderProps) {
   const { t } = useTranslation("users")
 
   return (
@@ -23,6 +24,15 @@ export function UsersHeader({ className }: UsersHeaderProps) {
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onExportCsv}
+          disabled={!onExportCsv}
+        >
+          <Download data-icon="inline-start" />
+          {t("actions.export_csv")}
+        </Button>
         <Button asChild>
           <Link to={ROUTES.dashboard.userCreate}>
             <Plus data-icon="inline-start" />

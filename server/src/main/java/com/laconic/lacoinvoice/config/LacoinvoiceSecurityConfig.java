@@ -25,25 +25,29 @@ public class LacoinvoiceSecurityConfig {
 			CookieBearerTokenResolver cookieBearerTokenResolver) throws Exception {
 		http.csrf(AbstractHttpConfigurer::disable);
 		http.cors(Customizer.withDefaults());
+
 		if ("permit_all".equalsIgnoreCase(securityMode.trim())) {
 			http.authorizeHttpRequests(auth -> auth
 					.requestMatchers(HttpMethod.OPTIONS, "/**")
 					.permitAll()
 					.requestMatchers("/actuator/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
 					.permitAll()
+					.requestMatchers(HttpMethod.GET, "/api/v1/health")
+					.permitAll()
 					.requestMatchers(HttpMethod.POST, "/api/v1/users")
 					.permitAll()
-				.requestMatchers(HttpMethod.POST,
-						"/api/v1/auth/login",
-						"/api/v1/auth/verify-otp",
-						"/api/v1/auth/resend-otp",
-						"/api/v1/auth/refresh",
-						"/api/v1/auth/logout")
+					.requestMatchers(HttpMethod.POST,
+							"/api/v1/auth/login",
+							"/api/v1/auth/verify-otp",
+							"/api/v1/auth/resend-otp",
+							"/api/v1/auth/refresh",
+							"/api/v1/auth/logout")
 					.permitAll()
 					.anyRequest()
 					.permitAll());
 			return http.build();
 		}
+
 		http.oauth2ResourceServer(oauth2 -> oauth2
 				.bearerTokenResolver(cookieBearerTokenResolver)
 				.jwt(Customizer.withDefaults()));
@@ -53,6 +57,8 @@ public class LacoinvoiceSecurityConfig {
 				.permitAll()
 				.requestMatchers("/actuator/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
 				.permitAll()
+				.requestMatchers(HttpMethod.GET, "/api/v1/health")
+				.permitAll()
 				.requestMatchers(HttpMethod.POST, "/api/v1/users")
 				.permitAll()
 				.requestMatchers(HttpMethod.POST,
@@ -61,9 +67,9 @@ public class LacoinvoiceSecurityConfig {
 						"/api/v1/auth/resend-otp",
 						"/api/v1/auth/refresh",
 						"/api/v1/auth/logout")
-					.permitAll()
+				.permitAll()
 				.requestMatchers("/api/v1/internal/tiktok-seller-sessions", "/api/v1/internal/tiktok-seller-sessions/**")
-					.permitAll()
+				.permitAll()
 				.anyRequest()
 				.authenticated());
 		return http.build();

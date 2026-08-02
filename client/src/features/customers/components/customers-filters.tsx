@@ -11,25 +11,24 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { CustomerFiltersState } from "@/features/customers/types/customer"
-import type { MarketplaceProductSource } from "@/features/products/types/product"
-import { buildProductSourceKey } from "@/shared/services/marketplace-product.service"
+import type { Store } from "@/features/stores/types/store"
 
 interface CustomersFiltersProps {
-  sources: MarketplaceProductSource[]
+  stores: Store[]
   value: CustomerFiltersState
-  selectedSourceKey: string
   onChange: (value: CustomerFiltersState) => void
   disabled?: boolean
 }
 
 export function CustomersFilters({
-  sources,
+  stores = [],
   value,
-  selectedSourceKey,
   onChange,
   disabled = false,
 }: CustomersFiltersProps) {
   const { t } = useTranslation("customers")
+  const selectedStoreId = value.storeId || "all"
+  const storeOptions = Array.isArray(stores) ? stores : []
 
   return (
     <section className="border border-border bg-card p-4 shadow-sm">
@@ -39,25 +38,22 @@ export function CustomersFilters({
             {t("filters.store_label")}
           </Label>
           <Select
-            value={selectedSourceKey}
-            onValueChange={(sourceKey) =>
-              onChange({ ...value, sourceKey: sourceKey === "all" ? "" : sourceKey })
+            value={selectedStoreId}
+            onValueChange={(storeId) =>
+              onChange({ ...value, storeId: storeId === "all" ? "" : storeId })
             }
-            disabled={disabled || sources.length === 0}
+            disabled={disabled || storeOptions.length === 0}
           >
             <SelectTrigger className="w-full max-w-md">
               <SelectValue placeholder={t("filters.store_placeholder")} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("filters.store_all")}</SelectItem>
-              {sources.map((source) => {
-                const key = buildProductSourceKey(source.storeId, source.marketplaceCode)
-                return (
-                  <SelectItem key={key} value={key}>
-                    {source.label}
-                  </SelectItem>
-                )
-              })}
+              {storeOptions.map((store) => (
+                <SelectItem key={store.id} value={String(store.id)}>
+                  {store.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

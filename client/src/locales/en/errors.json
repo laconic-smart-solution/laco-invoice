@@ -36,6 +36,7 @@
     "details_label": "Error details",
     "unreachable": "Unable to reach the server.",
     "try_again": "Try again",
+    "checking": "Checking connection…",
     "go_home": "Go to dashboard",
     "go_login": "Go to sign in",
     "go_back": "Go back"

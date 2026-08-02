@@ -3,9 +3,21 @@
   "subtitle": "View and manage invoices generated from marketplace orders.",
   "actions": {
     "export_csv": "Export CSV",
-    "bulk_download": "Bulk Download"
+    "exporting": "Exporting…",
+    "bulk_download": "Bulk Download",
+    "bulk_downloading": "Preparing ZIP…"
+  },
+  "stats": {
+    "issued": "Issued Invoices",
+    "issued_value": "{{count}} Invoices",
+    "total_billed": "Total Billed",
+    "voided": "Voided",
+    "voided_value": "{{count}} Invoices"
   },
   "filters": {
+    "store_label": "Store",
+    "store_placeholder": "Select a store",
+    "store_all": "All stores",
     "marketplace_label": "Marketplace",
     "marketplace_all": "All Marketplaces",
     "marketplace_lazada": "Lazada",
@@ -19,6 +31,10 @@
   },
   "table": {
     "empty": "No invoices found.",
+    "select_all": "Select all",
+    "select_row": "Select row",
+    "selected_count_one": "{{count}} Invoice Selected",
+    "selected_count_other": "{{count}} Invoices Selected",
     "showing": "Showing {{start}}-{{end}} of {{total}} invoices",
     "columns": {
       "invoice_no": "Invoice No",
@@ -42,12 +58,41 @@
   "errors": {
     "load_failed": "Unable to load invoices. Please try again.",
     "void_failed": "Unable to void invoice. Please try again.",
-    "download_failed": "Unable to download PDF. Please try again."
+    "download_failed": "Unable to download PDF. Please try again.",
+    "export_failed": "Unable to export invoices. Please try again.",
+    "bulk_download_failed": "Unable to download invoice PDFs. Please try again.",
+    "select_to_export": "Select at least one invoice to export.",
+    "select_to_bulk_download": "Select at least one invoice to download.",
+    "export_preview_failed": "Unable to load export preview. Please try again."
+  },
+  "export": {
+    "preview_title": "Excel export preview",
+    "preview_description": "Review rows and choose which columns to include.",
+    "preview_loading": "Loading preview…",
+    "preview_loading_more": "Loading more…",
+    "preview_empty": "No invoices to export.",
+    "preview_end": "You've reached the end of the preview.",
+    "columns": {
+      "marketplace": "Marketplace",
+      "currency": "Currency",
+      "vat": "VAT %"
+    }
   },
   "confirm": {
     "void": {
       "title": "Void invoice?",
       "description": "Invoice {{invoiceNo}} will be marked as void. This cannot be undone."
+    },
+    "export_all": {
+      "title": "Export all matching invoices?",
+      "description": "You selected every invoice on this page. This will export all {{count}} invoices that match your current filters as an Excel file. This may take a moment.",
+      "confirm": "Yes, export all",
+      "cancel": "Cancel"
+    },
+    "bulk_download_all": {
+      "title": "Download all matching invoice PDFs?",
+      "description": "You selected every invoice on this page. This will download PDFs for all {{count}} invoices that match your current filters as a ZIP file. Large downloads may take a few minutes.",
+      "confirm": "Yes, download all"
     }
   },
   "detail": {

@@ -21,4 +21,10 @@ public interface UserService extends BaseService<UserDto, CreateRequest, UpdateR
 	UserDto changeUserCredentials(Long id, ChangeCredentialsRequest request);
 
 	UserDto updateUserRole(Long id, UpdateRoleRequest request);
+
+	byte[] exportExcel(UserExportRequest request);
+
+	String exportFilename();
+
+	ApiResponse<List<UserDto>> exportPreview(UserExportRequest request);
 }

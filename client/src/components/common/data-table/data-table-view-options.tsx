@@ -36,14 +36,20 @@ export function DataTableViewOptions<TData>({
   }
 
   return (
-    <DropdownMenu>
+    // Non-modal so the menu does not disable pointer-events on a parent Dialog
+    // (otherwise the next click on the dialog hits the overlay and closes it).
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="h-8 gap-1.5">
           <Settings2 className="size-3.5" />
           {t("table.view.columns")}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent
+        align="end"
+        className="w-48"
+        onCloseAutoFocus={(event) => event.preventDefault()}
+      >
         <DropdownMenuLabel>{t("table.view.toggle_columns")}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {hideableColumns.map((column) => (
@@ -52,6 +58,7 @@ export function DataTableViewOptions<TData>({
             className="capitalize"
             checked={column.getIsVisible()}
             onCheckedChange={(value) => column.toggleVisibility(!!value)}
+            onSelect={(event) => event.preventDefault()}
           >
             {columnLabels?.[column.id] ?? column.id}
           </DropdownMenuCheckboxItem>

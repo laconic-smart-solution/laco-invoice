@@ -82,16 +82,20 @@ export function OrderLineItems({ order }: OrderLineItemsProps) {
             <dd>{formatCurrency(order.subtotal, locale, order.currency)}</dd>
           </div>
           <div className="flex justify-between gap-4">
-            <dt className="text-muted-foreground">{t("detail.summary.tax")}</dt>
-            <dd>{formatCurrency(order.tax, locale, order.currency)}</dd>
-          </div>
-          <div className="flex justify-between gap-4">
             <dt className="text-muted-foreground">{t("detail.summary.shipping")}</dt>
             <dd>
               {order.shipping === 0
                 ? t("detail.summary.free")
                 : formatCurrency(order.shipping, locale, order.currency)}
             </dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt className="text-muted-foreground">{t("detail.summary.ex_vat")}</dt>
+            <dd>{formatCurrency(order.amountExVat, locale, order.currency)}</dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt className="text-muted-foreground">{t("detail.summary.vat")}</dt>
+            <dd>{formatCurrency(order.vatAmount, locale, order.currency)}</dd>
           </div>
           <div className="flex justify-between gap-4 border-t border-border pt-2 font-semibold">
             <dt>{t("detail.summary.total")}</dt>

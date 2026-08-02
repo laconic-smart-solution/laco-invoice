@@ -3,12 +3,22 @@
   "subtitle": "Manage and automate marketplace order invoicing.",
   "actions": {
     "export_csv": "Export CSV",
+    "exporting": "Exporting…",
     "sync_orders": "Sync Orders",
-    "bulk_generate": "Bulk Generate"
+    "import_excel": "Import Excel",
+    "bulk_generate": "Bulk Generate",
+    "bulk_generating": "Preparing ZIP…"
+  },
+  "stats": {
+    "invoice_coverage": "Invoice Coverage",
+    "awaiting_invoice": "Awaiting Invoice",
+    "awaiting_invoice_value": "{{count}} Orders",
+    "total_orders": "Total Orders",
+    "total_orders_value": "{{count}} Orders"
   },
   "filters": {
-    "store_label": "Marketplace Store",
-    "store_all": "All connected stores",
+    "store_label": "Store",
+    "store_all": "All stores",
     "store_placeholder": "Select a store",
     "search_label": "Order ID",
     "search_placeholder": "Search by order ID…",
@@ -16,6 +26,8 @@
     "date_range_value": "Oct 01 - Oct 24, 2023",
     "status_label": "Order Status",
     "status_all": "All Statuses",
+    "source_label": "Source",
+    "source_all": "All Sources",
     "more_filters": "More filters"
   },
   "table": {
@@ -34,6 +46,7 @@
       "customer": "Customer",
       "total_amount": "Total Amount",
       "sync_status": "Sync Status",
+      "source": "Source",
       "action": "Action"
     },
     "actions": {
@@ -47,6 +60,10 @@
     "pending": "Pending",
     "failed": "Failed"
   },
+  "source_type": {
+    "api": "API",
+    "import": "IMPORT"
+  },
   "order_status": {
     "pending": "Pending",
     "confirmed": "Confirmed",
@@ -58,6 +75,17 @@
     "generate": {
       "title": "Generate invoice?",
       "description": "This will create an invoice for order {{orderId}}. Continue?"
+    },
+    "export_all": {
+      "title": "Export all matching orders?",
+      "description": "You selected every order on this page. This will export all {{count}} orders that match your current filters as an Excel file. This may take a moment.",
+      "confirm": "Yes, export all",
+      "cancel": "Cancel"
+    },
+    "bulk_generate_all": {
+      "title": "Generate invoices for all matching orders?",
+      "description": "You selected every order on this page. This will generate invoices for up to 100 orders matching your filters and download their PDFs as a ZIP file. Large batches may take a few minutes.",
+      "confirm": "Yes, generate all"
     }
   },
   "detail": {
@@ -89,6 +117,8 @@
       "subtotal": "Subtotal",
       "tax": "Tax",
       "shipping": "Shipping",
+      "ex_vat": "EX.VAT",
+      "vat": "VAT",
       "free": "Free",
       "total": "Total"
     }
@@ -96,6 +126,60 @@
   "errors": {
     "load_failed": "Unable to load orders. Please try again.",
     "sync_failed": "Unable to sync orders. Please try again.",
-    "generate_invoice_failed": "Unable to generate invoice. Please try again."
+    "import_failed": "Unable to import orders. Please try again.",
+    "generate_invoice_failed": "Unable to generate invoice. Please try again.",
+    "export_failed": "Unable to export orders. Please try again.",
+    "select_to_export": "Select at least one order to export.",
+    "export_preview_failed": "Unable to load export preview. Please try again.",
+    "bulk_generate_failed": "Unable to generate invoices. Please try again.",
+    "select_to_bulk_generate": "Select at least one order to generate invoices."
+  },
+  "export": {
+    "preview_title": "Excel export preview",
+    "preview_description": "Review rows and choose which columns to include.",
+    "preview_loading": "Loading preview…",
+    "preview_loading_more": "Loading more…",
+    "preview_empty": "No orders to export.",
+    "preview_end": "You've reached the end of the preview.",
+    "columns": {
+      "id": "ID",
+      "marketplace": "Marketplace",
+      "customer_phone": "Customer Phone",
+      "invoice_id": "Invoice ID",
+      "subtotal": "Subtotal",
+      "shipping": "Shipping Fee",
+      "ex_vat": "EX.VAT",
+      "vat": "VAT",
+      "currency": "Currency",
+      "created_at": "Created At"
+    }
+  },
+  "import": {
+    "title": "Import orders from Excel",
+    "description": "Upload a TikTok Shop OrderSKUList export (.xlsx). Orders are matched by Order ID.",
+    "store_label": "Store",
+    "store_placeholder": "Select store",
+    "marketplace_label": "Marketplace",
+    "marketplace_placeholder": "Select marketplace",
+    "file_label": "Excel file",
+    "file_placeholder": "Choose .xlsx file",
+    "file_hint": "Sheet must use the OrderSKUList format.",
+    "sample_title": "Need the template?",
+    "download_sample": "Download sample",
+    "download_sample_aria": "Download sample OrderSKUList Excel file with all column headers and one example order row",
+    "download_sample_hint": "One sheet, all required columns, and one example order row. Replace it with your data before importing.",
+    "submit": "Import",
+    "importing": "Importing…",
+    "result_title": "Import result",
+    "result_orders": "{{count}} orders imported",
+    "result_items": "{{count}} line items",
+    "result_rows": "{{count}} rows processed",
+    "status_completed": "Completed successfully",
+    "status_partial": "Partially completed — some orders failed",
+    "status_failed": "Import failed",
+    "errors_title": "Errors",
+    "no_file": "Please select an Excel file.",
+    "no_store": "Please select a store.",
+    "close": "Close"
   }
 }

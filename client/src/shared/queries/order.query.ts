@@ -1,6 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
-import type { OrderPageRequest } from "@/shared/services/order.service"
+import type {
+  OrderExportRequest,
+  OrderImportRequest,
+  OrderPageRequest,
+} from "@/shared/services/order.service"
 import { orderService } from "@/shared/services/order.service"
 import {
   extractApiErrorMessage,
@@ -14,12 +18,22 @@ export const orderKeys = {
   list: (request: OrderPageRequest) => [...orderKeys.lists(), request] as const,
   details: () => [...orderKeys.all, "detail"] as const,
   detail: (id: number) => [...orderKeys.details(), id] as const,
+  stats: (storeId?: number) => [...orderKeys.all, "stats", storeId ?? "all"] as const,
+  exportPreview: (request: Omit<OrderExportRequest, "pageNumber" | "pageSize" | "columns">) =>
+    [...orderKeys.all, "export-preview", request] as const,
 }
 
 export function useOrdersPageQuery(request: OrderPageRequest) {
   return useQuery({
     queryKey: orderKeys.list(request),
     queryFn: () => orderService.pageOrders(request),
+  })
+}
+
+export function useOrderStatsQuery(storeId?: number) {
+  return useQuery({
+    queryKey: orderKeys.stats(storeId),
+    queryFn: () => orderService.getStats(storeId),
   })
 }
 
@@ -38,8 +52,66 @@ export function useTriggerOrderSyncMutation() {
     mutationFn: () => orderService.triggerSync(),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
+      void queryClient.invalidateQueries({ queryKey: orderKeys.all })
       // Customers are upserted inline during order sync
       void queryClient.invalidateQueries({ queryKey: customerKeys.lists() })
+    },
+  })
+}
+
+export function useImportOrdersMutation() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (request: OrderImportRequest) => orderService.importExcel(request),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
+      void queryClient.invalidateQueries({ queryKey: orderKeys.all })
+      void queryClient.invalidateQueries({ queryKey: customerKeys.lists() })
+    },
+  })
+}
+
+export function useOrderExportPreviewQuery(
+  request: Omit<OrderExportRequest, "pageNumber" | "pageSize" | "columns">,
+  enabled: boolean
+) {
+  return useInfiniteQuery({
+    queryKey: orderKeys.exportPreview(request),
+    queryFn: ({ pageParam }) =>
+      orderService.previewExport({
+        ...request,
+        pageNumber: pageParam,
+        pageSize: 10,
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const page = lastPage.meta?.page ?? 1
+      const totalPages = lastPage.meta?.totalPages ?? 0
+      if (page >= totalPages) {
+        return undefined
+      }
+      return page + 1
+    },
+    enabled,
+  })
+}
+
+export function useExportOrdersMutation() {
+  return useMutation({
+    mutationFn: (request: OrderExportRequest) => orderService.exportExcel(request),
+  })
+}
+
+export function useBulkGenerateOrdersMutation() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (request: OrderExportRequest) => orderService.bulkGenerateZip(request),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
+      void queryClient.invalidateQueries({ queryKey: orderKeys.all })
+      void queryClient.invalidateQueries({ queryKey: ["invoices"] })
     },
   })
 }

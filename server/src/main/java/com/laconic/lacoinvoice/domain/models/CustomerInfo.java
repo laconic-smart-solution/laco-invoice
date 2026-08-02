@@ -42,4 +42,22 @@ public class CustomerInfo extends StoreScopedEntity {
 	@Lob
 	@Column(columnDefinition = "CLOB")
 	private String address;
+
+	@Column(length = 20)
+	private String zipcode;
+
+	@Column(length = 100)
+	private String country;
+
+	@Column(length = 100)
+	private String province;
+
+	@Column(length = 100)
+	private String district;
+
+	@Column(name = "sub_district", length = 100)
+	private String subDistrict;
+
+	@Column(name = "additional_address_info", length = 1020)
+	private String additionalAddressInfo;
 }

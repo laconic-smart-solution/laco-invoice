@@ -20,6 +20,9 @@
     "marketplace_label": "Marketplace အရင်းအမြစ်",
     "marketplace_placeholder": "ချိတ်ဆက်ထားသော ဆိုင်ကို ရွေးပါ",
     "marketplace_all": "အားလုံး",
+    "store_label": "ဆိုင်",
+    "store_placeholder": "ဆိုင် ရွေးပါ",
+    "store_all": "ဆိုင်အားလုံး",
     "erp_status_label": "ERP အခြေအနေ",
     "erp_status": {
       "all": "အားလုံး",
@@ -54,11 +57,36 @@
   "errors": {
     "load_sources_failed": "Marketplace အရင်းအမြစ်များ ဖွင့်မရပါ။",
     "load_products_failed": "Marketplace ကုန်ပစ္စည်းများ ဖွင့်မရပါ။",
-    "load_detail_failed": "ကုန်ပစ္စည်း အသေးစိတ် ဖွင့်မရပါ။"
+    "load_detail_failed": "ကုန်ပစ္စည်း အသေးစိတ် ဖွင့်မရပါ။",
+    "export_failed": "ကုန်ပစ္စည်းများ မထုတ်နိုင်ပါ။ ထပ်ကြိုးစားပါ။",
+    "select_to_export": "ထုတ်ရန် ကုန်ပစ္စည်း အနည်းဆုံး တစ်ခု ရွေးပါ။",
+    "export_preview_failed": "Export preview မတင်နိုင်ပါ။ ထပ်ကြိုးစားပါ။"
+  },
+  "export": {
+    "preview_title": "Excel ထုတ်ရန် အကြိုကြည့်",
+    "preview_description": "အတန်းများကို စစ်ဆေးပြီး ထည့်မည့် ကော်လံများကို ရွေးပါ။",
+    "preview_loading": "အကြိုကြည့် တင်နေသည်…",
+    "preview_loading_more": "ထပ်မံ တင်နေသည်…",
+    "preview_empty": "ထုတ်ရန် ကုန်ပစ္စည်း မရှိပါ။",
+    "preview_end": "အကြိုကြည့် အဆုံးသို့ ရောက်ပါပြီ။",
+    "columns": {
+      "id": "ID",
+      "store": "Store",
+      "marketplace_code": "Marketplace Code",
+      "marketplace_name": "Marketplace Name",
+      "external_product_id": "External Product ID",
+      "sku": "SKU",
+      "currency": "ငွေကြေး",
+      "status": "အခြေအနေ"
+    }
   },
   "table": {
     "empty": "ကုန်ပစ္စည်း မတွေ့ပါ။",
     "loading": "ကုန်ပစ္စည်းများ ဖွင့်နေသည်...",
+    "select_all": "အားလုံး ရွေးရန်",
+    "select_row": "အတန်း ရွေးရန်",
+    "selected_count_one": "ကုန်ပစ္စည်း {{count}} ခု ရွေးထားသည်",
+    "selected_count_other": "ကုန်ပစ္စည်း {{count}} ခု ရွေးထားသည်",
     "showing": "{{total}} ခုအနက် {{start}}-{{end}} ပြနေသည်",
     "store_label": "ဆိုင်: {{id}}",
     "marketplace_label": "Marketplace: {{id}}",

@@ -2,6 +2,10 @@ package com.laconic.lacoinvoice.features.user;
 
 import java.util.List;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +33,9 @@ import jakarta.validation.Valid;
 @Tag(name = "Users")
 public class UserController extends BaseCrudController<UserDto, CreateRequest, UpdateRequest> {
 
+	private static final MediaType XLSX = MediaType.parseMediaType(
+			"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
 	private final UserService service;
 
 	public UserController(UserService service) {
@@ -50,6 +57,22 @@ public class UserController extends BaseCrudController<UserDto, CreateRequest, U
 	@Operation(summary = "Paginated user search")
 	public ApiResponse<List<UserDto>> pageable(@RequestBody @Valid UserPageRequest request) {
 		return service.page(request);
+	}
+
+	@PostMapping("/export")
+	@Operation(summary = "Export users to Excel (selected IDs or all matching filter)")
+	public ResponseEntity<byte[]> export(@RequestBody UserExportRequest request) {
+		byte[] body = service.exportExcel(request);
+		return ResponseEntity.status(HttpStatus.OK)
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + service.exportFilename() + "\"")
+				.contentType(XLSX)
+				.body(body);
+	}
+
+	@PostMapping("/export/preview")
+	@Operation(summary = "Paginated preview of users that will be exported")
+	public ApiResponse<List<UserDto>> exportPreview(@RequestBody UserExportRequest request) {
+		return service.exportPreview(request);
 	}
 
 	@PostMapping("/{id}/verify-otp")

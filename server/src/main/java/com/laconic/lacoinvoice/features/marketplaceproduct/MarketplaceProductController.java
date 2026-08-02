@@ -3,6 +3,10 @@ package com.laconic.lacoinvoice.features.marketplaceproduct;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +26,9 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/v1/marketplace-products")
 @Tag(name = "Marketplace products")
 public class MarketplaceProductController {
+
+	private static final MediaType XLSX = MediaType.parseMediaType(
+			"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
 	private final MarketplaceProductService service;
 	private final MarketplaceProductSyncService syncService;
@@ -67,6 +74,23 @@ public class MarketplaceProductController {
 	public ApiResponse<List<MarketplaceProductDto>> pageable(
 			@RequestBody @Valid MarketplaceProductPageRequest request) {
 		return service.page(request);
+	}
+
+	@PostMapping("/export")
+	@Operation(summary = "Export marketplace products to Excel (selected IDs or all matching filter)")
+	public ResponseEntity<byte[]> export(@RequestBody MarketplaceProductExportRequest request) {
+		byte[] body = service.exportExcel(request);
+		return ResponseEntity.status(HttpStatus.OK)
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + service.exportFilename() + "\"")
+				.contentType(XLSX)
+				.body(body);
+	}
+
+	@PostMapping("/export/preview")
+	@Operation(summary = "Paginated preview of marketplace products that will be exported")
+	public ApiResponse<List<MarketplaceProductDto>> exportPreview(
+			@RequestBody MarketplaceProductExportRequest request) {
+		return service.exportPreview(request);
 	}
 
 	@GetMapping("/stats")

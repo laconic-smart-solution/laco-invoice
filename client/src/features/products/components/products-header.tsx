@@ -11,6 +11,7 @@ interface ProductsHeaderProps {
   isFiltersOpen?: boolean
   onSync?: () => void
   onToggleFilters?: () => void
+  onExportCsv?: () => void
 }
 
 export function ProductsHeader({
@@ -20,6 +21,7 @@ export function ProductsHeader({
   isFiltersOpen = false,
   onSync,
   onToggleFilters,
+  onExportCsv,
 }: ProductsHeaderProps) {
   const { t } = useTranslation("products")
 
@@ -67,7 +69,12 @@ export function ProductsHeader({
           <Filter data-icon="inline-start" />
           {t("actions.filter")}
         </Button>
-        <Button variant="outline" disabled>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onExportCsv}
+          disabled={!onExportCsv}
+        >
           <Download data-icon="inline-start" />
           {t("actions.export_csv")}
         </Button>

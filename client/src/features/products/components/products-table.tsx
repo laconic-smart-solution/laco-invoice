@@ -4,22 +4,25 @@ import type {
   OnChangeFn,
   SortingState,
 } from "@tanstack/react-table"
-import { RotateCcw } from "lucide-react"
-import { useCallback, useMemo } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
 
 import { DataTable } from "@/components/common/data-table/data-table"
+import { DataTableColumnControls } from "@/components/common/data-table/data-table-column-controls"
 import { DataTableColumnHeader } from "@/components/common/data-table/data-table-column-header"
 import { DataTableFooter } from "@/components/common/data-table/data-table-footer"
 import { DataTableRowActions } from "@/components/common/data-table/data-table-row-actions"
-import { DataTableViewOptions } from "@/components/common/data-table/data-table-view-options"
-import { useDataTable } from "@/components/common/data-table/use-data-table"
+import { DataTableToolbar } from "@/components/common/data-table/data-table-toolbar"
+import {
+  useDataTable,
+  type RowSelectionState,
+} from "@/components/common/data-table/use-data-table"
+import type { DataTableSelection } from "@/components/common/data-table/types"
 import { StatusBadge } from "@/components/common/status-badge"
 import type { StatusBadgeVariant } from "@/components/common/status-badge"
-import { Button } from "@/components/ui/button"
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import {
   Tooltip,
@@ -75,6 +78,7 @@ interface ProductsTableProps {
   onSortingChange: (sorting: SortingState) => void
   columnFilters: ColumnFiltersState
   onColumnFiltersChange: (filters: ColumnFiltersState) => void
+  onSelectionChange?: (selection: DataTableSelection) => void
 }
 
 export function ProductsTable({
@@ -94,11 +98,34 @@ export function ProductsTable({
   onSortingChange,
   columnFilters,
   onColumnFiltersChange,
+  onSelectionChange,
 }: ProductsTableProps) {
   const { t } = useTranslation("products")
-  const { t: tCommon } = useTranslation("common")
   const navigate = useNavigate()
   const locale = useLocaleStore((state) => state.locale)
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
+  const [isAllMatchingSelected, setIsAllMatchingSelected] = useState(false)
+
+  const pageRowIdsKey = useMemo(
+    () => products.map((product) => product.id).join(","),
+    [products]
+  )
+
+  useEffect(() => {
+    setRowSelection({})
+    setIsAllMatchingSelected(false)
+  }, [totalCount])
+
+  useEffect(() => {
+    if (!isAllMatchingSelected || products.length === 0) {
+      return
+    }
+    const next: RowSelectionState = {}
+    for (const product of products) {
+      next[String(product.id)] = true
+    }
+    setRowSelection(next)
+  }, [isAllMatchingSelected, pageRowIdsKey, products])
 
   const handleRowClick = useCallback(
     (product: ProductTableRow) => {
@@ -261,33 +288,57 @@ export function ProductsTable({
     data: products,
     columns,
     getRowId: (row) => String(row.id),
+    enableRowSelection: true,
     manualSorting: true,
     manualFiltering: true,
-    state: { sorting, columnFilters },
+    selectColumnLabels: {
+      selectAll: t("table.select_all"),
+      selectRow: t("table.select_row"),
+    },
+    state: { rowSelection, sorting, columnFilters },
+    onRowSelectionChange: setRowSelection,
     onSortingChange: handleSortingChange,
     onColumnFiltersChange: handleColumnFiltersChange,
+    meta: {
+      selectAllMatching: {
+        enabled: true,
+        isSelected: isAllMatchingSelected,
+        onChange: setIsAllMatchingSelected,
+      },
+    },
   })
 
-  const handleResetColumns = () => {
-    table.resetColumnVisibility()
-    onColumnFiltersChange([])
-    onSortingChange([])
-  }
+  useEffect(() => {
+    if (!onSelectionChange) {
+      return
+    }
+    const ids = Object.keys(rowSelection).filter((id) => rowSelection[id])
+    const pageRowCount = products.length
+    onSelectionChange({
+      ids,
+      isAllPageSelected: pageRowCount > 0 && ids.length === pageRowCount,
+      isAllMatchingSelected,
+    })
+  }, [isAllMatchingSelected, onSelectionChange, products.length, rowSelection])
+
+  const toolbarSelectedCount = isAllMatchingSelected
+    ? totalCount
+    : Object.keys(rowSelection).filter((id) => rowSelection[id]).length
 
   return (
     <section className="border border-border bg-card shadow-sm">
-      <div className="flex items-center justify-end gap-2 border-b border-border px-4 py-3">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-8 gap-1.5"
-          onClick={handleResetColumns}
-        >
-          <RotateCcw className="size-3.5" />
-          {tCommon("table.view.reset_columns")}
-        </Button>
-        <DataTableViewOptions table={table} columnLabels={columnLabels} />
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border">
+        <DataTableToolbar
+          table={table}
+          selectedLabel={(count) => t("table.selected_count", { count })}
+          selectedCount={toolbarSelectedCount}
+          className="border-b-0"
+        />
+        <DataTableColumnControls
+          table={table}
+          columnLabels={columnLabels}
+          className="px-4 py-3"
+        />
       </div>
 
       <div className="overflow-x-auto">

@@ -1,14 +1,20 @@
 import type { ColumnDef } from "@tanstack/react-table"
 import { Download, Store } from "lucide-react"
-import { useCallback, useMemo } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
 import { DataTable } from "@/components/common/data-table/data-table"
+import { DataTableColumnControls } from "@/components/common/data-table/data-table-column-controls"
 import { DataTableFooter } from "@/components/common/data-table/data-table-footer"
 import { DataTableRowActions } from "@/components/common/data-table/data-table-row-actions"
-import { useDataTable } from "@/components/common/data-table/use-data-table"
+import { DataTableToolbar } from "@/components/common/data-table/data-table-toolbar"
+import type { DataTableSelection } from "@/components/common/data-table/types"
+import {
+  useDataTable,
+  type RowSelectionState,
+} from "@/components/common/data-table/use-data-table"
 import { StatusBadge } from "@/components/common/status-badge"
 import type { StatusBadgeVariant } from "@/components/common/status-badge"
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
@@ -72,6 +78,7 @@ interface InvoicesTableProps {
   canGoNext: boolean
   onPageChange: (page: number) => void
   onLimitChange: (limit: number) => void
+  onSelectionChange?: (selection: DataTableSelection) => void
 }
 
 export function InvoicesTable({
@@ -87,16 +94,52 @@ export function InvoicesTable({
   canGoNext,
   onPageChange,
   onLimitChange,
+  onSelectionChange,
 }: InvoicesTableProps) {
   const { t } = useTranslation("invoices")
   const navigate = useNavigate()
   const locale = useLocaleStore((state) => state.locale)
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
+  const [isAllMatchingSelected, setIsAllMatchingSelected] = useState(false)
+
+  const pageRowIdsKey = useMemo(
+    () => invoices.map((invoice) => invoice.id).join(","),
+    [invoices]
+  )
+
+  useEffect(() => {
+    setRowSelection({})
+    setIsAllMatchingSelected(false)
+  }, [totalCount])
+
+  useEffect(() => {
+    if (!isAllMatchingSelected || invoices.length === 0) {
+      return
+    }
+    const next: RowSelectionState = {}
+    for (const invoice of invoices) {
+      next[invoice.id] = true
+    }
+    setRowSelection(next)
+  }, [invoices, isAllMatchingSelected, pageRowIdsKey])
 
   const handleRowClick = useCallback(
     (invoice: InvoiceListItem) => {
       void navigate(ROUTES.dashboard.invoiceDetail(invoice.id))
     },
     [navigate]
+  )
+
+  const columnLabels = useMemo(
+    () => ({
+      invoiceNo: t("table.columns.invoice_no"),
+      customerName: t("table.columns.customer"),
+      storeName: t("table.columns.store"),
+      grandTotal: t("table.columns.grand_total"),
+      status: t("table.columns.status"),
+      issuedAt: t("table.columns.created_at"),
+    }),
+    [t]
   )
 
   const columns = useMemo<ColumnDef<InvoiceListItem>[]>(
@@ -164,6 +207,9 @@ export function InvoicesTable({
       {
         id: "action",
         header: t("table.columns.action"),
+        enableSorting: false,
+        enableHiding: false,
+        enableColumnFilter: false,
         cell: ({ row }) => <InvoiceRowAction invoice={row.original} />,
       },
     ],
@@ -174,10 +220,55 @@ export function InvoicesTable({
     data: invoices,
     columns,
     getRowId: (row) => row.id,
+    enableRowSelection: true,
+    selectColumnLabels: {
+      selectAll: t("table.select_all"),
+      selectRow: t("table.select_row"),
+    },
+    state: { rowSelection },
+    onRowSelectionChange: setRowSelection,
+    meta: {
+      selectAllMatching: {
+        enabled: true,
+        isSelected: isAllMatchingSelected,
+        onChange: setIsAllMatchingSelected,
+      },
+    },
   })
+
+  useEffect(() => {
+    if (!onSelectionChange) {
+      return
+    }
+    const ids = Object.keys(rowSelection).filter((id) => rowSelection[id])
+    const pageRowCount = invoices.length
+    onSelectionChange({
+      ids,
+      isAllPageSelected: pageRowCount > 0 && ids.length === pageRowCount,
+      isAllMatchingSelected,
+    })
+  }, [invoices.length, isAllMatchingSelected, onSelectionChange, rowSelection])
+
+  const toolbarSelectedCount = isAllMatchingSelected
+    ? totalCount
+    : Object.keys(rowSelection).filter((id) => rowSelection[id]).length
 
   return (
     <section className="border border-border bg-card shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border">
+        <DataTableToolbar
+          table={table}
+          selectedCount={toolbarSelectedCount}
+          selectedLabel={(count) => t("table.selected_count", { count })}
+          className="border-b-0"
+        />
+        <DataTableColumnControls
+          table={table}
+          columnLabels={columnLabels}
+          className="px-4 py-3"
+        />
+      </div>
+
       <div className="overflow-x-auto">
         <DataTable
           table={table}

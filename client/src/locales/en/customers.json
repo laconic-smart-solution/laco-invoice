@@ -10,9 +10,9 @@
     "export_csv": "Export CSV"
   },
   "filters": {
-    "store_label": "Store / Marketplace",
-    "store_placeholder": "Select source",
-    "store_all": "All sources",
+    "store_label": "Store",
+    "store_placeholder": "Select a store",
+    "store_all": "All stores",
     "search_label": "Search",
     "search_placeholder": "Search by name…"
   },
@@ -57,11 +57,31 @@
     "load_failed": "Unable to load customers. Please try again.",
     "save_failed": "Unable to save customer. Please try again.",
     "delete_failed": "Unable to delete customer. Please try again.",
-    "sync_failed": "Unable to sync customers. Please try again."
+    "sync_failed": "Unable to sync customers. Please try again.",
+    "export_failed": "Unable to export customers. Please try again.",
+    "select_to_export": "Select at least one customer to export.",
+    "export_preview_failed": "Unable to load export preview. Please try again."
+  },
+  "export": {
+    "preview_title": "Excel export preview",
+    "preview_description": "Review rows and choose which columns to include.",
+    "preview_loading": "Loading preview…",
+    "preview_loading_more": "Loading more…",
+    "preview_empty": "No customers to export.",
+    "preview_end": "You've reached the end of the preview.",
+    "columns": {
+      "marketplace": "Marketplace",
+      "external_customer_id": "External Customer ID",
+      "created_at": "Created At"
+    }
   },
   "table": {
     "empty": "No customers found.",
     "loading": "Loading customers...",
+    "select_all": "Select all",
+    "select_row": "Select row",
+    "selected_count_one": "{{count}} Customer Selected",
+    "selected_count_other": "{{count}} Customers Selected",
     "showing": "Showing {{start}}-{{end}} of {{total}} customers",
     "columns": {
       "id": "ID",

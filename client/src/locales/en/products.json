@@ -20,6 +20,9 @@
     "marketplace_label": "Marketplace Source",
     "marketplace_placeholder": "Select a connected store",
     "marketplace_all": "All",
+    "store_label": "Store",
+    "store_placeholder": "Select a store",
+    "store_all": "All stores",
     "erp_status_label": "ERP Status",
     "erp_status": {
       "all": "All",
@@ -54,11 +57,36 @@
   "errors": {
     "load_sources_failed": "Failed to load marketplace sources.",
     "load_products_failed": "Failed to load marketplace products.",
-    "load_detail_failed": "Failed to load product detail."
+    "load_detail_failed": "Failed to load product detail.",
+    "export_failed": "Unable to export products. Please try again.",
+    "select_to_export": "Select at least one product to export.",
+    "export_preview_failed": "Unable to load export preview. Please try again."
+  },
+  "export": {
+    "preview_title": "Excel export preview",
+    "preview_description": "Review rows and choose which columns to include.",
+    "preview_loading": "Loading preview…",
+    "preview_loading_more": "Loading more…",
+    "preview_empty": "No products to export.",
+    "preview_end": "You've reached the end of the preview.",
+    "columns": {
+      "id": "ID",
+      "store": "Store",
+      "marketplace_code": "Marketplace Code",
+      "marketplace_name": "Marketplace Name",
+      "external_product_id": "External Product ID",
+      "sku": "SKU",
+      "currency": "Currency",
+      "status": "Status"
+    }
   },
   "table": {
     "empty": "No products found.",
     "loading": "Loading products...",
+    "select_all": "Select all",
+    "select_row": "Select row",
+    "selected_count_one": "{{count}} Product Selected",
+    "selected_count_other": "{{count}} Products Selected",
     "showing": "Showing {{start}}-{{end}} of {{total}} products",
     "store_label": "Store: {{id}}",
     "marketplace_label": "Marketplace: {{id}}",

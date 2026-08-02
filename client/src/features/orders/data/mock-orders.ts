@@ -96,8 +96,11 @@ function buildMockOrder(globalIndex: number): OrderDetail {
     currency: "USD",
     subtotal,
     tax,
+    amountExVat: Math.round((totalAmount / 1.07) * 100) / 100,
+    vatAmount: Math.round((totalAmount - totalAmount / 1.07) * 100) / 100,
     shipping,
     syncStatus,
+    sourceType: globalIndex % 3 === 0 ? "IMPORT" : "API",
     lineItems,
     invoiceId: syncStatus === "synced" ? `INV-${90000 + globalIndex}` : undefined,
     lastSyncedAt:

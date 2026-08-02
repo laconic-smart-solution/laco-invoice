@@ -3,6 +3,7 @@ package com.laconic.lacoinvoice.features.order;
 import java.math.BigDecimal;
 import java.time.Instant;
 
+import com.laconic.lacoinvoice.domain.models.OrderSourceType;
 import com.laconic.lacoinvoice.domain.models.OrderStatus;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,8 +21,11 @@ public record OrderDto(
 		Long invoiceId,
 		String externalOrderId,
 		OrderStatus orderStatus,
+		OrderSourceType sourceType,
 		BigDecimal subtotal,
 		BigDecimal shippingFee,
+		BigDecimal amountExVat,
+		BigDecimal vatAmount,
 		BigDecimal totalAmount,
 		String currency,
 		Instant orderDate,

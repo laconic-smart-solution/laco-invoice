@@ -1,7 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import type { InvoicePageRequest } from "@/features/invoices/types/invoice"
-import { invoiceService } from "@/shared/services/invoice.service"
+import {
+  invoiceService,
+  type InvoiceExportRequest,
+} from "@/shared/services/invoice.service"
 import {
   extractApiErrorMessage,
   isAxiosStatusMessage,
@@ -15,12 +18,22 @@ export const invoiceKeys = {
     [...invoiceKeys.lists(), request] as const,
   details: () => [...invoiceKeys.all, "detail"] as const,
   detail: (id: number) => [...invoiceKeys.details(), id] as const,
+  stats: (storeId?: number) => [...invoiceKeys.all, "stats", storeId ?? "all"] as const,
+  exportPreview: (request: Omit<InvoiceExportRequest, "pageNumber" | "pageSize" | "columns">) =>
+    [...invoiceKeys.all, "export-preview", request] as const,
 }
 
 export function useInvoicesPageQuery(request: InvoicePageRequest) {
   return useQuery({
     queryKey: invoiceKeys.list(request),
     queryFn: () => invoiceService.pageInvoices(request),
+  })
+}
+
+export function useInvoiceStatsQuery(storeId?: number) {
+  return useQuery({
+    queryKey: invoiceKeys.stats(storeId),
+    queryFn: () => invoiceService.getStats(storeId),
   })
 }
 
@@ -39,7 +52,9 @@ export function useGenerateInvoiceMutation() {
     mutationFn: (orderId: number) => invoiceService.generateForOrder(orderId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: invoiceKeys.lists() })
+      void queryClient.invalidateQueries({ queryKey: invoiceKeys.all })
       void queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
+      void queryClient.invalidateQueries({ queryKey: orderKeys.all })
       void queryClient.invalidateQueries({ queryKey: orderKeys.details() })
     },
   })
@@ -52,8 +67,10 @@ export function useVoidInvoiceMutation() {
     mutationFn: (id: number) => invoiceService.voidInvoice(id),
     onSuccess: (_data, id) => {
       void queryClient.invalidateQueries({ queryKey: invoiceKeys.lists() })
+      void queryClient.invalidateQueries({ queryKey: invoiceKeys.all })
       void queryClient.invalidateQueries({ queryKey: invoiceKeys.detail(id) })
       void queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
+      void queryClient.invalidateQueries({ queryKey: orderKeys.all })
     },
   })
 }
@@ -68,6 +85,44 @@ export function useDownloadInvoicePdfMutation() {
 export function usePrintInvoicePdfMutation() {
   return useMutation({
     mutationFn: (id: number) => invoiceService.printPdf(id),
+  })
+}
+
+export function useInvoiceExportPreviewQuery(
+  request: Omit<InvoiceExportRequest, "pageNumber" | "pageSize" | "columns">,
+  enabled: boolean
+) {
+  return useInfiniteQuery({
+    queryKey: invoiceKeys.exportPreview(request),
+    queryFn: ({ pageParam }) =>
+      invoiceService.previewExport({
+        ...request,
+        pageNumber: pageParam,
+        pageSize: 10,
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const page = lastPage.meta?.page ?? 1
+      const totalPages = lastPage.meta?.totalPages ?? 0
+      if (page >= totalPages) {
+        return undefined
+      }
+      return page + 1
+    },
+    enabled,
+  })
+}
+
+export function useExportInvoicesMutation() {
+  return useMutation({
+    mutationFn: (request: InvoiceExportRequest) => invoiceService.exportExcel(request),
+  })
+}
+
+export function useBulkDownloadInvoicesMutation() {
+  return useMutation({
+    mutationFn: (request: InvoiceExportRequest) =>
+      invoiceService.bulkDownloadPdf(request),
   })
 }
 

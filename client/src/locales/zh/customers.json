@@ -10,9 +10,9 @@
     "export_csv": "导出 CSV"
   },
   "filters": {
-    "store_label": "店铺 / Marketplace",
-    "store_placeholder": "选择来源",
-    "store_all": "全部来源",
+    "store_label": "店铺",
+    "store_placeholder": "选择店铺",
+    "store_all": "全部店铺",
     "search_label": "搜索",
     "search_placeholder": "按姓名搜索…"
   },
@@ -57,11 +57,31 @@
     "load_failed": "无法加载客户列表，请重试。",
     "save_failed": "无法保存客户，请重试。",
     "delete_failed": "无法删除客户，请重试。",
-    "sync_failed": "无法同步客户，请重试。"
+    "sync_failed": "无法同步客户，请重试。",
+    "export_failed": "无法导出客户，请重试。",
+    "select_to_export": "请至少选择一位客户进行导出。",
+    "export_preview_failed": "无法加载导出预览，请重试。"
+  },
+  "export": {
+    "preview_title": "Excel 导出预览",
+    "preview_description": "核对数据并选择要包含的列。",
+    "preview_loading": "正在加载预览…",
+    "preview_loading_more": "正在加载更多…",
+    "preview_empty": "没有可导出的客户。",
+    "preview_end": "已到预览末尾。",
+    "columns": {
+      "marketplace": "平台",
+      "external_customer_id": "外部客户 ID",
+      "created_at": "创建时间"
+    }
   },
   "table": {
     "empty": "暂无客户",
     "loading": "正在加载客户...",
+    "select_all": "全选",
+    "select_row": "选择行",
+    "selected_count_one": "已选择 {{count}} 位客户",
+    "selected_count_other": "已选择 {{count}} 位客户",
     "showing": "显示第 {{start}}-{{end}} 条，共 {{total}} 条",
     "columns": {
       "id": "ID",

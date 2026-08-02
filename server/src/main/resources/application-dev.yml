@@ -11,8 +11,11 @@ spring:
     show-sql: true
   data:
     redis:
-      host: ${REDIS_HOST:192.168.0.242}
-      password: ${REDIS_PASSWORD:Hello@test123}
+      # host: ${REDIS_HOST:192.168.0.242}
+      # password: ${REDIS_PASSWORD:Hello@test123}
+      # port: ${REDIS_PORT:6379}
+      host: ${REDIS_HOST:127.0.0.1}
+      password: ${REDIS_PASSWORD:}
       port: ${REDIS_PORT:6379}
 
 app:

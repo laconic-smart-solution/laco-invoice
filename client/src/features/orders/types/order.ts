@@ -1,5 +1,7 @@
 export type OrderSyncStatus = "synced" | "pending" | "failed"
 
+export type OrderSourceType = "API" | "IMPORT"
+
 export interface OrderLineItem {
   id: string
   name: string
@@ -21,6 +23,7 @@ export interface Order {
   totalAmount: number
   currency: string
   syncStatus: OrderSyncStatus
+  sourceType: OrderSourceType
 }
 
 export interface OrderDetail extends Order {
@@ -30,6 +33,8 @@ export interface OrderDetail extends Order {
   shippingAddress: string
   subtotal: number
   tax: number
+  amountExVat: number
+  vatAmount: number
   shipping: number
   lineItems: OrderLineItem[]
   invoiceId?: string

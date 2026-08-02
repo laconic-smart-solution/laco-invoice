@@ -1,4 +1,5 @@
 import { Receipt } from "lucide-react"
+import { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { isRouteErrorResponse, Link, useRouteError } from "react-router-dom"
 
@@ -7,33 +8,23 @@ import { DashboardShell } from "@/components/layouts/dashboard-layout"
 import { SomethingWentWrongContent } from "@/features/errors/components/something-went-wrong-content"
 import { useAuthStore } from "@/shared/stores/auth-store"
 
-function resolveErrorMessage(error: unknown): string | null {
+function logRouteError(error: unknown): void {
+  if (import.meta.env.DEV) {
+    console.error("[SomethingWentWrong]", error)
+    return
+  }
+
   if (isRouteErrorResponse(error)) {
-    if (typeof error.data === "string" && error.data.length > 0) {
-      return error.data
-    }
-
-    if (
-      error.data &&
-      typeof error.data === "object" &&
-      "message" in error.data &&
-      typeof error.data.message === "string"
-    ) {
-      return error.data.message
-    }
-
-    return error.statusText || String(error.status)
+    console.error("[SomethingWentWrong]", error.status, error.statusText)
+    return
   }
 
   if (error instanceof Error) {
-    return error.message
+    console.error("[SomethingWentWrong]", error.name, error.message)
+    return
   }
 
-  if (typeof error === "string") {
-    return error
-  }
-
-  return null
+  console.error("[SomethingWentWrong]", error)
 }
 
 export function SomethingWentWrongPage() {
@@ -41,7 +32,10 @@ export function SomethingWentWrongPage() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const isHydrated = useAuthStore((state) => state.isHydrated)
   const routeError = useRouteError()
-  const errorMessage = resolveErrorMessage(routeError)
+
+  useEffect(() => {
+    logRouteError(routeError)
+  }, [routeError])
 
   if (!isHydrated) {
     return null
@@ -50,11 +44,7 @@ export function SomethingWentWrongPage() {
   if (isAuthenticated) {
     return (
       <DashboardShell>
-        <SomethingWentWrongContent
-          isAuthenticated
-          variant="embedded"
-          errorMessage={errorMessage}
-        />
+        <SomethingWentWrongContent isAuthenticated variant="embedded" />
       </DashboardShell>
     )
   }
@@ -82,7 +72,6 @@ export function SomethingWentWrongPage() {
       <SomethingWentWrongContent
         isAuthenticated={false}
         variant="standalone"
-        errorMessage={errorMessage}
       />
     </div>
   )

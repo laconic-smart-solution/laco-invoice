@@ -1,4 +1,4 @@
-import { Plus, RefreshCw } from "lucide-react"
+import { Download, Plus, RefreshCw } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 
@@ -11,6 +11,7 @@ interface CustomersHeaderProps {
   isAdmin?: boolean
   onSync?: () => void
   isSyncing?: boolean
+  onExportCsv?: () => void
 }
 
 export function CustomersHeader({
@@ -18,6 +19,7 @@ export function CustomersHeader({
   isAdmin = false,
   onSync,
   isSyncing = false,
+  onExportCsv,
 }: CustomersHeaderProps) {
   const { t } = useTranslation("customers")
 
@@ -49,6 +51,15 @@ export function CustomersHeader({
             className={isSyncing ? "animate-spin" : undefined}
           />
           {t("actions.sync_customers")}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onExportCsv}
+          disabled={!onExportCsv}
+        >
+          <Download data-icon="inline-start" />
+          {t("actions.export_csv")}
         </Button>
         {!isAdmin ? (
           <Button asChild>

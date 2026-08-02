@@ -59,6 +59,7 @@ export function mapOrderDtoToOrder(dto: ApiOrderDto): Order {
     totalAmount: dto.totalAmount,
     currency: resolveCurrency(dto),
     syncStatus: mapOrderStatusToSyncBadge(dto.orderStatus),
+    sourceType: dto.sourceType === "IMPORT" ? "IMPORT" : "API",
   }
 }
 
@@ -80,6 +81,13 @@ function mapOrderStatusToSyncBadge(
 export function mapOrderDetailDtoToOrderDetail(detail: ApiOrderDetailDto): OrderDetail {
   const base = mapOrderDtoToOrder(detail.order)
   const customer = detail.customer
+  const totalAmount = detail.order.totalAmount
+  const amountExVat =
+    detail.order.amountExVat ??
+    (totalAmount != null ? Math.round((totalAmount / 1.07) * 100) / 100 : 0)
+  const vatAmount =
+    detail.order.vatAmount ??
+    (totalAmount != null ? Math.round((totalAmount - amountExVat) * 100) / 100 : 0)
 
   return {
     ...base,
@@ -90,7 +98,9 @@ export function mapOrderDetailDtoToOrderDetail(detail: ApiOrderDetailDto): Order
     customerGender: customer?.gender?.trim() || EMPTY_VALUE,
     shippingAddress: customer?.address?.trim() || EMPTY_VALUE,
     subtotal: detail.order.subtotal,
-    tax: 0,
+    tax: vatAmount,
+    amountExVat,
+    vatAmount,
     shipping: detail.order.shippingFee,
     lineItems: detail.items.map(toOrderLineItem),
     lastSyncedAt: detail.order.createdAt,

@@ -10,9 +10,9 @@
     "export_csv": "CSV ထုတ်ရန်"
   },
   "filters": {
-    "store_label": "ဆိုင် / Marketplace",
-    "store_placeholder": "အရင်းအမြစ် ရွေးပါ",
-    "store_all": "အားလုံး",
+    "store_label": "ဆိုင်",
+    "store_placeholder": "ဆိုင် ရွေးပါ",
+    "store_all": "ဆိုင်အားလုံး",
     "search_label": "ရှာရန်",
     "search_placeholder": "အမည်ဖြင့် ရှာရန်…"
   },
@@ -57,11 +57,31 @@
     "load_failed": "ဖောက်သည်စာရင်း မတင်နိုင်ပါ။ ထပ်ကြိုးစားပါ။",
     "save_failed": "ဖောက်သည်ကို မသိမ်းနိုင်ပါ။ ထပ်ကြိုးစားပါ။",
     "delete_failed": "ဖောက်သည်ကို မဖျက်နိုင်ပါ။ ထပ်ကြိုးစားပါ။",
-    "sync_failed": "ဖောက်သည် Sync မလုပ်နိုင်ပါ။ ထပ်ကြိုးစားပါ။"
+    "sync_failed": "ဖောက်သည် Sync မလုပ်နိုင်ပါ။ ထပ်ကြိုးစားပါ။",
+    "export_failed": "ဖောက်သည်များ မထုတ်နိုင်ပါ။ ထပ်ကြိုးစားပါ။",
+    "select_to_export": "ထုတ်ရန် ဖောက်သည် အနည်းဆုံး တစ်ဦး ရွေးပါ။",
+    "export_preview_failed": "Export preview မတင်နိုင်ပါ။ ထပ်ကြိုးစားပါ။"
+  },
+  "export": {
+    "preview_title": "Excel ထုတ်ရန် အကြိုကြည့်",
+    "preview_description": "အတန်းများကို စစ်ဆေးပြီး ထည့်မည့် ကော်လံများကို ရွေးပါ။",
+    "preview_loading": "အကြိုကြည့် တင်နေသည်…",
+    "preview_loading_more": "ထပ်မံ တင်နေသည်…",
+    "preview_empty": "ထုတ်ရန် ဖောက်သည် မရှိပါ။",
+    "preview_end": "အကြိုကြည့် အဆုံးသို့ ရောက်ပါပြီ။",
+    "columns": {
+      "marketplace": "Marketplace",
+      "external_customer_id": "External Customer ID",
+      "created_at": "ဖန်တီးချိန်"
+    }
   },
   "table": {
     "empty": "ဖောက်သည် မရှိသေးပါ။",
     "loading": "ဖောက်သည်များ တင်နေသည်...",
+    "select_all": "အားလုံး ရွေးရန်",
+    "select_row": "အတန်း ရွေးရန်",
+    "selected_count_one": "ဖောက်သည် {{count}} ဦး ရွေးထားသည်",
+    "selected_count_other": "ဖောက်သည် {{count}} ဦး ရွေးထားသည်",
     "showing": "ဖောက်သည် {{total}} ယောက်အနက် {{start}}-{{end}} ကို ပြနေသည်",
     "columns": {
       "id": "ID",

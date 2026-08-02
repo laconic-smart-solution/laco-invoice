@@ -3,8 +3,21 @@ import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 
-export function InvoicesHeader() {
+interface InvoicesHeaderProps {
+  onExportCsv?: () => void
+  onBulkDownload?: () => void
+  isExporting?: boolean
+  isBulkDownloading?: boolean
+}
+
+export function InvoicesHeader({
+  onExportCsv,
+  onBulkDownload,
+  isExporting = false,
+  isBulkDownloading = false,
+}: InvoicesHeaderProps) {
   const { t } = useTranslation("invoices")
+  const busy = isExporting || isBulkDownloading
 
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -16,13 +29,26 @@ export function InvoicesHeader() {
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Button variant="outline">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onExportCsv}
+          disabled={busy || !onExportCsv}
+          aria-busy={isExporting}
+        >
           <Download data-icon="inline-start" />
-          {t("actions.export_csv")}
+          {isExporting ? t("actions.exporting") : t("actions.export_csv")}
         </Button>
-        <Button>
+        <Button
+          type="button"
+          onClick={onBulkDownload}
+          disabled={busy || !onBulkDownload}
+          aria-busy={isBulkDownloading}
+        >
           <FileDown data-icon="inline-start" />
-          {t("actions.bulk_download")}
+          {isBulkDownloading
+            ? t("actions.bulk_downloading")
+            : t("actions.bulk_download")}
         </Button>
       </div>
     </div>

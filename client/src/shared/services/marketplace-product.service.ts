@@ -9,6 +9,7 @@ import type {
 import { normalizeProductErpStatus } from "@/features/products/util/erp-status"
 import { apiClient } from "@/app/api/client"
 import type { ApiResponse } from "@/shared/types/api-response"
+import { downloadBlob, filenameFromContentDisposition, rethrowBlobApiError } from "@/util/download-blob"
 
 export interface MarketplaceProductListParams {
   storeId: number
@@ -33,6 +34,15 @@ export interface MarketplaceProductPageRequest {
     priceMax?: number
     erpStatus?: string
   }
+}
+
+export interface MarketplaceProductExportRequest {
+  ids?: number[]
+  exportAll?: boolean
+  filter?: MarketplaceProductPageRequest["filter"]
+  columns?: string[]
+  pageNumber?: number
+  pageSize?: number
 }
 
 export interface MarketplaceProductSyncParams {
@@ -96,6 +106,37 @@ export const marketplaceProductService = {
     return {
       ...response.data,
       data: mapProducts(response.data.data ?? []),
+    }
+  },
+
+  previewExport: async (request: MarketplaceProductExportRequest) => {
+    const response = await apiClient.post<
+      ApiResponse<Array<Omit<MarketplaceProduct, "erpStatus"> & { erpStatus?: string }>>
+    >("/v1/marketplace-products/export/preview", {
+      ...request,
+      pageNumber: request.pageNumber ?? 1,
+      pageSize: request.pageSize ?? 10,
+    })
+    return {
+      ...response.data,
+      data: mapProducts(response.data.data ?? []),
+    }
+  },
+
+  exportExcel: async (request: MarketplaceProductExportRequest) => {
+    try {
+      const response = await apiClient.post<Blob>(
+        "/v1/marketplace-products/export",
+        request,
+        { responseType: "blob" }
+      )
+      const filename = filenameFromContentDisposition(
+        response.headers["content-disposition"] as string | undefined,
+        "products-export.xlsx"
+      )
+      downloadBlob(response.data, filename)
+    } catch (error) {
+      await rethrowBlobApiError(error)
     }
   },
 

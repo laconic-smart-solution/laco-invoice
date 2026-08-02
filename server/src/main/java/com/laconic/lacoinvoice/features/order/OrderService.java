@@ -11,5 +11,13 @@ public interface OrderService {
 
 	OrderDetailDto getDetailById(Long id);
 
+	OrderStatsDto stats(Long storeId);
+
 	void triggerSync();
+
+	byte[] exportExcel(OrderExportRequest request);
+
+	String exportFilename();
+
+	ApiResponse<List<OrderDto>> exportPreview(OrderExportRequest request);
 }

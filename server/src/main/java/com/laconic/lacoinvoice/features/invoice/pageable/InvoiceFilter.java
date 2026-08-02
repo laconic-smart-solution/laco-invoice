@@ -18,4 +18,6 @@ public class InvoiceFilter {
 	private String invoiceNo;
 
 	private Long orderId;
+
+	private Long storeId;
 }

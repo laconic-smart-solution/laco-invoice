@@ -21,6 +21,7 @@
   },
   "table": {
     "open_menu": "打开菜单",
+    "showing_total": "{{count}} 条记录",
     "column": {
       "search_placeholder": "搜索...",
       "search_aria": "搜索 {{column}}",
@@ -33,6 +34,11 @@
       "toggle_columns": "切换列显示",
       "reset_columns": "重置列"
     }
+  },
+  "export_preview": {
+    "column_hint": "隐藏的列将不会包含在 Excel 文件中。",
+    "download": "下载 Excel",
+    "exporting": "正在导出…"
   },
   "time": {
     "minutes_ago_one": "{{count}} 分钟前",

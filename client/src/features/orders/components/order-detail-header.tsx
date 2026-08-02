@@ -7,13 +7,22 @@ import { ROUTES } from "@/app/constants/routes"
 import { StatusBadge } from "@/components/common/status-badge"
 import type { StatusBadgeVariant } from "@/components/common/status-badge"
 import { Button } from "@/components/ui/button"
-import type { OrderDetail, OrderSyncStatus } from "@/features/orders/types/order"
+import type {
+  OrderDetail,
+  OrderSourceType,
+  OrderSyncStatus,
+} from "@/features/orders/types/order"
 import { formatDate } from "@/util/format"
 
 const SYNC_STATUS_BADGE: Record<OrderSyncStatus, StatusBadgeVariant> = {
   synced: "synced",
   pending: "pending",
   failed: "failed",
+}
+
+const SOURCE_TYPE_BADGE: Record<OrderSourceType, StatusBadgeVariant> = {
+  API: "synced",
+  IMPORT: "draft",
 }
 
 interface OrderDetailHeaderProps {
@@ -57,6 +66,12 @@ export function OrderDetailHeader({
             status={SYNC_STATUS_BADGE[order.syncStatus]}
             label={t(`sync_status.${order.syncStatus}`).toUpperCase()}
             showDot
+          />
+          <StatusBadge
+            status={SOURCE_TYPE_BADGE[order.sourceType]}
+            label={t(
+              `source_type.${order.sourceType === "IMPORT" ? "import" : "api"}`
+            ).toUpperCase()}
           />
         </div>
         <p className="text-sm text-muted-foreground">

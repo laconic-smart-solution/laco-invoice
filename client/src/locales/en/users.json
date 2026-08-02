@@ -2,7 +2,8 @@
   "title": "User Management",
   "subtitle": "View and manage user accounts across the platform.",
   "actions": {
-    "add_user": "Add User"
+    "add_user": "Add User",
+    "export_csv": "Export CSV"
   },
   "stats": {
     "total_users": "Total Users"
@@ -65,7 +66,22 @@
   "errors": {
     "load_failed": "Unable to load users. Please try again.",
     "save_failed": "Unable to create user. Please try again.",
-    "verify_otp_failed": "Unable to verify OTP. Please try again."
+    "verify_otp_failed": "Unable to verify OTP. Please try again.",
+    "export_failed": "Unable to export users. Please try again.",
+    "select_to_export": "Select at least one user to export.",
+    "export_preview_failed": "Unable to load export preview. Please try again."
+  },
+  "export": {
+    "preview_title": "Excel export preview",
+    "preview_description": "Review rows and choose which columns to include.",
+    "preview_loading": "Loading preview…",
+    "preview_loading_more": "Loading more…",
+    "preview_empty": "No users to export.",
+    "preview_end": "You've reached the end of the preview.",
+    "columns": {
+      "email": "Email",
+      "auth_server_user_id": "Auth Server User ID"
+    }
   },
   "verify_otp": {
     "confirm_title": "Mark OTP as verified?",
@@ -76,6 +92,10 @@
   "table": {
     "empty": "No users found.",
     "loading": "Loading users...",
+    "select_all": "Select all",
+    "select_row": "Select row",
+    "selected_count_one": "{{count}} User Selected",
+    "selected_count_other": "{{count}} Users Selected",
     "showing": "Showing {{start}}-{{end}} of {{total}} users",
     "columns": {
       "id": "ID",
