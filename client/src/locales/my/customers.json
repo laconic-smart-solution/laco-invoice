@@ -14,10 +14,18 @@
     "store_placeholder": "ဆိုင် ရွေးပါ",
     "store_all": "ဆိုင်အားလုံး",
     "search_label": "ရှာရန်",
-    "search_placeholder": "အမည်ဖြင့် ရှာရန်…"
+    "search_placeholder": "အမည်ဖြင့် ရှာရန်…",
+    "gender_label": "ကျား/မ",
+    "gender": {
+      "all": "ကျား/မ အားလုံး",
+      "male": "ကျား",
+      "female": "မ"
+    },
+    "more_filters": "Filter ထပ်ထည့်ရန်"
   },
   "stats": {
-    "total_customers": "ဖောက်သည် စုစုပေါင်း"
+    "total_customers": "ဖောက်သည် စုစုပေါင်း",
+    "total_customers_value": "ဖောက်သည် {{count}} ဦး"
   },
   "create": {
     "title": "ဖောက်သည် ထည့်ရန်",

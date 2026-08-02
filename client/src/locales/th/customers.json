@@ -14,10 +14,18 @@
     "store_placeholder": "เลือกร้านค้า",
     "store_all": "ร้านค้าทั้งหมด",
     "search_label": "ค้นหา",
-    "search_placeholder": "ค้นหาด้วยชื่อ…"
+    "search_placeholder": "ค้นหาด้วยชื่อ…",
+    "gender_label": "เพศ",
+    "gender": {
+      "all": "ทุกเพศ",
+      "male": "ชาย",
+      "female": "หญิง"
+    },
+    "more_filters": "ตัวกรองเพิ่มเติม"
   },
   "stats": {
-    "total_customers": "ลูกค้าทั้งหมด"
+    "total_customers": "ลูกค้าทั้งหมด",
+    "total_customers_value": "{{count}} ลูกค้า"
   },
   "create": {
     "title": "เพิ่มลูกค้า",

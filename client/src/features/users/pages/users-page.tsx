@@ -4,13 +4,14 @@ import { useSearchParams } from "react-router-dom"
 import type { ColumnFiltersState, SortingState } from "@tanstack/react-table"
 
 import { ConfirmDialog } from "@/components/common/confirm-dialog"
+import { EMPTY_TABLE_SELECTION } from "@/components/common/data-table/types"
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
 import { UserExportPreviewDialog } from "@/features/users/components/user-export-preview-dialog"
 import { UsersFilters } from "@/features/users/components/users-filters"
 import { UsersHeader } from "@/features/users/components/users-header"
 import { UsersStatCards } from "@/features/users/components/users-stat-cards"
 import { UsersTable } from "@/features/users/components/users-table"
-import type { AdminUser, UserRoleFilter } from "@/features/users/types/user"
+import type { AdminUser, UserActiveFilter, UserRoleFilter } from "@/features/users/types/user"
 import { useExportSelection } from "@/shared/hooks/use-export-selection"
 import {
   getPaginationMeta,
@@ -18,6 +19,7 @@ import {
   usePagination,
 } from "@/shared/hooks/use-pagination"
 import { useDebounce } from "@/shared/hooks/use-debounce"
+import { useRegisterListShortcuts } from "@/shared/hooks/use-register-list-shortcuts"
 import {
   getAdminUserErrorMessage,
   useUsersPageQuery,
@@ -29,6 +31,7 @@ import { getColumnFilterValue } from "@/util/table-column-filters"
 import { sortingToPageSort } from "@/util/table-sort"
 
 const ROLE_QUERY_KEY = "role"
+const ACTIVE_QUERY_KEY = "active"
 const USER_ROLES: UserRole[] = ["ADMIN", "OWNER", "MANAGER", "STAFF"]
 
 const USER_SORT_FIELD_MAP: Record<string, string> = {
@@ -46,6 +49,13 @@ function parseRoleFilter(value: string | null): UserRoleFilter {
   return "all"
 }
 
+function parseActiveFilter(value: string | null): UserActiveFilter {
+  if (value === "active" || value === "inactive") {
+    return value
+  }
+  return "all"
+}
+
 function getUserDisplayName(user: AdminUser): string {
   return user.fullName?.trim() || user.email
 }
@@ -54,6 +64,7 @@ export function UsersPage() {
   const { t } = useTranslation("users")
   const [searchParams, setSearchParams] = useSearchParams()
   const roleFilter = parseRoleFilter(searchParams.get(ROLE_QUERY_KEY))
+  const activeFilter = parseActiveFilter(searchParams.get(ACTIVE_QUERY_KEY))
   const [search, setSearch] = useState("")
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -82,13 +93,18 @@ export function UsersPage() {
     if (roleFilter !== "all") {
       filter.role = roleFilter
     }
+    if (activeFilter === "active") {
+      filter.active = true
+    } else if (activeFilter === "inactive") {
+      filter.active = false
+    }
     const nameSearch = columnFullName || search.trim()
     if (nameSearch) {
       filter.fullName = nameSearch
     }
 
     return Object.keys(filter).length > 0 ? filter : undefined
-  }, [columnFullName, roleFilter, search])
+  }, [activeFilter, columnFullName, roleFilter, search])
 
   const pageRequest = useMemo(() => {
     return {
@@ -135,7 +151,7 @@ export function UsersPage() {
     []
   )
 
-  const handleExportCsv = () => {
+  const handleExportCsv = useCallback(() => {
     const result = requestAction("export")
     if (result.kind === "need_selection") {
       setActionError(t("errors.select_to_export"))
@@ -154,7 +170,23 @@ export function UsersPage() {
         ids: result.ids.map((id) => Number(id)).filter(Number.isFinite),
       })
     }
-  }
+  }, [
+    closeConfirm,
+    exportFilter,
+    openExportPreview,
+    requestAction,
+    setActionError,
+    t,
+  ])
+
+  const handleClearSelection = useCallback(() => {
+    setSelection(EMPTY_TABLE_SELECTION)
+  }, [setSelection])
+
+  useRegisterListShortcuts({
+    onExport: handleExportCsv,
+    onClearSelection: handleClearSelection,
+  })
 
   const handleVerifyOtpRequest = useCallback((user: AdminUser) => {
     setVerifySuccessMessage(null)
@@ -196,6 +228,28 @@ export function UsersPage() {
     [setPage, setSearchParams]
   )
 
+  const handleActiveChange = useCallback(
+    (active: UserActiveFilter) => {
+      setPage(1)
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+
+          if (active === "all") {
+            next.delete(ACTIVE_QUERY_KEY)
+          } else {
+            next.set(ACTIVE_QUERY_KEY, active)
+          }
+
+          next.delete(PAGE_QUERY_KEY)
+          return next
+        },
+        { replace: true }
+      )
+    },
+    [setPage, setSearchParams]
+  )
+
   return (
     <div className="space-y-6 p-6">
       <UsersHeader onExportCsv={handleExportCsv} />
@@ -204,16 +258,19 @@ export function UsersPage() {
         onOpenChange={setExportPreviewOpen}
         scope={exportScope}
       />
-      <UsersStatCards totalUsers={totalCount} />
       <UsersFilters
         role={roleFilter}
+        active={activeFilter}
         search={search}
         onRoleChange={handleRoleChange}
+        onActiveChange={handleActiveChange}
         onSearchChange={(next) => {
           setSearch(next)
           setPage(1)
         }}
+        disabled={isLoading}
       />
+      <UsersStatCards totalUsers={totalCount} />
       <AuthFormError message={loadError ?? actionError} />
       <AuthFormError message={verifyError} />
       {verifySuccessMessage ? (

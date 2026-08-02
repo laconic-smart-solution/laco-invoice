@@ -7,6 +7,7 @@ import { Navbar } from "@/components/core/navbar/navbar"
 import { Sidebar } from "@/components/core/sidebar/sidebar"
 import { SidebarToggle } from "@/components/core/sidebar/sidebar-toggle"
 import { cn } from "@/lib/utils"
+import { useAppKeyboardShortcuts } from "@/shared/hooks/use-app-keyboard-shortcuts"
 import { useSidebarKeyboardToggle } from "@/shared/hooks/use-sidebar-keyboard-toggle"
 import { useSidebarStore } from "@/shared/stores/sidebar-store"
 
@@ -16,6 +17,7 @@ interface DashboardShellProps {
 
 export function DashboardShell({ children }: DashboardShellProps) {
   useSidebarKeyboardToggle()
+  useAppKeyboardShortcuts()
   const isCollapsed = useSidebarStore((state) => state.isCollapsed)
 
   return (

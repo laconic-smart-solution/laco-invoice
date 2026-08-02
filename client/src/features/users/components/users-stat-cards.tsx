@@ -14,11 +14,14 @@ export function UsersStatCards({ totalUsers }: UsersStatCardsProps) {
   const locale = useLocaleStore((state) => state.locale)
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-4 lg:grid-cols-3">
       <StatCard
         title={t("stats.total_users")}
-        value={formatNumber(totalUsers, locale)}
+        value={t("stats.total_users_value", {
+          count: formatNumber(totalUsers, locale),
+        })}
         icon={UserCog}
+        iconWrapperClassName="bg-info/10 text-info"
       />
     </div>
   )

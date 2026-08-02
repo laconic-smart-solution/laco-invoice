@@ -3,10 +3,10 @@
     "store_management": "การจัดการร้านค้า"
   },
   "title": "สินค้า Marketplace",
+  "subtitle": "เรียกดูและจัดการแคตตาล็อกสินค้าจากมาร์เก็ตเพลส",
   "sync_status": "กำลังซิงก์",
   "actions": {
     "sync_now": "ซิงก์ตอนนี้",
-    "filter": "กรอง",
     "export_csv": "ส่งออก CSV"
   },
   "sync": {
@@ -32,6 +32,7 @@
     "price_range_label": "ช่วงราคา",
     "price_min": "ต่ำสุด",
     "price_max": "สูงสุด",
+    "more_filters": "ตัวกรองเพิ่มเติม",
     "price_sort_label": "เรียงตามราคา",
     "price_sort_placeholder": "เลือกลำดับการเรียง",
     "price_sort": {
@@ -122,6 +123,29 @@
     "variant_sku": "SKU",
     "variant_price": "ราคา",
     "variant_status": "สถานะ",
-    "variant_quantity": "จำนวน"
+    "variant_quantity": "จำนวน",
+    "sections": {
+      "product_info": "ข้อมูลสินค้า",
+      "erp_mapping": "การแมป ERP"
+    },
+    "fields": {
+      "external_product_id": "รหัสสินค้าภายนอก",
+      "sku": "SKU",
+      "marketplace_status": "สถานะ Marketplace",
+      "price": "ราคา",
+      "currency": "สกุลเงิน",
+      "no_currency": "ไม่มีสกุลเงิน",
+      "erp_status": "สถานะ ERP",
+      "erp_sku": "SKU ของ ERP",
+      "erp_name": "ชื่อ ERP",
+      "erp_item_id": "รหัสรายการ ERP",
+      "mapped_at": "แมปเมื่อ"
+    },
+    "empty": {
+      "no_images": "ยังไม่มีรูปภาพ ซิงก์จากมาร์เก็ตเพลสเพื่อเติมข้อมูลสินค้านี้",
+      "no_description": "ยังไม่มีคำอธิบาย ซิงก์จากมาร์เก็ตเพลสเพื่อเติมข้อมูลสินค้านี้",
+      "no_variants": "ยังไม่มีตัวเลือกสินค้า ซิงก์จากมาร์เก็ตเพลสเพื่อเติมข้อมูลสินค้านี้",
+      "no_marketplace_status": "ยังไม่ได้ตั้งค่า (สินค้าจากการนำเข้า)"
+    }
   }
 }

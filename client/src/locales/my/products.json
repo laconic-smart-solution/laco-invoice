@@ -3,10 +3,10 @@
     "store_management": "ဆိုင်စီမံမှု"
   },
   "title": "Marketplace ကုန်ပစ္စည်းများ",
+  "subtitle": "Marketplace ကုန်ပစ္စည်းများ စာရင်းကို ကြည့်ရှုနှင့် စီမံပါ။",
   "sync_status": "Sync လုပ်နေသည်",
   "actions": {
     "sync_now": "ယခု Sync လုပ်ရန်",
-    "filter": "စစ်ထုတ်ရန်",
     "export_csv": "CSV ထုတ်ရန်"
   },
   "sync": {
@@ -32,6 +32,7 @@
     "price_range_label": "စျေးနှုန်းအကွာအဝေး",
     "price_min": "အနည်းဆုံး",
     "price_max": "အများဆုံး",
+    "more_filters": "Filter ထပ်ထည့်ရန်",
     "price_sort_label": "စျေးနှုန်းအလိုက် စီရန်",
     "price_sort_placeholder": "စီစဉ်ပုံ ရွေးပါ",
     "price_sort": {
@@ -122,6 +123,29 @@
     "variant_sku": "SKU",
     "variant_price": "စျေးနှုန်း",
     "variant_status": "အခြေအနေ",
-    "variant_quantity": "အရေအတွက်"
+    "variant_quantity": "အရေအတွက်",
+    "sections": {
+      "product_info": "ကုန်ပစ္စည်း အချက်အလက်",
+      "erp_mapping": "ERP ချိတ်ဆက်မှု"
+    },
+    "fields": {
+      "external_product_id": "ပြင်ပ ကုန်ပစ္စည်း ID",
+      "sku": "SKU",
+      "marketplace_status": "Marketplace အခြေအနေ",
+      "price": "စျေးနှုန်း",
+      "currency": "ငွေကြေး",
+      "no_currency": "ငွေကြေး မရှိ",
+      "erp_status": "ERP အခြေအနေ",
+      "erp_sku": "ERP SKU",
+      "erp_name": "ERP အမည်",
+      "erp_item_id": "ERP Item ID",
+      "mapped_at": "ချိတ်ခဲ့သော အချိန်"
+    },
+    "empty": {
+      "no_images": "ပုံ မရှိသေးပါ။ ဤကုန်ပစ္စည်းကို ဖြည့်ရန် Marketplace မှ Sync လုပ်ပါ။",
+      "no_description": "ဖော်ပြချက် မရှိသေးပါ။ ဤကုန်ပစ္စည်းကို ဖြည့်ရန် Marketplace မှ Sync လုပ်ပါ။",
+      "no_variants": "Variant မရှိသေးပါ။ ဤကုန်ပစ္စည်းကို ဖြည့်ရန် Marketplace မှ Sync လုပ်ပါ။",
+      "no_marketplace_status": "မသတ်မှတ်ရသေး (Import မှ ဖန်တီးထားသည်)"
+    }
   }
 }

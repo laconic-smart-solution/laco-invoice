@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import type { ColumnFiltersState, SortingState } from "@tanstack/react-table"
 
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
+import { EMPTY_TABLE_SELECTION } from "@/components/common/data-table/types"
 import { CustomerExportPreviewDialog } from "@/features/customers/components/customer-export-preview-dialog"
 import { CustomersFilters } from "@/features/customers/components/customers-filters"
 import { CustomersHeader } from "@/features/customers/components/customers-header"
@@ -29,6 +30,7 @@ import {
   usePagination,
 } from "@/shared/hooks/use-pagination"
 import { useDebounce } from "@/shared/hooks/use-debounce"
+import { useRegisterListShortcuts } from "@/shared/hooks/use-register-list-shortcuts"
 import { getColumnFilterValue } from "@/util/table-column-filters"
 import { sortingToPageSort } from "@/util/table-sort"
 
@@ -103,9 +105,19 @@ export function CustomersPage() {
     if (columnPhone) {
       filter.phone = columnPhone
     }
+    if (filters.gender !== "all") {
+      filter.gender = filters.gender
+    }
 
     return Object.keys(filter).length > 0 ? filter : undefined
-  }, [columnEmail, columnName, columnPhone, filters.search, filters.storeId])
+  }, [
+    columnEmail,
+    columnName,
+    columnPhone,
+    filters.gender,
+    filters.search,
+    filters.storeId,
+  ])
 
   const pageRequest = useMemo(() => {
     return {
@@ -153,7 +165,7 @@ export function CustomersPage() {
     []
   )
 
-  const handleExportCsv = () => {
+  const handleExportCsv = useCallback(() => {
     const result = requestAction("export")
     if (result.kind === "need_selection") {
       setActionError(t("errors.select_to_export"))
@@ -172,7 +184,23 @@ export function CustomersPage() {
         ids: result.ids.map((id) => Number(id)).filter(Number.isFinite),
       })
     }
-  }
+  }, [
+    closeConfirm,
+    exportFilter,
+    openExportPreview,
+    requestAction,
+    setActionError,
+    t,
+  ])
+
+  const handleClearSelection = useCallback(() => {
+    setSelection(EMPTY_TABLE_SELECTION)
+  }, [setSelection])
+
+  useRegisterListShortcuts({
+    onExport: handleExportCsv,
+    onClearSelection: handleClearSelection,
+  })
 
   return (
     <div className="space-y-6 p-6">
@@ -188,7 +216,6 @@ export function CustomersPage() {
         scope={exportScope}
       />
       <AuthFormError message={syncError} />
-      <CustomersStatCards totalCustomers={totalCount} />
       <CustomersFilters
         stores={stores}
         value={filters}
@@ -198,6 +225,7 @@ export function CustomersPage() {
         }}
         disabled={storesLoading || isLoading}
       />
+      <CustomersStatCards totalCustomers={totalCount} />
       <AuthFormError message={loadError ?? actionError} />
       <CustomersTable
         customers={customers}

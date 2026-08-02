@@ -14,10 +14,18 @@
     "store_placeholder": "Select a store",
     "store_all": "All stores",
     "search_label": "Search",
-    "search_placeholder": "Search by name…"
+    "search_placeholder": "Search by name…",
+    "gender_label": "Gender",
+    "gender": {
+      "all": "All genders",
+      "male": "Male",
+      "female": "Female"
+    },
+    "more_filters": "More filters"
   },
   "stats": {
-    "total_customers": "Total Customers"
+    "total_customers": "Total Customers",
+    "total_customers_value": "{{count}} Customers"
   },
   "create": {
     "title": "Add Customer",

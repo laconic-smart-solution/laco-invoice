@@ -1,4 +1,4 @@
-import { Download, Filter, RefreshCw } from "lucide-react"
+import { Download } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
@@ -8,19 +8,13 @@ interface ProductsHeaderProps {
   className?: string
   isSyncing?: boolean
   canSync?: boolean
-  isFiltersOpen?: boolean
   onSync?: () => void
-  onToggleFilters?: () => void
   onExportCsv?: () => void
 }
 
 export function ProductsHeader({
   className,
   isSyncing = false,
-  canSync = false,
-  isFiltersOpen = false,
-  onSync,
-  onToggleFilters,
   onExportCsv,
 }: ProductsHeaderProps) {
   const { t } = useTranslation("products")
@@ -32,7 +26,7 @@ export function ProductsHeader({
         className
       )}
     >
-      <div className="space-y-3">
+      <div>
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="font-heading text-2xl font-semibold tracking-tight">
             {t("title")}
@@ -47,28 +41,10 @@ export function ProductsHeader({
             </span>
           ) : null}
         </div>
+        <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Button
-          onClick={onSync}
-          disabled={!canSync || isSyncing}
-        >
-          <RefreshCw
-            data-icon="inline-start"
-            className={cn(isSyncing && "animate-spin")}
-          />
-          {t("actions.sync_now")}
-        </Button>
-        <Button
-          variant={isFiltersOpen ? "default" : "outline"}
-          onClick={onToggleFilters}
-          aria-expanded={isFiltersOpen}
-          aria-controls="products-filters"
-        >
-          <Filter data-icon="inline-start" />
-          {t("actions.filter")}
-        </Button>
         <Button
           type="button"
           variant="outline"

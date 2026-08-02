@@ -23,6 +23,7 @@ export const ROUTES = {
     userDetail: (userId: number | string) => `/users/${userId}`,
     profile: "/profile",
     settings: "/settings",
+    shortcuts: "/shortcuts",
   },
   auth: {
     login: "/login",

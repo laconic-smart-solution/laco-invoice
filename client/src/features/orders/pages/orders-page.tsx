@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import type { ColumnFiltersState, SortingState } from "@tanstack/react-table"
 
 import { ConfirmDialog } from "@/components/common/confirm-dialog"
+import { EMPTY_TABLE_SELECTION } from "@/components/common/data-table/types"
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
 import { OrderExportPreviewDialog } from "@/features/orders/components/order-export-preview-dialog"
 import { OrderImportDialog } from "@/features/orders/components/order-import-dialog"
@@ -23,6 +24,7 @@ import type {
 import { useDebounce } from "@/shared/hooks/use-debounce"
 import { useExportSelection } from "@/shared/hooks/use-export-selection"
 import { getPaginationMeta, usePagination } from "@/shared/hooks/use-pagination"
+import { useRegisterListShortcuts } from "@/shared/hooks/use-register-list-shortcuts"
 import {
   getOrderErrorMessage,
   useOrderStatsQuery,
@@ -200,7 +202,7 @@ export function OrdersPage() {
     [setActionError, startBulkGenerateMutation, startBulkRun, t]
   )
 
-  const handleExportCsv = () => {
+  const handleExportCsv = useCallback(() => {
     const result = requestAction("export")
     if (result.kind === "need_selection") {
       setActionError(t("errors.select_to_export"))
@@ -219,7 +221,23 @@ export function OrdersPage() {
         ids: result.ids.map((id) => Number(id)).filter(Number.isFinite),
       })
     }
-  }
+  }, [
+    closeConfirm,
+    exportFilter,
+    openExportPreview,
+    requestAction,
+    setActionError,
+    t,
+  ])
+
+  const handleClearSelection = useCallback(() => {
+    setSelection(EMPTY_TABLE_SELECTION)
+  }, [setSelection])
+
+  useRegisterListShortcuts({
+    onExport: handleExportCsv,
+    onClearSelection: handleClearSelection,
+  })
 
   const handleBulkGenerate = () => {
     const result = requestAction("bulk")

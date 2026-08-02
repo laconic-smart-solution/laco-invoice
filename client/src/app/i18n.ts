@@ -14,6 +14,7 @@ import enNavbar from "@/locales/en/navbar.json"
 import enOrders from "@/locales/en/orders.json"
 import enProducts from "@/locales/en/products.json"
 import enProfile from "@/locales/en/profile.json"
+import enShortcuts from "@/locales/en/shortcuts.json"
 import enSidebar from "@/locales/en/sidebar.json"
 import myAuth from "@/locales/my/auth.json"
 import myBreadcrumb from "@/locales/my/breadcrumb.json"
@@ -28,6 +29,7 @@ import myNavbar from "@/locales/my/navbar.json"
 import myOrders from "@/locales/my/orders.json"
 import myProducts from "@/locales/my/products.json"
 import myProfile from "@/locales/my/profile.json"
+import myShortcuts from "@/locales/my/shortcuts.json"
 import mySidebar from "@/locales/my/sidebar.json"
 import thAuth from "@/locales/th/auth.json"
 import thBreadcrumb from "@/locales/th/breadcrumb.json"
@@ -42,6 +44,7 @@ import thNavbar from "@/locales/th/navbar.json"
 import thOrders from "@/locales/th/orders.json"
 import thProducts from "@/locales/th/products.json"
 import thProfile from "@/locales/th/profile.json"
+import thShortcuts from "@/locales/th/shortcuts.json"
 import thSidebar from "@/locales/th/sidebar.json"
 import zhAuth from "@/locales/zh/auth.json"
 import zhBreadcrumb from "@/locales/zh/breadcrumb.json"
@@ -56,6 +59,7 @@ import zhNavbar from "@/locales/zh/navbar.json"
 import zhOrders from "@/locales/zh/orders.json"
 import zhProducts from "@/locales/zh/products.json"
 import zhProfile from "@/locales/zh/profile.json"
+import zhShortcuts from "@/locales/zh/shortcuts.json"
 import zhSidebar from "@/locales/zh/sidebar.json"
 
 export const SUPPORTED_LOCALES = ["en", "th", "zh", "my"] as const
@@ -79,6 +83,7 @@ void i18n.use(initReactI18next).init({
       stores: enStores,
       products: enProducts,
       profile: enProfile,
+      shortcuts: enShortcuts,
     },
     th: {
       common: thCommon,
@@ -95,6 +100,7 @@ void i18n.use(initReactI18next).init({
       stores: thStores,
       products: thProducts,
       profile: thProfile,
+      shortcuts: thShortcuts,
     },
     zh: {
       common: zhCommon,
@@ -111,6 +117,7 @@ void i18n.use(initReactI18next).init({
       stores: zhStores,
       products: zhProducts,
       profile: zhProfile,
+      shortcuts: zhShortcuts,
     },
     my: {
       common: myCommon,
@@ -127,6 +134,7 @@ void i18n.use(initReactI18next).init({
       stores: myStores,
       products: myProducts,
       profile: myProfile,
+      shortcuts: myShortcuts,
     },
   },
   lng: "en",

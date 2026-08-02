@@ -74,6 +74,7 @@ export function OrdersFilters({
             <Input
               id="orders-search"
               type="search"
+              data-shortcut-search
               placeholder={t("filters.search_placeholder")}
               value={value.search}
               onChange={(event) =>

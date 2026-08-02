@@ -3,10 +3,10 @@
     "store_management": "Store Management"
   },
   "title": "Marketplace Products",
+  "subtitle": "Browse and manage marketplace product catalogs.",
   "sync_status": "Syncing",
   "actions": {
     "sync_now": "Sync Now",
-    "filter": "Filter",
     "export_csv": "Export CSV"
   },
   "sync": {
@@ -32,6 +32,7 @@
     "price_range_label": "Price Range",
     "price_min": "Min",
     "price_max": "Max",
+    "more_filters": "More filters",
     "price_sort_label": "Sort by Price",
     "price_sort_placeholder": "Select sort order",
     "price_sort": {
@@ -122,6 +123,29 @@
     "variant_sku": "SKU",
     "variant_price": "Price",
     "variant_status": "Status",
-    "variant_quantity": "Quantity"
+    "variant_quantity": "Quantity",
+    "sections": {
+      "product_info": "Product info",
+      "erp_mapping": "ERP mapping"
+    },
+    "fields": {
+      "external_product_id": "External product ID",
+      "sku": "SKU",
+      "marketplace_status": "Marketplace status",
+      "price": "Price",
+      "currency": "Currency",
+      "no_currency": "No currency",
+      "erp_status": "ERP status",
+      "erp_sku": "ERP SKU",
+      "erp_name": "ERP name",
+      "erp_item_id": "ERP item ID",
+      "mapped_at": "Mapped at"
+    },
+    "empty": {
+      "no_images": "No images available. Sync from the marketplace to enrich this product.",
+      "no_description": "No description available. Sync from the marketplace to enrich this product.",
+      "no_variants": "No variants available. Sync from the marketplace to enrich this product.",
+      "no_marketplace_status": "Not set (import placeholder)"
+    }
   }
 }

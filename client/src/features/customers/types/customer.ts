@@ -45,9 +45,11 @@ export interface CustomerPageRequest {
 export interface CustomerFiltersState {
   storeId: string
   search: string
+  gender: "all" | "male" | "female"
 }
 
 export const DEFAULT_CUSTOMER_FILTERS: CustomerFiltersState = {
   storeId: "",
   search: "",
+  gender: "all",
 }

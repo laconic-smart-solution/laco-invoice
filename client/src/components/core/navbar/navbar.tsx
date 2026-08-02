@@ -1,4 +1,4 @@
-import { Bell, CircleHelp, CirclePlus, LogOut, Search, UserRound } from "lucide-react"
+import { CirclePlus, LogOut, Search, UserRound } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate } from "react-router-dom"
 
@@ -53,20 +53,6 @@ function NavbarSearch({ className }: NavbarSearchProps) {
   )
 }
 
-function NavbarSyncStatus() {
-  const { t } = useTranslation("navbar")
-
-  return (
-    <div className="flex items-center gap-2 rounded-full border border-border bg-muted/40 px-3 py-1.5 text-xs font-medium text-muted-foreground">
-      <span className="relative flex size-2">
-        <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-60" />
-        <span className="relative inline-flex size-2 rounded-full bg-primary" />
-      </span>
-      {t("syncing")}
-    </div>
-  )
-}
-
 export function Navbar() {
   const { t } = useTranslation("navbar")
   const navigate = useNavigate()
@@ -86,30 +72,8 @@ export function Navbar() {
       </div>
 
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-        <NavbarSyncStatus />
-
         <NavbarLanguageToggle />
         <NavbarThemeToggle />
-
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          className="text-muted-foreground"
-          aria-label={t("notifications")}
-        >
-          <Bell className="size-4" aria-hidden />
-        </Button>
-
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          className="text-muted-foreground"
-          aria-label={t("help")}
-        >
-          <CircleHelp className="size-4" aria-hidden />
-        </Button>
 
         <Button type="button" className="h-9 gap-2 px-3">
           <CirclePlus className="size-4" aria-hidden />

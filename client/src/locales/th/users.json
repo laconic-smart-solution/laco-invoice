@@ -6,7 +6,8 @@
     "export_csv": "ส่งออก CSV"
   },
   "stats": {
-    "total_users": "ผู้ใช้ทั้งหมด"
+    "total_users": "ผู้ใช้ทั้งหมด",
+    "total_users_value": "{{count}} ผู้ใช้"
   },
   "create": {
     "title": "เพิ่มผู้ใช้",
@@ -42,12 +43,19 @@
     "role_label": "บทบาท",
     "search_label": "ค้นหา",
     "search_placeholder": "ค้นหาด้วยชื่อ…",
+    "active_label": "สถานะ",
+    "more_filters": "ตัวกรองเพิ่มเติม",
     "role": {
       "all": "ทุกบทบาท",
       "admin": "ผู้ดูแลระบบ",
       "owner": "เจ้าของร้าน",
       "manager": "ผู้จัดการ",
       "staff": "พนักงาน"
+    },
+    "active": {
+      "all": "ทุกสถานะ",
+      "active": "ใช้งาน",
+      "inactive": "ปิดใช้งาน"
     }
   },
   "detail": {

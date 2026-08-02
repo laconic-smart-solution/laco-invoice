@@ -3,10 +3,10 @@
     "store_management": "店铺管理"
   },
   "title": "Marketplace 商品",
+  "subtitle": "浏览和管理 Marketplace 商品目录。",
   "sync_status": "同步中",
   "actions": {
     "sync_now": "立即同步",
-    "filter": "筛选",
     "export_csv": "导出 CSV"
   },
   "sync": {
@@ -32,6 +32,7 @@
     "price_range_label": "价格范围",
     "price_min": "最低",
     "price_max": "最高",
+    "more_filters": "更多筛选",
     "price_sort_label": "按价格排序",
     "price_sort_placeholder": "选择排序方式",
     "price_sort": {
@@ -122,6 +123,29 @@
     "variant_sku": "SKU",
     "variant_price": "价格",
     "variant_status": "状态",
-    "variant_quantity": "库存"
+    "variant_quantity": "库存",
+    "sections": {
+      "product_info": "商品信息",
+      "erp_mapping": "ERP 映射"
+    },
+    "fields": {
+      "external_product_id": "外部商品 ID",
+      "sku": "SKU",
+      "marketplace_status": "Marketplace 状态",
+      "price": "价格",
+      "currency": "货币",
+      "no_currency": "无货币",
+      "erp_status": "ERP 状态",
+      "erp_sku": "ERP SKU",
+      "erp_name": "ERP 名称",
+      "erp_item_id": "ERP 物料 ID",
+      "mapped_at": "映射时间"
+    },
+    "empty": {
+      "no_images": "暂无图片。从 Marketplace 同步以补充该商品信息。",
+      "no_description": "暂无描述。从 Marketplace 同步以补充该商品信息。",
+      "no_variants": "暂无规格。从 Marketplace 同步以补充该商品信息。",
+      "no_marketplace_status": "未设置（导入占位商品）"
+    }
   }
 }

@@ -6,7 +6,8 @@
     "export_csv": "CSV ထုတ်ရန်"
   },
   "stats": {
-    "total_users": "စုစုပေါင်း အသုံးပြုသူ"
+    "total_users": "စုစုပေါင်း အသုံးပြုသူ",
+    "total_users_value": "အသုံးပြုသူ {{count}} ဦး"
   },
   "create": {
     "title": "Add User",
@@ -42,12 +43,19 @@
     "role_label": "အခန်းကဏ္ဍ",
     "search_label": "ရှာရန်",
     "search_placeholder": "အမည်ဖြင့် ရှာရန်…",
+    "active_label": "အခြေအနေ",
+    "more_filters": "Filter ထပ်ထည့်ရန်",
     "role": {
       "all": "အခန်းကဏ္ဍ အားလုံး",
       "admin": "Admin",
       "owner": "Owner",
       "manager": "Manager",
       "staff": "Staff"
+    },
+    "active": {
+      "all": "အခြေအနေ အားလုံး",
+      "active": "Active",
+      "inactive": "Inactive"
     }
   },
   "detail": {

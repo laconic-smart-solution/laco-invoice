@@ -25,6 +25,7 @@ import {
   StoreDetailPage,
   MarketplaceOAuthCallbackPage,
   ProfilePage,
+  ShortcutsPage,
 } from "@/app/constants/lazyload"
 import { AdminRoute } from "@/components/common/admin-route"
 import { GuestRoute } from "@/components/common/guest-route"
@@ -121,6 +122,10 @@ export const router = createBrowserRouter([
               {
                 path: ROUTES.dashboard.profile,
                 element: <ProfilePage />,
+              },
+              {
+                path: ROUTES.dashboard.shortcuts,
+                element: <ShortcutsPage />,
               },
               {
                 path: ROUTES.dashboard.settings,

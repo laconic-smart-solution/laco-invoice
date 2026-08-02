@@ -187,3 +187,11 @@ export const ResetPasswordPage = PageLoader(
     }))
   )
 )
+
+export const ShortcutsPage = PageLoader(
+  lazy(() =>
+    import("@/features/shortcuts/pages/shortcuts-page").then((module) => ({
+      default: module.ShortcutsPage,
+    }))
+  )
+)

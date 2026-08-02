@@ -1,0 +1,22 @@
+{
+  "title": "键盘快捷键",
+  "subtitle": "未在输入框中输入时，可在应用内任意位置使用这些快捷键。",
+  "note": "焦点位于输入框、文本域或下拉框时，快捷键不会生效。先按 G，再在一秒内按下一个键即可导航。",
+  "chord_then": "然后",
+  "items": {
+    "toggle_theme": "切换深色 / 浅色模式",
+    "toggle_sidebar": "折叠或展开侧边栏",
+    "open_shortcuts": "打开此快捷键页面",
+    "focus_search": "聚焦列表搜索框",
+    "export": "导出当前列表（Excel）",
+    "clear_selection": "清除表格选择（或取消搜索框焦点）",
+    "go_home": "前往仪表盘",
+    "go_orders": "前往订单",
+    "go_products": "前往产品",
+    "go_invoices": "前往发票",
+    "go_customers": "前往客户",
+    "go_stores": "前往店铺",
+    "go_users": "前往用户",
+    "go_shortcuts": "前往快捷键"
+  }
+}

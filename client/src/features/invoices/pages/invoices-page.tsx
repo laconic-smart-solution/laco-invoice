@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { ConfirmDialog } from "@/components/common/confirm-dialog"
+import { EMPTY_TABLE_SELECTION } from "@/components/common/data-table/types"
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
 import { InvoiceExportPreviewDialog } from "@/features/invoices/components/invoice-export-preview-dialog"
 import { InvoicesFilters } from "@/features/invoices/components/invoices-filters"
@@ -14,6 +15,7 @@ import {
   getPaginationMeta,
   usePagination,
 } from "@/shared/hooks/use-pagination"
+import { useRegisterListShortcuts } from "@/shared/hooks/use-register-list-shortcuts"
 import {
   getInvoiceErrorMessage,
   useBulkDownloadInvoicesMutation,
@@ -131,7 +133,7 @@ export function InvoicesPage() {
     [bulkMutation, setActionError, t]
   )
 
-  const handleExportCsv = () => {
+  const handleExportCsv = useCallback(() => {
     const result = requestAction("export")
     if (result.kind === "need_selection") {
       setActionError(t("errors.select_to_export"))
@@ -150,7 +152,23 @@ export function InvoicesPage() {
         ids: result.ids.map((id) => Number(id)).filter(Number.isFinite),
       })
     }
-  }
+  }, [
+    closeConfirm,
+    exportFilter,
+    openExportPreview,
+    requestAction,
+    setActionError,
+    t,
+  ])
+
+  const handleClearSelection = useCallback(() => {
+    setSelection(EMPTY_TABLE_SELECTION)
+  }, [setSelection])
+
+  useRegisterListShortcuts({
+    onExport: handleExportCsv,
+    onClearSelection: handleClearSelection,
+  })
 
   const handleBulkDownload = () => {
     const result = requestAction("bulk")

@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import type { ColumnFiltersState, SortingState } from "@tanstack/react-table"
 
 import { ROUTES } from "@/app/constants/routes"
+import { EMPTY_TABLE_SELECTION } from "@/components/common/data-table/types"
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
 import { ProductExportPreviewDialog } from "@/features/products/components/product-export-preview-dialog"
 import { ProductsFilters } from "@/features/products/components/products-filters"
@@ -16,6 +17,8 @@ import { Button } from "@/components/ui/button"
 import { DEFAULT_LIMIT, DEFAULT_PAGE, getPaginationMeta } from "@/shared/hooks/use-pagination"
 import { useDebounce } from "@/shared/hooks/use-debounce"
 import { useExportSelection } from "@/shared/hooks/use-export-selection"
+import { useRegisterListShortcuts } from "@/shared/hooks/use-register-list-shortcuts"
+import { useMarketplaceProductSyncSubscription } from "@/shared/hooks/use-marketplace-product-sync-subscription"
 import {
   marketplaceProductKeys,
   useMarketplaceProductSourcesQuery,
@@ -26,7 +29,6 @@ import {
 } from "@/shared/queries/marketplace-product.query"
 import { useStoresPageQuery } from "@/shared/queries/store.query"
 import type { MarketplaceProductExportRequest } from "@/shared/services/marketplace-product.service"
-import { useMarketplaceProductSyncSubscription } from "@/shared/hooks/use-marketplace-product-sync-subscription"
 import { getFirstColumnFilterValue } from "@/util/table-column-filters"
 import { sortingToPageSort } from "@/util/table-sort"
 
@@ -62,7 +64,6 @@ export function ProductsPage() {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const debouncedColumnFilters = useDebounce(columnFilters)
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false)
   const [activeSyncRunId, setActiveSyncRunId] = useState<number | null>(null)
   const [syncMessage, setSyncMessage] = useState<string | null>(null)
   const [exportPreviewOpen, setExportPreviewOpen] = useState(false)
@@ -240,7 +241,7 @@ export function ProductsPage() {
     []
   )
 
-  const handleExportCsv = () => {
+  const handleExportCsv = useCallback(() => {
     const result = requestAction("export")
     if (result.kind === "need_selection") {
       setActionError(t("errors.select_to_export"))
@@ -259,7 +260,23 @@ export function ProductsPage() {
         ids: result.ids.map((id) => Number(id)).filter(Number.isFinite),
       })
     }
-  }
+  }, [
+    closeConfirm,
+    exportFilter,
+    openExportPreview,
+    requestAction,
+    setActionError,
+    t,
+  ])
+
+  const handleClearSelection = useCallback(() => {
+    setSelection(EMPTY_TABLE_SELECTION)
+  }, [setSelection])
+
+  useRegisterListShortcuts({
+    onExport: handleExportCsv,
+    onClearSelection: handleClearSelection,
+  })
 
   useEffect(() => {
     setPage(1)
@@ -295,9 +312,7 @@ export function ProductsPage() {
       <ProductsHeader
         isSyncing={isSyncRunning}
         canSync={syncTarget != null && !showEmptyStores}
-        isFiltersOpen={isFiltersOpen}
         onSync={() => void handleSync()}
-        onToggleFilters={() => setIsFiltersOpen((open) => !open)}
         onExportCsv={handleExportCsv}
       />
       <ProductExportPreviewDialog
@@ -305,15 +320,18 @@ export function ProductsPage() {
         onOpenChange={setExportPreviewOpen}
         scope={exportScope}
       />
-      <AuthFormError message={requestError ?? syncMessage ?? actionError} />
+      <AuthFormError message={syncMessage} />
 
       {showEmptyStores ? (
-        <div className="rounded-lg border border-dashed border-border bg-card p-8 text-center">
-          <p className="text-sm text-muted-foreground">{t("empty.no_connections")}</p>
-          <Button asChild className="mt-4">
-            <Link to={ROUTES.dashboard.stores}>{t("empty.go_to_stores")}</Link>
-          </Button>
-        </div>
+        <>
+          <AuthFormError message={requestError ?? actionError} />
+          <div className="rounded-lg border border-dashed border-border bg-card p-8 text-center">
+            <p className="text-sm text-muted-foreground">{t("empty.no_connections")}</p>
+            <Button asChild className="mt-4">
+              <Link to={ROUTES.dashboard.stores}>{t("empty.go_to_stores")}</Link>
+            </Button>
+          </div>
+        </>
       ) : showNeverSynced ? (
         <>
           <ProductsFilters
@@ -325,6 +343,16 @@ export function ProductsPage() {
             }}
             disabled={storesLoading}
           />
+          <ProductsStatCards
+            stats={
+              stats ?? {
+                mappingRatePercent: 0,
+                actionRequiredCount: 0,
+                activeSkuCount: 0,
+              }
+            }
+          />
+          <AuthFormError message={requestError ?? actionError} />
           <div className="rounded-lg border border-dashed border-border bg-card p-8 text-center">
             <p className="text-sm text-muted-foreground">{t("empty.never_synced")}</p>
             <p className="mt-2 text-sm text-muted-foreground">{t("empty.sync_now_prompt")}</p>
@@ -335,6 +363,15 @@ export function ProductsPage() {
         </>
       ) : (
         <>
+          <ProductsFilters
+            stores={stores}
+            value={filters}
+            onChange={(next) => {
+              setFilters(next)
+              setPage(1)
+            }}
+            disabled={storesLoading}
+          />
           <ProductsStatCards
             stats={
               stats ?? {
@@ -344,16 +381,7 @@ export function ProductsPage() {
               }
             }
           />
-          <ProductsFilters
-            stores={stores}
-            value={filters}
-            onChange={(next) => {
-              setFilters(next)
-              setPage(1)
-            }}
-            showAdvanced={isFiltersOpen}
-            disabled={storesLoading}
-          />
+          <AuthFormError message={requestError ?? actionError} />
           <ProductsTable
             products={products}
             isLoading={storesLoading || productsLoading}

@@ -1,6 +1,7 @@
-import { Search } from "lucide-react"
+import { ListFilter, Search } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -12,6 +13,12 @@ import {
 } from "@/components/ui/select"
 import type { CustomerFiltersState } from "@/features/customers/types/customer"
 import type { Store } from "@/features/stores/types/store"
+
+const GENDER_FILTER_OPTIONS = [
+  { value: "all", labelKey: "filters.gender.all" },
+  { value: "male", labelKey: "filters.gender.male" },
+  { value: "female", labelKey: "filters.gender.female" },
+] as const
 
 interface CustomersFiltersProps {
   stores: Store[]
@@ -32,7 +39,7 @@ export function CustomersFilters({
 
   return (
     <section className="border border-border bg-card p-4 shadow-sm">
-      <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] md:items-end">
+      <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] md:items-end">
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground">
             {t("filters.store_label")}
@@ -44,7 +51,7 @@ export function CustomersFilters({
             }
             disabled={disabled || storeOptions.length === 0}
           >
-            <SelectTrigger className="w-full max-w-md">
+            <SelectTrigger className="w-full">
               <SelectValue placeholder={t("filters.store_placeholder")} />
             </SelectTrigger>
             <SelectContent>
@@ -62,7 +69,7 @@ export function CustomersFilters({
           <Label className="text-xs text-muted-foreground" htmlFor="customers-search">
             {t("filters.search_label")}
           </Label>
-          <div className="relative max-w-md">
+          <div className="relative">
             <Search
               className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
               aria-hidden
@@ -70,6 +77,7 @@ export function CustomersFilters({
             <Input
               id="customers-search"
               type="search"
+              data-shortcut-search
               placeholder={t("filters.search_placeholder")}
               value={value.search}
               onChange={(event) =>
@@ -80,6 +88,44 @@ export function CustomersFilters({
             />
           </div>
         </div>
+
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">
+            {t("filters.gender_label")}
+          </Label>
+          <Select
+            value={value.gender}
+            onValueChange={(gender) =>
+              onChange({
+                ...value,
+                gender: gender as CustomerFiltersState["gender"],
+              })
+            }
+            disabled={disabled}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {GENDER_FILTER_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {t(option.labelKey)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="shrink-0"
+          aria-label={t("filters.more_filters")}
+          disabled={disabled}
+        >
+          <ListFilter />
+        </Button>
       </div>
     </section>
   )

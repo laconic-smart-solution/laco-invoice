@@ -6,7 +6,8 @@
     "export_csv": "Export CSV"
   },
   "stats": {
-    "total_users": "Total Users"
+    "total_users": "Total Users",
+    "total_users_value": "{{count}} Users"
   },
   "create": {
     "title": "Add User",
@@ -42,12 +43,19 @@
     "role_label": "Role",
     "search_label": "Search",
     "search_placeholder": "Search by name…",
+    "active_label": "Status",
+    "more_filters": "More filters",
     "role": {
       "all": "All roles",
       "admin": "Admin",
       "owner": "Owner",
       "manager": "Manager",
       "staff": "Staff"
+    },
+    "active": {
+      "all": "All statuses",
+      "active": "Active",
+      "inactive": "Inactive"
     }
   },
   "detail": {

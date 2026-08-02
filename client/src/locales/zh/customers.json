@@ -14,10 +14,18 @@
     "store_placeholder": "选择店铺",
     "store_all": "全部店铺",
     "search_label": "搜索",
-    "search_placeholder": "按姓名搜索…"
+    "search_placeholder": "按姓名搜索…",
+    "gender_label": "性别",
+    "gender": {
+      "all": "全部性别",
+      "male": "男",
+      "female": "女"
+    },
+    "more_filters": "更多筛选"
   },
   "stats": {
-    "total_customers": "客户总数"
+    "total_customers": "客户总数",
+    "total_customers_value": "{{count}} 位客户"
   },
   "create": {
     "title": "添加客户",
