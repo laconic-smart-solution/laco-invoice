@@ -8,6 +8,7 @@ export interface OrderLineItem {
   sku: string
   quantity: number
   unitPrice: number
+  productId?: string
 }
 
 export interface Order {

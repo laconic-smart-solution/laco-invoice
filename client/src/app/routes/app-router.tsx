@@ -11,6 +11,8 @@ import {
   InvoicesPage,
   LoginPage,
   OrderDetailPage,
+  OrderImportFilesPage,
+  OrderImportFileDetailPage,
   OrdersPage,
   OtpVerifyPage,
   ProductsPage,
@@ -77,6 +79,14 @@ export const router = createBrowserRouter([
               {
                 path: ROUTES.dashboard.orders,
                 element: <OrdersPage />,
+              },
+              {
+                path: ROUTES.dashboard.orderImports,
+                element: <OrderImportFilesPage />,
+              },
+              {
+                path: `${ROUTES.dashboard.orderImports}/:importFileId`,
+                element: <OrderImportFileDetailPage />,
               },
               {
                 path: `${ROUTES.dashboard.orders}/:orderId`,

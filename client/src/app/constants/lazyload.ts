@@ -26,6 +26,24 @@ export const OrderDetailPage = PageLoader(
   )
 )
 
+export const OrderImportFilesPage = PageLoader(
+  lazy(() =>
+    import("@/features/orders/pages/order-import-files-page").then((module) => ({
+      default: module.OrderImportFilesPage,
+    }))
+  )
+)
+
+export const OrderImportFileDetailPage = PageLoader(
+  lazy(() =>
+    import("@/features/orders/pages/order-import-file-detail-page").then(
+      (module) => ({
+        default: module.OrderImportFileDetailPage,
+      })
+    )
+  )
+)
+
 export const InvoicesPage = PageLoader(
   lazy(() =>
     import("@/features/invoices/pages/invoices-page").then((module) => ({

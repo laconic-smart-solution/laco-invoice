@@ -2,6 +2,9 @@ package com.laconic.lacoinvoice.features.order.import_;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +24,7 @@ import com.laconic.lacoinvoice.domain.models.OrderTaxInvoice;
 import com.laconic.lacoinvoice.domain.models.Product;
 import com.laconic.lacoinvoice.domain.models.Store;
 import com.laconic.lacoinvoice.domain.repositories.CustomerInfoRepository;
+import com.laconic.lacoinvoice.domain.repositories.InvoiceRepository;
 import com.laconic.lacoinvoice.domain.repositories.MarketplaceRepository;
 import com.laconic.lacoinvoice.domain.repositories.OrderImportFileRepository;
 import com.laconic.lacoinvoice.domain.repositories.OrderItemRepository;
@@ -44,6 +48,7 @@ public class OrderImportService {
 	private final CustomerInfoRepository customerInfoRepository;
 	private final ProductRepository productRepository;
 	private final OrderTaxInvoiceRepository orderTaxInvoiceRepository;
+	private final InvoiceRepository invoiceRepository;
 	private final OrderSkuListExcelParser excelParser;
 
 	public OrderImportService(
@@ -55,6 +60,7 @@ public class OrderImportService {
 			CustomerInfoRepository customerInfoRepository,
 			ProductRepository productRepository,
 			OrderTaxInvoiceRepository orderTaxInvoiceRepository,
+			InvoiceRepository invoiceRepository,
 			OrderSkuListExcelParser excelParser) {
 		this.storeRepository = storeRepository;
 		this.marketplaceRepository = marketplaceRepository;
@@ -64,9 +70,14 @@ public class OrderImportService {
 		this.customerInfoRepository = customerInfoRepository;
 		this.productRepository = productRepository;
 		this.orderTaxInvoiceRepository = orderTaxInvoiceRepository;
+		this.invoiceRepository = invoiceRepository;
 		this.excelParser = excelParser;
 	}
 
+	/**
+	 * Direct import for API clients: NEW orders are created; existing Order IDs are skipped (safe default).
+	 * Prefer preview → decide → commit for interactive UI.
+	 */
 	@Transactional
 	public OrderImportResultDto importExcel(Long storeId, String marketplaceCode, MultipartFile file) {
 		Store store = storeRepository.findById(storeId)
@@ -94,10 +105,19 @@ public class OrderImportService {
 			int orderCount = 0;
 			int itemCount = 0;
 			int failedOrders = 0;
+			int skippedDuplicates = 0;
 
 			for (OrderSkuListExcelRow row : workbook.ordersByExternalId().values()) {
 				try {
-					int items = upsertOrder(store, marketplace, importFile, row);
+					boolean exists = orderRepository
+							.findByStore_IdAndMarketplace_IdAndExternalOrderId(
+									store.getId(), marketplace.getId(), row.orderId())
+							.isPresent();
+					if (exists) {
+						skippedDuplicates++;
+						continue;
+					}
+					int items = createOrder(store, marketplace, importFile, row);
 					orderCount++;
 					itemCount += items;
 				} catch (Exception ex) {
@@ -108,6 +128,12 @@ public class OrderImportService {
 				}
 			}
 
+			if (skippedDuplicates > 0) {
+				result.getErrors().add(
+						"Skipped " + skippedDuplicates
+								+ " duplicate Order ID(s). Use import preview to MERGE or REPLACE.");
+			}
+
 			result.setOrderCount(orderCount);
 			result.setItemCount(itemCount);
 			importFile.setImportedOrders(orderCount);
@@ -116,11 +142,12 @@ public class OrderImportService {
 			if (workbook.ordersByExternalId().isEmpty() && workbook.rowCount() == 0) {
 				importFile.setStatus(OrderImportStatus.FAILED);
 				result.setStatus(OrderImportStatus.FAILED);
-				result.getErrors().add("No order rows found in Excel. Check that the sheet has an Order ID header and data rows.");
+				result.getErrors().add(
+						"No order rows found in Excel. Check that the sheet has an Order ID header and data rows.");
 			} else if (failedOrders > 0 && orderCount == 0) {
 				importFile.setStatus(OrderImportStatus.FAILED);
 				result.setStatus(OrderImportStatus.FAILED);
-			} else if (failedOrders > 0) {
+			} else if (failedOrders > 0 || skippedDuplicates > 0) {
 				importFile.setStatus(OrderImportStatus.PARTIAL);
 				result.setStatus(OrderImportStatus.PARTIAL);
 			} else {
@@ -136,6 +163,136 @@ public class OrderImportService {
 
 		importFileRepository.save(importFile);
 		return result;
+	}
+
+	@Transactional
+	public int createOrder(Store store, Marketplace marketplace, OrderImportFile importFile, OrderSkuListExcelRow row) {
+		boolean exists = orderRepository
+				.findByStore_IdAndMarketplace_IdAndExternalOrderId(
+						store.getId(), marketplace.getId(), row.orderId())
+				.isPresent();
+		if (exists) {
+			throw new IllegalStateException("Order already exists: " + row.orderId());
+		}
+		return upsertOrder(store, marketplace, importFile, row);
+	}
+
+	@Transactional
+	public int replaceOrder(Store store, Marketplace marketplace, OrderImportFile importFile, OrderSkuListExcelRow row) {
+		Order existing = orderRepository
+				.findByStore_IdAndMarketplace_IdAndExternalOrderId(
+						store.getId(), marketplace.getId(), row.orderId())
+				.orElseThrow(() -> new IllegalStateException("Order not found for REPLACE: " + row.orderId()));
+		if (invoiceRepository.existsByOrder_Id(existing.getId())) {
+			throw new IllegalArgumentException(
+					"REPLACE blocked for order " + row.orderId() + " because an invoice already exists");
+		}
+		return upsertOrder(store, marketplace, importFile, row);
+	}
+
+	@Transactional
+	public int mergeOrder(
+			Store store,
+			Marketplace marketplace,
+			OrderImportFile importFile,
+			Order order,
+			OrderSkuListExcelRow row) {
+		CustomerInfo customer = order.getCustomer();
+		if (customer == null) {
+			customer = resolveCustomer(store, marketplace, row);
+			customer.setStore(store);
+			customer.setMarketplace(marketplace);
+		} else {
+			applyCustomerFieldsPreferExcel(customer, row);
+		}
+		customer = customerInfoRepository.save(customer);
+		order.setCustomer(customer);
+
+		applyHeaderPreferExcel(order, row);
+		order.setCurrency(resolveCurrency(order));
+		order.setSourceType(OrderSourceType.IMPORT);
+		order.setSourceId(importFile.getId());
+
+		Map<String, OrderItem> byKey = new HashMap<>();
+		for (OrderItem item : orderItemRepository.findByOrder_Id(order.getId())) {
+			byKey.put(
+					OrderImportPreviewService.lineKey(item.getPlatformSkuId(), item.getSku(), item.getVariation()),
+					item);
+		}
+
+		Long sourceId = importFile.getId();
+		for (OrderSkuListLineItem line : row.lineItems()) {
+			applyLineItemFallbacks(line);
+			String key = OrderImportPreviewService.lineKey(
+					line.getPlatformSkuId(), line.getSellerSku(), line.getVariation());
+			OrderItem existingItem = byKey.get(key);
+			if (existingItem != null) {
+				existingItem.setQuantity(
+						OrderImportPreviewService.nullSafeInt(existingItem.getQuantity())
+								+ OrderImportPreviewService.nullSafeInt(line.getQuantity()));
+				existingItem.setQuantityReturned(
+						OrderImportPreviewService.nullSafeInt(existingItem.getQuantityReturned())
+								+ OrderImportPreviewService.nullSafeInt(line.getQuantityReturned()));
+				existingItem.setLineTotal(
+						OrderImportPreviewService.nullSafeAdd(existingItem.getLineTotal(), line.getLineTotal()));
+				existingItem.setSubtotalBeforeDiscount(OrderImportPreviewService.nullSafeAdd(
+						existingItem.getSubtotalBeforeDiscount(), line.getSubtotalBeforeDiscount()));
+				existingItem.setItemPlatformDiscount(OrderImportPreviewService.nullSafeAdd(
+						existingItem.getItemPlatformDiscount(), line.getPlatformDiscount()));
+				existingItem.setItemSellerDiscount(OrderImportPreviewService.nullSafeAdd(
+						existingItem.getItemSellerDiscount(), line.getSellerDiscount()));
+				if (line.getUnitPrice() != null) {
+					existingItem.setPrice(line.getUnitPrice());
+				}
+				if (StringUtils.hasText(line.getProductName())) {
+					existingItem.setProductName(line.getProductName());
+				}
+				if (StringUtils.hasText(line.getProductCategory())) {
+					existingItem.setProductCategory(line.getProductCategory());
+				}
+				if (line.getWeightKg() != null) {
+					existingItem.setWeightKg(line.getWeightKg());
+				}
+				existingItem.setSourceType(OrderSourceType.IMPORT);
+				existingItem.setSourceId(sourceId);
+				orderItemRepository.save(existingItem);
+			} else {
+				OrderItem item = new OrderItem();
+				item.setOrder(order);
+				item.setProduct(resolveProduct(store, marketplace, line));
+				item.setPlatformSkuId(line.getPlatformSkuId());
+				item.setSku(line.getSellerSku());
+				item.setProductName(line.getProductName());
+				item.setVariation(line.getVariation());
+				item.setQuantity(line.getQuantity());
+				item.setQuantityReturned(line.getQuantityReturned());
+				item.setPrice(line.getUnitPrice());
+				item.setSubtotalBeforeDiscount(line.getSubtotalBeforeDiscount());
+				item.setItemPlatformDiscount(line.getPlatformDiscount());
+				item.setItemSellerDiscount(line.getSellerDiscount());
+				item.setLineTotal(line.getLineTotal());
+				item.setWeightKg(line.getWeightKg());
+				item.setProductCategory(line.getProductCategory());
+				item.setSourceType(OrderSourceType.IMPORT);
+				item.setSourceId(sourceId);
+				OrderItem saved = orderItemRepository.save(item);
+				byKey.put(key, saved);
+			}
+		}
+
+		List<OrderItem> allItems = orderItemRepository.findByOrder_Id(order.getId());
+		order.setSubtotal(sumOrderItemLineTotals(allItems));
+		if (row.getTotalAmount() != null) {
+			order.setTotalAmount(row.getTotalAmount());
+		} else {
+			BigDecimal shipping = order.getShippingFee() != null ? order.getShippingFee() : BigDecimal.ZERO;
+			BigDecimal sub = order.getSubtotal() != null ? order.getSubtotal() : BigDecimal.ZERO;
+			order.setTotalAmount(sub.add(shipping));
+		}
+		applyVatBreakdown(order);
+		orderRepository.save(order);
+		upsertTaxInvoice(order, row);
+		return allItems.size();
 	}
 
 	private int upsertOrder(
@@ -218,6 +375,87 @@ public class OrderImportService {
 
 		upsertTaxInvoice(saved, row);
 		return row.lineItems().size();
+	}
+
+	private void applyHeaderPreferExcel(Order order, OrderSkuListExcelRow row) {
+		if (StringUtils.hasText(row.getOrderStatus())) {
+			order.setOrderStatus(OrderStatusTextMapper.parse(row.getOrderStatus()));
+		}
+		order.setOrderSubstatus(OrderImportPreviewService.prefer(row.getOrderSubstatus(), order.getOrderSubstatus()));
+		order.setCancelReturnType(
+				OrderImportPreviewService.prefer(row.getCancelReturnType(), order.getCancelReturnType()));
+		order.setOrderKind(OrderImportPreviewService.prefer(row.getOrderKind(), order.getOrderKind()));
+		if (row.getShippingFeeOriginal() != null
+				|| row.getShippingFeeSellerDisc() != null
+				|| row.getShippingFeePlatformDisc() != null
+				|| row.getShippingFeeAfterDiscount() != null) {
+			applyShippingAndTotals(order, row);
+		}
+		if (row.getPaymentPlatformDiscount() != null) {
+			order.setPaymentPlatformDiscount(row.getPaymentPlatformDiscount());
+		}
+		if (row.getRefundAmount() != null) {
+			order.setRefundAmount(row.getRefundAmount());
+		}
+		if (row.getTaxes() != null) {
+			order.setTaxes(row.getTaxes());
+		}
+		order.setOrderDate(OrderImportPreviewService.prefer(row.getOrderDate(), order.getOrderDate()));
+		order.setPaidAt(OrderImportPreviewService.prefer(row.getPaidAt(), order.getPaidAt()));
+		order.setRtsAt(OrderImportPreviewService.prefer(row.getRtsAt(), order.getRtsAt()));
+		order.setShippedAt(OrderImportPreviewService.prefer(row.getShippedAt(), order.getShippedAt()));
+		order.setDeliveredAt(OrderImportPreviewService.prefer(row.getDeliveredAt(), order.getDeliveredAt()));
+		order.setCancelledAt(OrderImportPreviewService.prefer(row.getCancelledAt(), order.getCancelledAt()));
+		order.setCancelBy(OrderImportPreviewService.prefer(row.getCancelBy(), order.getCancelBy()));
+		order.setCancelReason(OrderImportPreviewService.prefer(row.getCancelReason(), order.getCancelReason()));
+		order.setFulfillmentType(
+				OrderImportPreviewService.prefer(row.getFulfillmentType(), order.getFulfillmentType()));
+		order.setWarehouseName(OrderImportPreviewService.prefer(row.getWarehouseName(), order.getWarehouseName()));
+		order.setTrackingId(OrderImportPreviewService.prefer(row.getTrackingId(), order.getTrackingId()));
+		order.setDeliveryOption(OrderImportPreviewService.prefer(row.getDeliveryOption(), order.getDeliveryOption()));
+		order.setShippingProviderName(
+				OrderImportPreviewService.prefer(row.getShippingProviderName(), order.getShippingProviderName()));
+		order.setBuyerMessage(OrderImportPreviewService.prefer(row.getBuyerMessage(), order.getBuyerMessage()));
+		order.setPaymentMethod(OrderImportPreviewService.prefer(row.getPaymentMethod(), order.getPaymentMethod()));
+		order.setPackageId(OrderImportPreviewService.prefer(row.getPackageId(), order.getPackageId()));
+		order.setSellerNote(OrderImportPreviewService.prefer(row.getSellerNote(), order.getSellerNote()));
+		order.setCheckedStatus(OrderImportPreviewService.prefer(row.getCheckedStatus(), order.getCheckedStatus()));
+		order.setCheckedMarkedBy(
+				OrderImportPreviewService.prefer(row.getCheckedMarkedBy(), order.getCheckedMarkedBy()));
+	}
+
+	private CustomerInfo applyCustomerFieldsPreferExcel(CustomerInfo customer, OrderSkuListExcelRow row) {
+		if (StringUtils.hasText(row.getBuyerUsername())) {
+			customer.setExternalCustomerId(row.getBuyerUsername().trim());
+		}
+		if (StringUtils.hasText(row.getRecipient())) {
+			customer.setName(row.getRecipient().trim());
+		}
+		if (StringUtils.hasText(row.getPhone())) {
+			customer.setPhone(row.getPhone().trim());
+		}
+		if (StringUtils.hasText(row.getDetailAddress())) {
+			customer.setAddress(row.getDetailAddress().trim());
+		}
+		if (row.getZipcode() != null) {
+			customer.setZipcode(row.getZipcode());
+		}
+		if (row.getCountry() != null) {
+			customer.setCountry(row.getCountry());
+		}
+		if (row.getProvince() != null) {
+			customer.setProvince(row.getProvince());
+		}
+		if (row.getDistrict() != null) {
+			customer.setDistrict(row.getDistrict());
+		}
+		if (row.getSubDistrict() != null) {
+			customer.setSubDistrict(row.getSubDistrict());
+		}
+		if (row.getAdditionalAddressInfo() != null) {
+			customer.setAdditionalAddressInfo(row.getAdditionalAddressInfo());
+		}
+		return customer;
 	}
 
 	private CustomerInfo resolveCustomer(Store store, Marketplace marketplace, OrderSkuListExcelRow row) {
@@ -349,6 +587,16 @@ public class OrderImportService {
 		for (OrderSkuListLineItem line : lines) {
 			if (line.getLineTotal() != null) {
 				total = total.add(line.getLineTotal());
+			}
+		}
+		return total.compareTo(BigDecimal.ZERO) == 0 ? null : total;
+	}
+
+	private static BigDecimal sumOrderItemLineTotals(Collection<OrderItem> items) {
+		BigDecimal total = BigDecimal.ZERO;
+		for (OrderItem item : items) {
+			if (item.getLineTotal() != null) {
+				total = total.add(item.getLineTotal());
 			}
 		}
 		return total.compareTo(BigDecimal.ZERO) == 0 ? null : total;

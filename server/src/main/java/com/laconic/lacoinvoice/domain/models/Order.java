@@ -18,13 +18,18 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "lco_orders")
+@Table(
+		name = "lco_orders",
+		uniqueConstraints = @UniqueConstraint(
+				name = "uk_lco_orders_store_mp_ext",
+				columnNames = { "store_id", "marketplace_id", "external_order_id" }))
 public class Order extends StoreScopedEntity {
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)

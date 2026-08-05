@@ -10,6 +10,8 @@
     "stores": "Stores",
     "products": "Products",
     "orders": "Orders",
+    "order_list": "Order list",
+    "order_imports": "Order imported Excel files",
     "invoices": "Invoices",
     "customers": "Customers",
     "users": "Users",

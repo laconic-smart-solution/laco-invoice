@@ -42,6 +42,7 @@ function toOrderLineItem(item: ApiOrderDetailDto["items"][number]): OrderLineIte
     sku: item.sku?.trim() || EMPTY_VALUE,
     quantity: item.quantity,
     unitPrice: item.price,
+    productId: item.productId != null ? String(item.productId) : undefined,
   }
 }
 

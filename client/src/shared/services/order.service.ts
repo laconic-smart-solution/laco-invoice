@@ -67,6 +67,7 @@ export interface OrderPageRequest {
   filter?: {
     orderStatus?: ApiOrderStatus
     sourceType?: ApiOrderSourceType
+    sourceId?: number
     externalOrderId?: string
     storeId?: number
     marketplaceId?: number
@@ -90,6 +91,70 @@ export interface OrderImportRequest {
   storeId: number
   marketplaceCode: string
   file: File
+}
+
+export type ApiOrderImportMatchStatus = "NEW" | "DUPLICATE"
+export type ApiOrderImportResolveAction = "CREATE" | "MERGE" | "SKIP" | "REPLACE"
+export type ApiOrderImportBatchStatus =
+  | "PREVIEW"
+  | "COMMITTED"
+  | "EXPIRED"
+  | "CANCELLED"
+
+export interface ApiOrderImportPreviewOrderDto {
+  id: number
+  externalOrderId: string
+  matchStatus: ApiOrderImportMatchStatus
+  existingOrderId: number | null
+  resolveAction: ApiOrderImportResolveAction | null
+  resolveSource: string | null
+  excelItemCount: number | null
+  existingItemCount: number | null
+  excelTotalAmount: number | null
+  existingTotalAmount: number | null
+  warningCode: string | null
+}
+
+export interface ApiOrderImportPreviewBatchDto {
+  batchId: number
+  status: ApiOrderImportBatchStatus
+  sheetName: string | null
+  originalFilename: string | null
+  rowCount: number
+  totalOrders: number
+  newCount: number
+  duplicateCount: number
+  expiresAt: string | null
+  orders: ApiOrderImportPreviewOrderDto[]
+}
+
+export interface ApiOrderImportPreviewExcelRowDto {
+  excelRowIndex: number | null
+  values: Record<string, string>
+}
+
+export interface ApiOrderImportPreviewExcelRowsDto {
+  previewOrderId: number
+  externalOrderId: string
+  columns: string[]
+  rows: ApiOrderImportPreviewExcelRowDto[]
+}
+
+export interface OrderImportDecideUpdate {
+  previewOrderId: number
+  resolveAction: ApiOrderImportResolveAction
+}
+
+export interface OrderImportDecideRequest {
+  storeId: number
+  batchId: number
+  bulkDuplicatesAction?: ApiOrderImportResolveAction
+  updates?: OrderImportDecideUpdate[]
+}
+
+export interface OrderImportCommitRequest {
+  storeId: number
+  batchId: number
 }
 
 export interface OrderStats {
@@ -121,6 +186,7 @@ export interface OrderExportRequest {
     storeId?: number
     orderStatus?: ApiOrderStatus
     sourceType?: ApiOrderSourceType
+    sourceId?: number
     externalOrderId?: string
   }
   columns?: string[]
@@ -184,6 +250,63 @@ export const orderService = {
         params: { storeId, marketplaceCode },
         headers: { "Content-Type": "multipart/form-data" },
       }
+    )
+    return response.data.data
+  },
+
+  previewImport: async ({ storeId, marketplaceCode, file }: OrderImportRequest) => {
+    const formData = new FormData()
+    formData.append("file", file)
+
+    const response = await apiClient.post<ApiResponse<ApiOrderImportPreviewBatchDto>>(
+      "/v1/orders/import/preview",
+      formData,
+      {
+        params: { storeId, marketplaceCode },
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    )
+    return response.data.data
+  },
+
+  decideImportPreview: async ({
+    storeId,
+    batchId,
+    bulkDuplicatesAction,
+    updates,
+  }: OrderImportDecideRequest) => {
+    const response = await apiClient.patch<ApiResponse<ApiOrderImportPreviewBatchDto>>(
+      `/v1/orders/import/preview/${batchId}/orders`,
+      {
+        bulkDuplicatesAction,
+        updates,
+      },
+      { params: { storeId } }
+    )
+    return response.data.data
+  },
+
+  getImportPreviewExcelRows: async ({
+    storeId,
+    batchId,
+    previewOrderId,
+  }: {
+    storeId: number
+    batchId: number
+    previewOrderId: number
+  }) => {
+    const response = await apiClient.get<ApiResponse<ApiOrderImportPreviewExcelRowsDto>>(
+      `/v1/orders/import/preview/${batchId}/orders/${previewOrderId}/excel-rows`,
+      { params: { storeId } }
+    )
+    return response.data.data
+  },
+
+  commitImportPreview: async ({ storeId, batchId }: OrderImportCommitRequest) => {
+    const response = await apiClient.post<ApiResponse<ApiOrderImportResultDto>>(
+      `/v1/orders/import/preview/${batchId}/commit`,
+      null,
+      { params: { storeId } }
     )
     return response.data.data
   },

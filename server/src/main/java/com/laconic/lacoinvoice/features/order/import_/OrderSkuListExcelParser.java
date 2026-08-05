@@ -93,7 +93,7 @@ public class OrderSkuListExcelParser {
 	}
 
 	private Map<String, Integer> buildColumnIndex(Row headerRow) {
-		Map<String, Integer> index = new HashMap<>();
+		Map<String, Integer> index = new java.util.LinkedHashMap<>();
 		for (Cell cell : headerRow) {
 			String name = formatter.formatCellValue(cell).trim();
 			if (StringUtils.hasText(name)) {
@@ -182,6 +182,8 @@ public class OrderSkuListExcelParser {
 		order.setTaxAddressType(cell(cols, row, "Tax Info - Address Type"));
 
 		OrderSkuListLineItem line = new OrderSkuListLineItem();
+		line.setExcelRowIndex(row.getRowNum() + 1);
+		line.setExcelColumns(captureAllColumns(row, cols));
 		line.setPlatformSkuId(cell(cols, row, "SKU ID"));
 		line.setSellerSku(cell(cols, row, "Seller SKU"));
 		line.setProductName(cell(cols, row, "Product Name"));
@@ -197,6 +199,15 @@ public class OrderSkuListExcelParser {
 		line.setProductCategory(cell(cols, row, "Product Category"));
 		order.lineItems().add(line);
 		return order;
+	}
+
+	private Map<String, String> captureAllColumns(Row row, Map<String, Integer> cols) {
+		Map<String, String> values = new java.util.LinkedHashMap<>();
+		for (Map.Entry<String, Integer> entry : cols.entrySet()) {
+			String raw = cellValue(row, entry.getValue());
+			values.put(entry.getKey(), StringUtils.hasText(raw) ? raw.trim() : "");
+		}
+		return values;
 	}
 
 	private String cell(Map<String, Integer> cols, Row row, String name) {

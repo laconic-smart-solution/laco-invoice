@@ -24,11 +24,19 @@ export function parseClassicRoute(pathname: string): ClassicRouteMatch | null {
     return { panel: "overview", detail: null, setup: null }
   }
 
+  // Import file routes use full pages under classic chrome (not workspace panels).
+  if (
+    pathname === ROUTES.dashboard.orderImports ||
+    pathname.startsWith(`${ROUTES.dashboard.orderImports}/`)
+  ) {
+    return null
+  }
+
   if (pathname === ROUTES.dashboard.orders) {
     return { panel: "orders", detail: null, setup: null }
   }
   const orderMatch = pathname.match(/^\/orders\/([^/]+)$/)
-  if (orderMatch) {
+  if (orderMatch && orderMatch[1] !== "imports") {
     return {
       panel: "orders",
       detail: { type: "order", id: orderMatch[1] },

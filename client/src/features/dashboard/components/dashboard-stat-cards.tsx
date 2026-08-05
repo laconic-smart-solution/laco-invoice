@@ -44,8 +44,6 @@ export function DashboardStatCards() {
 
   const orders = orderStats?.totalOrders ?? 0
   const awaiting = orderStats?.awaitingInvoice ?? 0
-  const invoiced = orderStats?.invoicedOrders ?? 0
-  const coverage = orderStats?.invoiceCoveragePercent ?? 0
   const invoices = invoiceStats?.issuedCount ?? 0
   const billed = invoiceStats?.issuedGrandTotal ?? 0
   const stores = storesPage?.meta?.totalElements ?? 0
@@ -64,14 +62,7 @@ export function DashboardStatCards() {
         iconWrapperClassName="bg-info/10 text-info"
         footer={hint}
         onClick={() => void navigate(ROUTES.dashboard.orders)}
-      >
-        <p className="text-xs text-muted-foreground">
-          {t("stats.invoice_coverage", {
-            percent: coverage.toFixed(1),
-            invoiced: formatNumber(invoiced, locale),
-          })}
-        </p>
-      </StatCard>
+      />
 
       <StatCard
         title={t("stats.awaiting_invoice")}

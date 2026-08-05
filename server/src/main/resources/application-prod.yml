@@ -2,6 +2,8 @@ spring:
   config:
     activate:
       on-profile: prod
+  quartz:
+    auto-startup: true
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -26,3 +28,8 @@ app:
   sync:
     quartz:
       enabled: true
+  order-import:
+    preview-cleanup:
+      quartz:
+        enabled: true
+        retention-days: 7

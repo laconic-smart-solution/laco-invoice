@@ -55,7 +55,32 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
       ]
     }
 
-    if (orderId && pathname.startsWith(`${ROUTES.dashboard.orders}/`)) {
+    if (pathname === ROUTES.dashboard.orderImports) {
+      return [
+        { label: t("sidebar:nav.dashboard"), href: ROUTES.dashboard.root },
+        { label: t("sidebar:nav.orders"), href: ROUTES.dashboard.orders },
+        { label: t("sidebar:nav.order_imports") },
+      ]
+    }
+
+    if (pathname.startsWith(`${ROUTES.dashboard.orderImports}/`)) {
+      const importFileId = pathname.split("/").pop()
+      return [
+        { label: t("sidebar:nav.dashboard"), href: ROUTES.dashboard.root },
+        { label: t("sidebar:nav.orders"), href: ROUTES.dashboard.orders },
+        {
+          label: t("sidebar:nav.order_imports"),
+          href: ROUTES.dashboard.orderImports,
+        },
+        { label: importFileId ?? "" },
+      ]
+    }
+
+    if (
+      orderId &&
+      pathname.startsWith(`${ROUTES.dashboard.orders}/`) &&
+      !pathname.startsWith(ROUTES.dashboard.orderImports)
+    ) {
       const order = getMockOrderById(orderId)
 
       return [

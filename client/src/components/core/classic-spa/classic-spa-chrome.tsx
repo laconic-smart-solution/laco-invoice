@@ -1,4 +1,4 @@
-import { LogOut, UserRound } from "lucide-react"
+import { ChevronDown, LogOut, UserRound } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 
@@ -14,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { SIDEBAR_NAV_ITEMS } from "@/constants/navigation"
+import { SIDEBAR_NAV_ITEMS, type SidebarNavItem } from "@/constants/navigation"
 import {
   CLASSIC_NAV_PANEL_BY_KEY,
   classicPanelPath,
@@ -31,6 +31,10 @@ function getInitials(name: string) {
     .join("")
     .slice(0, 2)
     .toUpperCase()
+}
+
+function isPathUnder(pathname: string, path: string) {
+  return pathname === path || pathname.startsWith(`${path}/`)
 }
 
 /**
@@ -77,53 +81,23 @@ export function ClassicSpaChrome() {
           className="flex min-w-0 flex-1 items-center gap-1"
           aria-label={t("sidebar:nav_label")}
         >
-          {navItems.map((item) => {
-            const Icon = item.icon
-            const label = t(`sidebar:nav.${item.key}`)
-            const panel = CLASSIC_NAV_PANEL_BY_KEY[item.key]
-            const isActive =
-              panel != null
-                ? activeRoute?.panel === panel
-                : pathname === item.path || pathname.startsWith(`${item.path}/`)
-
-            if (panel != null) {
-              return (
-                <button
-                  key={item.key}
-                  type="button"
-                  onClick={() => {
-                    setPanel(panel)
-                    void navigate(classicPanelPath(panel), { replace: true })
-                  }}
-                  className={cn(
-                    "inline-flex shrink-0 items-center gap-1.5 border px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors",
-                    isActive
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground"
-                  )}
-                >
-                  <Icon className="size-3.5 shrink-0" aria-hidden />
-                  {label}
-                </button>
-              )
-            }
-
-            return (
-              <Link
+          {navItems.map((item) =>
+            item.children?.length ? (
+              <ClassicNavDropdown
                 key={item.key}
-                to={item.path}
-                className={cn(
-                  "inline-flex shrink-0 items-center gap-1.5 border px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors",
-                  isActive
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground"
-                )}
-              >
-                <Icon className="size-3.5 shrink-0" aria-hidden />
-                {label}
-              </Link>
+                item={item}
+                pathname={pathname}
+                activePanel={activeRoute?.panel ?? null}
+              />
+            ) : (
+              <ClassicNavItem
+                key={item.key}
+                item={item}
+                pathname={pathname}
+                activePanel={activeRoute?.panel ?? null}
+              />
             )
-          })}
+          )}
         </nav>
       </div>
 
@@ -167,5 +141,134 @@ export function ClassicSpaChrome() {
         ) : null}
       </div>
     </header>
+  )
+}
+
+interface ClassicNavItemProps {
+  item: SidebarNavItem
+  pathname: string
+  activePanel: string | null
+}
+
+function ClassicNavItem({ item, pathname, activePanel }: ClassicNavItemProps) {
+  const { t } = useTranslation("sidebar")
+  const navigate = useNavigate()
+  const setPanel = useClassicWorkspaceStore((state) => state.setPanel)
+  const Icon = item.icon
+  const label = t(`nav.${item.key}`)
+  const panel = CLASSIC_NAV_PANEL_BY_KEY[item.key]
+  const isActive =
+    panel != null
+      ? activePanel === panel
+      : isPathUnder(pathname, item.path)
+
+  if (panel != null) {
+    return (
+      <button
+        type="button"
+        onClick={() => {
+          setPanel(panel)
+          void navigate(classicPanelPath(panel), { replace: true })
+        }}
+        className={cn(
+          "inline-flex shrink-0 items-center gap-1.5 border px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors",
+          isActive
+            ? "border-primary bg-primary text-primary-foreground"
+            : "border-border bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground"
+        )}
+      >
+        <Icon className="size-3.5 shrink-0" aria-hidden />
+        {label}
+      </button>
+    )
+  }
+
+  return (
+    <Link
+      to={item.path}
+      className={cn(
+        "inline-flex shrink-0 items-center gap-1.5 border px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors",
+        isActive
+          ? "border-primary bg-primary text-primary-foreground"
+          : "border-border bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground"
+      )}
+    >
+      <Icon className="size-3.5 shrink-0" aria-hidden />
+      {label}
+    </Link>
+  )
+}
+
+interface ClassicNavDropdownProps {
+  item: SidebarNavItem
+  pathname: string
+  activePanel: string | null
+}
+
+function ClassicNavDropdown({
+  item,
+  pathname,
+  activePanel,
+}: ClassicNavDropdownProps) {
+  const { t } = useTranslation("sidebar")
+  const navigate = useNavigate()
+  const setPanel = useClassicWorkspaceStore((state) => state.setPanel)
+  const Icon = item.icon
+  const label = t(`nav.${item.key}`)
+  const panel = CLASSIC_NAV_PANEL_BY_KEY[item.key]
+  const childActive = item.children?.some((child) =>
+    isPathUnder(pathname, child.path)
+  )
+  const isActive =
+    (panel != null && activePanel === panel) || Boolean(childActive)
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className={cn(
+            "inline-flex shrink-0 items-center gap-1.5 border px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors",
+            isActive
+              ? "border-primary bg-primary text-primary-foreground"
+              : "border-border bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground"
+          )}
+        >
+          <Icon className="size-3.5 shrink-0" aria-hidden />
+          {label}
+          <ChevronDown className="size-3 shrink-0 opacity-80" aria-hidden />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="min-w-48 rounded-none">
+        {item.children?.map((child) => {
+          const childLabel = t(`nav.${child.key}`)
+          const childIsList = child.path === item.path
+          const childIsActive = childIsList
+            ? Boolean(
+                panel != null &&
+                  activePanel === panel &&
+                  !pathname.startsWith(ROUTES.dashboard.orderImports)
+              )
+            : isPathUnder(pathname, child.path)
+
+          return (
+            <DropdownMenuItem
+              key={child.key}
+              className={cn(childIsActive && "bg-accent text-accent-foreground")}
+              onSelect={() => {
+                if (childIsList && panel != null) {
+                  setPanel(panel)
+                  void navigate(classicPanelPath(panel), { replace: true })
+                  return
+                }
+                void navigate(child.path)
+              }}
+            >
+              {childLabel}
+            </DropdownMenuItem>
+          )
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

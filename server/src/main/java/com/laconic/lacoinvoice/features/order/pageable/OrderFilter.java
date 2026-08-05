@@ -18,6 +18,8 @@ public class OrderFilter {
 
 	private OrderSourceType sourceType;
 
+	private Long sourceId;
+
 	private String externalOrderId;
 
 	private Long storeId;

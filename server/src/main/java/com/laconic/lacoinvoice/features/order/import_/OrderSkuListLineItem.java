@@ -1,6 +1,8 @@
 package com.laconic.lacoinvoice.features.order.import_;
 
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class OrderSkuListLineItem {
 
@@ -17,6 +19,10 @@ public class OrderSkuListLineItem {
 	private BigDecimal lineTotal;
 	private BigDecimal weightKg;
 	private String productCategory;
+	/** 1-based Excel sheet row number (matches what users see in spreadsheet apps). */
+	private Integer excelRowIndex;
+	/** All header→cell values for this physical Excel row (JSON-friendly map). */
+	private Map<String, String> excelColumns;
 
 	public String getPlatformSkuId() {
 		return platformSkuId;
@@ -120,5 +126,21 @@ public class OrderSkuListLineItem {
 
 	public void setProductCategory(String productCategory) {
 		this.productCategory = productCategory;
+	}
+
+	public Integer getExcelRowIndex() {
+		return excelRowIndex;
+	}
+
+	public void setExcelRowIndex(Integer excelRowIndex) {
+		this.excelRowIndex = excelRowIndex;
+	}
+
+	public Map<String, String> getExcelColumns() {
+		return excelColumns;
+	}
+
+	public void setExcelColumns(Map<String, String> excelColumns) {
+		this.excelColumns = excelColumns;
 	}
 }

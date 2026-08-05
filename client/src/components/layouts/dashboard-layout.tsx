@@ -45,7 +45,13 @@ export function DashboardLayout() {
           <AppBreadcrumb />
         </div>
       ) : null}
-      <Outlet />
+      {mode === "classic" ? (
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <Outlet />
+        </div>
+      ) : (
+        <Outlet />
+      )}
     </DashboardShell>
   )
 }

@@ -17,12 +17,14 @@ import {
   ORDER_STATUS_FILTER_OPTIONS,
   type OrderFiltersState,
 } from "@/features/orders/types/order-filters"
+import { cn } from "@/lib/utils"
 
 interface OrdersFiltersProps {
   stores: Store[]
   value: OrderFiltersState
   onChange: (value: OrderFiltersState) => void
   disabled?: boolean
+  hideSourceFilter?: boolean
 }
 
 export function OrdersFilters({
@@ -30,13 +32,21 @@ export function OrdersFilters({
   value,
   onChange,
   disabled = false,
+  hideSourceFilter = false,
 }: OrdersFiltersProps) {
   const { t } = useTranslation("orders")
   const selectedStoreId = value.storeId || "all"
 
   return (
     <section className="border border-border bg-card p-4 shadow-sm">
-      <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] md:items-end">
+      <div
+        className={cn(
+          "grid gap-4 md:items-end",
+          hideSourceFilter
+            ? "md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto]"
+            : "md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto]"
+        )}
+      >
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground">
             {t("filters.store_label")}
@@ -108,27 +118,29 @@ export function OrdersFilters({
           </Select>
         </div>
 
-        <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">
-            {t("filters.source_label")}
-          </Label>
-          <Select
-            value={value.sourceType}
-            onValueChange={(sourceType) => onChange({ ...value, sourceType })}
-            disabled={disabled}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {ORDER_SOURCE_FILTER_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {t(option.labelKey)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {!hideSourceFilter ? (
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">
+              {t("filters.source_label")}
+            </Label>
+            <Select
+              value={value.sourceType}
+              onValueChange={(sourceType) => onChange({ ...value, sourceType })}
+              disabled={disabled}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {ORDER_SOURCE_FILTER_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {t(option.labelKey)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ) : null}
 
         <Button
           variant="outline"

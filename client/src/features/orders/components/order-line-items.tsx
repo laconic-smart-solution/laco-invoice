@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next"
+import { Link } from "react-router-dom"
 
+import { ROUTES } from "@/app/constants/routes"
 import {
   Table,
   TableBody,
@@ -8,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import type { OrderDetail } from "@/features/orders/types/order"
+import type { OrderDetail, OrderLineItem } from "@/features/orders/types/order"
 import { cn } from "@/lib/utils"
 import { useLocaleStore } from "@/shared/stores/locale-store"
 import { formatCurrency } from "@/util/format"
@@ -16,6 +18,21 @@ import { formatCurrency } from "@/util/format"
 interface OrderLineItemsProps {
   order: OrderDetail
   variant?: "page" | "sheet"
+}
+
+function OrderLineItemProductName({ item }: { item: OrderLineItem }) {
+  if (!item.productId) {
+    return <>{item.name}</>
+  }
+
+  return (
+    <Link
+      to={ROUTES.dashboard.productDetail(item.productId)}
+      className="text-primary underline-offset-4 hover:underline"
+    >
+      {item.name}
+    </Link>
+  )
 }
 
 export function OrderLineItems({
@@ -54,7 +71,7 @@ export function OrderLineItems({
               return (
                 <li key={item.id} className="min-w-0 space-y-2 px-3 py-3">
                   <p className="text-sm font-medium break-words whitespace-normal">
-                    {item.name}
+                    <OrderLineItemProductName item={item} />
                   </p>
                   <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-xs text-muted-foreground">
                     <span className="min-w-0 break-all">
@@ -101,7 +118,7 @@ export function OrderLineItems({
               return (
                 <TableRow key={item.id} className="border-b border-border/80">
                   <TableCell className="max-w-md px-4 py-3.5 text-sm font-medium whitespace-normal break-words">
-                    {item.name}
+                    <OrderLineItemProductName item={item} />
                   </TableCell>
                   <TableCell className="px-4 py-3.5 text-sm text-muted-foreground whitespace-normal break-all">
                     {item.sku}

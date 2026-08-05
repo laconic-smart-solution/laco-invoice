@@ -1,5 +1,6 @@
 package com.laconic.lacoinvoice.domain.repositories;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,6 +19,11 @@ public interface OrderRepository extends BaseRepository<Order> {
 			Long storeId,
 			Long marketplaceId,
 			String externalOrderId);
+
+	List<Order> findByStore_IdAndMarketplace_IdAndExternalOrderIdIn(
+			Long storeId,
+			Long marketplaceId,
+			Collection<String> externalOrderIds);
 
 	@Query("""
 			SELECT DISTINCT o FROM Order o

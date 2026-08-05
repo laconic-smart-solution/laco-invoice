@@ -87,6 +87,14 @@ app:
       enabled: false
       cron: "0 */10 * * * ?"
       timezone: Asia/Bangkok
+  order-import:
+    preview-cleanup:
+      quartz:
+        # Hard-deletes order_import_batches + preview_orders/items only (keeps order_import_files).
+        enabled: false
+        cron: "0 15 3 * * ?"
+        timezone: Asia/Bangkok
+        retention-days: 7
   marketplace-product-sync:
     list-chunk-size: 50
     detail-chunk-size: 10

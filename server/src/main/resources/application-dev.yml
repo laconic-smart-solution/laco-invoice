@@ -4,8 +4,8 @@ spring:
       on-profile: dev
   datasource:
     url: ${DB_URL:jdbc:oracle:thin:@//113.53.62.172:1200/LACONIC}
-    username: ${DB_USERNAME:LACO_INVOICE}
-    password: ${DB_PASSWORD:LACO_INVOICE}
+    username: ${DB_USERNAME:LACO_INVOICE_DB}
+    password: ${DB_PASSWORD:LACO_INVOICE_DB}
     driver-class-name: oracle.jdbc.OracleDriver
   jpa:
     show-sql: true

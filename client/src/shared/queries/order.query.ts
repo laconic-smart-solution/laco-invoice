@@ -3,6 +3,8 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tansta
 import type {
   OrderBulkGenerateStatus,
   OrderExportRequest,
+  OrderImportCommitRequest,
+  OrderImportDecideRequest,
   OrderImportRequest,
   OrderPageRequest,
 } from "@/shared/services/order.service"
@@ -12,6 +14,7 @@ import {
   isAxiosStatusMessage,
 } from "@/shared/api/extract-api-error-message"
 import { customerKeys } from "@/shared/queries/customer.query"
+import { orderImportFileKeys } from "@/shared/queries/order-import-file.query"
 
 export const orderKeys = {
   all: ["orders"] as const,
@@ -23,6 +26,18 @@ export const orderKeys = {
   exportPreview: (request: Omit<OrderExportRequest, "pageNumber" | "pageSize" | "columns">) =>
     [...orderKeys.all, "export-preview", request] as const,
   bulkGenerate: (runId: number) => [...orderKeys.all, "bulk-generate", runId] as const,
+  importPreviewExcelRows: (
+    storeId: number,
+    batchId: number,
+    previewOrderId: number
+  ) =>
+    [
+      ...orderKeys.all,
+      "import-preview-excel-rows",
+      storeId,
+      batchId,
+      previewOrderId,
+    ] as const,
 }
 
 export const TERMINAL_BULK_GENERATE_STATUSES: OrderBulkGenerateStatus[] = [
@@ -30,10 +45,11 @@ export const TERMINAL_BULK_GENERATE_STATUSES: OrderBulkGenerateStatus[] = [
   "FAILED",
 ]
 
-export function useOrdersPageQuery(request: OrderPageRequest) {
+export function useOrdersPageQuery(request: OrderPageRequest, enabled = true) {
   return useQuery({
     queryKey: orderKeys.list(request),
     queryFn: () => orderService.pageOrders(request),
+    enabled,
   })
 }
 
@@ -75,6 +91,64 @@ export function useImportOrdersMutation() {
       void queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
       void queryClient.invalidateQueries({ queryKey: orderKeys.all })
       void queryClient.invalidateQueries({ queryKey: customerKeys.lists() })
+      void queryClient.invalidateQueries({ queryKey: orderImportFileKeys.all })
+    },
+  })
+}
+
+export function usePreviewOrderImportMutation() {
+  return useMutation({
+    mutationFn: (request: OrderImportRequest) => orderService.previewImport(request),
+  })
+}
+
+export function useDecideOrderImportMutation() {
+  return useMutation({
+    mutationFn: (request: OrderImportDecideRequest) =>
+      orderService.decideImportPreview(request),
+  })
+}
+
+export function useImportPreviewExcelRowsQuery(
+  storeId: number | null,
+  batchId: number | null,
+  previewOrderId: number | null,
+  enabled = true
+) {
+  return useQuery({
+    queryKey: orderKeys.importPreviewExcelRows(
+      storeId ?? 0,
+      batchId ?? 0,
+      previewOrderId ?? 0
+    ),
+    queryFn: () =>
+      orderService.getImportPreviewExcelRows({
+        storeId: storeId as number,
+        batchId: batchId as number,
+        previewOrderId: previewOrderId as number,
+      }),
+    enabled:
+      enabled &&
+      storeId != null &&
+      storeId > 0 &&
+      batchId != null &&
+      batchId > 0 &&
+      previewOrderId != null &&
+      previewOrderId > 0,
+  })
+}
+
+export function useCommitOrderImportMutation() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (request: OrderImportCommitRequest) =>
+      orderService.commitImportPreview(request),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
+      void queryClient.invalidateQueries({ queryKey: orderKeys.all })
+      void queryClient.invalidateQueries({ queryKey: customerKeys.lists() })
+      void queryClient.invalidateQueries({ queryKey: orderImportFileKeys.all })
     },
   })
 }
