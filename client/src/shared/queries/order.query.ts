@@ -22,6 +22,7 @@ export const orderKeys = {
   list: (request: OrderPageRequest) => [...orderKeys.lists(), request] as const,
   details: () => [...orderKeys.all, "detail"] as const,
   detail: (id: number) => [...orderKeys.details(), id] as const,
+  history: (orderId: number) => [...orderKeys.all, "history", orderId] as const,
   stats: (storeId?: number) => [...orderKeys.all, "stats", storeId ?? "all"] as const,
   exportPreview: (request: Omit<OrderExportRequest, "pageNumber" | "pageSize" | "columns">) =>
     [...orderKeys.all, "export-preview", request] as const,
@@ -65,6 +66,24 @@ export function useOrderDetailQuery(id: number | null) {
     queryKey: orderKeys.detail(id ?? 0),
     queryFn: () => orderService.getOrder(id as number),
     enabled: id != null && id > 0,
+  })
+}
+
+export function useOrderHistoryQuery(orderId: number | null, enabled = true) {
+  return useInfiniteQuery({
+    queryKey: orderKeys.history(orderId ?? 0),
+    queryFn: ({ pageParam }) =>
+      orderService.pageOrderHistory(orderId as number, pageParam, 10),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const page = lastPage.meta?.page ?? 1
+      const totalPages = lastPage.meta?.totalPages ?? 0
+      if (page >= totalPages) {
+        return undefined
+      }
+      return page + 1
+    },
+    enabled: enabled && orderId != null && orderId > 0,
   })
 }
 

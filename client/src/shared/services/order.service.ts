@@ -61,6 +61,30 @@ export interface ApiOrderDetailDto {
   items: ApiOrderItemDto[]
 }
 
+export type ApiOrderHistoryAction = "CREATE" | "UPDATE" | "DELETE"
+export type ApiOrderHistorySource = "MANUAL" | "IMPORT_EXCEL"
+
+export interface ApiOrderHistoryChangeDto {
+  field: string
+  fieldLabelKey: string | null
+  before: string | null
+  after: string | null
+  valueType: string
+}
+
+export interface ApiOrderHistoryEventDto {
+  id: number
+  action: ApiOrderHistoryAction
+  source: ApiOrderHistorySource
+  updatedByUserId: number | null
+  updatedBy: string | null
+  updatedAt: string
+  importFileId: number | null
+  excelFileName: string | null
+  note: string | null
+  changes: ApiOrderHistoryChangeDto[]
+}
+
 export interface OrderPageRequest {
   pageNumber?: number
   pageSize?: number
@@ -225,6 +249,18 @@ export const orderService = {
       `/v1/orders/${id}`
     )
     return response.data.data
+  },
+
+  pageOrderHistory: async (
+    orderId: number,
+    pageNumber = 1,
+    pageSize = 10
+  ) => {
+    const response = await apiClient.get<ApiResponse<ApiOrderHistoryEventDto[]>>(
+      `/v1/orders/${orderId}/history`,
+      { params: { pageNumber, pageSize } }
+    )
+    return response.data
   },
 
   getStats: async (storeId?: number): Promise<OrderStats> => {

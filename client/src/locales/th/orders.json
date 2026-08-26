@@ -57,7 +57,55 @@
     "actions": {
       "view_invoice": "ดูใบแจ้งหนี้",
       "generate": "สร้าง",
+      "history": "ประวัติ",
       "retry": "ลองอีกครั้ง"
+    }
+  },
+  "history": {
+    "title": "ประวัติคำสั่งซื้อ",
+    "description": "ประวัติการเปลี่ยนแปลงของคำสั่งซื้อ {{orderId}}",
+    "loading": "กำลังโหลดประวัติ…",
+    "empty": "ยังไม่มีประวัติสำหรับคำสั่งซื้อนี้",
+    "load_failed": "โหลดประวัติไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "empty_value": "—",
+    "unknown_user": "ไม่ทราบผู้ใช้",
+    "updated_by": "อัปเดตโดย: {{name}}",
+    "action_label": "การกระทำ: {{action}}",
+    "source_label": "แหล่งที่มา: {{source}}",
+    "excel_file_label": "ไฟล์ Excel:",
+    "page_info": "หน้า {{page}} จาก {{totalPages}} ({{total}} รายการ)",
+    "loaded_info": "แสดง {{loaded}} จาก {{total}} รายการ",
+    "loading_more": "กำลังโหลดเพิ่ม…",
+    "end": "สิ้นสุดประวัติ",
+    "prev": "ก่อนหน้า",
+    "next": "ถัดไป",
+    "close": "ปิด",
+    "actions": {
+      "create": "CREATE",
+      "update": "UPDATE",
+      "delete": "DELETE"
+    },
+    "sources": {
+      "manual": "MANUAL",
+      "import_excel": "IMPORT_EXCEL"
+    },
+    "columns": {
+      "field": "ฟิลด์",
+      "before": "ก่อน",
+      "after": "หลัง"
+    },
+    "fields": {
+      "order_status": "สถานะคำสั่งซื้อ",
+      "order_substatus": "สถานะย่อย",
+      "total_amount": "ยอดรวม",
+      "subtotal": "ยอดก่อนค่าส่ง",
+      "shipping_fee": "ค่าส่ง",
+      "amount_ex_vat": "ยอดไม่รวม VAT",
+      "vat_amount": "VAT",
+      "currency": "สกุลเงิน",
+      "order_date": "วันที่สั่งซื้อ",
+      "buyer_message": "ข้อความผู้ซื้อ",
+      "seller_note": "หมายเหตุผู้ขาย"
     }
   },
   "sync_status": {

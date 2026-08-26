@@ -57,7 +57,55 @@
     "actions": {
       "view_invoice": "查看发票",
       "generate": "生成",
+      "history": "历史",
       "retry": "重试"
+    }
+  },
+  "history": {
+    "title": "订单历史",
+    "description": "订单 {{orderId}} 的变更审计记录。",
+    "loading": "正在加载历史…",
+    "empty": "此订单尚无历史记录。",
+    "load_failed": "无法加载订单历史，请重试。",
+    "empty_value": "—",
+    "unknown_user": "未知用户",
+    "updated_by": "更新人：{{name}}",
+    "action_label": "操作：{{action}}",
+    "source_label": "来源：{{source}}",
+    "excel_file_label": "Excel 文件：",
+    "page_info": "第 {{page}} / {{totalPages}} 页（共 {{total}} 条）",
+    "loaded_info": "已显示 {{loaded}} / {{total}} 条",
+    "loading_more": "正在加载更多…",
+    "end": "已到历史末尾",
+    "prev": "上一页",
+    "next": "下一页",
+    "close": "关闭",
+    "actions": {
+      "create": "CREATE",
+      "update": "UPDATE",
+      "delete": "DELETE"
+    },
+    "sources": {
+      "manual": "MANUAL",
+      "import_excel": "IMPORT_EXCEL"
+    },
+    "columns": {
+      "field": "字段",
+      "before": "变更前",
+      "after": "变更后"
+    },
+    "fields": {
+      "order_status": "订单状态",
+      "order_substatus": "订单子状态",
+      "total_amount": "总金额",
+      "subtotal": "小计",
+      "shipping_fee": "运费",
+      "amount_ex_vat": "不含税金额",
+      "vat_amount": "增值税",
+      "currency": "货币",
+      "order_date": "下单日期",
+      "buyer_message": "买家留言",
+      "seller_note": "卖家备注"
     }
   },
   "sync_status": {

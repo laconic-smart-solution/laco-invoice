@@ -57,7 +57,55 @@
     "actions": {
       "view_invoice": "View Invoice",
       "generate": "Generate",
+      "history": "History",
       "retry": "Retry"
+    }
+  },
+  "history": {
+    "title": "Order History",
+    "description": "Audit trail for order {{orderId}}.",
+    "loading": "Loading history…",
+    "empty": "No history recorded for this order yet.",
+    "load_failed": "Unable to load order history. Please try again.",
+    "empty_value": "—",
+    "unknown_user": "Unknown user",
+    "updated_by": "Updated by: {{name}}",
+    "action_label": "Action: {{action}}",
+    "source_label": "Source: {{source}}",
+    "excel_file_label": "Excel File:",
+    "page_info": "Page {{page}} of {{totalPages}} ({{total}} events)",
+    "loaded_info": "Showing {{loaded}} of {{total}} events",
+    "loading_more": "Loading more…",
+    "end": "End of history",
+    "prev": "Previous",
+    "next": "Next",
+    "close": "Close",
+    "actions": {
+      "create": "CREATE",
+      "update": "UPDATE",
+      "delete": "DELETE"
+    },
+    "sources": {
+      "manual": "MANUAL",
+      "import_excel": "IMPORT_EXCEL"
+    },
+    "columns": {
+      "field": "Field",
+      "before": "Before",
+      "after": "After"
+    },
+    "fields": {
+      "order_status": "Order Status",
+      "order_substatus": "Order Substatus",
+      "total_amount": "Total Amount",
+      "subtotal": "Subtotal",
+      "shipping_fee": "Shipping Fee",
+      "amount_ex_vat": "Amount Ex VAT",
+      "vat_amount": "VAT Amount",
+      "currency": "Currency",
+      "order_date": "Order Date",
+      "buyer_message": "Buyer Message",
+      "seller_note": "Seller Note"
     }
   },
   "sync_status": {

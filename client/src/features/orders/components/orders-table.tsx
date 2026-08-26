@@ -27,6 +27,7 @@ import { StatusBadge } from "@/components/common/status-badge"
 import type { StatusBadgeVariant } from "@/components/common/status-badge"
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
+import { OrderHistoryDialog } from "@/features/orders/components/order-history-dialog"
 import type {
   Order,
   OrderSourceType,
@@ -58,9 +59,10 @@ const DEFAULT_HIDDEN_ORDER_COLUMNS: VisibilityState = {
 interface OrderRowActionProps {
   order: Order
   onGenerate: (order: Order) => void
+  onHistory: (order: Order) => void
 }
 
-function OrderRowAction({ order, onGenerate }: OrderRowActionProps) {
+function OrderRowAction({ order, onGenerate, onHistory }: OrderRowActionProps) {
   const { t } = useTranslation("orders")
   const navigate = useNavigate()
 
@@ -74,6 +76,9 @@ function OrderRowAction({ order, onGenerate }: OrderRowActionProps) {
         >
           {t("table.actions.view_invoice")}
         </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => onHistory(order)}>
+          {t("table.actions.history")}
+        </DropdownMenuItem>
       </DataTableRowActions>
     )
   }
@@ -82,6 +87,9 @@ function OrderRowAction({ order, onGenerate }: OrderRowActionProps) {
     <DataTableRowActions>
       <DropdownMenuItem onSelect={() => onGenerate(order)}>
         {t("table.actions.generate")}
+      </DropdownMenuItem>
+      <DropdownMenuItem onSelect={() => onHistory(order)}>
+        {t("table.actions.history")}
       </DropdownMenuItem>
     </DataTableRowActions>
   )
@@ -136,6 +144,7 @@ export function OrdersTable({
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
   const [isAllMatchingSelected, setIsAllMatchingSelected] = useState(false)
   const [orderToGenerate, setOrderToGenerate] = useState<Order | null>(null)
+  const [historyOrder, setHistoryOrder] = useState<Order | null>(null)
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     DEFAULT_HIDDEN_ORDER_COLUMNS
   )
@@ -164,6 +173,10 @@ export function OrdersTable({
 
   const handleGenerateRequest = useCallback((order: Order) => {
     setOrderToGenerate(order)
+  }, [])
+
+  const handleHistoryRequest = useCallback((order: Order) => {
+    setHistoryOrder(order)
   }, [])
 
   const handleConfirmGenerate = useCallback(async () => {
@@ -401,11 +414,15 @@ export function OrdersTable({
         enableHiding: false,
         enableColumnFilter: false,
         cell: ({ row }) => (
-          <OrderRowAction order={row.original} onGenerate={handleGenerateRequest} />
+          <OrderRowAction
+            order={row.original}
+            onGenerate={handleGenerateRequest}
+            onHistory={handleHistoryRequest}
+          />
         ),
       },
     ],
-    [handleGenerateRequest, locale, t]
+    [handleGenerateRequest, handleHistoryRequest, locale, t]
   )
 
   const table = useDataTable({
@@ -474,6 +491,19 @@ export function OrdersTable({
         confirmLabel={t("table.actions.generate")}
         onConfirm={handleConfirmGenerate}
         isLoading={generateMutation.isPending}
+      />
+
+      <OrderHistoryDialog
+        open={historyOrder !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setHistoryOrder(null)
+          }
+        }}
+        orderId={
+          historyOrder != null ? Number.parseInt(historyOrder.id, 10) || null : null
+        }
+        externalOrderId={historyOrder?.orderId ?? null}
       />
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border">

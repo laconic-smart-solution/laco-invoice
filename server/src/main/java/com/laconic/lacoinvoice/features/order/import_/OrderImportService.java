@@ -33,6 +33,8 @@ import com.laconic.lacoinvoice.domain.repositories.OrderTaxInvoiceRepository;
 import com.laconic.lacoinvoice.domain.repositories.ProductRepository;
 import com.laconic.lacoinvoice.domain.repositories.StoreRepository;
 import com.laconic.lacoinvoice.features.order.OrderMoneyCalculator;
+import com.laconic.lacoinvoice.features.order.history.OrderHistoryRecorder;
+import com.laconic.lacoinvoice.features.order.history.OrderHistorySnapshot;
 
 @Service
 public class OrderImportService {
@@ -50,6 +52,7 @@ public class OrderImportService {
 	private final OrderTaxInvoiceRepository orderTaxInvoiceRepository;
 	private final InvoiceRepository invoiceRepository;
 	private final OrderSkuListExcelParser excelParser;
+	private final OrderHistoryRecorder orderHistoryRecorder;
 
 	public OrderImportService(
 			StoreRepository storeRepository,
@@ -61,7 +64,8 @@ public class OrderImportService {
 			ProductRepository productRepository,
 			OrderTaxInvoiceRepository orderTaxInvoiceRepository,
 			InvoiceRepository invoiceRepository,
-			OrderSkuListExcelParser excelParser) {
+			OrderSkuListExcelParser excelParser,
+			OrderHistoryRecorder orderHistoryRecorder) {
 		this.storeRepository = storeRepository;
 		this.marketplaceRepository = marketplaceRepository;
 		this.importFileRepository = importFileRepository;
@@ -72,6 +76,7 @@ public class OrderImportService {
 		this.orderTaxInvoiceRepository = orderTaxInvoiceRepository;
 		this.invoiceRepository = invoiceRepository;
 		this.excelParser = excelParser;
+		this.orderHistoryRecorder = orderHistoryRecorder;
 	}
 
 	/**
@@ -193,7 +198,13 @@ public class OrderImportService {
 		if (exists) {
 			throw new IllegalStateException("Order already exists: " + row.orderId());
 		}
-		return upsertOrder(store, marketplace, importFile, row);
+		int itemCount = upsertOrder(store, marketplace, importFile, row);
+		Order saved = orderRepository
+				.findByStore_IdAndMarketplace_IdAndExternalOrderId(
+						store.getId(), marketplace.getId(), row.orderId())
+				.orElseThrow(() -> new IllegalStateException("Order not found after CREATE: " + row.orderId()));
+		orderHistoryRecorder.recordImportCreate(saved, importFile, OrderHistorySnapshot.capture(saved));
+		return itemCount;
 	}
 
 	@Transactional
@@ -206,7 +217,14 @@ public class OrderImportService {
 			throw new IllegalArgumentException(
 					"REPLACE blocked for order " + row.orderId() + " because an invoice already exists");
 		}
-		return upsertOrder(store, marketplace, importFile, row);
+		OrderHistorySnapshot before = OrderHistorySnapshot.capture(existing);
+		int itemCount = upsertOrder(store, marketplace, importFile, row);
+		Order after = orderRepository
+				.findByStore_IdAndMarketplace_IdAndExternalOrderId(
+						store.getId(), marketplace.getId(), row.orderId())
+				.orElseThrow(() -> new IllegalStateException("Order not found after REPLACE: " + row.orderId()));
+		orderHistoryRecorder.recordImportUpdate(after, importFile, before, OrderHistorySnapshot.capture(after));
+		return itemCount;
 	}
 
 	@Transactional
@@ -216,6 +234,7 @@ public class OrderImportService {
 			OrderImportFile importFile,
 			Order order,
 			OrderSkuListExcelRow row) {
+		OrderHistorySnapshot before = OrderHistorySnapshot.capture(order);
 		CustomerInfo customer = order.getCustomer();
 		if (customer == null) {
 			customer = resolveCustomer(store, marketplace, row);
@@ -311,6 +330,7 @@ public class OrderImportService {
 		applyVatBreakdown(order);
 		orderRepository.save(order);
 		upsertTaxInvoice(order, row);
+		orderHistoryRecorder.recordImportUpdate(order, importFile, before, OrderHistorySnapshot.capture(order));
 		return allItems.size();
 	}
 

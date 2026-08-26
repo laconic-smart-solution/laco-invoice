@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.laconic.lacoinvoice.common.web.ApiResponse;
+import com.laconic.lacoinvoice.features.order.history.OrderHistoryEventDto;
+import com.laconic.lacoinvoice.features.order.history.OrderHistoryService;
 import com.laconic.lacoinvoice.features.order.pageable.OrderPageRequest;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,9 +32,11 @@ public class OrderController {
 			"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
 	private final OrderService service;
+	private final OrderHistoryService orderHistoryService;
 
-	public OrderController(OrderService service) {
+	public OrderController(OrderService service, OrderHistoryService orderHistoryService) {
 		this.service = service;
+		this.orderHistoryService = orderHistoryService;
 	}
 
 	@PostMapping("/pageable")
@@ -67,6 +71,15 @@ public class OrderController {
 	@Operation(summary = "Get order detail with line items")
 	public ApiResponse<OrderDetailDto> getById(@PathVariable Long id) {
 		return ApiResponse.ok("OK", service.getDetailById(id));
+	}
+
+	@GetMapping("/{id}/history")
+	@Operation(summary = "Paginated order history / audit trail (newest first)")
+	public ApiResponse<List<OrderHistoryEventDto>> history(
+			@PathVariable Long id,
+			@RequestParam(defaultValue = "1") int pageNumber,
+			@RequestParam(defaultValue = "10") int pageSize) {
+		return orderHistoryService.page(id, pageNumber, pageSize);
 	}
 
 	@PostMapping("/sync")

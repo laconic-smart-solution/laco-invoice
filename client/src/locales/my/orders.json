@@ -57,7 +57,55 @@
     "actions": {
       "view_invoice": "ငွေတောင်းခံလွှာ ကြည့်ရန်",
       "generate": "ထုတ်ရန်",
+      "history": "မှတ်တမ်း",
       "retry": "ထပ်ကြိုးစားရန်"
+    }
+  },
+  "history": {
+    "title": "အော်ဒါ မှတ်တမ်း",
+    "description": "အော်ဒါ {{orderId}} အတွက် ပြောင်းလဲမှု မှတ်တမ်း။",
+    "loading": "မှတ်တမ်း တင်နေသည်…",
+    "empty": "ဤအော်ဒါအတွက် မှတ်တမ်း မရှိသေးပါ။",
+    "load_failed": "အော်ဒါ မှတ်တမ်း တင်မရပါ။ ထပ်ကြိုးစားပါ။",
+    "empty_value": "—",
+    "unknown_user": "အမည်မသိ အသုံးပြုသူ",
+    "updated_by": "ပြင်ဆင်သူ: {{name}}",
+    "action_label": "လုပ်ဆောင်ချက်: {{action}}",
+    "source_label": "ရင်းမြစ်: {{source}}",
+    "excel_file_label": "Excel ဖိုင်:",
+    "page_info": "စာမျက်နှာ {{page}} / {{totalPages}} ({{total}} ခု)",
+    "loaded_info": "{{loaded}} / {{total}} ခု ပြထားသည်",
+    "loading_more": "ထပ်မံ တင်နေသည်…",
+    "end": "မှတ်တမ်း အဆုံး",
+    "prev": "ယခင်",
+    "next": "ရှေ့",
+    "close": "ပိတ်ရန်",
+    "actions": {
+      "create": "CREATE",
+      "update": "UPDATE",
+      "delete": "DELETE"
+    },
+    "sources": {
+      "manual": "MANUAL",
+      "import_excel": "IMPORT_EXCEL"
+    },
+    "columns": {
+      "field": "အကွက်",
+      "before": "မတိုင်မီ",
+      "after": "ပြီးနောက်"
+    },
+    "fields": {
+      "order_status": "အော်ဒါ အခြေအနေ",
+      "order_substatus": "အော်ဒါ အခြေအနေခွဲ",
+      "total_amount": "စုစုပေါင်း ပမာဏ",
+      "subtotal": "စုစုပေါင်းခွဲ",
+      "shipping_fee": "ပို့ဆောင်ခ",
+      "amount_ex_vat": "VAT မပါ ပမာဏ",
+      "vat_amount": "VAT ပမာဏ",
+      "currency": "ငွေကြေး",
+      "order_date": "အော်ဒါ ရက်စွဲ",
+      "buyer_message": "ဝယ်သူ မက်ဆေ့ချ်",
+      "seller_note": "ရောင်းသူ မှတ်ချက်"
     }
   },
   "sync_status": {
