@@ -1,0 +1,29 @@
+{
+  "title": "发票与税务发票",
+  "subtitle": "管理多订单合并发票、周期销售及 7% VAT 税务发票。",
+  "create_invoice": "创建发票",
+  "kpi": {
+    "total_invoiced": "已开票总额",
+    "vat_total": "7% 增值税总额",
+    "orders_included": "包含订单数",
+    "active_invoices": "有效发票"
+  },
+  "table": {
+    "invoice_no": "发票编号",
+    "title": "标题 / 批次",
+    "store": "店铺",
+    "period": "周期",
+    "orders": "订单数",
+    "subtotal": "不含税小计",
+    "vat": "增值税 (7%)",
+    "grand_total": "总计",
+    "status": "状态",
+    "actions": "操作"
+  },
+  "status": {
+    "draft": "草稿",
+    "issued": "已开具",
+    "paid": "已付款",
+    "void": "作废"
+  }
+}

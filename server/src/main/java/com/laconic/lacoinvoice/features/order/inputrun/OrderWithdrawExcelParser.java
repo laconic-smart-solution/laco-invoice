@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.laconic.lacoinvoice.common.util.ExcelXmlNormalizer;
 import com.laconic.lacoinvoice.features.order.inputrun.ParsedWithdrawWorkbook.ParsedWithdrawRow;
 
 /**
@@ -118,7 +119,8 @@ public class OrderWithdrawExcelParser {
 	}
 
 	public ParsedWithdrawWorkbook parse(InputStream inputStream) {
-		try (Workbook workbook = WorkbookFactory.create(inputStream)) {
+		try (InputStream normalized = ExcelXmlNormalizer.normalize(inputStream);
+				Workbook workbook = WorkbookFactory.create(normalized)) {
 			Sheet sheet = findOrderDetailsSheet(workbook);
 			int headerRowIndex = findHeaderRowIndex(sheet);
 			Row headerRow = sheet.getRow(headerRowIndex);

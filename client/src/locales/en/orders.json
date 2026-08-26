@@ -332,7 +332,7 @@
   },
   "inputs": {
     "title": "Order inputs",
-    "subtitle": "Create a titled run, attach Order Detail + Total Withdraw Excels, then Run files.",
+    "subtitle": "Create a titled run, attach Shipping Fee + Service fee Excels, then Run files.",
     "create": "New order input",
     "create_title": "New order input",
     "create_subtitle": "Give this run a title, then upload both Excel files on the next screen.",
@@ -364,7 +364,7 @@
       "orders": "Orders",
       "items": "Items",
       "files": "Files",
-      "file_states": "Detail: {{orderDetail}} · Withdraw: {{withdraw}}",
+      "file_states": "Shipping Fee: {{orderDetail}} · Service fee: {{withdraw}}",
       "created_at": "Created",
       "loading": "Loading…",
       "empty": "No order inputs yet.",
@@ -382,8 +382,8 @@
       "ready": "Ready",
       "running": "Running",
       "succeeded": "Succeeded",
-      "failed": "Failed",
-      "partial": "Partial"
+      "partial": "Partial",
+      "failed": "Failed"
     },
     "match": {
       "matched": "Matched",
@@ -398,13 +398,14 @@
     },
     "detail": {
       "loading": "Loading…",
-      "order_detail_title": "Order detail Excel",
+      "order_detail_title": "Shipping Fee excel",
       "order_detail_description": "TikTok OrderSKUList export (.xlsx)",
-      "withdraw_title": "Total withdraw Excel",
+      "withdraw_title": "Service fee excel",
       "withdraw_description": "TikTok Payout Report — Order details sheet (.xlsx)",
       "no_file": "No file uploaded",
       "upload": "Upload file",
       "uploading": "Uploading…",
+      "download_sample": "Download sample",
       "withdraw_summary": "{{rows}} rows · {{matched}} matched · {{unmatched}} unmatched",
       "stuck_running": "This run was left in Running (e.g. after refresh). Reset to continue.",
       "reset_stuck": "Reset status",

@@ -1,5 +1,13 @@
 import type { ColumnFiltersState, SortingState } from "@tanstack/react-table"
-import { ArrowDown, ArrowUp, ChevronsUpDown, FileSpreadsheet, Loader2, Play } from "lucide-react"
+import {
+  ArrowDown,
+  ArrowUp,
+  ChevronsUpDown,
+  Download,
+  FileSpreadsheet,
+  Loader2,
+  Play,
+} from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useParams } from "react-router-dom"
@@ -11,6 +19,12 @@ import { AuthFormError } from "@/features/auth/components/auth-form-error"
 import { OrderImportDialog } from "@/features/orders/components/order-import-dialog"
 import { OrdersFilters } from "@/features/orders/components/orders-filters"
 import { OrdersTable } from "@/features/orders/components/orders-table"
+import {
+  SERVICE_FEE_SAMPLE_FILENAME,
+  SERVICE_FEE_SAMPLE_HREF,
+  SHIPPING_FEE_SAMPLE_FILENAME,
+  SHIPPING_FEE_SAMPLE_HREF,
+} from "@/features/orders/constants/order-import-sample"
 import {
   DEFAULT_WITHDRAW_ROWS_FILTERS,
   WithdrawRowsFilters,
@@ -540,6 +554,8 @@ export function OrderInputRunDetailPage() {
           }
           inputRef={orderDetailInputRef}
           disabled={isBusy}
+          sampleHref={SHIPPING_FEE_SAMPLE_HREF}
+          sampleFilename={SHIPPING_FEE_SAMPLE_FILENAME}
           onPick={() => orderDetailInputRef.current?.click()}
           onFile={(file) => uploadOrderDetail.mutate({ id: run.id, file })}
           uploading={uploadOrderDetail.isPending}
@@ -556,6 +572,8 @@ export function OrderInputRunDetailPage() {
           error={runWithdrawMutation.isPending ? null : run.withdrawError}
           inputRef={withdrawInputRef}
           disabled={isBusy}
+          sampleHref={SERVICE_FEE_SAMPLE_HREF}
+          sampleFilename={SERVICE_FEE_SAMPLE_FILENAME}
           onPick={() => withdrawInputRef.current?.click()}
           onFile={(file) => uploadWithdraw.mutate({ id: run.id, file })}
           uploading={uploadWithdraw.isPending}
@@ -965,6 +983,8 @@ interface FileUploadCardProps {
   uploading: boolean
   canRun: boolean
   running: boolean
+  sampleHref?: string
+  sampleFilename?: string
   onPick: () => void
   onFile: (file: File) => void
   onRun: () => void
@@ -982,6 +1002,8 @@ function FileUploadCard({
   uploading,
   canRun,
   running,
+  sampleHref,
+  sampleFilename,
   onPick,
   onFile,
   onRun,
@@ -1056,6 +1078,23 @@ function FileUploadCard({
           )}
           {running ? t("inputs.running") : t("inputs.run_file")}
         </Button>
+        {sampleHref ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            asChild
+          >
+            <a
+              href={sampleHref}
+              download={sampleFilename}
+              aria-label={t("inputs.detail.download_sample")}
+            >
+              <Download data-icon="inline-start" aria-hidden />
+              {t("inputs.detail.download_sample")}
+            </a>
+          </Button>
+        ) : null}
       </div>
     </div>
   )

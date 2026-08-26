@@ -1,5 +1,6 @@
 package com.laconic.lacoinvoice.features.order.import_;
 
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -18,6 +19,8 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.laconic.lacoinvoice.common.util.ExcelXmlNormalizer;
 
 @Component
 public class OrderSkuListExcelParser {
@@ -42,7 +45,8 @@ public class OrderSkuListExcelParser {
 	}
 
 	public ParsedOrderSkuListWorkbook parse(java.io.InputStream inputStream) {
-		try (Workbook workbook = WorkbookFactory.create(inputStream)) {
+		try (InputStream normalized = ExcelXmlNormalizer.normalize(inputStream);
+				Workbook workbook = WorkbookFactory.create(normalized)) {
 			Sheet sheet = workbook.getSheet(SHEET_NAME);
 			if (sheet == null) {
 				sheet = workbook.getSheetAt(0);

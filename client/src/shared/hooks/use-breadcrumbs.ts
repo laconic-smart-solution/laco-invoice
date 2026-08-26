@@ -68,6 +68,22 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
       ]
     }
 
+    if (pathname === ROUTES.dashboard.invoices) {
+      return [
+        { label: t("sidebar:nav.dashboard"), href: ROUTES.dashboard.root },
+        { label: "Invoices" },
+      ]
+    }
+
+    if (pathname.startsWith(`${ROUTES.dashboard.invoices}/`)) {
+      const invoiceId = pathname.split("/").pop()
+      return [
+        { label: t("sidebar:nav.dashboard"), href: ROUTES.dashboard.root },
+        { label: "Invoices", href: ROUTES.dashboard.invoices },
+        { label: invoiceId ?? "" },
+      ]
+    }
+
     if (pathname === ROUTES.dashboard.orderInputs) {
       return [
         { label: t("sidebar:nav.dashboard"), href: ROUTES.dashboard.root },

@@ -1,0 +1,29 @@
+{
+  "title": "Invoices",
+  "subtitle": "Manage multi-order consolidated invoices and 7% VAT tax documents.",
+  "create_invoice": "Create Invoice",
+  "kpi": {
+    "total_invoiced": "Total Invoiced",
+    "vat_total": "VAT 7% Total",
+    "orders_included": "Orders Included",
+    "active_invoices": "Active Invoices"
+  },
+  "table": {
+    "invoice_no": "Invoice No.",
+    "title": "Title / Batch",
+    "store": "Store",
+    "period": "Period",
+    "orders": "Orders",
+    "subtotal": "Subtotal (Ex-VAT)",
+    "vat": "VAT (7%)",
+    "grand_total": "Grand Total",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "status": {
+    "draft": "Draft",
+    "issued": "Issued",
+    "paid": "Paid",
+    "void": "Void"
+  }
+}

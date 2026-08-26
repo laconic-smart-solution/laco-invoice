@@ -1,4 +1,5 @@
 import {
+  FileText,
   Keyboard,
   LayoutGrid,
   Package,
@@ -39,6 +40,7 @@ export const SIDEBAR_NAV_ITEMS: SidebarNavItem[] = [
       { key: "order_inputs", path: ROUTES.dashboard.orderInputs },
     ],
   },
+  { key: "invoices", path: ROUTES.dashboard.invoices, icon: FileText },
   { key: "customers", path: ROUTES.dashboard.customers, icon: Users },
   { key: "users", path: ROUTES.dashboard.users, icon: UserCog, adminOnly: true },
   { key: "shortcuts", path: ROUTES.dashboard.shortcuts, icon: Keyboard },
