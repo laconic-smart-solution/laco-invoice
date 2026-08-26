@@ -17,7 +17,13 @@ public interface MarketplaceGatewayClient {
 
 	GatewayStoreData refresh(UUID tenantId, UUID actorId, String refreshToken, String shopId);
 
-	List<GatewayOrderData> listOrders(UUID tenantId, String accessToken, String sellerId, String updatedFrom);
+	List<GatewayOrderData> listOrders(
+			UUID tenantId,
+			String accessToken,
+			String sellerId,
+			String updatedFrom,
+			int page,
+			int limit);
 
 	GatewayProductListData listProducts(
 			UUID tenantId,

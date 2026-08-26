@@ -2,10 +2,12 @@
   "title": "အသုံးပြုသူ စီမံခန့်ခွဲမှု",
   "subtitle": "ပလက်ဖောင်းရှိ အသုံးပြုသူ အကောင့်များကို ကြည့်ရှုနှင့် စီမံခန့်ခွဲပါ။",
   "actions": {
-    "add_user": "Add User"
+    "add_user": "Add User",
+    "export_csv": "CSV ထုတ်ရန်"
   },
   "stats": {
-    "total_users": "စုစုပေါင်း အသုံးပြုသူ"
+    "total_users": "စုစုပေါင်း အသုံးပြုသူ",
+    "total_users_value": "အသုံးပြုသူ {{count}} ဦး"
   },
   "create": {
     "title": "Add User",
@@ -39,18 +41,55 @@
   },
   "filters": {
     "role_label": "အခန်းကဏ္ဍ",
+    "search_label": "ရှာရန်",
+    "search_placeholder": "အမည်ဖြင့် ရှာရန်…",
+    "active_label": "အခြေအနေ",
+    "more_filters": "Filter ထပ်ထည့်ရန်",
     "role": {
       "all": "အခန်းကဏ္ဍ အားလုံး",
       "admin": "Admin",
       "owner": "Owner",
       "manager": "Manager",
       "staff": "Staff"
+    },
+    "active": {
+      "all": "အခြေအနေ အားလုံး",
+      "active": "Active",
+      "inactive": "Inactive"
+    }
+  },
+  "detail": {
+    "loading": "အသုံးပြုသူ ဖတ်နေသည်...",
+    "back_to_users": "အသုံးပြုသူစာရင်းသို့ ပြန်သွားရန်",
+    "not_found_title": "အသုံးပြုသူ မတွေ့ပါ",
+    "not_found_description": "ဤအသုံးပြုသူ မရှိပါ သို့မဟုတ် သင့်တွင် ဝင်ရောက်ခွင့် မရှိပါ။",
+    "empty_value": "—",
+    "fields": {
+      "email": "အီးမေးလ်",
+      "full_name": "အမည် အပြည့်အစုံ",
+      "joined": "ဝင်ရောက်သည့်အချိန်",
+      "last_updated": "နောက်ဆုံး ပြင်ဆင်သည့်အချိန်"
     }
   },
   "errors": {
     "load_failed": "အသုံးပြုသူများကို မဖတ်နိုင်ပါ။ ထပ်ကြိုးစားပါ။",
     "save_failed": "Unable to create user. Please try again.",
-    "verify_otp_failed": "OTP ကို အတည်ပြု၍ မရပါ။ ထပ်ကြိုးစားပါ။"
+    "verify_otp_failed": "OTP ကို အတည်ပြု၍ မရပါ။ ထပ်ကြိုးစားပါ။",
+    "export_failed": "အသုံးပြုသူများ မထုတ်နိုင်ပါ။ ထပ်ကြိုးစားပါ။",
+    "select_to_export": "ထုတ်ရန် အသုံးပြုသူ အနည်းဆုံး တစ်ဦး ရွေးပါ။",
+    "export_preview_failed": "Export preview မတင်နိုင်ပါ။ ထပ်ကြိုးစားပါ။"
+  },
+  "export": {
+    "preview_title": "Excel ထုတ်ရန် အကြိုကြည့်",
+    "preview_description": "အတန်းများကို စစ်ဆေးပြီး ထည့်မည့် ကော်လံများကို ရွေးပါ။",
+    "preview_loading": "အကြိုကြည့် တင်နေသည်…",
+    "preview_loading_more": "ထပ်မံ တင်နေသည်…",
+    "preview_empty": "ထုတ်ရန် အသုံးပြုသူ မရှိပါ။",
+    "preview_end": "အကြိုကြည့် အဆုံးသို့ ရောက်ပါပြီ။",
+    "columns": {
+      "email": "အီးမေးလ်",
+      "auth_server_user_id": "Auth Server User ID"
+    }
   },
   "verify_otp": {
     "confirm_title": "Mark OTP as verified?",
@@ -61,6 +100,10 @@
   "table": {
     "empty": "အသုံးပြုသူ မတွေ့ပါ။",
     "loading": "အသုံးပြုသူများ ဖတ်နေသည်...",
+    "select_all": "အားလုံး ရွေးရန်",
+    "select_row": "အတန်း ရွေးရန်",
+    "selected_count_one": "အသုံးပြုသူ {{count}} ဦး ရွေးထားသည်",
+    "selected_count_other": "အသုံးပြုသူ {{count}} ဦး ရွေးထားသည်",
     "showing": "{{total}} ဦးအနက် {{start}}-{{end}} ပြသနေသည်",
     "columns": {
       "id": "ID",

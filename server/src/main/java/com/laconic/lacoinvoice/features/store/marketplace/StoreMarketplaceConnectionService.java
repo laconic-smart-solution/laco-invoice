@@ -11,10 +11,14 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
+import com.laconic.lacoinvoice.common.exception.BadGatewayException;
 import com.laconic.lacoinvoice.common.exception.ResourceNotFoundException;
 import com.laconic.lacoinvoice.common.persistence.AuditUserContext;
 import com.laconic.lacoinvoice.config.AuthorizationService;
+import com.laconic.lacoinvoice.config.CommunicationProperties;
+import com.laconic.lacoinvoice.domain.models.Marketplace;
 import com.laconic.lacoinvoice.domain.models.MarketplaceConnectionStatus;
 import com.laconic.lacoinvoice.domain.models.Store;
 import com.laconic.lacoinvoice.domain.models.StoreMarketplaceConnection;
@@ -23,6 +27,9 @@ import com.laconic.lacoinvoice.domain.repositories.StoreMarketplaceConnectionRep
 import com.laconic.lacoinvoice.domain.repositories.StoreRepository;
 import com.laconic.lacoinvoice.features.store.StoreMapper;
 import com.laconic.lacoinvoice.features.store.StoreMarketplaceConnectionDto;
+import com.laconic.lacoinvoice.features.store.tiktok.TikTokScrapeConnectRequest;
+import com.laconic.lacoinvoice.features.tiktokscrape.TikTokSellerSessionService;
+import com.laconic.lacoinvoice.features.tiktokscrape.TikTokSellerSessionUpsertRequest;
 import com.laconic.lacoinvoice.integration.marketplace.client.MarketplaceGatewayClient;
 import com.laconic.lacoinvoice.integration.marketplace.MarketplaceScopeSupport;
 import com.laconic.lacoinvoice.integration.marketplace.dto.GatewayStoreData;
@@ -36,6 +43,8 @@ public class StoreMarketplaceConnectionService {
 	private final Map<String, MarketplaceGatewayClient> clientsByCode;
 	private final StoreMapper mapper;
 	private final AuthorizationService authz;
+	private final CommunicationProperties communicationProperties;
+	private final TikTokSellerSessionService tikTokSellerSessionService;
 
 	public StoreMarketplaceConnectionService(
 			StoreRepository storeRepository,
@@ -43,7 +52,9 @@ public class StoreMarketplaceConnectionService {
 			MarketplaceRepository marketplaceRepository,
 			List<MarketplaceGatewayClient> clients,
 			StoreMapper mapper,
-			AuthorizationService authz) {
+			AuthorizationService authz,
+			CommunicationProperties communicationProperties,
+			TikTokSellerSessionService tikTokSellerSessionService) {
 		this.storeRepository = storeRepository;
 		this.connectionRepository = connectionRepository;
 		this.marketplaceRepository = marketplaceRepository;
@@ -54,6 +65,8 @@ public class StoreMarketplaceConnectionService {
 						(existing, duplicate) -> existing));
 		this.mapper = mapper;
 		this.authz = authz;
+		this.communicationProperties = communicationProperties;
+		this.tikTokSellerSessionService = tikTokSellerSessionService;
 	}
 
 	@Transactional(readOnly = true)
@@ -157,8 +170,59 @@ public class StoreMarketplaceConnectionService {
 					connection.setStatus(MarketplaceConnectionStatus.DISCONNECTED);
 					connection.setAccessToken(null);
 					connection.setRefreshToken(null);
+					connection.setScrapeSessionJson(null);
 					connectionRepository.save(connection);
 				});
+	}
+
+	/**
+	 * Register a TikTok connection for scrape mode (no Partner OAuth).
+	 * Stores optional Playwright session JSON on the connection and mirrors it to tiktok-shop-scrape.
+	 */
+	@Transactional
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	public StoreMarketplaceConnectionDto registerTikTokScrapeConnection(
+			Long storeId,
+			TikTokScrapeConnectRequest request) {
+		if (!communicationProperties.isTiktokShopScraping()) {
+			throw new BadGatewayException(
+					"TikTok scrape mode is disabled. Set TIKTOK_SHOP_SCRAPPING=true to register scrape connections.");
+		}
+		Store store = findStoreOrThrow(storeId);
+		verifyStoreOwner(store);
+
+		String sellerId = request.getSellerId().trim();
+		Marketplace marketplace = marketplaceRepository.findByCodeIgnoreCase("TIKTOK")
+				.orElseThrow(() -> new ResourceNotFoundException("Marketplace not found: code=TIKTOK"));
+
+		StoreMarketplaceConnection connection = connectionRepository
+				.findByStore_IdAndMarketplace_CodeIgnoreCase(storeId, "TIKTOK")
+				.orElseGet(StoreMarketplaceConnection::new);
+		if (connection.getId() == null) {
+			connection.setStore(store);
+			connection.setMarketplace(marketplace);
+			connection.setExternalConnectionId(UUID.randomUUID());
+		}
+		connection.setExternalSellerId(sellerId);
+		if (StringUtils.hasText(request.getDisplayName())) {
+			connection.setDisplayName(request.getDisplayName().trim());
+		} else if (!StringUtils.hasText(connection.getDisplayName())) {
+			connection.setDisplayName("TikTok scrape " + sellerId);
+		}
+		connection.setAccessToken("scrape");
+		connection.setRefreshToken(null);
+		connection.setTokenExpiry(null);
+		connection.setStatus(MarketplaceConnectionStatus.CONNECTED);
+		if (StringUtils.hasText(request.getScrapeSessionJson())) {
+			connection.setScrapeSessionJson(request.getScrapeSessionJson().trim());
+			TikTokSellerSessionUpsertRequest sessionRequest = new TikTokSellerSessionUpsertRequest();
+			sessionRequest.setSellerId(sellerId);
+			sessionRequest.setStorageStateJson(connection.getScrapeSessionJson());
+			sessionRequest.setDisplayName(connection.getDisplayName());
+			tikTokSellerSessionService.upsert(sessionRequest);
+		}
+
+		return mapper.toConnectionDto(connectionRepository.save(connection));
 	}
 
 	private MarketplaceGatewayClient resolveClient(String marketplaceCode) {

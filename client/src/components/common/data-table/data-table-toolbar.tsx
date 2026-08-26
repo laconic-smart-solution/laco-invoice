@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils"
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
   selectedLabel: (count: number) => string
+  /** Overrides the selected-row count (e.g. when select-all matching is active). */
+  selectedCount?: number
   bulkActionLabel?: string
   onBulkAction?: () => void
   className?: string
@@ -15,11 +17,13 @@ interface DataTableToolbarProps<TData> {
 export function DataTableToolbar<TData>({
   table,
   selectedLabel,
+  selectedCount: selectedCountOverride,
   bulkActionLabel,
   onBulkAction,
   className,
 }: DataTableToolbarProps<TData>) {
-  const selectedCount = table.getSelectedRowModel().rows.length
+  const selectedCount =
+    selectedCountOverride ?? table.getSelectedRowModel().rows.length
   const hasSelection = selectedCount > 0
 
   let bulkAction: ReactNode = null

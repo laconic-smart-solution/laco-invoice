@@ -3,14 +3,26 @@
     "store_management": "Store Management"
   },
   "title": "Marketplace Products",
+  "subtitle": "Browse and manage marketplace product catalogs.",
   "sync_status": "Syncing",
   "actions": {
-    "filter": "Filter",
+    "sync_now": "Sync Now",
     "export_csv": "Export CSV"
   },
+  "sync": {
+    "completed": "Product sync completed.",
+    "failed": "Product sync failed.",
+    "start_failed": "Could not start product sync."
+  },
   "filters": {
+    "search_label": "Search",
+    "search_placeholder": "Search by name, SKU, or product ID",
     "marketplace_label": "Marketplace Source",
     "marketplace_placeholder": "Select a connected store",
+    "marketplace_all": "All",
+    "store_label": "Store",
+    "store_placeholder": "Select a store",
+    "store_all": "All stores",
     "erp_status_label": "ERP Status",
     "erp_status": {
       "all": "All",
@@ -20,6 +32,14 @@
     "price_range_label": "Price Range",
     "price_min": "Min",
     "price_max": "Max",
+    "more_filters": "More filters",
+    "price_sort_label": "Sort by Price",
+    "price_sort_placeholder": "Select sort order",
+    "price_sort": {
+      "none": "Default",
+      "asc": "Low to High",
+      "desc": "High to Low"
+    },
     "reset_view": "Reset View"
   },
   "erp_status": {
@@ -31,15 +51,43 @@
   },
   "empty": {
     "no_connections": "No marketplace connections found. Connect Lazada, Shopee, or TikTok Shop from your store details page first.",
-    "go_to_stores": "Go to Stores"
+    "go_to_stores": "Go to Stores",
+    "never_synced": "No products synced yet for this marketplace source.",
+    "sync_now_prompt": "Run Sync Now to import products from the marketplace."
   },
   "errors": {
     "load_sources_failed": "Failed to load marketplace sources.",
-    "load_products_failed": "Failed to load marketplace products."
+    "load_products_failed": "Failed to load marketplace products.",
+    "load_detail_failed": "Failed to load product detail.",
+    "export_failed": "Unable to export products. Please try again.",
+    "select_to_export": "Select at least one product to export.",
+    "export_preview_failed": "Unable to load export preview. Please try again."
+  },
+  "export": {
+    "preview_title": "Excel export preview",
+    "preview_description": "Review rows and choose which columns to include.",
+    "preview_loading": "Loading preview…",
+    "preview_loading_more": "Loading more…",
+    "preview_empty": "No products to export.",
+    "preview_end": "You've reached the end of the preview.",
+    "columns": {
+      "id": "ID",
+      "store": "Store",
+      "marketplace_code": "Marketplace Code",
+      "marketplace_name": "Marketplace Name",
+      "external_product_id": "External Product ID",
+      "sku": "SKU",
+      "currency": "Currency",
+      "status": "Status"
+    }
   },
   "table": {
     "empty": "No products found.",
     "loading": "Loading products...",
+    "select_all": "Select all",
+    "select_row": "Select row",
+    "selected_count_one": "{{count}} Product Selected",
+    "selected_count_other": "{{count}} Products Selected",
     "showing": "Showing {{start}}-{{end}} of {{total}} products",
     "store_label": "Store: {{id}}",
     "marketplace_label": "Marketplace: {{id}}",
@@ -63,5 +111,41 @@
     "action_required_value": "{{count}} Products",
     "active_sku": "Active SKU",
     "active_sku_value": "{{count}} SKUs"
+  },
+  "detail": {
+    "loading": "Loading product...",
+    "not_found_title": "Product not found",
+    "not_found_description": "This product may have been removed or you may not have access.",
+    "back_to_products": "Back to Products",
+    "description": "Description",
+    "images": "Images",
+    "variants": "Variants",
+    "variant_sku": "SKU",
+    "variant_price": "Price",
+    "variant_status": "Status",
+    "variant_quantity": "Quantity",
+    "sections": {
+      "product_info": "Product info",
+      "erp_mapping": "ERP mapping"
+    },
+    "fields": {
+      "external_product_id": "External product ID",
+      "sku": "SKU",
+      "marketplace_status": "Marketplace status",
+      "price": "Price",
+      "currency": "Currency",
+      "no_currency": "No currency",
+      "erp_status": "ERP status",
+      "erp_sku": "ERP SKU",
+      "erp_name": "ERP name",
+      "erp_item_id": "ERP item ID",
+      "mapped_at": "Mapped at"
+    },
+    "empty": {
+      "no_images": "No images available. Sync from the marketplace to enrich this product.",
+      "no_description": "No description available. Sync from the marketplace to enrich this product.",
+      "no_variants": "No variants available. Sync from the marketplace to enrich this product.",
+      "no_marketplace_status": "Not set (import placeholder)"
+    }
   }
 }

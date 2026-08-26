@@ -19,6 +19,12 @@ export interface MeProfile {
   active: boolean
 }
 
+export interface MeCredentialsRequest {
+  currentPassword: string
+  newEmail?: string
+  newUsername?: string
+}
+
 export interface LoginCredentials {
   identifier: string
   password: string

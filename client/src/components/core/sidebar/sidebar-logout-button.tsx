@@ -18,10 +18,10 @@ export function SidebarLogoutButton({
 }: SidebarLogoutButtonProps) {
   const { t } = useTranslation("sidebar")
   const navigate = useNavigate()
-  const user = useAuthStore((state) => state.user)
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const logout = useAuthStore((state) => state.logout)
 
-  if (!user) {
+  if (!isAuthenticated) {
     return null
   }
 
@@ -33,9 +33,9 @@ export function SidebarLogoutButton({
   return (
     <Button
       type="button"
-      variant="ghost"
+      variant="destructive"
       className={cn(
-        "h-auto w-full text-sm font-medium text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground",
+        "h-auto w-full text-sm font-medium",
         isCollapsed ? "justify-center px-2 py-2.5" : "justify-start gap-3 px-3 py-2.5",
         className
       )}

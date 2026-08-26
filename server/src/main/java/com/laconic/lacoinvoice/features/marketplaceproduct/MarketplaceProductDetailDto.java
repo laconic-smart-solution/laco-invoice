@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(name = "MarketplaceProductDetailDto")
 public record MarketplaceProductDetailDto(
+		Long id,
 		Long storeId,
 		String storeName,
 		String marketplaceCode,

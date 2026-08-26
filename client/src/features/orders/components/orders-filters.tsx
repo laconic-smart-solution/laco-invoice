@@ -1,5 +1,4 @@
-import { Calendar, ListFilter } from "lucide-react"
-import { useState } from "react"
+import { ListFilter, Search } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
@@ -12,50 +11,93 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import type { Store } from "@/features/stores/types/store"
 import {
+  ORDER_SOURCE_FILTER_OPTIONS,
   ORDER_STATUS_FILTER_OPTIONS,
-  ORDER_STORE_FILTER_OPTIONS,
-} from "@/features/orders/data/mock-orders"
+  type OrderFiltersState,
+} from "@/features/orders/types/order-filters"
+import { cn } from "@/lib/utils"
 
-export function OrdersFilters() {
+interface OrdersFiltersProps {
+  stores: Store[]
+  value: OrderFiltersState
+  onChange: (value: OrderFiltersState) => void
+  disabled?: boolean
+  hideSourceFilter?: boolean
+  hideStoreFilter?: boolean
+}
+
+export function OrdersFilters({
+  stores,
+  value,
+  onChange,
+  disabled = false,
+  hideSourceFilter = false,
+  hideStoreFilter = false,
+}: OrdersFiltersProps) {
   const { t } = useTranslation("orders")
-  const [store, setStore] = useState("all")
-  const [status, setStatus] = useState("all")
+  const selectedStoreId = value.storeId || "all"
+
+  const gridClassName = cn(
+    "grid gap-4 md:items-end",
+    hideStoreFilter && hideSourceFilter
+      ? "md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"
+      : hideStoreFilter || hideSourceFilter
+        ? "md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto]"
+        : "md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto]"
+  )
 
   return (
     <section className="border border-border bg-card p-4 shadow-sm">
-      <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] md:items-end">
-        <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">
-            {t("filters.store_label")}
-          </Label>
-          <Select value={store} onValueChange={setStore}>
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {ORDER_STORE_FILTER_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {t(option.labelKey)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <div className={gridClassName}>
+        {!hideStoreFilter ? (
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">
+              {t("filters.store_label")}
+            </Label>
+            <Select
+              value={selectedStoreId}
+              onValueChange={(storeId) =>
+                onChange({ ...value, storeId: storeId === "all" ? "" : storeId })
+              }
+              disabled={disabled || stores.length === 0}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={t("filters.store_placeholder")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t("filters.store_all")}</SelectItem>
+                {stores.map((store) => (
+                  <SelectItem key={store.id} value={String(store.id)}>
+                    {store.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ) : null}
 
         <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">
-            {t("filters.date_range_label")}
+          <Label className="text-xs text-muted-foreground" htmlFor="orders-search">
+            {t("filters.search_label")}
           </Label>
           <div className="relative">
-            <Input
-              readOnly
-              value={t("filters.date_range_value")}
-              className="pr-9"
-            />
-            <Calendar
-              className="pointer-events-none absolute top-1/2 right-2.5 size-4 -translate-y-1/2 text-muted-foreground"
+            <Search
+              className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
               aria-hidden
+            />
+            <Input
+              id="orders-search"
+              type="search"
+              data-shortcut-search
+              placeholder={t("filters.search_placeholder")}
+              value={value.search}
+              onChange={(event) =>
+                onChange({ ...value, search: event.target.value })
+              }
+              className="h-9 pl-8"
+              disabled={disabled}
             />
           </div>
         </div>
@@ -64,7 +106,11 @@ export function OrdersFilters() {
           <Label className="text-xs text-muted-foreground">
             {t("filters.status_label")}
           </Label>
-          <Select value={status} onValueChange={setStatus}>
+          <Select
+            value={value.orderStatus}
+            onValueChange={(orderStatus) => onChange({ ...value, orderStatus })}
+            disabled={disabled}
+          >
             <SelectTrigger className="w-full">
               <SelectValue />
             </SelectTrigger>
@@ -78,11 +124,36 @@ export function OrdersFilters() {
           </Select>
         </div>
 
+        {!hideSourceFilter ? (
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">
+              {t("filters.source_label")}
+            </Label>
+            <Select
+              value={value.sourceType}
+              onValueChange={(sourceType) => onChange({ ...value, sourceType })}
+              disabled={disabled}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {ORDER_SOURCE_FILTER_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {t(option.labelKey)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ) : null}
+
         <Button
           variant="outline"
           size="icon"
           className="shrink-0"
           aria-label={t("filters.more_filters")}
+          disabled={disabled}
         >
           <ListFilter />
         </Button>

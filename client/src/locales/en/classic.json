@@ -1,0 +1,49 @@
+{
+  "panels": {
+    "overview": "Overview",
+    "orders": "Orders",
+    "products": "Products",
+    "stores": "Stores",
+    "invoices": "Invoices",
+    "customers": "Customers",
+    "users": "Users"
+  },
+  "overview": {
+    "title": "Control tower",
+    "subtitle": "Click a count to open the matching list. Chrome stays put — only the table changes.",
+    "stats": {
+      "orders": "Orders",
+      "awaiting_invoice": "Awaiting invoice",
+      "invoices": "Invoices issued",
+      "stores": "Stores",
+      "products": "Products",
+      "customers": "Customers",
+      "users": "Users"
+    },
+    "hint_click": "Open list"
+  },
+  "toolbar": {
+    "setup_store": "Setup store",
+    "add_store": "Add store"
+  },
+  "setup": {
+    "store_title": "Setup store",
+    "store_description": "Create a store without leaving this screen.",
+    "customer_title": "Add customer",
+    "customer_description": "Create a customer without leaving this screen."
+  },
+  "detail": {
+    "order": "Order detail",
+    "product": "Product detail",
+    "store": "Store detail",
+    "invoice": "Invoice detail",
+    "customer": "Customer",
+    "user": "User detail",
+    "close": "Close"
+  },
+  "empty_stores": {
+    "title": "No stores yet",
+    "description": "Set up a store to sync orders and products.",
+    "action": "Setup store"
+  }
+}

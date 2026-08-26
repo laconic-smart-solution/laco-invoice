@@ -3,14 +3,26 @@
     "store_management": "การจัดการร้านค้า"
   },
   "title": "สินค้า Marketplace",
+  "subtitle": "เรียกดูและจัดการแคตตาล็อกสินค้าจากมาร์เก็ตเพลส",
   "sync_status": "กำลังซิงก์",
   "actions": {
-    "filter": "กรอง",
+    "sync_now": "ซิงก์ตอนนี้",
     "export_csv": "ส่งออก CSV"
   },
+  "sync": {
+    "completed": "ซิงก์สินค้าเสร็จสิ้น",
+    "failed": "ซิงก์สินค้าไม่สำเร็จ",
+    "start_failed": "ไม่สามารถเริ่มซิงก์สินค้าได้"
+  },
   "filters": {
+    "search_label": "ค้นหา",
+    "search_placeholder": "ค้นหาด้วยชื่อ SKU หรือรหัสสินค้า",
     "marketplace_label": "แหล่ง Marketplace",
     "marketplace_placeholder": "เลือกร้านค้าที่เชื่อมต่อแล้ว",
+    "marketplace_all": "ทั้งหมด",
+    "store_label": "ร้านค้า",
+    "store_placeholder": "เลือกร้านค้า",
+    "store_all": "ร้านค้าทั้งหมด",
     "erp_status_label": "สถานะ ERP",
     "erp_status": {
       "all": "ทั้งหมด",
@@ -20,6 +32,14 @@
     "price_range_label": "ช่วงราคา",
     "price_min": "ต่ำสุด",
     "price_max": "สูงสุด",
+    "more_filters": "ตัวกรองเพิ่มเติม",
+    "price_sort_label": "เรียงตามราคา",
+    "price_sort_placeholder": "เลือกลำดับการเรียง",
+    "price_sort": {
+      "none": "ค่าเริ่มต้น",
+      "asc": "ต่ำไปสูง",
+      "desc": "สูงไปต่ำ"
+    },
     "reset_view": "รีเซ็ตมุมมอง"
   },
   "erp_status": {
@@ -31,15 +51,43 @@
   },
   "empty": {
     "no_connections": "ยังไม่มีการเชื่อมต่อ marketplace กรุณาเชื่อมต่อ Lazada, Shopee หรือ TikTok Shop จากหน้ารายละเอียดร้านค้าก่อน",
-    "go_to_stores": "ไปที่ร้านค้า"
+    "go_to_stores": "ไปที่ร้านค้า",
+    "never_synced": "ยังไม่มีสินค้าที่ซิงก์สำหรับแหล่ง marketplace นี้",
+    "sync_now_prompt": "กดซิงก์ตอนนี้เพื่อนำเข้าสินค้าจาก marketplace"
   },
   "errors": {
     "load_sources_failed": "โหลดแหล่ง marketplace ไม่สำเร็จ",
-    "load_products_failed": "โหลดสินค้า marketplace ไม่สำเร็จ"
+    "load_products_failed": "โหลดสินค้า marketplace ไม่สำเร็จ",
+    "load_detail_failed": "โหลดรายละเอียดสินค้าไม่สำเร็จ",
+    "export_failed": "ส่งออกสินค้าไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "select_to_export": "เลือกอย่างน้อยหนึ่งสินค้าเพื่อส่งออก",
+    "export_preview_failed": "โหลดตัวอย่างการส่งออกไม่สำเร็จ กรุณาลองอีกครั้ง"
+  },
+  "export": {
+    "preview_title": "ตัวอย่างการส่งออก Excel",
+    "preview_description": "ตรวจสอบแถวและเลือกคอลัมน์ที่ต้องการใส่ในไฟล์",
+    "preview_loading": "กำลังโหลดตัวอย่าง…",
+    "preview_loading_more": "กำลังโหลดเพิ่ม…",
+    "preview_empty": "ไม่มีสินค้าให้ส่งออก",
+    "preview_end": "ถึงท้ายรายการตัวอย่างแล้ว",
+    "columns": {
+      "id": "ID",
+      "store": "ร้านค้า",
+      "marketplace_code": "รหัส Marketplace",
+      "marketplace_name": "ชื่อ Marketplace",
+      "external_product_id": "รหัสสินค้าภายนอก",
+      "sku": "SKU",
+      "currency": "สกุลเงิน",
+      "status": "สถานะ"
+    }
   },
   "table": {
     "empty": "ไม่พบสินค้า",
     "loading": "กำลังโหลดสินค้า...",
+    "select_all": "เลือกทั้งหมด",
+    "select_row": "เลือกแถว",
+    "selected_count_one": "เลือก {{count}} สินค้า",
+    "selected_count_other": "เลือก {{count}} สินค้า",
     "showing": "แสดง {{start}}-{{end}} จาก {{total}} สินค้า",
     "store_label": "ร้านค้า: {{id}}",
     "marketplace_label": "Marketplace: {{id}}",
@@ -63,5 +111,41 @@
     "action_required_value": "{{count}} สินค้า",
     "active_sku": "SKU ที่ใช้งาน",
     "active_sku_value": "{{count}} SKU"
+  },
+  "detail": {
+    "loading": "กำลังโหลดสินค้า...",
+    "not_found_title": "ไม่พบสินค้า",
+    "not_found_description": "สินค้านี้อาจถูกลบหรือคุณไม่มีสิทธิ์เข้าถึง",
+    "back_to_products": "กลับไปที่สินค้า",
+    "description": "คำอธิบาย",
+    "images": "รูปภาพ",
+    "variants": "ตัวเลือกสินค้า",
+    "variant_sku": "SKU",
+    "variant_price": "ราคา",
+    "variant_status": "สถานะ",
+    "variant_quantity": "จำนวน",
+    "sections": {
+      "product_info": "ข้อมูลสินค้า",
+      "erp_mapping": "การแมป ERP"
+    },
+    "fields": {
+      "external_product_id": "รหัสสินค้าภายนอก",
+      "sku": "SKU",
+      "marketplace_status": "สถานะ Marketplace",
+      "price": "ราคา",
+      "currency": "สกุลเงิน",
+      "no_currency": "ไม่มีสกุลเงิน",
+      "erp_status": "สถานะ ERP",
+      "erp_sku": "SKU ของ ERP",
+      "erp_name": "ชื่อ ERP",
+      "erp_item_id": "รหัสรายการ ERP",
+      "mapped_at": "แมปเมื่อ"
+    },
+    "empty": {
+      "no_images": "ยังไม่มีรูปภาพ ซิงก์จากมาร์เก็ตเพลสเพื่อเติมข้อมูลสินค้านี้",
+      "no_description": "ยังไม่มีคำอธิบาย ซิงก์จากมาร์เก็ตเพลสเพื่อเติมข้อมูลสินค้านี้",
+      "no_variants": "ยังไม่มีตัวเลือกสินค้า ซิงก์จากมาร์เก็ตเพลสเพื่อเติมข้อมูลสินค้านี้",
+      "no_marketplace_status": "ยังไม่ได้ตั้งค่า (สินค้าจากการนำเข้า)"
+    }
   }
 }

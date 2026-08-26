@@ -1,25 +1,41 @@
 {
   "title": "Order Management",
-  "subtitle": "Manage and automate TikTok Shop order invoicing.",
+  "subtitle": "Manage and automate marketplace order invoicing.",
   "actions": {
     "export_csv": "Export CSV",
+    "exporting": "Exporting…",
     "sync_orders": "Sync Orders",
-    "bulk_generate": "Bulk Generate"
+    "import_excel": "Import Excel",
+    "bulk_generate": "Bulk Generate",
+    "bulk_generating": "Preparing ZIP…"
+  },
+  "stats": {
+    "invoice_coverage": "Invoice Coverage",
+    "awaiting_invoice": "Awaiting Invoice",
+    "awaiting_invoice_value": "{{count}} Orders",
+    "total_orders": "Total Orders",
+    "total_orders_value": "{{count}} Orders",
+    "total_revenue": "Total Revenue",
+    "total_fees": "Total Fees",
+    "total_adjustments": "Total Adjustments"
   },
   "filters": {
-    "store_label": "Marketplace Store",
-    "store_all": "All TikTok Stores",
-    "store_tiktok_us": "TikTok Shop US",
-    "store_tiktok_uk": "TikTok Shop UK",
-    "store_tiktok_sg": "TikTok Shop SG",
+    "store_label": "Store",
+    "store_all": "All stores",
+    "store_placeholder": "Select a store",
+    "search_label": "Order ID",
+    "search_placeholder": "Search by order ID…",
     "date_range_label": "Date Range",
     "date_range_value": "Oct 01 - Oct 24, 2023",
     "status_label": "Order Status",
     "status_all": "All Statuses",
+    "source_label": "Source",
+    "source_all": "All Sources",
     "more_filters": "More filters"
   },
   "table": {
     "empty": "No orders found.",
+    "loading": "Loading orders…",
     "select_all": "Select all",
     "select_row": "Select row",
     "selected_count_one": "{{count}} Order Selected",
@@ -32,13 +48,64 @@
       "store": "Store",
       "customer": "Customer",
       "total_amount": "Total Amount",
+      "total_fees": "Total Fees",
+      "total_adjustments": "Total Adjustments",
       "sync_status": "Sync Status",
+      "source": "Source",
       "action": "Action"
     },
     "actions": {
       "view_invoice": "View Invoice",
       "generate": "Generate",
+      "history": "History",
       "retry": "Retry"
+    }
+  },
+  "history": {
+    "title": "Order History",
+    "description": "Audit trail for order {{orderId}}.",
+    "loading": "Loading history…",
+    "empty": "No history recorded for this order yet.",
+    "load_failed": "Unable to load order history. Please try again.",
+    "empty_value": "—",
+    "unknown_user": "Unknown user",
+    "updated_by": "Updated by: {{name}}",
+    "action_label": "Action: {{action}}",
+    "source_label": "Source: {{source}}",
+    "excel_file_label": "Excel File:",
+    "page_info": "Page {{page}} of {{totalPages}} ({{total}} events)",
+    "loaded_info": "Showing {{loaded}} of {{total}} events",
+    "loading_more": "Loading more…",
+    "end": "End of history",
+    "prev": "Previous",
+    "next": "Next",
+    "close": "Close",
+    "actions": {
+      "create": "CREATE",
+      "update": "UPDATE",
+      "delete": "DELETE"
+    },
+    "sources": {
+      "manual": "MANUAL",
+      "import_excel": "IMPORT_EXCEL"
+    },
+    "columns": {
+      "field": "Field",
+      "before": "Before",
+      "after": "After"
+    },
+    "fields": {
+      "order_status": "Order Status",
+      "order_substatus": "Order Substatus",
+      "total_amount": "Total Amount",
+      "subtotal": "Subtotal",
+      "shipping_fee": "Shipping Fee",
+      "amount_ex_vat": "Amount Ex VAT",
+      "vat_amount": "VAT Amount",
+      "currency": "Currency",
+      "order_date": "Order Date",
+      "buyer_message": "Buyer Message",
+      "seller_note": "Seller Note"
     }
   },
   "sync_status": {
@@ -46,19 +113,44 @@
     "pending": "Pending",
     "failed": "Failed"
   },
+  "source_type": {
+    "api": "API",
+    "import": "IMPORT"
+  },
+  "order_status": {
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "shipped": "Shipped",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled"
+  },
   "confirm": {
     "generate": {
       "title": "Generate invoice?",
       "description": "This will create an invoice for order {{orderId}}. Continue?"
+    },
+    "export_all": {
+      "title": "Export all matching orders?",
+      "description": "You selected every order on this page. This will export all {{count}} orders that match your current filters as an Excel file. This may take a moment.",
+      "confirm": "Yes, export all",
+      "cancel": "Cancel"
+    },
+    "bulk_generate_all": {
+      "title": "Generate invoices for all matching orders?",
+      "description": "You selected every order on this page. This will start a background job for up to 2000 orders matching your filters, then download their PDFs as a ZIP when ready.",
+      "confirm": "Yes, generate all"
     }
   },
   "detail": {
+    "loading": "Loading order…",
     "back_to_orders": "Back to Orders",
     "placed_on": "Placed on {{date}}",
     "view_invoice": "View Invoice",
     "last_synced": "Last Synced",
     "invoice_id": "Invoice ID",
     "customer_email": "Email",
+    "customer_phone": "Phone",
+    "customer_gender": "Gender",
     "shipping_address": "Shipping Address",
     "not_found_title": "Order not found",
     "not_found_description": "The order you are looking for does not exist or may have been removed.",
@@ -78,8 +170,280 @@
       "subtotal": "Subtotal",
       "tax": "Tax",
       "shipping": "Shipping",
+      "ex_vat": "EX.VAT",
+      "vat": "VAT",
       "free": "Free",
       "total": "Total"
+    }
+  },
+  "errors": {
+    "load_failed": "Unable to load orders. Please try again.",
+    "sync_failed": "Unable to sync orders. Please try again.",
+    "import_failed": "Unable to import orders. Please try again.",
+    "import_excel_rows_failed": "Unable to load Excel rows for this Order ID.",
+    "generate_invoice_failed": "Unable to generate invoice. Please try again.",
+    "export_failed": "Unable to export orders. Please try again.",
+    "select_to_export": "Select at least one order to export.",
+    "export_preview_failed": "Unable to load export preview. Please try again.",
+    "bulk_generate_failed": "Unable to generate invoices. Please try again.",
+    "select_to_bulk_generate": "Select at least one order to generate invoices.",
+    "bulk_generate_download_failed": "Invoices were generated, but the ZIP download failed. Try again from the job status."
+  },
+  "bulk_generate": {
+    "started": "Generating invoices for {{count}} orders…",
+    "completed": "Generated {{count}} invoices. Downloading ZIP…",
+    "panel": {
+      "generating_title": "Generating invoices…",
+      "downloading_title": "Downloading ZIP…",
+      "completed_title": "Invoices ready",
+      "failed_title": "Generation failed",
+      "download_failed_title": "Download failed",
+      "progress_detail": "{{processed}} of {{total}} orders",
+      "completed_detail": "{{count}} invoices generated",
+      "percent": "{{percent}}%",
+      "minimize": "Minimize",
+      "expand": "Expand",
+      "dismiss": "Dismiss",
+      "retry_download": "Retry download"
+    }
+  },
+  "export": {
+    "preview_title": "Excel export preview",
+    "preview_description": "Review rows and choose which columns to include.",
+    "preview_loading": "Loading preview…",
+    "preview_loading_more": "Loading more…",
+    "preview_empty": "No orders to export.",
+    "preview_end": "You've reached the end of the preview.",
+    "columns": {
+      "id": "ID",
+      "marketplace": "Marketplace",
+      "customer_phone": "Customer Phone",
+      "invoice_id": "Invoice ID",
+      "subtotal": "Subtotal",
+      "shipping": "Shipping Fee",
+      "ex_vat": "EX.VAT",
+      "vat": "VAT",
+      "currency": "Currency",
+      "created_at": "Created At"
+    }
+  },
+  "import": {
+    "title": "Import orders from Excel",
+    "description": "Upload a TikTok Shop OrderSKUList export (.xlsx). Orders are matched by Order ID.",
+    "preview_description": "Review new and duplicate Order IDs. Same Order ID on multiple Excel rows is combined into one order. If an Order ID already exists in this store, choose MERGE, SKIP, or REPLACE.",
+    "store_label": "Store",
+    "store_placeholder": "Select store",
+    "marketplace_label": "Marketplace",
+    "marketplace_placeholder": "Select marketplace",
+    "file_label": "Excel file",
+    "file_placeholder": "Choose .xlsx file",
+    "file_hint": "Sheet must use the OrderSKUList format.",
+    "sample_title": "Need the template?",
+    "download_sample": "Download sample",
+    "download_sample_aria": "Download sample OrderSKUList Excel file with all column headers and one example order row",
+    "download_sample_hint": "One sheet, all required columns, and one example order row. Replace it with your data before importing.",
+    "preview": "Preview import",
+    "previewing": "Analyzing…",
+    "commit": "Confirm import",
+    "back": "Back",
+    "submit": "Import",
+    "importing": "Importing…",
+    "preview_summary": "{{total}} orders — {{newCount}} new, {{duplicateCount}} duplicate",
+    "table_showing": "Showing {{shown}} of {{total}} — scroll for more",
+    "table_end": "All {{total}} orders",
+    "col_order_id": "Order ID",
+    "col_match": "Match",
+    "col_excel_items": "Excel items",
+    "col_existing_items": "Existing items",
+    "col_action": "Action",
+    "col_warning": "Warning",
+    "match_new": "New",
+    "match_duplicate": "Duplicate",
+    "match_multiline": "Multi-item",
+    "action_choose": "Choose…",
+    "action_create": "Create",
+    "action_merge": "Merge",
+    "action_skip": "Skip",
+    "action_replace": "Replace",
+    "bulk_merge": "Merge all duplicates",
+    "bulk_skip": "Skip all duplicates",
+    "merge_prompt_title": "Order ID already exists — merge?",
+    "merge_prompt_description": "Order {{orderId}} is already in this store for this marketplace. What should we do with the Excel data?",
+    "merge_prompt_order_label": "Order ID {{orderId}}",
+    "merge_prompt_excel_items": "Excel line items: {{count}}",
+    "merge_prompt_existing_items": "Existing line items: {{count}}",
+    "merge_prompt_remaining": "{{count}} duplicate(s) still need a choice",
+    "multiline_title": "Same Order ID on multiple Excel rows",
+    "multiline_description": "{{orderCount}} Order IDs appear on more than one row ({{rowCount}} rows → {{totalOrders}} orders). TikTok exports one row per product. Merge those rows into one order each?",
+    "multiline_confirm": "Yes, merge line items",
+    "multiline_ack_required": "Confirm combining multi-row Order IDs before importing.",
+    "warning_has_invoice": "Has invoice — REPLACE blocked; MERGE allowed",
+    "warning_multiline": "Combined from multiple Excel rows",
+    "excel_rows_title": "Excel rows for this Order ID",
+    "excel_rows_description": "Order {{orderId}} — {{count}} Excel row(s). No. is the Excel sheet row number.",
+    "excel_rows_loading": "Loading Excel rows…",
+    "excel_rows_empty": "No Excel rows found for this Order ID.",
+    "excel_rows_col_no": "No.",
+    "excel_rows_open_aria": "View Excel rows for Order ID {{orderId}}",
+    "unresolved_duplicates": "Choose Merge, Skip, or Replace for every duplicate Order ID before importing.",
+    "result_title": "Import result",
+    "result_orders": "{{count}} orders imported",
+    "result_items": "{{count}} line items",
+    "result_rows": "{{count}} rows processed",
+    "status_completed": "Completed successfully",
+    "status_partial": "Partially completed — some orders failed",
+    "status_failed": "Import failed",
+    "errors_title": "Errors",
+    "no_file": "Please select an Excel file.",
+    "no_store": "Please select a store.",
+    "close": "Close"
+  },
+  "imports": {
+    "title": "Order imported Excel files",
+    "subtitle": "Browse Excel import runs and open the orders they created or updated.",
+    "back_to_list": "Back to imported files",
+    "table": {
+      "filename": "Filename",
+      "store": "Store",
+      "marketplace": "Marketplace",
+      "status": "Status",
+      "imported_orders": "Orders",
+      "imported_items": "Items",
+      "created_at": "Imported at",
+      "action": "Action",
+      "view_detail": "View detail",
+      "empty": "No imported Excel files yet.",
+      "search_placeholder": "Search by filename…",
+      "showing": "Showing {{start}}-{{end}} of {{total}} files"
+    },
+    "detail": {
+      "subtitle": "Import file details",
+      "loading": "Loading import file…",
+      "sheet": "Sheet",
+      "row_count": "Rows processed",
+      "orders_title": "Orders from this import",
+      "orders_subtitle": "Orders linked to this Excel import file (source = IMPORT)."
+    },
+    "errors": {
+      "load_failed": "Unable to load imported Excel files.",
+      "load_detail_failed": "Unable to load this import file.",
+      "invalid_id": "Invalid import file id."
+    }
+  },
+  "inputs": {
+    "title": "Order inputs",
+    "subtitle": "Create a titled run, attach Order Detail + Total Withdraw Excels, then Run files.",
+    "create": "New order input",
+    "create_title": "New order input",
+    "create_subtitle": "Give this run a title, then upload both Excel files on the next screen.",
+    "create_submit": "Create",
+    "creating": "Creating…",
+    "cancel": "Cancel",
+    "back": "Back to order inputs",
+    "run_files": "Run both",
+    "run_file": "Run file",
+    "running": "Running…",
+    "fields": {
+      "title": "Title",
+      "title_placeholder": "e.g. TikTok May 2026 week 1",
+      "store": "Store",
+      "store_placeholder": "Select store",
+      "marketplace": "Marketplace"
+    },
+    "filters": {
+      "store": "Store",
+      "store_all": "All stores",
+      "search": "Title",
+      "search_placeholder": "Search by title…"
+    },
+    "table": {
+      "title": "Title",
+      "store": "Store",
+      "marketplace": "Marketplace",
+      "status": "Status",
+      "orders": "Orders",
+      "items": "Items",
+      "files": "Files",
+      "file_states": "Detail: {{orderDetail}} · Withdraw: {{withdraw}}",
+      "created_at": "Created",
+      "loading": "Loading…",
+      "empty": "No order inputs yet.",
+      "showing": "Showing {{start}}-{{end}} of {{total}}"
+    },
+    "status": {
+      "draft": "Draft",
+      "running": "Running",
+      "completed": "Completed",
+      "partial": "Partial",
+      "failed": "Failed"
+    },
+    "file_status": {
+      "missing": "Missing",
+      "ready": "Ready",
+      "running": "Running",
+      "succeeded": "Succeeded",
+      "failed": "Failed",
+      "partial": "Partial"
+    },
+    "match": {
+      "matched": "Matched",
+      "unmatched": "Unmatched",
+      "invalid": "Invalid"
+    },
+    "apply": {
+      "pending": "Pending",
+      "applied": "Applied",
+      "skipped": "Skipped",
+      "failed": "Failed"
+    },
+    "detail": {
+      "loading": "Loading…",
+      "order_detail_title": "Order detail Excel",
+      "order_detail_description": "TikTok OrderSKUList export (.xlsx)",
+      "withdraw_title": "Total withdraw Excel",
+      "withdraw_description": "TikTok Payout Report — Order details sheet (.xlsx)",
+      "no_file": "No file uploaded",
+      "upload": "Upload file",
+      "uploading": "Uploading…",
+      "withdraw_summary": "{{rows}} rows · {{matched}} matched · {{unmatched}} unmatched",
+      "stuck_running": "This run was left in Running (e.g. after refresh). Reset to continue.",
+      "reset_stuck": "Reset status",
+      "tab_orders": "Order list",
+      "tab_withdraw": "Withdraw / settlement rows",
+      "filters": {
+        "order_id": "Order ID",
+        "order_id_placeholder": "Search by order ID…",
+        "match": "Match",
+        "match_all": "All matches",
+        "apply": "Apply",
+        "apply_all": "All apply statuses"
+      },
+      "orders_empty": "No orders from this run yet. Run the Order detail Excel first.",
+      "orders_none": "No new orders were created (all rows may have been duplicates).",
+      "withdraw_rows_title": "Withdraw / settlement rows",
+      "withdraw_rows_empty": "No rows.",
+      "withdraw_not_ready": "Run the Total withdraw Excel to see settlement rows.",
+      "col_no": "No.",
+      "col_order_id": "Order ID",
+      "col_amount": "Settlement amount",
+      "col_fees": "Total Fees",
+      "col_adjustments": "Total Adjustments",
+      "col_match": "Match",
+      "col_apply": "Apply",
+      "match_apply_hint": "Unmatched = no order with this Order ID in this store yet, so Apply is Skipped. Fees/adjustments still appear here; they only show on the Order list after a successful match. Run Order detail first, then re-run Withdraw.",
+      "prev": "Prev",
+      "next": "Next",
+      "updated_at": "Updated {{value}}"
+    },
+    "errors": {
+      "load_failed": "Unable to load order inputs.",
+      "create_failed": "Unable to create order input.",
+      "title_required": "Please enter a title.",
+      "store_required": "Please select a store.",
+      "files_required": "Upload both Excel files (Ready) before running both.",
+      "order_detail_required": "Upload Order Detail Excel (Ready) before running.",
+      "withdraw_required": "Upload Total Withdraw Excel (Ready) before running.",
+      "not_found": "Order input not found."
     }
   }
 }

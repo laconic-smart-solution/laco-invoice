@@ -1,24 +1,38 @@
-import type { ColumnDef } from "@tanstack/react-table"
-import { RefreshCw, Store } from "lucide-react"
-import { useCallback, useMemo, useState } from "react"
+import type {
+  ColumnDef,
+  ColumnFiltersState,
+  OnChangeFn,
+  SortingState,
+} from "@tanstack/react-table"
+import { Store } from "lucide-react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
-import { ConfirmDialog } from "@/components/common/confirm-dialog"
 import { DataTable } from "@/components/common/data-table/data-table"
+import { DataTableColumnControls } from "@/components/common/data-table/data-table-column-controls"
+import { DataTableColumnHeader } from "@/components/common/data-table/data-table-column-header"
 import { DataTableFooter } from "@/components/common/data-table/data-table-footer"
+import { DataTableRowActions } from "@/components/common/data-table/data-table-row-actions"
 import { DataTableToolbar } from "@/components/common/data-table/data-table-toolbar"
+import type { DataTableSelection } from "@/components/common/data-table/types"
 import {
   useDataTable,
   type RowSelectionState,
+  type VisibilityState,
 } from "@/components/common/data-table/use-data-table"
 import { StatusBadge } from "@/components/common/status-badge"
 import type { StatusBadgeVariant } from "@/components/common/status-badge"
-import { Button } from "@/components/ui/button"
-import type { Order, OrderSyncStatus } from "@/features/orders/types/order"
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
+import { OrderHistoryDialog } from "@/features/orders/components/order-history-dialog"
+import type {
+  Order,
+  OrderSourceType,
+  OrderSyncStatus,
+} from "@/features/orders/types/order"
 import { useLocaleStore } from "@/shared/stores/locale-store"
-import { formatCurrency } from "@/util/format"
+import { formatCurrency, formatDate } from "@/util/format"
 
 const SYNC_STATUS_BADGE: Record<OrderSyncStatus, StatusBadgeVariant> = {
   synced: "synced",
@@ -26,53 +40,31 @@ const SYNC_STATUS_BADGE: Record<OrderSyncStatus, StatusBadgeVariant> = {
   failed: "failed",
 }
 
-interface OrderRowActionProps {
-  order: Order
-  onGenerate: (order: Order) => void
+const SOURCE_TYPE_BADGE: Record<OrderSourceType, StatusBadgeVariant> = {
+  API: "synced",
+  IMPORT: "draft",
 }
 
-function OrderRowAction({ order, onGenerate }: OrderRowActionProps) {
+const DEFAULT_HIDDEN_ORDER_COLUMNS: VisibilityState = {
+  syncStatus: false,
+  sourceType: false,
+}
+
+interface OrderRowActionProps {
+  order: Order
+  onHistory: (order: Order) => void
+}
+
+function OrderRowAction({ order, onHistory }: OrderRowActionProps) {
   const { t } = useTranslation("orders")
 
-  switch (order.syncStatus) {
-    case "synced":
-      return (
-        <Button
-          variant="link"
-          className="h-auto p-0 text-info"
-          onClick={(event) => event.stopPropagation()}
-        >
-          {t("table.actions.view_invoice")}
-        </Button>
-      )
-    case "pending":
-      return (
-        <Button
-          size="xs"
-          className="uppercase"
-          onClick={(event) => {
-            event.stopPropagation()
-            onGenerate(order)
-          }}
-        >
-          {t("table.actions.generate")}
-        </Button>
-      )
-    case "failed":
-      return (
-        <Button
-          variant="link"
-          size="sm"
-          className="h-auto p-0 text-destructive"
-          onClick={(event) => event.stopPropagation()}
-        >
-          <RefreshCw data-icon="inline-start" />
-          {t("table.actions.retry")}
-        </Button>
-      )
-    default:
-      return null
-  }
+  return (
+    <DataTableRowActions>
+      <DropdownMenuItem onSelect={() => onHistory(order)}>
+        {t("table.actions.history")}
+      </DropdownMenuItem>
+    </DataTableRowActions>
+  )
 }
 
 interface OrdersTableProps {
@@ -87,6 +79,12 @@ interface OrdersTableProps {
   canGoNext: boolean
   onPageChange: (page: number) => void
   onLimitChange: (limit: number) => void
+  isLoading?: boolean
+  sorting: SortingState
+  onSortingChange: (sorting: SortingState) => void
+  columnFilters: ColumnFiltersState
+  onColumnFiltersChange: (filters: ColumnFiltersState) => void
+  onSelectionChange?: (selection: DataTableSelection) => void
 }
 
 export function OrdersTable({
@@ -101,25 +99,47 @@ export function OrdersTable({
   canGoNext,
   onPageChange,
   onLimitChange,
+  isLoading = false,
+  sorting,
+  onSortingChange,
+  columnFilters,
+  onColumnFiltersChange,
+  onSelectionChange,
 }: OrdersTableProps) {
   const { t } = useTranslation("orders")
   const navigate = useNavigate()
   const locale = useLocaleStore((state) => state.locale)
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
-  const [orderToGenerate, setOrderToGenerate] = useState<Order | null>(null)
+  const [isAllMatchingSelected, setIsAllMatchingSelected] = useState(false)
+  const [historyOrder, setHistoryOrder] = useState<Order | null>(null)
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
+    DEFAULT_HIDDEN_ORDER_COLUMNS
+  )
 
-  const handleGenerateRequest = useCallback((order: Order) => {
-    setOrderToGenerate(order)
-  }, [])
+  const pageRowIdsKey = useMemo(
+    () => orders.map((order) => order.id).join(","),
+    [orders]
+  )
 
-  const handleConfirmGenerate = useCallback(() => {
-    if (!orderToGenerate) {
+  useEffect(() => {
+    setRowSelection({})
+    setIsAllMatchingSelected(false)
+  }, [totalCount])
+
+  useEffect(() => {
+    if (!isAllMatchingSelected || orders.length === 0) {
       return
     }
+    const next: RowSelectionState = {}
+    for (const order of orders) {
+      next[order.id] = true
+    }
+    setRowSelection(next)
+  }, [isAllMatchingSelected, orders, pageRowIdsKey])
 
-    // TODO: wire invoice generation mutation
-    setOrderToGenerate(null)
-  }, [orderToGenerate])
+  const handleHistoryRequest = useCallback((order: Order) => {
+    setHistoryOrder(order)
+  }, [])
 
   const handleRowClick = useCallback(
     (order: Order) => {
@@ -128,22 +148,84 @@ export function OrdersTable({
     [navigate]
   )
 
+  const handleSortingChange = useCallback<OnChangeFn<SortingState>>(
+    (updater) => {
+      const next = typeof updater === "function" ? updater(sorting) : updater
+      onSortingChange(next)
+    },
+    [onSortingChange, sorting]
+  )
+
+  const handleColumnFiltersChange = useCallback<OnChangeFn<ColumnFiltersState>>(
+    (updater) => {
+      const next =
+        typeof updater === "function" ? updater(columnFilters) : updater
+      onColumnFiltersChange(next)
+    },
+    [columnFilters, onColumnFiltersChange]
+  )
+
+  const columnLabels = useMemo(
+    () => ({
+      orderId: t("table.columns.order_id"),
+      orderDate: t("table.columns.order_date"),
+      storeName: t("table.columns.store"),
+      customer: t("table.columns.customer"),
+      totalAmount: t("table.columns.total_amount"),
+      totalFees: t("table.columns.total_fees"),
+      totalAdjustments: t("table.columns.total_adjustments"),
+      syncStatus: t("table.columns.sync_status"),
+      sourceType: t("table.columns.source"),
+    }),
+    [t]
+  )
+
   const columns = useMemo<ColumnDef<Order>[]>(
     () => [
       {
         accessorKey: "orderId",
-        header: t("table.columns.order_id"),
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.order_id")}
+          />
+        ),
         cell: ({ getValue }) => (
           <span className="font-medium text-foreground">{getValue<string>()}</span>
         ),
       },
       {
         accessorKey: "orderDate",
-        header: t("table.columns.order_date"),
+        enableColumnFilter: false,
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.order_date")}
+            enableSearch={false}
+          />
+        ),
+        cell: ({ getValue }) => {
+          const value = getValue<string>()
+          if (!value) {
+            return "—"
+          }
+          const parsed = new Date(value)
+          if (Number.isNaN(parsed.getTime()) || parsed.getFullYear() < 1971) {
+            return "—"
+          }
+          return formatDate(value, locale)
+        },
       },
       {
         accessorKey: "storeName",
-        header: t("table.columns.store"),
+        enableColumnFilter: false,
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.store")}
+            enableSearch={false}
+          />
+        ),
         cell: ({ row }) => (
           <div className="flex items-center gap-2">
             <span className="flex size-6 shrink-0 items-center justify-center bg-foreground text-background">
@@ -154,17 +236,85 @@ export function OrdersTable({
         ),
       },
       {
-        accessorKey: "customer",
-        header: t("table.columns.customer"),
+        id: "customer",
+        accessorFn: (row) =>
+          `${row.customer} ${row.customerPhone?.trim() ?? ""}`.trim(),
+        enableColumnFilter: false,
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.customer")}
+            enableSearch={false}
+          />
+        ),
+        cell: ({ row }) => {
+          const phone = row.original.customerPhone?.trim()
+          return (
+            <div className="min-w-[140px]">
+              <p className="font-medium text-foreground">{row.original.customer}</p>
+              {phone ? (
+                <p className="text-xs text-muted-foreground">{phone}</p>
+              ) : null}
+            </div>
+          )
+        },
       },
       {
         accessorKey: "totalAmount",
-        header: t("table.columns.total_amount"),
-        cell: ({ getValue }) => formatCurrency(getValue<number>(), locale),
+        enableColumnFilter: false,
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.total_amount")}
+            enableSearch={false}
+          />
+        ),
+        cell: ({ row }) =>
+          formatCurrency(row.original.totalAmount, locale, row.original.currency),
+      },
+      {
+        accessorKey: "totalFees",
+        enableColumnFilter: false,
+        enableSorting: false,
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.total_fees")}
+            enableSearch={false}
+          />
+        ),
+        cell: ({ row }) =>
+          formatCurrency(row.original.totalFees, locale, row.original.currency),
+      },
+      {
+        accessorKey: "totalAdjustments",
+        enableColumnFilter: false,
+        enableSorting: false,
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.total_adjustments")}
+            enableSearch={false}
+          />
+        ),
+        cell: ({ row }) =>
+          formatCurrency(
+            row.original.totalAdjustments,
+            locale,
+            row.original.currency
+          ),
       },
       {
         accessorKey: "syncStatus",
-        header: t("table.columns.sync_status"),
+        enableColumnFilter: false,
+        enableSorting: false,
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.sync_status")}
+            enableSearch={false}
+          />
+        ),
         cell: ({ getValue }) => {
           const status = getValue<OrderSyncStatus>()
           return (
@@ -177,14 +327,41 @@ export function OrdersTable({
         },
       },
       {
+        accessorKey: "sourceType",
+        enableColumnFilter: false,
+        enableSorting: false,
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.source")}
+            enableSearch={false}
+          />
+        ),
+        cell: ({ getValue }) => {
+          const sourceType = getValue<OrderSourceType>()
+          return (
+            <StatusBadge
+              status={SOURCE_TYPE_BADGE[sourceType]}
+              label={t(`source_type.${sourceType === "IMPORT" ? "import" : "api"}`).toUpperCase()}
+            />
+          )
+        },
+      },
+      {
         id: "action",
         header: t("table.columns.action"),
+        enableSorting: false,
+        enableHiding: false,
+        enableColumnFilter: false,
         cell: ({ row }) => (
-          <OrderRowAction order={row.original} onGenerate={handleGenerateRequest} />
+          <OrderRowAction
+            order={row.original}
+            onHistory={handleHistoryRequest}
+          />
         ),
       },
     ],
-    [handleGenerateRequest, locale, t]
+    [handleHistoryRequest, locale, t]
   )
 
   const table = useDataTable({
@@ -192,46 +369,81 @@ export function OrdersTable({
     columns,
     getRowId: (row) => row.id,
     enableRowSelection: true,
+    manualSorting: true,
+    manualFiltering: true,
     selectColumnLabels: {
       selectAll: t("table.select_all"),
       selectRow: t("table.select_row"),
     },
-    state: { rowSelection },
+    initialState: {
+      columnVisibility: DEFAULT_HIDDEN_ORDER_COLUMNS,
+    },
+    state: { rowSelection, sorting, columnFilters, columnVisibility },
     onRowSelectionChange: setRowSelection,
+    onSortingChange: handleSortingChange,
+    onColumnFiltersChange: handleColumnFiltersChange,
+    onColumnVisibilityChange: setColumnVisibility,
+    meta: {
+      selectAllMatching: {
+        enabled: true,
+        isSelected: isAllMatchingSelected,
+        onChange: setIsAllMatchingSelected,
+      },
+    },
   })
+
+  useEffect(() => {
+    if (!onSelectionChange) {
+      return
+    }
+    const ids = Object.keys(rowSelection).filter((id) => rowSelection[id])
+    const pageRowCount = orders.length
+    onSelectionChange({
+      ids,
+      isAllPageSelected: pageRowCount > 0 && ids.length === pageRowCount,
+      isAllMatchingSelected,
+    })
+  }, [isAllMatchingSelected, onSelectionChange, orders.length, rowSelection])
+
+  const toolbarSelectedCount = isAllMatchingSelected
+    ? totalCount
+    : Object.keys(rowSelection).filter((id) => rowSelection[id]).length
 
   return (
     <section className="border border-border bg-card shadow-sm">
-      <ConfirmDialog
-        open={orderToGenerate !== null}
+      <OrderHistoryDialog
+        open={historyOrder !== null}
         onOpenChange={(open) => {
           if (!open) {
-            setOrderToGenerate(null)
+            setHistoryOrder(null)
           }
         }}
-        title={t("confirm.generate.title")}
-        description={
-          orderToGenerate
-            ? t("confirm.generate.description", {
-                orderId: orderToGenerate.orderId,
-              })
-            : undefined
+        orderId={
+          historyOrder != null ? Number.parseInt(historyOrder.id, 10) || null : null
         }
-        confirmLabel={t("table.actions.generate")}
-        onConfirm={handleConfirmGenerate}
+        externalOrderId={historyOrder?.orderId ?? null}
       />
 
-      <DataTableToolbar
-        table={table}
-        selectedLabel={(count) => t("table.selected_count", { count })}
-        bulkActionLabel={t("table.bulk_generate")}
-        onBulkAction={() => undefined}
-      />
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border">
+        <DataTableToolbar
+          table={table}
+          selectedCount={toolbarSelectedCount}
+          selectedLabel={(count) => t("table.selected_count", { count })}
+          className="border-b-0"
+        />
+        <DataTableColumnControls
+          table={table}
+          columnLabels={columnLabels}
+          className="px-4 py-3"
+        />
+      </div>
 
       <div className="overflow-x-auto">
         <DataTable
           table={table}
           emptyMessage={t("table.empty")}
+          isLoading={isLoading}
+          skeletonRowCount={limit}
           onRowClick={handleRowClick}
         />
       </div>

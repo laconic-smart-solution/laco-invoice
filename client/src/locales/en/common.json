@@ -19,6 +19,27 @@
     "next": "Next",
     "showing_range": "Showing {{start}} to {{end}} of {{total}}"
   },
+  "table": {
+    "open_menu": "Open menu",
+    "showing_total": "{{count}} records",
+    "column": {
+      "search_placeholder": "Search...",
+      "search_aria": "Search {{column}}",
+      "sort_asc": "Asc",
+      "sort_desc": "Desc",
+      "hide": "Hide"
+    },
+    "view": {
+      "columns": "Columns",
+      "toggle_columns": "Toggle columns",
+      "reset_columns": "Reset column"
+    }
+  },
+  "export_preview": {
+    "column_hint": "Hidden columns will be excluded from the Excel file.",
+    "download": "Download Excel",
+    "exporting": "Exporting…"
+  },
   "time": {
     "minutes_ago_one": "{{count}} min ago",
     "minutes_ago_other": "{{count}} mins ago"

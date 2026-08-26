@@ -1,18 +1,44 @@
 {
   "not_found": {
-    "page_title": "Page not found | Laco Invoice",
+    "page_title": "စာမျက်နှာ မတွေ့ပါ | Laco Invoice",
     "code": "404",
-    "title": "Page not found",
-    "description": "The page you requested doesn't exist, was moved, or the link may be outdated.",
-    "path_label": "Requested path",
-    "go_home": "Go to dashboard",
-    "go_login": "Go to sign in",
-    "go_back": "Go back",
-    "quick_links_label": "Popular destinations",
+    "title": "စာမျက်နှာ မတွေ့ပါ",
+    "description": "သင်တောင်းဆိုသော စာမျက်နှာ မရှိတော့ပါ၊ ရွှေ့ထားခြင်း သို့မဟုတ် လင့်ခ် မှားနေနိုင်ပါသည်။",
+    "path_label": "တောင်းဆိုထားသော လမ်းကြောင်း",
+    "go_home": "ဒက်ရှ်ဘုတ်သို့ သွားမည်",
+    "go_login": "အကောင့်ဝင်ရန်",
+    "go_back": "နောက်သို့",
+    "quick_links_label": "လူကြိုက်များသော စာမျက်နှာများ",
     "links": {
-      "dashboard": "Dashboard",
-      "orders": "Orders",
-      "customers": "Customers"
+      "dashboard": "ဒက်ရှ်ဘုတ်",
+      "orders": "အော်ဒါများ",
+      "customers": "ဖောက်သည်များ"
     }
+  },
+  "something_went_wrong": {
+    "page_title": "တစ်ခုခု အဆင်မပြေဖြစ်နေသည် | Laco Invoice",
+    "code": "Error",
+    "title": "တစ်ခုခု အဆင်မပြေဖြစ်နေသည်",
+    "description": "ဤစာမျက်နှာကို ဖွင့်နေစဉ် မမျှော်လင့်ထားသော အမှားတစ်ခု ဖြစ်ပွားခဲ့သည်။ ထပ်မံကြိုးစားနိုင်သည် သို့မဟုတ် လုံခြုံသော စာမျက်နှာသို့ ပြန်သွားနိုင်သည်။",
+    "details_label": "အမှားအသေးစိတ်",
+    "try_again": "ထပ်မံကြိုးစားမည်",
+    "go_home": "ဒက်ရှ်ဘုတ်သို့ သွားမည်",
+    "go_login": "အကောင့်ဝင်ရန်",
+    "go_back": "နောက်သို့"
+  },
+  "server_error": {
+    "page_title": "ဆာဗာ မရရှိနိုင်ပါ | Laco Invoice",
+    "status_label": "ချိတ်ဆက်မှု ပြတ်တောက်နေသည်",
+    "code_label": "502 · Bad gateway",
+    "code": "500",
+    "title": "ဆာဗာ မရရှိနိုင်ပါ",
+    "description": "ဤနေရာနှင့် ဆာဗာကြား အချက်ပြမှု ပြတ်တောက်သွားပါသည်။ ဆာဗာ ပြန်လည်စတင်နေခြင်း သို့မဟုတ် ယာယီ မရရှိနိုင်ခြင်း ဖြစ်နိုင်ပြီး မကြာမီ ပြန်လည်ကောင်းမွန်လေ့ရှိပါသည်။",
+    "details_label": "အမှားအသေးစိတ်",
+    "unreachable": "ဆာဗာသို့ ချိတ်ဆက်မရပါ။",
+    "try_again": "ထပ်မံကြိုးစားမည်",
+    "checking": "ချိတ်ဆက်မှု စစ်ဆေးနေသည်…",
+    "go_home": "ဒက်ရှ်ဘုတ်သို့ သွားမည်",
+    "go_login": "အကောင့်ဝင်ရန်",
+    "go_back": "နောက်သို့"
   }
 }

@@ -1,5 +1,6 @@
 package com.laconic.lacoinvoice.domain.repositories;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +20,11 @@ public interface OrderRepository extends BaseRepository<Order> {
 			Long marketplaceId,
 			String externalOrderId);
 
+	List<Order> findByStore_IdAndMarketplace_IdAndExternalOrderIdIn(
+			Long storeId,
+			Long marketplaceId,
+			Collection<String> externalOrderIds);
+
 	@Query("""
 			SELECT DISTINCT o FROM Order o
 			LEFT JOIN FETCH o.customer
@@ -34,4 +40,10 @@ public interface OrderRepository extends BaseRepository<Order> {
 			WHERE oi.order.id = :orderId
 			""")
 	List<OrderItem> findItemsByOrderId(@Param("orderId") Long orderId);
+
+	@Query("""
+			SELECT COUNT(o) FROM Order o
+			WHERE (:storeId IS NULL OR o.store.id = :storeId)
+			""")
+	long countByOptionalStoreId(@Param("storeId") Long storeId);
 }

@@ -9,11 +9,16 @@ interface SidebarState {
 
 export const useSidebarStore = create<SidebarState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       isCollapsed: false,
-      toggle: () => set((state) => ({ isCollapsed: !state.isCollapsed })),
+      toggle: () => {
+        set({ isCollapsed: !get().isCollapsed })
+      },
       setCollapsed: (isCollapsed) => set({ isCollapsed }),
     }),
-    { name: "sidebar" }
+    {
+      name: "sidebar",
+      partialize: (state) => ({ isCollapsed: state.isCollapsed }),
+    }
   )
 )

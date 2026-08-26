@@ -11,6 +11,12 @@ import lombok.Setter;
 @Schema(name = "LacoinvoiceCustomerFilter")
 public class CustomerFilter {
 
+	private Long storeId;
+
+	private Long marketplaceId;
+
+	private String marketplaceCode;
+
 	private String name;
 
 	private String email;

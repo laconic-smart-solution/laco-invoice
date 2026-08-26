@@ -4,20 +4,23 @@ spring:
       on-profile: dev
   datasource:
     url: ${DB_URL:jdbc:oracle:thin:@//113.53.62.172:1200/LACONIC}
-    username: ${DB_USERNAME:LACO_INVOICE}
-    password: ${DB_PASSWORD:LACO_INVOICE}
+    username: ${DB_USERNAME:LACO_INVOICE_DB}
+    password: ${DB_PASSWORD:LACO_INVOICE_DB}
     driver-class-name: oracle.jdbc.OracleDriver
   jpa:
     show-sql: true
   data:
     redis:
-      host: ${REDIS_HOST:192.168.0.242}
-      password: ${REDIS_PASSWORD:Hello@test123}
+      # host: ${REDIS_HOST:192.168.0.242}
+      # password: ${REDIS_PASSWORD:Hello@test123}
+      # port: ${REDIS_PORT:6379}
+      host: ${REDIS_HOST:127.0.0.1}
+      password: ${REDIS_PASSWORD:}
       port: ${REDIS_PORT:6379}
 
 app:
   cors:
-    allowed-origin-patterns: http://localhost:*,http://127.0.0.1:*,http://192.168.23.224:*,http://192.168.23.224,https://brittany-pretrochal-supergloriously.ngrok-free.dev:*,https://dev-laco-invoice.laconic.co.th:*,https://dev-laco-invoice.laconic.co.th
+    allowed-origin-patterns: http://localhost:*,http://127.0.0.1:*,http://192.168.23.224:*,http://192.168.23.224,https://brittany-pretrochal-supergloriously.ngrok-free.dev:*,https://dev-laco-invoice.laconic.co.th:*,https://dev-laco-invoice.laconic.co.th,http://192.168.23.151:*,http://192.168.23.151
   auth:
     cookies:
       secure: false
@@ -29,3 +32,19 @@ app:
   users:
     default-admin:
       auth-server-user-id: ${DEFAULT_ADMIN_AUTH_SERVER_USER_ID:f14b9e92-0acf-42d3-9a85-cabc7d994c93}
+  # Marketplace Open Platform credentials (caller-owned; forwarded as vendor headers)
+  communication:
+    gateway-url: ${COMMUNICATION_GATEWAY_URL:http://192.168.0.242:8084}
+    # Empty when calling marketplace services directly. Set /comms/lazada etc. only if
+    # gateway-url points at Spring Cloud Gateway (:8080).
+    lazada-base-path: ${COMMUNICATION_LAZADA_BASE_PATH:}
+    shopee-base-path: ${COMMUNICATION_SHOPEE_BASE_PATH:}
+    tiktok-base-path: ${COMMUNICATION_TIKTOK_BASE_PATH:}
+    lazada-app-key: ${LAZADA_APP_KEY:139411}
+    lazada-app-secret: ${LAZADA_APP_SECRET:JGDsqR9i0CvXXgdqNOW9tdFuUeBXZmXe}
+    # Set real Partner Center values (or env) before connecting TikTok Shop
+    tiktok-app-key: ${TIKTOK_APP_KEY:}
+    tiktok-app-secret: ${TIKTOK_APP_SECRET:}
+    # Temporary: true → tiktok-shop-scrape (Playwright); false → Partner tiktok-service
+    tiktok-shop-scraping: ${TIKTOK_SHOP_SCRAPPING:false}
+    tiktok-scrape-url: ${TIKTOK_SCRAPE_URL:http://localhost:8090}

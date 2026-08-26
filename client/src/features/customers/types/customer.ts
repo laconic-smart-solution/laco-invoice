@@ -3,6 +3,10 @@ export type CustomerGender = "male" | "female"
 export interface Customer {
   id: number
   storeId: number | null
+  storeName: string | null
+  marketplaceId: number | null
+  marketplaceCode: string | null
+  externalCustomerId: string | null
   name: string
   email: string | null
   phone: string | null
@@ -28,9 +32,24 @@ export interface CustomerPageRequest {
   sortBy?: string
   sortOrder?: "ASC" | "DESC"
   filter?: {
+    storeId?: number
+    marketplaceId?: number
+    marketplaceCode?: string
     name?: string
     email?: string
     phone?: string
     gender?: string
   }
+}
+
+export interface CustomerFiltersState {
+  storeId: string
+  search: string
+  gender: "all" | "male" | "female"
+}
+
+export const DEFAULT_CUSTOMER_FILTERS: CustomerFiltersState = {
+  storeId: "",
+  search: "",
+  gender: "all",
 }

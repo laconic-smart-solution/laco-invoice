@@ -1,14 +1,23 @@
 {
   "title": "လုပ်ငန်းအခြေအနေ",
   "subtitle": "ဈေးကွက်တစ်ခုချင်းစီမှ လက်ရှိစွမ်းဆောင်ရည်",
+  "subtitle_hongta": "Count ကို နှိပ်ပြီး ဆက်စပ်စာရင်းကို ဖွင့်ပါ",
   "actions": {
     "sync_all_stores": "ဆိုင်အားလုံး Sync လုပ်ရန်",
     "bulk_invoices": "ငွေတောင်းခံလွှာ အစုလိုက် ထုတ်ရန်"
   },
   "stats": {
     "total_revenue": "စုစုပေါင်း ဝင်ငွေ",
+    "total_billed": "စုစုပေါင်း billed",
     "total_orders": "အော်ဒါ စုစုပေါင်း",
+    "awaiting_invoice": "Awaiting invoice",
     "invoices_issued": "ထုတ်ပြီးသော ငွေတောင်းခံလွှာ",
+    "stores": "Stores",
+    "products": "Products",
+    "customers": "Customers",
+    "users": "Users",
+    "hint_click": "စာရင်းဖွင့်ရန်",
+    "invoice_coverage": "Coverage {{percent}}% · Invoiced {{invoiced}}",
     "last_sync": "နောက်ဆုံး sync — {{time}} (channel {{count}} ခု)",
     "synced_count": "Sync ပြီး {{count}}",
     "pending_count": "စောင့်ဆိုင်းနေ {{count}}",
@@ -19,7 +28,7 @@
     "invoices_of_total": "{{issued}} / {{total}}"
   },
   "recent_orders": {
-    "title": "TikTok Shop အော်ဒါ နောက်ဆုံးများ",
+    "title": "Recent orders",
     "view_all": "အော်ဒါ အားလုံး ကြည့်ရန်",
     "empty": "အော်ဒါ မရှိသေးပါ။",
     "columns": {
@@ -45,9 +54,11 @@
   "marketplaces": {
     "title": "သုံးနေသော Marketplace များ",
     "connect_channel": "Channel ချိတ်ဆက်ရန်",
-    "tiktok": "TikTok Shop",
-    "shopify": "Shopify",
-    "amazon": "Amazon"
+    "channels": {
+      "lazada": "Lazada",
+      "shopee": "Shopee",
+      "tiktok": "TikTok Shop"
+    }
   },
   "promo": {
     "title": "Cash Flow ကို ပိုကောင်းအောင် လုပ်ပါ",

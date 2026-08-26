@@ -1,0 +1,49 @@
+{
+  "panels": {
+    "overview": "总览",
+    "orders": "订单",
+    "products": "商品",
+    "stores": "店铺",
+    "invoices": "发票",
+    "customers": "客户",
+    "users": "用户"
+  },
+  "overview": {
+    "title": "控制塔",
+    "subtitle": "点击数字打开对应列表。顶部导航保持不变，仅中间表格切换。",
+    "stats": {
+      "orders": "订单",
+      "awaiting_invoice": "待开票",
+      "invoices": "已开发票",
+      "stores": "店铺",
+      "products": "商品",
+      "customers": "客户",
+      "users": "用户"
+    },
+    "hint_click": "打开列表"
+  },
+  "toolbar": {
+    "setup_store": "设置店铺",
+    "add_store": "添加店铺"
+  },
+  "setup": {
+    "store_title": "设置店铺",
+    "store_description": "无需离开当前屏幕即可创建店铺。",
+    "customer_title": "添加客户",
+    "customer_description": "无需离开当前屏幕即可创建客户。"
+  },
+  "detail": {
+    "order": "订单详情",
+    "product": "商品详情",
+    "store": "店铺详情",
+    "invoice": "发票详情",
+    "customer": "客户",
+    "user": "用户详情",
+    "close": "关闭"
+  },
+  "empty_stores": {
+    "title": "暂无店铺",
+    "description": "先设置店铺以同步订单和商品。",
+    "action": "设置店铺"
+  }
+}

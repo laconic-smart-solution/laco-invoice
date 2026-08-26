@@ -5,11 +5,27 @@
   "sync_status": "ซิงก์แบบเรียลไทม์",
   "actions": {
     "add_customer": "เพิ่มลูกค้า",
+    "sync_customers": "ซิงก์ลูกค้า",
     "filter_marketplace": "กรอง Marketplace",
     "export_csv": "ส่งออก CSV"
   },
+  "filters": {
+    "store_label": "ร้านค้า",
+    "store_placeholder": "เลือกร้านค้า",
+    "store_all": "ร้านค้าทั้งหมด",
+    "search_label": "ค้นหา",
+    "search_placeholder": "ค้นหาด้วยชื่อ…",
+    "gender_label": "เพศ",
+    "gender": {
+      "all": "ทุกเพศ",
+      "male": "ชาย",
+      "female": "หญิง"
+    },
+    "more_filters": "ตัวกรองเพิ่มเติม"
+  },
   "stats": {
-    "total_customers": "ลูกค้าทั้งหมด"
+    "total_customers": "ลูกค้าทั้งหมด",
+    "total_customers_value": "{{count}} ลูกค้า"
   },
   "create": {
     "title": "เพิ่มลูกค้า",
@@ -48,11 +64,32 @@
   "errors": {
     "load_failed": "โหลดข้อมูลลูกค้าไม่สำเร็จ กรุณาลองอีกครั้ง",
     "save_failed": "บันทึกข้อมูลลูกค้าไม่สำเร็จ กรุณาลองอีกครั้ง",
-    "delete_failed": "ลบลูกค้าไม่สำเร็จ กรุณาลองอีกครั้ง"
+    "delete_failed": "ลบลูกค้าไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "sync_failed": "ซิงก์ลูกค้าไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "export_failed": "ส่งออกลูกค้าไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "select_to_export": "เลือกอย่างน้อยหนึ่งลูกค้าเพื่อส่งออก",
+    "export_preview_failed": "โหลดตัวอย่างการส่งออกไม่สำเร็จ กรุณาลองอีกครั้ง"
+  },
+  "export": {
+    "preview_title": "ตัวอย่างการส่งออก Excel",
+    "preview_description": "ตรวจสอบแถวและเลือกคอลัมน์ที่ต้องการใส่ในไฟล์",
+    "preview_loading": "กำลังโหลดตัวอย่าง…",
+    "preview_loading_more": "กำลังโหลดเพิ่ม…",
+    "preview_empty": "ไม่มีลูกค้าให้ส่งออก",
+    "preview_end": "ถึงท้ายรายการตัวอย่างแล้ว",
+    "columns": {
+      "marketplace": "Marketplace",
+      "external_customer_id": "รหัสลูกค้าภายนอก",
+      "created_at": "สร้างเมื่อ"
+    }
   },
   "table": {
     "empty": "ไม่พบลูกค้า",
     "loading": "กำลังโหลดลูกค้า...",
+    "select_all": "เลือกทั้งหมด",
+    "select_row": "เลือกแถว",
+    "selected_count_one": "เลือก {{count}} ลูกค้า",
+    "selected_count_other": "เลือก {{count}} ลูกค้า",
     "showing": "แสดง {{start}}-{{end}} จาก {{total}} ราย",
     "columns": {
       "id": "ID",

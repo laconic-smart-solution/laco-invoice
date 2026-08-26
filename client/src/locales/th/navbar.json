@@ -4,6 +4,8 @@
   "generate_invoice": "สร้างใบแจ้งหนี้",
   "notifications": "การแจ้งเตือน",
   "help": "ความช่วยเหลือ",
+  "view_profile": "ดูโปรไฟล์",
+  "profile": "โปรไฟล์",
   "logout": "ออกจากระบบ",
   "language": "ภาษา",
   "theme_light": "สลับเป็นโหมดสว่าง",

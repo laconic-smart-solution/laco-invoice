@@ -3,14 +3,26 @@
     "store_management": "ဆိုင်စီမံမှု"
   },
   "title": "Marketplace ကုန်ပစ္စည်းများ",
+  "subtitle": "Marketplace ကုန်ပစ္စည်းများ စာရင်းကို ကြည့်ရှုနှင့် စီမံပါ။",
   "sync_status": "Sync လုပ်နေသည်",
   "actions": {
-    "filter": "စစ်ထုတ်ရန်",
+    "sync_now": "ယခု Sync လုပ်ရန်",
     "export_csv": "CSV ထုတ်ရန်"
   },
+  "sync": {
+    "completed": "ကုန်ပစ္စည်း sync ပြီးပါပြီ။",
+    "failed": "ကုန်ပစ္စည်း sync မအောင်မြင်ပါ။",
+    "start_failed": "ကုန်ပစ္စည်း sync စတင်၍ မရပါ။"
+  },
   "filters": {
+    "search_label": "ရှာရန်",
+    "search_placeholder": "အမည်၊ SKU သို့မဟုတ် ကုန်ပစ္စည်း ID ဖြင့် ရှာရန်",
     "marketplace_label": "Marketplace အရင်းအမြစ်",
     "marketplace_placeholder": "ချိတ်ဆက်ထားသော ဆိုင်ကို ရွေးပါ",
+    "marketplace_all": "အားလုံး",
+    "store_label": "ဆိုင်",
+    "store_placeholder": "ဆိုင် ရွေးပါ",
+    "store_all": "ဆိုင်အားလုံး",
     "erp_status_label": "ERP အခြေအနေ",
     "erp_status": {
       "all": "အားလုံး",
@@ -20,6 +32,14 @@
     "price_range_label": "စျေးနှုန်းအကွာအဝေး",
     "price_min": "အနည်းဆုံး",
     "price_max": "အများဆုံး",
+    "more_filters": "Filter ထပ်ထည့်ရန်",
+    "price_sort_label": "စျေးနှုန်းအလိုက် စီရန်",
+    "price_sort_placeholder": "စီစဉ်ပုံ ရွေးပါ",
+    "price_sort": {
+      "none": "ပုံမှန်",
+      "asc": "နည်းမှများ",
+      "desc": "များမှနည်း"
+    },
     "reset_view": "မြင်ကွင်းပြန်သတ်မှတ်ရန်"
   },
   "erp_status": {
@@ -31,15 +51,43 @@
   },
   "empty": {
     "no_connections": "Marketplace ချိတ်ဆက်မှု မတွေ့ပါ။ Lazada၊ Shopee သို့မဟုတ် TikTok Shop ကို ဆိုင်အသေးစိတ်စာမျက်နှာမှ ဦးစွာချိတ်ဆက်ပါ။",
-    "go_to_stores": "ဆိုင်များသို့ သွားရန်"
+    "go_to_stores": "ဆိုင်များသို့ သွားရန်",
+    "never_synced": "ဤ marketplace အရင်းအမြစ်အတွက် sync လုပ်ထားသော ကုန်ပစ္စည်း မရှိသေးပါ။",
+    "sync_now_prompt": "Marketplace မှ ကုန်ပစ္စည်းများ တင်သွင်းရန် ယခု Sync လုပ်ပါ။"
   },
   "errors": {
     "load_sources_failed": "Marketplace အရင်းအမြစ်များ ဖွင့်မရပါ။",
-    "load_products_failed": "Marketplace ကုန်ပစ္စည်းများ ဖွင့်မရပါ။"
+    "load_products_failed": "Marketplace ကုန်ပစ္စည်းများ ဖွင့်မရပါ။",
+    "load_detail_failed": "ကုန်ပစ္စည်း အသေးစိတ် ဖွင့်မရပါ။",
+    "export_failed": "ကုန်ပစ္စည်းများ မထုတ်နိုင်ပါ။ ထပ်ကြိုးစားပါ။",
+    "select_to_export": "ထုတ်ရန် ကုန်ပစ္စည်း အနည်းဆုံး တစ်ခု ရွေးပါ။",
+    "export_preview_failed": "Export preview မတင်နိုင်ပါ။ ထပ်ကြိုးစားပါ။"
+  },
+  "export": {
+    "preview_title": "Excel ထုတ်ရန် အကြိုကြည့်",
+    "preview_description": "အတန်းများကို စစ်ဆေးပြီး ထည့်မည့် ကော်လံများကို ရွေးပါ။",
+    "preview_loading": "အကြိုကြည့် တင်နေသည်…",
+    "preview_loading_more": "ထပ်မံ တင်နေသည်…",
+    "preview_empty": "ထုတ်ရန် ကုန်ပစ္စည်း မရှိပါ။",
+    "preview_end": "အကြိုကြည့် အဆုံးသို့ ရောက်ပါပြီ။",
+    "columns": {
+      "id": "ID",
+      "store": "Store",
+      "marketplace_code": "Marketplace Code",
+      "marketplace_name": "Marketplace Name",
+      "external_product_id": "External Product ID",
+      "sku": "SKU",
+      "currency": "ငွေကြေး",
+      "status": "အခြေအနေ"
+    }
   },
   "table": {
     "empty": "ကုန်ပစ္စည်း မတွေ့ပါ။",
     "loading": "ကုန်ပစ္စည်းများ ဖွင့်နေသည်...",
+    "select_all": "အားလုံး ရွေးရန်",
+    "select_row": "အတန်း ရွေးရန်",
+    "selected_count_one": "ကုန်ပစ္စည်း {{count}} ခု ရွေးထားသည်",
+    "selected_count_other": "ကုန်ပစ္စည်း {{count}} ခု ရွေးထားသည်",
     "showing": "{{total}} ခုအနက် {{start}}-{{end}} ပြနေသည်",
     "store_label": "ဆိုင်: {{id}}",
     "marketplace_label": "Marketplace: {{id}}",
@@ -63,5 +111,41 @@
     "action_required_value": "ကုန်ပစ္စည်း {{count}} ခု",
     "active_sku": "အသုံးပြုနေသော SKU",
     "active_sku_value": "SKU {{count}} ခု"
+  },
+  "detail": {
+    "loading": "ကုန်ပစ္စည်း ဖွင့်နေသည်...",
+    "not_found_title": "ကုန်ပစ္စည်း မတွေ့ပါ",
+    "not_found_description": "ဤကုန်ပစ္စည်းကို ဖယ်ရှားထားပြီး သို့မဟုတ် သင်ဝင်ရောက်ခွင့် မရှိနိုင်ပါ။",
+    "back_to_products": "ကုန်ပစ္စည်းများသို့ ပြန်သွားရန်",
+    "description": "ဖော်ပြချက်",
+    "images": "ပုံများ",
+    "variants": "Variants",
+    "variant_sku": "SKU",
+    "variant_price": "စျေးနှုန်း",
+    "variant_status": "အခြေအနေ",
+    "variant_quantity": "အရေအတွက်",
+    "sections": {
+      "product_info": "ကုန်ပစ္စည်း အချက်အလက်",
+      "erp_mapping": "ERP ချိတ်ဆက်မှု"
+    },
+    "fields": {
+      "external_product_id": "ပြင်ပ ကုန်ပစ္စည်း ID",
+      "sku": "SKU",
+      "marketplace_status": "Marketplace အခြေအနေ",
+      "price": "စျေးနှုန်း",
+      "currency": "ငွေကြေး",
+      "no_currency": "ငွေကြေး မရှိ",
+      "erp_status": "ERP အခြေအနေ",
+      "erp_sku": "ERP SKU",
+      "erp_name": "ERP အမည်",
+      "erp_item_id": "ERP Item ID",
+      "mapped_at": "ချိတ်ခဲ့သော အချိန်"
+    },
+    "empty": {
+      "no_images": "ပုံ မရှိသေးပါ။ ဤကုန်ပစ္စည်းကို ဖြည့်ရန် Marketplace မှ Sync လုပ်ပါ။",
+      "no_description": "ဖော်ပြချက် မရှိသေးပါ။ ဤကုန်ပစ္စည်းကို ဖြည့်ရန် Marketplace မှ Sync လုပ်ပါ။",
+      "no_variants": "Variant မရှိသေးပါ။ ဤကုန်ပစ္စည်းကို ဖြည့်ရန် Marketplace မှ Sync လုပ်ပါ။",
+      "no_marketplace_status": "မသတ်မှတ်ရသေး (Import မှ ဖန်တီးထားသည်)"
+    }
   }
 }

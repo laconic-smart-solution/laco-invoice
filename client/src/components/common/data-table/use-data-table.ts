@@ -1,12 +1,17 @@
 import {
   getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
   useReactTable,
   type ColumnDef,
+  type ColumnFiltersState,
   type OnChangeFn,
   type RowSelectionState,
+  type SortingState,
   type TableOptions,
+  type VisibilityState,
 } from "@tanstack/react-table"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 
 import { createSelectColumn } from "@/components/common/data-table/select-column"
 
@@ -21,6 +26,10 @@ interface UseDataTableOptions<TData>
   data: TData[]
   enableRowSelection?: boolean
   selectColumnLabels?: SelectColumnLabels
+  /** When true, sorting is handled by the server; TanStack will not re-sort rows. */
+  manualSorting?: boolean
+  /** When true, filtering is handled by the server; TanStack will not filter rows. */
+  manualFiltering?: boolean
 }
 
 export function useDataTable<TData>({
@@ -31,8 +40,17 @@ export function useDataTable<TData>({
   getRowId,
   state,
   onRowSelectionChange,
+  onSortingChange,
+  onColumnFiltersChange,
+  onColumnVisibilityChange,
+  manualSorting = false,
+  manualFiltering = false,
   ...options
 }: UseDataTableOptions<TData>) {
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+
   const resolvedColumns = useMemo(() => {
     if (!enableRowSelection) {
       return columns
@@ -50,12 +68,30 @@ export function useDataTable<TData>({
     data,
     columns: resolvedColumns,
     getCoreRowModel: getCoreRowModel(),
+    ...(manualSorting ? {} : { getSortedRowModel: getSortedRowModel() }),
+    ...(manualFiltering ? {} : { getFilteredRowModel: getFilteredRowModel() }),
     enableRowSelection,
     getRowId,
-    state,
+    manualSorting,
+    manualFiltering,
     onRowSelectionChange,
+    onSortingChange: onSortingChange ?? setSorting,
+    onColumnFiltersChange: onColumnFiltersChange ?? setColumnFilters,
+    onColumnVisibilityChange: onColumnVisibilityChange ?? setColumnVisibility,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      ...state,
+    },
     ...options,
   })
 }
 
-export type { OnChangeFn, RowSelectionState }
+export type {
+  ColumnFiltersState,
+  OnChangeFn,
+  RowSelectionState,
+  SortingState,
+  VisibilityState,
+}

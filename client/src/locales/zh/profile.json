@@ -1,0 +1,64 @@
+{
+  "title": "个人资料",
+  "subtitle": "查看账户详情并更新登录凭据。",
+  "overview": {
+    "title": "账户信息",
+    "subtitle": "这些详情来自您当前的会话。",
+    "full_name": "全名",
+    "email": "邮箱",
+    "role": "角色",
+    "status": "状态",
+    "status_active": "启用",
+    "status_inactive": "停用",
+    "empty_value": "—"
+  },
+  "roles": {
+    "owner": "所有者",
+    "manager": "经理",
+    "staff": "员工",
+    "admin": "管理员"
+  },
+  "username_email": {
+    "title": "用户名和邮箱",
+    "subtitle": "更新您的登录邮箱和显示用户名。",
+    "new_email_label": "新邮箱",
+    "new_email_placeholder": "name@company.com",
+    "new_username_label": "新用户名",
+    "new_username_placeholder": "jane.doe",
+    "current_password_label": "当前密码",
+    "current_password_placeholder": "输入当前密码",
+    "submit": "保存更改",
+    "submitting": "保存中…",
+    "success": "用户名和邮箱已成功更新。",
+    "validation": {
+      "current_password_required": "当前密码为必填项",
+      "invalid_email": "请输入有效的邮箱地址",
+      "username_min": "用户名至少需要 3 个字符",
+      "at_least_one_change": "请提供新邮箱或新用户名"
+    }
+  },
+  "password": {
+    "title": "密码",
+    "subtitle": "更改您的账户密码。",
+    "current_password_label": "当前密码",
+    "current_password_placeholder": "输入当前密码",
+    "new_password_label": "新密码",
+    "new_password_placeholder": "输入新密码",
+    "submit": "保存更改",
+    "submitting": "保存中…",
+    "validation": {
+      "current_password_required": "当前密码为必填项",
+      "new_password_min": "密码至少需要 8 个字符"
+    }
+  },
+  "load_error": {
+    "title": "无法加载个人资料",
+    "description": "无法加载您的账户详情。请检查网络连接后重试。",
+    "retry": "重试",
+    "back_home": "返回仪表盘"
+  },
+  "errors": {
+    "credentials_failed": "无法更新用户名或邮箱。请检查密码后重试。",
+    "password_failed": "无法更新密码。请重试。"
+  }
+}

@@ -5,7 +5,6 @@ import { useLocation, useParams } from "react-router-dom"
 import { ROUTES } from "@/app/constants/routes"
 import { SIDEBAR_NAV_ITEMS } from "@/constants/navigation"
 import { getMockOrderById } from "@/features/orders/data/mock-orders"
-import { getMockInvoiceById } from "@/features/invoices/data/mock-invoices"
 
 export interface BreadcrumbItem {
   label: string
@@ -14,7 +13,7 @@ export interface BreadcrumbItem {
 
 export function useBreadcrumbs(): BreadcrumbItem[] {
   const { pathname } = useLocation()
-  const { orderId, invoiceId, customerId } = useParams()
+  const { orderId, customerId, productId } = useParams()
   const { t } = useTranslation(["breadcrumb", "sidebar", "common", "products", "customers", "users"])
 
   return useMemo(() => {
@@ -29,6 +28,14 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
       ]
     }
 
+    if (productId && pathname.startsWith(`${ROUTES.dashboard.products}/`)) {
+      return [
+        { label: t("sidebar:nav.products"), href: ROUTES.dashboard.products },
+        { label: t("products:breadcrumb.store_management"), href: ROUTES.dashboard.products },
+        { label: productId },
+      ]
+    }
+
     const navItem = SIDEBAR_NAV_ITEMS.find(
       (item) => item.path !== ROUTES.dashboard.root && item.path === pathname
     )
@@ -40,17 +47,54 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
       ]
     }
 
-    if (invoiceId && pathname.startsWith(`${ROUTES.dashboard.invoices}/`)) {
-      const invoice = getMockInvoiceById(invoiceId)
-
+    if (pathname === ROUTES.dashboard.orderImports) {
       return [
         { label: t("sidebar:nav.dashboard"), href: ROUTES.dashboard.root },
-        { label: t("sidebar:nav.invoices"), href: ROUTES.dashboard.invoices },
-        { label: invoice?.invoiceNo ?? invoiceId },
+        { label: t("sidebar:nav.orders"), href: ROUTES.dashboard.orders },
+        { label: t("sidebar:nav.order_imports") },
       ]
     }
 
-    if (orderId && pathname.startsWith(`${ROUTES.dashboard.orders}/`)) {
+    if (pathname.startsWith(`${ROUTES.dashboard.orderImports}/`)) {
+      const importFileId = pathname.split("/").pop()
+      return [
+        { label: t("sidebar:nav.dashboard"), href: ROUTES.dashboard.root },
+        { label: t("sidebar:nav.orders"), href: ROUTES.dashboard.orders },
+        {
+          label: t("sidebar:nav.order_imports"),
+          href: ROUTES.dashboard.orderImports,
+        },
+        { label: importFileId ?? "" },
+      ]
+    }
+
+    if (pathname === ROUTES.dashboard.orderInputs) {
+      return [
+        { label: t("sidebar:nav.dashboard"), href: ROUTES.dashboard.root },
+        { label: t("sidebar:nav.orders"), href: ROUTES.dashboard.orders },
+        { label: t("sidebar:nav.order_inputs") },
+      ]
+    }
+
+    if (pathname.startsWith(`${ROUTES.dashboard.orderInputs}/`)) {
+      const inputRunId = pathname.split("/").pop()
+      return [
+        { label: t("sidebar:nav.dashboard"), href: ROUTES.dashboard.root },
+        { label: t("sidebar:nav.orders"), href: ROUTES.dashboard.orders },
+        {
+          label: t("sidebar:nav.order_inputs"),
+          href: ROUTES.dashboard.orderInputs,
+        },
+        { label: inputRunId ?? "" },
+      ]
+    }
+
+    if (
+      orderId &&
+      pathname.startsWith(`${ROUTES.dashboard.orders}/`) &&
+      !pathname.startsWith(ROUTES.dashboard.orderImports) &&
+      !pathname.startsWith(ROUTES.dashboard.orderInputs)
+    ) {
       const order = getMockOrderById(orderId)
 
       return [
@@ -113,5 +157,5 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
       default:
         return [{ label: t("sidebar:nav.dashboard"), href: ROUTES.dashboard.root }]
     }
-  }, [customerId, invoiceId, orderId, pathname, t])
+  }, [customerId, orderId, pathname, t])
 }

@@ -55,6 +55,15 @@ public class StoreTikTokController {
 				.body(ApiResponse.created("Connected", service.connect(storeId, MARKETPLACE_CODE, request)));
 	}
 
+	@PostMapping("/scrape-connect")
+	@Operation(summary = "Register TikTok scrape connection (no Partner OAuth; requires TIKTOK_SHOP_SCRAPPING=true)")
+	public ResponseEntity<ApiResponse<StoreMarketplaceConnectionDto>> scrapeConnect(
+			@PathVariable Long storeId,
+			@RequestBody @Valid TikTokScrapeConnectRequest request) {
+		return ResponseEntity.status(HttpStatus.CREATED)
+				.body(ApiResponse.created("Connected", service.registerTikTokScrapeConnection(storeId, request)));
+	}
+
 	@GetMapping("/connections")
 	@Operation(summary = "List TikTok connections for store")
 	public ApiResponse<List<StoreMarketplaceConnectionViewDto>> listConnections(@PathVariable Long storeId) {

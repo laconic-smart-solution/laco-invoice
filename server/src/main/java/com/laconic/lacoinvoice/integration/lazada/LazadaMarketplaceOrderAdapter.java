@@ -21,9 +21,19 @@ public class LazadaMarketplaceOrderAdapter extends AbstractMarketplaceOrderAdapt
 	}
 
 	@Override
-	protected List<GatewayOrderData> fetchFromGateway(StoreMarketplaceConnection connection, String updatedFrom) {
+	protected List<GatewayOrderData> fetchFromGateway(
+			StoreMarketplaceConnection connection,
+			String updatedFrom,
+			int page,
+			int limit) {
 		Long storeId = connection.getStore().getId();
 		UUID tenantId = MarketplaceScopeSupport.toTenantUuid(storeId);
-		return client.listOrders(tenantId, connection.getAccessToken(), connection.getExternalSellerId(), updatedFrom);
+		return client.listOrders(
+				tenantId,
+				connection.getAccessToken(),
+				connection.getExternalSellerId(),
+				updatedFrom,
+				page,
+				limit);
 	}
 }

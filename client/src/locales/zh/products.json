@@ -3,14 +3,26 @@
     "store_management": "店铺管理"
   },
   "title": "Marketplace 商品",
+  "subtitle": "浏览和管理 Marketplace 商品目录。",
   "sync_status": "同步中",
   "actions": {
-    "filter": "筛选",
+    "sync_now": "立即同步",
     "export_csv": "导出 CSV"
   },
+  "sync": {
+    "completed": "商品同步完成。",
+    "failed": "商品同步失败。",
+    "start_failed": "无法启动商品同步。"
+  },
   "filters": {
+    "search_label": "搜索",
+    "search_placeholder": "按名称、SKU 或商品 ID 搜索",
     "marketplace_label": "Marketplace 来源",
     "marketplace_placeholder": "选择已连接的店铺",
+    "marketplace_all": "全部",
+    "store_label": "店铺",
+    "store_placeholder": "选择店铺",
+    "store_all": "全部店铺",
     "erp_status_label": "ERP 状态",
     "erp_status": {
       "all": "全部",
@@ -20,6 +32,14 @@
     "price_range_label": "价格范围",
     "price_min": "最低",
     "price_max": "最高",
+    "more_filters": "更多筛选",
+    "price_sort_label": "按价格排序",
+    "price_sort_placeholder": "选择排序方式",
+    "price_sort": {
+      "none": "默认",
+      "asc": "从低到高",
+      "desc": "从高到低"
+    },
     "reset_view": "重置视图"
   },
   "erp_status": {
@@ -31,15 +51,43 @@
   },
   "empty": {
     "no_connections": "未找到 marketplace 连接。请先在店铺详情页连接 Lazada、Shopee 或 TikTok Shop。",
-    "go_to_stores": "前往店铺"
+    "go_to_stores": "前往店铺",
+    "never_synced": "此 marketplace 来源尚未同步任何商品。",
+    "sync_now_prompt": "点击立即同步从 marketplace 导入商品。"
   },
   "errors": {
     "load_sources_failed": "加载 marketplace 来源失败。",
-    "load_products_failed": "加载 marketplace 商品失败。"
+    "load_products_failed": "加载 marketplace 商品失败。",
+    "load_detail_failed": "加载商品详情失败。",
+    "export_failed": "无法导出商品，请重试。",
+    "select_to_export": "请至少选择一个商品进行导出。",
+    "export_preview_failed": "无法加载导出预览，请重试。"
+  },
+  "export": {
+    "preview_title": "Excel 导出预览",
+    "preview_description": "核对数据并选择要包含的列。",
+    "preview_loading": "正在加载预览…",
+    "preview_loading_more": "正在加载更多…",
+    "preview_empty": "没有可导出的商品。",
+    "preview_end": "已到预览末尾。",
+    "columns": {
+      "id": "ID",
+      "store": "店铺",
+      "marketplace_code": "平台代码",
+      "marketplace_name": "平台名称",
+      "external_product_id": "外部商品 ID",
+      "sku": "SKU",
+      "currency": "货币",
+      "status": "状态"
+    }
   },
   "table": {
     "empty": "未找到商品。",
     "loading": "正在加载商品...",
+    "select_all": "全选",
+    "select_row": "选择行",
+    "selected_count_one": "已选择 {{count}} 个商品",
+    "selected_count_other": "已选择 {{count}} 个商品",
     "showing": "显示第 {{start}}-{{end}} 条，共 {{total}} 条商品",
     "store_label": "店铺：{{id}}",
     "marketplace_label": "Marketplace：{{id}}",
@@ -63,5 +111,41 @@
     "action_required_value": "{{count}} 个商品",
     "active_sku": "活跃 SKU",
     "active_sku_value": "{{count}} 个 SKU"
+  },
+  "detail": {
+    "loading": "正在加载商品...",
+    "not_found_title": "未找到商品",
+    "not_found_description": "该商品可能已被删除，或您没有访问权限。",
+    "back_to_products": "返回商品列表",
+    "description": "描述",
+    "images": "图片",
+    "variants": "规格",
+    "variant_sku": "SKU",
+    "variant_price": "价格",
+    "variant_status": "状态",
+    "variant_quantity": "库存",
+    "sections": {
+      "product_info": "商品信息",
+      "erp_mapping": "ERP 映射"
+    },
+    "fields": {
+      "external_product_id": "外部商品 ID",
+      "sku": "SKU",
+      "marketplace_status": "Marketplace 状态",
+      "price": "价格",
+      "currency": "货币",
+      "no_currency": "无货币",
+      "erp_status": "ERP 状态",
+      "erp_sku": "ERP SKU",
+      "erp_name": "ERP 名称",
+      "erp_item_id": "ERP 物料 ID",
+      "mapped_at": "映射时间"
+    },
+    "empty": {
+      "no_images": "暂无图片。从 Marketplace 同步以补充该商品信息。",
+      "no_description": "暂无描述。从 Marketplace 同步以补充该商品信息。",
+      "no_variants": "暂无规格。从 Marketplace 同步以补充该商品信息。",
+      "no_marketplace_status": "未设置（导入占位商品）"
+    }
   }
 }

@@ -7,8 +7,9 @@ import { Link, useLocation, useNavigate } from "react-router-dom"
 import { ROUTES } from "@/app/constants/routes"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { defaultTransition, fadeIn } from "@/shared/motion-variants"
+import { useDocumentTitle } from "@/shared/hooks/use-document-title"
 import { useReducedMotion } from "@/shared/hooks/use-reduced-motion"
+import { defaultTransition, fadeIn } from "@/shared/motion-variants"
 
 interface NotFoundContentProps {
   isAuthenticated: boolean
@@ -35,10 +36,11 @@ export function NotFoundContent({
   const descriptionId = "not-found-description"
   const pathId = "not-found-path"
 
+  useDocumentTitle(t("not_found.page_title"))
+
   useEffect(() => {
-    document.title = t("not_found.page_title")
     headingRef.current?.focus()
-  }, [t])
+  }, [])
 
   const handleGoBack = () => {
     if (window.history.length > 1) {

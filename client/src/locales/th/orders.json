@@ -1,25 +1,41 @@
 {
   "title": "จัดการคำสั่งซื้อ",
-  "subtitle": "จัดการและออกใบแจ้งหนี้คำสั่งซื้อ TikTok Shop อัตโนมัติ",
+  "subtitle": "จัดการและออกใบแจ้งหนี้คำสั่งซื้อจากมาร์เก็ตเพลสอัตโนมัติ",
   "actions": {
     "export_csv": "ส่งออก CSV",
+    "exporting": "กำลังส่งออก…",
     "sync_orders": "ซิงก์คำสั่งซื้อ",
-    "bulk_generate": "สร้างแบบกลุ่ม"
+    "import_excel": "นำเข้า Excel",
+    "bulk_generate": "สร้างแบบกลุ่ม",
+    "bulk_generating": "กำลังเตรียม ZIP…"
+  },
+  "stats": {
+    "invoice_coverage": "ความครอบคลุมใบแจ้งหนี้",
+    "awaiting_invoice": "รอออกใบแจ้งหนี้",
+    "awaiting_invoice_value": "{{count}} คำสั่งซื้อ",
+    "total_orders": "คำสั่งซื้อทั้งหมด",
+    "total_orders_value": "{{count}} คำสั่งซื้อ",
+    "total_revenue": "รายได้รวม",
+    "total_fees": "ค่าธรรมเนียมรวม",
+    "total_adjustments": "รายการปรับปรุงรวม"
   },
   "filters": {
-    "store_label": "ร้านค้ามาร์เก็ตเพลส",
-    "store_all": "ร้าน TikTok ทั้งหมด",
-    "store_tiktok_us": "TikTok Shop US",
-    "store_tiktok_uk": "TikTok Shop UK",
-    "store_tiktok_sg": "TikTok Shop SG",
+    "store_label": "ร้านค้า",
+    "store_all": "ร้านค้าทั้งหมด",
+    "store_placeholder": "เลือกร้านค้า",
+    "search_label": "รหัสคำสั่งซื้อ",
+    "search_placeholder": "ค้นหาด้วยรหัสคำสั่งซื้อ…",
     "date_range_label": "ช่วงวันที่",
     "date_range_value": "01 ต.ค. - 24 ต.ค. 2023",
     "status_label": "สถานะคำสั่งซื้อ",
     "status_all": "ทุกสถานะ",
+    "source_label": "แหล่งที่มา",
+    "source_all": "ทุกแหล่งที่มา",
     "more_filters": "ตัวกรองเพิ่มเติม"
   },
   "table": {
     "empty": "ไม่พบคำสั่งซื้อ",
+    "loading": "กำลังโหลดคำสั่งซื้อ…",
     "select_all": "เลือกทั้งหมด",
     "select_row": "เลือกแถว",
     "selected_count_one": "เลือก {{count}} รายการ",
@@ -32,13 +48,64 @@
       "store": "ร้านค้า",
       "customer": "ลูกค้า",
       "total_amount": "ยอดรวม",
+      "total_fees": "ค่าธรรมเนียมรวม",
+      "total_adjustments": "รายการปรับปรุงรวม",
       "sync_status": "สถานะซิงก์",
+      "source": "แหล่งที่มา",
       "action": "การดำเนินการ"
     },
     "actions": {
       "view_invoice": "ดูใบแจ้งหนี้",
       "generate": "สร้าง",
+      "history": "ประวัติ",
       "retry": "ลองอีกครั้ง"
+    }
+  },
+  "history": {
+    "title": "ประวัติคำสั่งซื้อ",
+    "description": "ประวัติการเปลี่ยนแปลงของคำสั่งซื้อ {{orderId}}",
+    "loading": "กำลังโหลดประวัติ…",
+    "empty": "ยังไม่มีประวัติสำหรับคำสั่งซื้อนี้",
+    "load_failed": "โหลดประวัติไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "empty_value": "—",
+    "unknown_user": "ไม่ทราบผู้ใช้",
+    "updated_by": "อัปเดตโดย: {{name}}",
+    "action_label": "การกระทำ: {{action}}",
+    "source_label": "แหล่งที่มา: {{source}}",
+    "excel_file_label": "ไฟล์ Excel:",
+    "page_info": "หน้า {{page}} จาก {{totalPages}} ({{total}} รายการ)",
+    "loaded_info": "แสดง {{loaded}} จาก {{total}} รายการ",
+    "loading_more": "กำลังโหลดเพิ่ม…",
+    "end": "สิ้นสุดประวัติ",
+    "prev": "ก่อนหน้า",
+    "next": "ถัดไป",
+    "close": "ปิด",
+    "actions": {
+      "create": "CREATE",
+      "update": "UPDATE",
+      "delete": "DELETE"
+    },
+    "sources": {
+      "manual": "MANUAL",
+      "import_excel": "IMPORT_EXCEL"
+    },
+    "columns": {
+      "field": "ฟิลด์",
+      "before": "ก่อน",
+      "after": "หลัง"
+    },
+    "fields": {
+      "order_status": "สถานะคำสั่งซื้อ",
+      "order_substatus": "สถานะย่อย",
+      "total_amount": "ยอดรวม",
+      "subtotal": "ยอดก่อนค่าส่ง",
+      "shipping_fee": "ค่าส่ง",
+      "amount_ex_vat": "ยอดไม่รวม VAT",
+      "vat_amount": "VAT",
+      "currency": "สกุลเงิน",
+      "order_date": "วันที่สั่งซื้อ",
+      "buyer_message": "ข้อความผู้ซื้อ",
+      "seller_note": "หมายเหตุผู้ขาย"
     }
   },
   "sync_status": {
@@ -46,19 +113,44 @@
     "pending": "รอดำเนินการ",
     "failed": "ล้มเหลว"
   },
+  "source_type": {
+    "api": "API",
+    "import": "IMPORT"
+  },
+  "order_status": {
+    "pending": "รอดำเนินการ",
+    "confirmed": "ยืนยันแล้ว",
+    "shipped": "จัดส่งแล้ว",
+    "delivered": "ส่งมอบแล้ว",
+    "cancelled": "ยกเลิก"
+  },
   "confirm": {
     "generate": {
       "title": "สร้างใบแจ้งหนี้?",
       "description": "ระบบจะสร้างใบแจ้งหนี้สำหรับคำสั่งซื้อ {{orderId}} ต้องการดำเนินการต่อหรือไม่?"
+    },
+    "export_all": {
+      "title": "ส่งออกคำสั่งซื้อทั้งหมดที่ตรงเงื่อนไข?",
+      "description": "คุณเลือกทุกแถวในหน้านี้ ระบบจะส่งออกคำสั่งซื้อทั้งหมด {{count}} รายการที่ตรงกับตัวกรองปัจจุบันเป็นไฟล์ Excel อาจใช้เวลาสักครู่",
+      "confirm": "ใช่ ส่งออกทั้งหมด",
+      "cancel": "ยกเลิก"
+    },
+    "bulk_generate_all": {
+      "title": "สร้างใบแจ้งหนี้สำหรับคำสั่งซื้อทั้งหมดที่ตรงเงื่อนไข?",
+      "description": "คุณเลือกทุกแถวในหน้านี้ ระบบจะเริ่มงานเบื้องหลังสูงสุด 2000 รายการที่ตรงกับตัวกรอง และดาวน์โหลด PDF เป็น ZIP เมื่อพร้อม",
+      "confirm": "ใช่ สร้างทั้งหมด"
     }
   },
   "detail": {
+    "loading": "กำลังโหลดคำสั่งซื้อ…",
     "back_to_orders": "กลับไปคำสั่งซื้อ",
     "placed_on": "สั่งซื้อเมื่อ {{date}}",
     "view_invoice": "ดูใบแจ้งหนี้",
     "last_synced": "ซิงก์ล่าสุด",
     "invoice_id": "รหัสใบแจ้งหนี้",
     "customer_email": "อีเมล",
+    "customer_phone": "โทรศัพท์",
+    "customer_gender": "เพศ",
     "shipping_address": "ที่อยู่จัดส่ง",
     "not_found_title": "ไม่พบคำสั่งซื้อ",
     "not_found_description": "ไม่พบคำสั่งซื้อที่คุณต้องการ หรืออาจถูกลบไปแล้ว",
@@ -78,8 +170,280 @@
       "subtotal": "ยอดรวมย่อย",
       "tax": "ภาษี",
       "shipping": "ค่าจัดส่ง",
+      "ex_vat": "EX.VAT",
+      "vat": "VAT",
       "free": "ฟรี",
       "total": "ยอดรวม"
+    }
+  },
+  "errors": {
+    "load_failed": "โหลดคำสั่งซื้อไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "sync_failed": "ซิงก์คำสั่งซื้อไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "import_failed": "นำเข้าคำสั่งซื้อไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "import_excel_rows_failed": "โหลดแถว Excel ของ Order ID นี้ไม่สำเร็จ",
+    "generate_invoice_failed": "สร้างใบแจ้งหนี้ไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "export_failed": "ส่งออกคำสั่งซื้อไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "select_to_export": "เลือกอย่างน้อยหนึ่งคำสั่งซื้อเพื่อส่งออก",
+    "export_preview_failed": "โหลดตัวอย่างการส่งออกไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "bulk_generate_failed": "สร้างใบแจ้งหนี้ไม่สำเร็จ กรุณาลองอีกครั้ง",
+    "select_to_bulk_generate": "เลือกอย่างน้อยหนึ่งคำสั่งซื้อเพื่อสร้างใบแจ้งหนี้",
+    "bulk_generate_download_failed": "สร้างใบแจ้งหนี้แล้ว แต่ดาวน์โหลด ZIP ไม่สำเร็จ"
+  },
+  "bulk_generate": {
+    "started": "กำลังสร้างใบแจ้งหนี้สำหรับ {{count}} รายการ…",
+    "completed": "สร้างใบแจ้งหนี้แล้ว {{count}} รายการ กำลังดาวน์โหลด ZIP…",
+    "panel": {
+      "generating_title": "กำลังสร้างใบแจ้งหนี้…",
+      "downloading_title": "กำลังดาวน์โหลด ZIP…",
+      "completed_title": "ใบแจ้งหนี้พร้อมแล้ว",
+      "failed_title": "สร้างไม่สำเร็จ",
+      "download_failed_title": "ดาวน์โหลดไม่สำเร็จ",
+      "progress_detail": "{{processed}} จาก {{total}} รายการ",
+      "completed_detail": "สร้างใบแจ้งหนี้แล้ว {{count}} รายการ",
+      "percent": "{{percent}}%",
+      "minimize": "ย่อ",
+      "expand": "ขยาย",
+      "dismiss": "ปิด",
+      "retry_download": "ลองดาวน์โหลดอีกครั้ง"
+    }
+  },
+  "export": {
+    "preview_title": "ตัวอย่างการส่งออก Excel",
+    "preview_description": "ตรวจสอบแถวและเลือกคอลัมน์ที่ต้องการใส่ในไฟล์",
+    "preview_loading": "กำลังโหลดตัวอย่าง…",
+    "preview_loading_more": "กำลังโหลดเพิ่ม…",
+    "preview_empty": "ไม่มีคำสั่งซื้อให้ส่งออก",
+    "preview_end": "ถึงท้ายรายการตัวอย่างแล้ว",
+    "columns": {
+      "id": "ID",
+      "marketplace": "Marketplace",
+      "customer_phone": "เบอร์โทรลูกค้า",
+      "invoice_id": "รหัสใบแจ้งหนี้",
+      "subtotal": "Subtotal",
+      "shipping": "ค่าจัดส่ง",
+      "ex_vat": "EX.VAT",
+      "vat": "VAT",
+      "currency": "สกุลเงิน",
+      "created_at": "สร้างเมื่อ"
+    }
+  },
+  "import": {
+    "title": "นำเข้าคำสั่งซื้อจาก Excel",
+    "description": "อัปโหลดไฟล์ OrderSKUList จาก TikTok Shop (.xlsx) ระบบจับคู่ด้วย Order ID",
+    "preview_description": "ตรวจดู Order ID ใหม่และซ้ำ แถวที่ Order ID ซ้ำในไฟล์จะถูกรวมเป็นคำสั่งซื้อเดียว หาก Order ID มีในร้านแล้ว ให้เลือก MERGE / SKIP / REPLACE",
+    "store_label": "ร้านค้า",
+    "store_placeholder": "เลือกร้านค้า",
+    "marketplace_label": "มาร์เก็ตเพลส",
+    "marketplace_placeholder": "เลือกมาร์เก็ตเพลส",
+    "file_label": "ไฟล์ Excel",
+    "file_placeholder": "เลือกไฟล์ .xlsx",
+    "file_hint": "ต้องเป็นรูปแบบ OrderSKUList",
+    "sample_title": "ต้องการเทมเพลตไหม?",
+    "download_sample": "ดาวน์โหลดตัวอย่าง",
+    "download_sample_aria": "ดาวน์โหลดไฟล์ Excel ตัวอย่าง OrderSKUList พร้อมหัวคอลัมน์ทั้งหมดและตัวอย่างคำสั่งซื้อ 1 แถว",
+    "download_sample_hint": "หนึ่งชีต ครบทุกคอลัมน์ที่ต้องใช้ และตัวอย่างคำสั่งซื้อ 1 แถว แทนที่ด้วยข้อมูลของคุณก่อนนำเข้า",
+    "preview": "ดูตัวอย่างก่อนนำเข้า",
+    "previewing": "กำลังวิเคราะห์…",
+    "commit": "ยืนยันนำเข้า",
+    "back": "ย้อนกลับ",
+    "submit": "นำเข้า",
+    "importing": "กำลังนำเข้า…",
+    "preview_summary": "{{total}} คำสั่งซื้อ — ใหม่ {{newCount}}, ซ้ำ {{duplicateCount}}",
+    "table_showing": "แสดง {{shown}} จาก {{total}} — เลื่อนเพื่อดูเพิ่ม",
+    "table_end": "ทั้งหมด {{total}} คำสั่งซื้อ",
+    "col_order_id": "Order ID",
+    "col_match": "สถานะจับคู่",
+    "col_excel_items": "รายการใน Excel",
+    "col_existing_items": "รายการที่มีอยู่",
+    "col_action": "การดำเนินการ",
+    "col_warning": "คำเตือน",
+    "match_new": "ใหม่",
+    "match_duplicate": "ซ้ำ",
+    "match_multiline": "หลายรายการ",
+    "action_choose": "เลือก…",
+    "action_create": "สร้าง",
+    "action_merge": "รวม",
+    "action_skip": "ข้าม",
+    "action_replace": "แทนที่",
+    "bulk_merge": "รวมรายการซ้ำทั้งหมด",
+    "bulk_skip": "ข้ามรายการซ้ำทั้งหมด",
+    "merge_prompt_title": "มี Order ID นี้อยู่แล้ว — รวมหรือไม่?",
+    "merge_prompt_description": "คำสั่งซื้อ {{orderId}} มีอยู่ในร้านและมาร์เก็ตเพลสนี้แล้ว จะจัดการข้อมูลจาก Excel อย่างไร?",
+    "merge_prompt_order_label": "Order ID {{orderId}}",
+    "merge_prompt_excel_items": "รายการใน Excel: {{count}}",
+    "merge_prompt_existing_items": "รายการที่มีอยู่: {{count}}",
+    "merge_prompt_remaining": "ยังต้องเลือกรายการซ้ำอีก {{count}} รายการ",
+    "multiline_title": "พบ Order ID เดียวกันหลายแถวใน Excel",
+    "multiline_description": "มี {{orderCount}} Order ID ที่ปรากฏมากกว่าหนึ่งแถว ({{rowCount}} แถว → {{totalOrders}} คำสั่งซื้อ) TikTok ส่งออกหนึ่งแถวต่อสินค้า รวมแถวเหล่านี้เป็นคำสั่งซื้อเดียวหรือไม่?",
+    "multiline_confirm": "ใช่ รวมรายการสินค้า",
+    "multiline_ack_required": "ยืนยันการรวมแถวที่มี Order ID ซ้ำก่อนนำเข้า",
+    "warning_has_invoice": "มีใบแจ้งหนี้แล้ว — ห้าม REPLACE; อนุญาต MERGE",
+    "warning_multiline": "รวมจากหลายแถวใน Excel",
+    "excel_rows_title": "แถว Excel ของ Order ID นี้",
+    "excel_rows_description": "Order {{orderId}} — {{count}} แถวใน Excel คอลัมน์ No. คือหมายเลขแถวในชีต",
+    "excel_rows_loading": "กำลังโหลดแถว Excel…",
+    "excel_rows_empty": "ไม่พบแถว Excel สำหรับ Order ID นี้",
+    "excel_rows_col_no": "No.",
+    "excel_rows_open_aria": "ดูแถว Excel ของ Order ID {{orderId}}",
+    "unresolved_duplicates": "เลือก รวม / ข้าม / แทนที่ สำหรับ Order ID ที่ซ้ำทุกใบก่อนนำเข้า",
+    "result_title": "ผลการนำเข้า",
+    "result_orders": "นำเข้า {{count}} คำสั่งซื้อ",
+    "result_items": "{{count}} รายการสินค้า",
+    "result_rows": "ประมวลผล {{count}} แถว",
+    "status_completed": "นำเข้าสำเร็จ",
+    "status_partial": "นำเข้าบางส่วน — มีคำสั่งซื้อที่ล้มเหลว",
+    "status_failed": "นำเข้าไม่สำเร็จ",
+    "errors_title": "ข้อผิดพลาด",
+    "no_file": "กรุณาเลือกไฟล์ Excel",
+    "no_store": "กรุณาเลือกร้านค้า",
+    "close": "ปิด"
+  },
+  "imports": {
+    "title": "ไฟล์ Excel ที่นำเข้าคำสั่งซื้อ",
+    "subtitle": "ดูประวัติการนำเข้า Excel และเปิดคำสั่งซื้อที่สร้างหรืออัปเดต",
+    "back_to_list": "กลับไปรายการไฟล์",
+    "table": {
+      "filename": "ชื่อไฟล์",
+      "store": "ร้านค้า",
+      "marketplace": "มาร์เก็ตเพลส",
+      "status": "สถานะ",
+      "imported_orders": "คำสั่งซื้อ",
+      "imported_items": "รายการ",
+      "created_at": "นำเข้าเมื่อ",
+      "action": "การดำเนินการ",
+      "view_detail": "ดูรายละเอียด",
+      "empty": "ยังไม่มีไฟล์ Excel ที่นำเข้า",
+      "search_placeholder": "ค้นหาด้วยชื่อไฟล์…",
+      "showing": "แสดง {{start}}-{{end}} จาก {{total}} ไฟล์"
+    },
+    "detail": {
+      "subtitle": "รายละเอียดไฟล์นำเข้า",
+      "loading": "กำลังโหลดไฟล์นำเข้า…",
+      "sheet": "ชีต",
+      "row_count": "แถวที่ประมวลผล",
+      "orders_title": "คำสั่งซื้อจากการนำเข้านี้",
+      "orders_subtitle": "คำสั่งซื้อที่เชื่อมกับไฟล์ Excel นี้ (แหล่งที่มา = IMPORT)"
+    },
+    "errors": {
+      "load_failed": "โหลดรายการไฟล์ Excel ไม่สำเร็จ",
+      "load_detail_failed": "โหลดไฟล์นำเข้านี้ไม่สำเร็จ",
+      "invalid_id": "รหัสไฟล์นำเข้าไม่ถูกต้อง"
+    }
+  },
+  "inputs": {
+    "title": "Order inputs",
+    "subtitle": "สร้างรันพร้อมชื่อเรื่อง อัปโหลด Order Detail + Total Withdraw แล้วกด Run files",
+    "create": "สร้าง order input",
+    "create_title": "สร้าง order input",
+    "create_subtitle": "ตั้งชื่อรันนี้ แล้วอัปโหลดไฟล์ Excel สองไฟล์ในหน้าถัดไป",
+    "create_submit": "สร้าง",
+    "creating": "กำลังสร้าง…",
+    "cancel": "ยกเลิก",
+    "back": "กลับไป Order inputs",
+    "run_files": "รันทั้งสอง",
+    "run_file": "รันไฟล์",
+    "running": "กำลังรัน…",
+    "fields": {
+      "title": "ชื่อเรื่อง",
+      "title_placeholder": "เช่น TikTok May 2026 week 1",
+      "store": "ร้านค้า",
+      "store_placeholder": "เลือกร้านค้า",
+      "marketplace": "Marketplace"
+    },
+    "filters": {
+      "store": "ร้านค้า",
+      "store_all": "ทุกร้าน",
+      "search": "ชื่อเรื่อง",
+      "search_placeholder": "ค้นหาด้วยชื่อเรื่อง…"
+    },
+    "table": {
+      "title": "ชื่อเรื่อง",
+      "store": "ร้านค้า",
+      "marketplace": "Marketplace",
+      "status": "สถานะ",
+      "orders": "คำสั่งซื้อ",
+      "items": "รายการ",
+      "files": "ไฟล์",
+      "file_states": "Detail: {{orderDetail}} · Withdraw: {{withdraw}}",
+      "created_at": "สร้างเมื่อ",
+      "loading": "กำลังโหลด…",
+      "empty": "ยังไม่มี order input",
+      "showing": "แสดง {{start}}-{{end}} จาก {{total}}"
+    },
+    "status": {
+      "draft": "Draft",
+      "running": "Running",
+      "completed": "Completed",
+      "partial": "Partial",
+      "failed": "Failed"
+    },
+    "file_status": {
+      "missing": "Missing",
+      "ready": "Ready",
+      "running": "Running",
+      "succeeded": "Succeeded",
+      "failed": "Failed",
+      "partial": "Partial"
+    },
+    "match": {
+      "matched": "Matched",
+      "unmatched": "Unmatched",
+      "invalid": "Invalid"
+    },
+    "apply": {
+      "pending": "Pending",
+      "applied": "Applied",
+      "skipped": "Skipped",
+      "failed": "Failed"
+    },
+    "detail": {
+      "loading": "กำลังโหลด…",
+      "order_detail_title": "Order detail Excel",
+      "order_detail_description": "TikTok OrderSKUList (.xlsx)",
+      "withdraw_title": "Total withdraw Excel",
+      "withdraw_description": "TikTok Payout Report — Order details (.xlsx)",
+      "no_file": "ยังไม่มีไฟล์",
+      "upload": "อัปโหลดไฟล์",
+      "uploading": "กำลังอัปโหลด…",
+      "withdraw_summary": "{{rows}} แถว · จับคู่ {{matched}} · ไม่จับคู่ {{unmatched}}",
+      "stuck_running": "สถานะค้างที่ Running (เช่น รีเฟรชระหว่างรัน) กดรีเซ็ตเพื่อทำต่อ",
+      "reset_stuck": "รีเซ็ตสถานะ",
+      "tab_orders": "รายการออเดอร์",
+      "tab_withdraw": "แถว withdraw / settlement",
+      "filters": {
+        "order_id": "รหัสคำสั่งซื้อ",
+        "order_id_placeholder": "ค้นหาด้วยรหัสคำสั่งซื้อ…",
+        "match": "การจับคู่",
+        "match_all": "ทุกสถานะจับคู่",
+        "apply": "การนำไปใช้",
+        "apply_all": "ทุกสถานะนำไปใช้"
+      },
+      "orders_empty": "ยังไม่มีออเดอร์จากรอบนี้ รัน Order detail Excel ก่อน",
+      "orders_none": "ไม่มีออเดอร์ใหม่ (แถวอาจเป็น duplicate ทั้งหมด)",
+      "withdraw_rows_title": "แถว withdraw / settlement",
+      "withdraw_rows_empty": "ไม่มีแถว",
+      "withdraw_not_ready": "รัน Total withdraw Excel เพื่อดูแถว settlement",
+      "col_no": "No.",
+      "col_order_id": "Order ID",
+      "col_amount": "Settlement amount",
+      "col_fees": "ค่าธรรมเนียมรวม",
+      "col_adjustments": "รายการปรับปรุงรวม",
+      "col_match": "Match",
+      "col_apply": "Apply",
+      "match_apply_hint": "Unmatched = ยังไม่มีออเดอร์รหัสนี้ในร้าน จึงเป็น Skipped ค่าธรรมเนียมยังอยู่ในตารางนี้ แต่จะขึ้นใน Order list หลังจับคู่สำเร็จ รัน Order detail ก่อน แล้วค่อย Run Withdraw อีกครั้ง",
+      "prev": "ก่อนหน้า",
+      "next": "ถัดไป",
+      "updated_at": "อัปเดต {{value}}"
+    },
+    "errors": {
+      "load_failed": "โหลด order inputs ไม่สำเร็จ",
+      "create_failed": "สร้าง order input ไม่สำเร็จ",
+      "title_required": "กรุณาใส่ชื่อเรื่อง",
+      "store_required": "กรุณาเลือกร้านค้า",
+      "files_required": "อัปโหลดไฟล์ทั้งสองให้เป็น Ready ก่อนรันทั้งคู่",
+      "order_detail_required": "อัปโหลด Order Detail Excel (Ready) ก่อนรัน",
+      "withdraw_required": "อัปโหลด Total Withdraw Excel (Ready) ก่อนรัน",
+      "not_found": "ไม่พบ order input"
     }
   }
 }

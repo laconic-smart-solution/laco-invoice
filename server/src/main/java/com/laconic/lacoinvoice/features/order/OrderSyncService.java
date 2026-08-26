@@ -14,7 +14,8 @@ import com.laconic.lacoinvoice.domain.models.Marketplace;
 import com.laconic.lacoinvoice.domain.models.MarketplaceConnectionStatus;
 import com.laconic.lacoinvoice.domain.models.Order;
 import com.laconic.lacoinvoice.domain.models.OrderItem;
-import com.laconic.lacoinvoice.domain.models.OrderStatus;
+import com.laconic.lacoinvoice.domain.models.OrderSourceType;
+import com.laconic.lacoinvoice.features.order.import_.OrderStatusTextMapper;
 import com.laconic.lacoinvoice.domain.models.Product;
 import com.laconic.lacoinvoice.domain.models.Store;
 import com.laconic.lacoinvoice.domain.models.StoreMarketplaceConnection;
@@ -105,14 +106,27 @@ public class OrderSyncService {
 						store.getId(), marketplace.getId(), payload.externalOrderId())
 				.orElseGet(Order::new);
 
-		CustomerInfo customer = order.getCustomer();
-		if (customer == null) {
-			customer = new CustomerInfo();
-		}
+		CustomerInfo customer = resolveCustomer(store, marketplace, order, payload);
 		customer.setStore(store);
-		customer.setPhone(payload.customerPhone());
-		customer.setGender(payload.customerGender());
-		customer.setAddress(payload.customerAddress());
+		customer.setMarketplace(marketplace);
+		if (StringUtils.hasText(payload.externalCustomerId())) {
+			customer.setExternalCustomerId(payload.externalCustomerId().trim());
+		}
+		if (StringUtils.hasText(payload.customerName())) {
+			customer.setName(payload.customerName().trim());
+		}
+		if (StringUtils.hasText(payload.customerEmail())) {
+			customer.setEmail(payload.customerEmail().trim());
+		}
+		if (StringUtils.hasText(payload.customerPhone())) {
+			customer.setPhone(payload.customerPhone().trim());
+		}
+		if (StringUtils.hasText(payload.customerGender())) {
+			customer.setGender(payload.customerGender().trim());
+		}
+		if (StringUtils.hasText(payload.customerAddress())) {
+			customer.setAddress(payload.customerAddress().trim());
+		}
 		customer = customerInfoRepository.save(customer);
 
 		order.setStore(store);
@@ -120,14 +134,29 @@ public class OrderSyncService {
 		order.setCustomer(customer);
 		order.setExternalOrderId(payload.externalOrderId());
 		order.setExternalOrderDetailJson(payload.externalOrderDetailJson());
-		order.setOrderStatus(parseStatus(payload.orderStatus()));
+		order.setOrderStatus(OrderStatusTextMapper.parse(payload.orderStatus()));
+		order.setSourceType(OrderSourceType.API);
+		order.setSourceId(null);
 		order.setSubtotal(payload.subtotal());
 		order.setShippingFee(payload.shippingFee());
 		order.setTotalAmount(payload.totalAmount());
-		order.setOrderDate(payload.orderDate());
+		OrderMoneyCalculator.VatBreakdown vat = OrderMoneyCalculator.fromInclusiveTotal(payload.totalAmount());
+		order.setAmountExVat(vat.amountExVat());
+		order.setVatAmount(vat.vatAmount());
+		if (vat.vatAmount() != null) {
+			order.setTaxes(vat.vatAmount());
+		}
+		order.setCurrency(payload.currency());
+		// Keep an existing order date when the marketplace payload omitted/failed to parse one.
+		if (payload.orderDate() != null) {
+			order.setOrderDate(payload.orderDate());
+		}
 		Order saved = orderRepository.save(order);
 
-		if (payload.items() != null) {
+		// Only replace line items when the marketplace returned some.
+		// Empty list usually means item enrichment failed — do not wipe existing rows.
+		if (payload.items() != null && !payload.items().isEmpty()) {
+			orderItemRepository.deleteByOrder_Id(saved.getId());
 			for (MarketplaceFetchedOrderItem itemPayload : payload.items()) {
 				OrderItem item = new OrderItem();
 				item.setOrder(saved);
@@ -150,19 +179,46 @@ public class OrderSyncService {
 				item.setPrice(itemPayload.price());
 				item.setQuantity(itemPayload.quantity());
 				item.setLineTotal(itemPayload.lineTotal());
+				item.setSourceType(OrderSourceType.API);
+				item.setSourceId(null);
 				orderItemRepository.save(item);
 			}
+		} else if (payload.items() != null && payload.items().isEmpty()) {
+			log.warn(
+					"Order {} synced with empty line items; leaving existing order_items unchanged",
+					payload.externalOrderId());
 		}
 	}
 
-	private static OrderStatus parseStatus(String raw) {
-		if (!StringUtils.hasText(raw)) {
-			return OrderStatus.PENDING;
+	private CustomerInfo resolveCustomer(
+			Store store,
+			Marketplace marketplace,
+			Order order,
+			MarketplaceFetchedOrder payload) {
+		if (StringUtils.hasText(payload.externalCustomerId())) {
+			var byExternal = customerInfoRepository.findFirstByStore_IdAndMarketplace_IdAndExternalCustomerId(
+					store.getId(), marketplace.getId(), payload.externalCustomerId().trim());
+			if (byExternal.isPresent()) {
+				return byExternal.get();
+			}
 		}
-		try {
-			return OrderStatus.valueOf(raw.trim().toUpperCase());
-		} catch (IllegalArgumentException ex) {
-			return OrderStatus.PENDING;
+		if (StringUtils.hasText(payload.customerPhone())) {
+			String phone = payload.customerPhone().trim();
+			var byPhone = customerInfoRepository.findFirstByStore_IdAndMarketplace_IdAndPhoneIgnoreCase(
+					store.getId(), marketplace.getId(), phone);
+			if (byPhone.isPresent()) {
+				return byPhone.get();
+			}
+			var legacyByPhone = customerInfoRepository.findFirstByStore_IdAndPhoneIgnoreCaseAndMarketplaceIsNull(
+					store.getId(), phone);
+			if (legacyByPhone.isPresent()) {
+				return legacyByPhone.get();
+			}
 		}
+		if (order.getCustomer() != null) {
+			return order.getCustomer();
+		}
+		return new CustomerInfo();
 	}
+
 }

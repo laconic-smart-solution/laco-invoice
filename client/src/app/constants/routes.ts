@@ -10,16 +10,24 @@ export const ROUTES = {
     shopeeCallback: "/stores/shopee/callback",
     tiktokCallback: "/stores/tiktok/callback",
     products: "/products",
+    productDetail: (productId: number | string) => `/products/${productId}`,
     orders: "/orders",
     orderDetail: (orderId: string) => `/orders/${orderId}`,
-    invoices: "/invoices",
-    invoiceDetail: (invoiceId: string) => `/invoices/${invoiceId}`,
+    orderImports: "/orders/imports",
+    orderImportDetail: (importFileId: string | number) =>
+      `/orders/imports/${importFileId}`,
+    orderInputs: "/orders/inputs",
+    orderInputDetail: (inputRunId: string | number) =>
+      `/orders/inputs/${inputRunId}`,
     customers: "/customers",
     customerCreate: "/customers/new",
     customerEdit: (customerId: string) => `/customers/${customerId}/edit`,
     users: "/users",
     userCreate: "/users/new",
+    userDetail: (userId: number | string) => `/users/${userId}`,
+    profile: "/profile",
     settings: "/settings",
+    shortcuts: "/shortcuts",
   },
   auth: {
     login: "/login",
@@ -27,5 +35,8 @@ export const ROUTES = {
     forgotPassword: "/forgot-password",
     resetPassword: "/reset-password",
     otpVerify: "/otp-verify",
+  },
+  errors: {
+    serverError: "/500",
   },
 } as const

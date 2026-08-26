@@ -1,7 +1,6 @@
 import { lazy } from "react"
 
 import { PageLoader } from "@/components/core/page-loader"
-import { SectionPlaceholderPage } from "@/features/dashboard/pages/section-placeholder-page"
 
 export const DashboardPage = PageLoader(
   lazy(() =>
@@ -27,19 +26,39 @@ export const OrderDetailPage = PageLoader(
   )
 )
 
-export const InvoicesPage = PageLoader(
+export const OrderImportFilesPage = PageLoader(
   lazy(() =>
-    import("@/features/invoices/pages/invoices-page").then((module) => ({
-      default: module.InvoicesPage,
+    import("@/features/orders/pages/order-import-files-page").then((module) => ({
+      default: module.OrderImportFilesPage,
     }))
   )
 )
 
-export const InvoiceDetailPage = PageLoader(
+export const OrderImportFileDetailPage = PageLoader(
   lazy(() =>
-    import("@/features/invoices/pages/invoice-detail-page").then((module) => ({
-      default: module.InvoiceDetailPage,
+    import("@/features/orders/pages/order-import-file-detail-page").then(
+      (module) => ({
+        default: module.OrderImportFileDetailPage,
+      })
+    )
+  )
+)
+
+export const OrderInputRunsPage = PageLoader(
+  lazy(() =>
+    import("@/features/orders/pages/order-input-runs-page").then((module) => ({
+      default: module.OrderInputRunsPage,
     }))
+  )
+)
+
+export const OrderInputRunDetailPage = PageLoader(
+  lazy(() =>
+    import("@/features/orders/pages/order-input-run-detail-page").then(
+      (module) => ({
+        default: module.OrderInputRunDetailPage,
+      })
+    )
   )
 )
 
@@ -79,6 +98,22 @@ export const CreateUserPage = PageLoader(
   lazy(() =>
     import("@/features/users/pages/create-user-page").then((module) => ({
       default: module.CreateUserPage,
+    }))
+  )
+)
+
+export const UserDetailPage = PageLoader(
+  lazy(() =>
+    import("@/features/users/pages/user-detail-page").then((module) => ({
+      default: module.UserDetailPage,
+    }))
+  )
+)
+
+export const ProfilePage = PageLoader(
+  lazy(() =>
+    import("@/features/profile/pages/profile-page").then((module) => ({
+      default: module.ProfilePage,
     }))
   )
 )
@@ -125,6 +160,14 @@ export const ProductsPage = PageLoader(
   )
 )
 
+export const ProductDetailPage = PageLoader(
+  lazy(() =>
+    import("@/features/products/pages/product-detail-page").then((module) => ({
+      default: module.ProductDetailPage,
+    }))
+  )
+)
+
 export const LoginPage = PageLoader(
   lazy(() =>
     import("@/features/auth/pages/login-page").then((module) => ({
@@ -165,4 +208,10 @@ export const ResetPasswordPage = PageLoader(
   )
 )
 
-export { SectionPlaceholderPage }
+export const ShortcutsPage = PageLoader(
+  lazy(() =>
+    import("@/features/shortcuts/pages/shortcuts-page").then((module) => ({
+      default: module.ShortcutsPage,
+    }))
+  )
+)

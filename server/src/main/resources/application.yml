@@ -24,6 +24,11 @@ spring:
   quartz:
     job-store-type: memory
     auto-startup: false
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: false
 
 server:
   port: 8091
@@ -39,7 +44,7 @@ management:
         include: health,info
   endpoint:
     health:
-      show-details: when_authorized
+      show-details: never
 
 lacoinvoice:
   logging:
@@ -82,12 +87,32 @@ app:
       enabled: false
       cron: "0 */10 * * * ?"
       timezone: Asia/Bangkok
+  order-import:
+    preview-cleanup:
+      quartz:
+        # Hard-deletes order_import_batches + preview_orders/items only (keeps order_import_files).
+        enabled: false
+        cron: "0 15 3 * * ?"
+        timezone: Asia/Bangkok
+        retention-days: 7
+  marketplace-product-sync:
+    list-chunk-size: 50
+    detail-chunk-size: 10
+    detail-request-delay-ms: 300
   communication:
+    # Point at lazada-service directly (:8084) with empty base paths, OR at Spring Cloud
+    # Gateway (:8080) with /comms/{marketplace} prefixes (gateway rewrites them away).
     gateway-url: ${COMMUNICATION_GATEWAY_URL:http://localhost:8084}
     lazada-base-path: ${COMMUNICATION_LAZADA_BASE_PATH:}
     shopee-base-path: ${COMMUNICATION_SHOPEE_BASE_PATH:}
     tiktok-base-path: ${COMMUNICATION_TIKTOK_BASE_PATH:}
     gateway-secret: ${GATEWAY_SECRET:hello}
+    lazada-app-key: ${LAZADA_APP_KEY:}
+    lazada-app-secret: ${LAZADA_APP_SECRET:}
+    tiktok-app-key: ${TIKTOK_APP_KEY:}
+    tiktok-app-secret: ${TIKTOK_APP_SECRET:}
+    tiktok-shop-scraping: ${TIKTOK_SHOP_SCRAPPING:false}
+    tiktok-scrape-url: ${TIKTOK_SCRAPE_URL:http://localhost:8090}
 
 sso:
   url: ${SSO_URL:https://api-auths.laconic.co.th}
