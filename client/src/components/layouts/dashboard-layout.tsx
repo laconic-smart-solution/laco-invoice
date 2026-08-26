@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 import { Outlet, useLocation } from "react-router-dom"
 
 import { AppBreadcrumb } from "@/components/core/app-breadcrumb"
+import { AppDocumentTitle } from "@/components/core/app-document-title"
 import { ClassicSpaShell } from "@/components/layouts/classic-spa-shell"
 import { ModernDashboardShell } from "@/components/layouts/modern-dashboard-shell"
 import { ClassicWorkspace } from "@/features/classic-spa/components/classic-workspace"
@@ -33,6 +34,7 @@ export function DashboardLayout() {
   if (classicRoute) {
     return (
       <DashboardShell>
+        <AppDocumentTitle />
         <ClassicWorkspace route={classicRoute} />
       </DashboardShell>
     )
@@ -40,6 +42,7 @@ export function DashboardLayout() {
 
   return (
     <DashboardShell>
+      <AppDocumentTitle />
       {mode === "modern" ? (
         <div className="bg-background px-6 py-3">
           <AppBreadcrumb />

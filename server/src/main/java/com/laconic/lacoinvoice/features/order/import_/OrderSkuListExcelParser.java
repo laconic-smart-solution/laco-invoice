@@ -32,7 +32,17 @@ public class OrderSkuListExcelParser {
 	private final DataFormatter formatter = new DataFormatter();
 
 	public ParsedOrderSkuListWorkbook parse(MultipartFile file) {
-		try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
+		try {
+			return parse(file.getInputStream());
+		} catch (IllegalArgumentException ex) {
+			throw ex;
+		} catch (Exception ex) {
+			throw new IllegalArgumentException("Failed to parse Excel: " + ex.getMessage(), ex);
+		}
+	}
+
+	public ParsedOrderSkuListWorkbook parse(java.io.InputStream inputStream) {
+		try (Workbook workbook = WorkbookFactory.create(inputStream)) {
 			Sheet sheet = workbook.getSheet(SHEET_NAME);
 			if (sheet == null) {
 				sheet = workbook.getSheetAt(0);

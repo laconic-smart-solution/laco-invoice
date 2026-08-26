@@ -13,6 +13,8 @@ import {
   OrderDetailPage,
   OrderImportFilesPage,
   OrderImportFileDetailPage,
+  OrderInputRunsPage,
+  OrderInputRunDetailPage,
   OrdersPage,
   OtpVerifyPage,
   ProductsPage,
@@ -87,6 +89,14 @@ export const router = createBrowserRouter([
               {
                 path: `${ROUTES.dashboard.orderImports}/:importFileId`,
                 element: <OrderImportFileDetailPage />,
+              },
+              {
+                path: ROUTES.dashboard.orderInputs,
+                element: <OrderInputRunsPage />,
+              },
+              {
+                path: `${ROUTES.dashboard.orderInputs}/:inputRunId`,
+                element: <OrderInputRunDetailPage />,
               },
               {
                 path: `${ROUTES.dashboard.orders}/:orderId`,

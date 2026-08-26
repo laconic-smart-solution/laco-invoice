@@ -247,7 +247,8 @@ function ClassicNavDropdown({
             ? Boolean(
                 panel != null &&
                   activePanel === panel &&
-                  !pathname.startsWith(ROUTES.dashboard.orderImports)
+                  !pathname.startsWith(ROUTES.dashboard.orderImports) &&
+                  !pathname.startsWith(ROUTES.dashboard.orderInputs)
               )
             : isPathUnder(pathname, child.path)
 

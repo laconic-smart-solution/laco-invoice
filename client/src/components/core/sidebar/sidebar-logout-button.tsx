@@ -18,10 +18,10 @@ export function SidebarLogoutButton({
 }: SidebarLogoutButtonProps) {
   const { t } = useTranslation("sidebar")
   const navigate = useNavigate()
-  const user = useAuthStore((state) => state.user)
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const logout = useAuthStore((state) => state.logout)
 
-  if (!user) {
+  if (!isAuthenticated) {
     return null
   }
 

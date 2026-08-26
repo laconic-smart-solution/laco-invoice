@@ -1,5 +1,7 @@
 package com.laconic.lacoinvoice.features.order;
 
+import java.math.BigDecimal;
+
 import org.springframework.stereotype.Component;
 
 import com.laconic.lacoinvoice.common.mapper.BaseMapper;
@@ -46,6 +48,8 @@ public class OrderMapper implements BaseMapper<Order, OrderDto> {
 				vat.amountExVat(),
 				vat.vatAmount(),
 				entity.getTotalAmount(),
+				BigDecimal.ZERO,
+				BigDecimal.ZERO,
 				entity.getCurrency(),
 				entity.getOrderDate(),
 				entity.getCreatedAt());

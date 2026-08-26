@@ -98,15 +98,40 @@ public class OrderImportPreviewService {
 
 	@Transactional
 	public OrderImportPreviewBatchDto preview(Long storeId, String marketplaceCode, MultipartFile file) {
+		String filename = file.getOriginalFilename() != null ? file.getOriginalFilename() : "upload.xlsx";
+		return preview(storeId, marketplaceCode, filename, excelParser.parse(file));
+	}
+
+	@Transactional
+	public OrderImportPreviewBatchDto preview(
+			Long storeId,
+			String marketplaceCode,
+			String originalFilename,
+			byte[] content) {
+		if (content == null || content.length == 0) {
+			throw new IllegalArgumentException("Excel content is empty");
+		}
+		return preview(
+				storeId,
+				marketplaceCode,
+				StringUtils.hasText(originalFilename) ? originalFilename : "upload.xlsx",
+				excelParser.parse(new java.io.ByteArrayInputStream(content)));
+	}
+
+	@Transactional
+	public OrderImportPreviewBatchDto preview(
+			Long storeId,
+			String marketplaceCode,
+			String originalFilename,
+			ParsedOrderSkuListWorkbook workbook) {
 		Store store = requireStore(storeId);
 		Marketplace marketplace = requireMarketplace(marketplaceCode);
-		ParsedOrderSkuListWorkbook workbook = excelParser.parse(file);
 
 		OrderImportBatch batch = new OrderImportBatch();
 		batch.setStore(store);
 		batch.setMarketplace(marketplace);
 		batch.setOriginalFilename(
-				file.getOriginalFilename() != null ? file.getOriginalFilename() : "upload.xlsx");
+				StringUtils.hasText(originalFilename) ? originalFilename : "upload.xlsx");
 		batch.setSheetName(workbook.sheetName());
 		batch.setStatus(OrderImportBatchStatus.PREVIEW);
 		batch.setRowCount(workbook.rowCount());

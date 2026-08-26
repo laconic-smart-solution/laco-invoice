@@ -58,6 +58,8 @@ export function mapOrderDtoToOrder(dto: ApiOrderDto): Order {
     customerPhone: dto.customerPhone?.trim() || undefined,
     invoiceId: dto.invoiceId != null ? String(dto.invoiceId) : undefined,
     totalAmount: dto.totalAmount,
+    totalFees: dto.totalFees ?? 0,
+    totalAdjustments: dto.totalAdjustments ?? 0,
     currency: resolveCurrency(dto),
     syncStatus: mapOrderStatusToSyncBadge(dto.orderStatus),
     sourceType: dto.sourceType === "IMPORT" ? "IMPORT" : "API",

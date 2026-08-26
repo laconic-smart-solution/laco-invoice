@@ -21,6 +21,7 @@ import type { DataTableSelection } from "@/components/common/data-table/types"
 import {
   useDataTable,
   type RowSelectionState,
+  type VisibilityState,
 } from "@/components/common/data-table/use-data-table"
 import { StatusBadge } from "@/components/common/status-badge"
 import type { StatusBadgeVariant } from "@/components/common/status-badge"
@@ -47,6 +48,11 @@ const SYNC_STATUS_BADGE: Record<OrderSyncStatus, StatusBadgeVariant> = {
 const SOURCE_TYPE_BADGE: Record<OrderSourceType, StatusBadgeVariant> = {
   API: "synced",
   IMPORT: "draft",
+}
+
+const DEFAULT_HIDDEN_ORDER_COLUMNS: VisibilityState = {
+  syncStatus: false,
+  sourceType: false,
 }
 
 interface OrderRowActionProps {
@@ -130,6 +136,9 @@ export function OrdersTable({
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
   const [isAllMatchingSelected, setIsAllMatchingSelected] = useState(false)
   const [orderToGenerate, setOrderToGenerate] = useState<Order | null>(null)
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
+    DEFAULT_HIDDEN_ORDER_COLUMNS
+  )
   const generateMutation = useGenerateInvoiceMutation()
 
   const pageRowIdsKey = useMemo(
@@ -210,6 +219,8 @@ export function OrdersTable({
       storeName: t("table.columns.store"),
       customer: t("table.columns.customer"),
       totalAmount: t("table.columns.total_amount"),
+      totalFees: t("table.columns.total_fees"),
+      totalAdjustments: t("table.columns.total_adjustments"),
       syncStatus: t("table.columns.sync_status"),
       sourceType: t("table.columns.source"),
     }),
@@ -309,6 +320,38 @@ export function OrdersTable({
           formatCurrency(row.original.totalAmount, locale, row.original.currency),
       },
       {
+        accessorKey: "totalFees",
+        enableColumnFilter: false,
+        enableSorting: false,
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.total_fees")}
+            enableSearch={false}
+          />
+        ),
+        cell: ({ row }) =>
+          formatCurrency(row.original.totalFees, locale, row.original.currency),
+      },
+      {
+        accessorKey: "totalAdjustments",
+        enableColumnFilter: false,
+        enableSorting: false,
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.total_adjustments")}
+            enableSearch={false}
+          />
+        ),
+        cell: ({ row }) =>
+          formatCurrency(
+            row.original.totalAdjustments,
+            locale,
+            row.original.currency
+          ),
+      },
+      {
         accessorKey: "syncStatus",
         enableColumnFilter: false,
         enableSorting: false,
@@ -376,10 +419,14 @@ export function OrdersTable({
       selectAll: t("table.select_all"),
       selectRow: t("table.select_row"),
     },
-    state: { rowSelection, sorting, columnFilters },
+    initialState: {
+      columnVisibility: DEFAULT_HIDDEN_ORDER_COLUMNS,
+    },
+    state: { rowSelection, sorting, columnFilters, columnVisibility },
     onRowSelectionChange: setRowSelection,
     onSortingChange: handleSortingChange,
     onColumnFiltersChange: handleColumnFiltersChange,
+    onColumnVisibilityChange: setColumnVisibility,
     meta: {
       selectAllMatching: {
         enabled: true,

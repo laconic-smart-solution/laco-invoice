@@ -27,6 +27,8 @@ public record OrderDto(
 		BigDecimal amountExVat,
 		BigDecimal vatAmount,
 		BigDecimal totalAmount,
+		BigDecimal totalFees,
+		BigDecimal totalAdjustments,
 		String currency,
 		Instant orderDate,
 		Instant createdAt) {

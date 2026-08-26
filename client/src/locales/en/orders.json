@@ -14,7 +14,10 @@
     "awaiting_invoice": "Awaiting Invoice",
     "awaiting_invoice_value": "{{count}} Orders",
     "total_orders": "Total Orders",
-    "total_orders_value": "{{count}} Orders"
+    "total_orders_value": "{{count}} Orders",
+    "total_revenue": "Total Revenue",
+    "total_fees": "Total Fees",
+    "total_adjustments": "Total Adjustments"
   },
   "filters": {
     "store_label": "Store",
@@ -45,6 +48,8 @@
       "store": "Store",
       "customer": "Customer",
       "total_amount": "Total Amount",
+      "total_fees": "Total Fees",
+      "total_adjustments": "Total Adjustments",
       "sync_status": "Sync Status",
       "source": "Source",
       "action": "Action"
@@ -275,6 +280,122 @@
       "load_failed": "Unable to load imported Excel files.",
       "load_detail_failed": "Unable to load this import file.",
       "invalid_id": "Invalid import file id."
+    }
+  },
+  "inputs": {
+    "title": "Order inputs",
+    "subtitle": "Create a titled run, attach Order Detail + Total Withdraw Excels, then Run files.",
+    "create": "New order input",
+    "create_title": "New order input",
+    "create_subtitle": "Give this run a title, then upload both Excel files on the next screen.",
+    "create_submit": "Create",
+    "creating": "Creating…",
+    "cancel": "Cancel",
+    "back": "Back to order inputs",
+    "run_files": "Run both",
+    "run_file": "Run file",
+    "running": "Running…",
+    "fields": {
+      "title": "Title",
+      "title_placeholder": "e.g. TikTok May 2026 week 1",
+      "store": "Store",
+      "store_placeholder": "Select store",
+      "marketplace": "Marketplace"
+    },
+    "filters": {
+      "store": "Store",
+      "store_all": "All stores",
+      "search": "Title",
+      "search_placeholder": "Search by title…"
+    },
+    "table": {
+      "title": "Title",
+      "store": "Store",
+      "marketplace": "Marketplace",
+      "status": "Status",
+      "orders": "Orders",
+      "items": "Items",
+      "files": "Files",
+      "file_states": "Detail: {{orderDetail}} · Withdraw: {{withdraw}}",
+      "created_at": "Created",
+      "loading": "Loading…",
+      "empty": "No order inputs yet.",
+      "showing": "Showing {{start}}-{{end}} of {{total}}"
+    },
+    "status": {
+      "draft": "Draft",
+      "running": "Running",
+      "completed": "Completed",
+      "partial": "Partial",
+      "failed": "Failed"
+    },
+    "file_status": {
+      "missing": "Missing",
+      "ready": "Ready",
+      "running": "Running",
+      "succeeded": "Succeeded",
+      "failed": "Failed",
+      "partial": "Partial"
+    },
+    "match": {
+      "matched": "Matched",
+      "unmatched": "Unmatched",
+      "invalid": "Invalid"
+    },
+    "apply": {
+      "pending": "Pending",
+      "applied": "Applied",
+      "skipped": "Skipped",
+      "failed": "Failed"
+    },
+    "detail": {
+      "loading": "Loading…",
+      "order_detail_title": "Order detail Excel",
+      "order_detail_description": "TikTok OrderSKUList export (.xlsx)",
+      "withdraw_title": "Total withdraw Excel",
+      "withdraw_description": "TikTok Payout Report — Order details sheet (.xlsx)",
+      "no_file": "No file uploaded",
+      "upload": "Upload file",
+      "uploading": "Uploading…",
+      "withdraw_summary": "{{rows}} rows · {{matched}} matched · {{unmatched}} unmatched",
+      "stuck_running": "This run was left in Running (e.g. after refresh). Reset to continue.",
+      "reset_stuck": "Reset status",
+      "tab_orders": "Order list",
+      "tab_withdraw": "Withdraw / settlement rows",
+      "filters": {
+        "order_id": "Order ID",
+        "order_id_placeholder": "Search by order ID…",
+        "match": "Match",
+        "match_all": "All matches",
+        "apply": "Apply",
+        "apply_all": "All apply statuses"
+      },
+      "orders_empty": "No orders from this run yet. Run the Order detail Excel first.",
+      "orders_none": "No new orders were created (all rows may have been duplicates).",
+      "withdraw_rows_title": "Withdraw / settlement rows",
+      "withdraw_rows_empty": "No rows.",
+      "withdraw_not_ready": "Run the Total withdraw Excel to see settlement rows.",
+      "col_no": "No.",
+      "col_order_id": "Order ID",
+      "col_amount": "Settlement amount",
+      "col_fees": "Total Fees",
+      "col_adjustments": "Total Adjustments",
+      "col_match": "Match",
+      "col_apply": "Apply",
+      "match_apply_hint": "Unmatched = no order with this Order ID in this store yet, so Apply is Skipped. Fees/adjustments still appear here; they only show on the Order list after a successful match. Run Order detail first, then re-run Withdraw.",
+      "prev": "Prev",
+      "next": "Next",
+      "updated_at": "Updated {{value}}"
+    },
+    "errors": {
+      "load_failed": "Unable to load order inputs.",
+      "create_failed": "Unable to create order input.",
+      "title_required": "Please enter a title.",
+      "store_required": "Please select a store.",
+      "files_required": "Upload both Excel files (Ready) before running both.",
+      "order_detail_required": "Upload Order Detail Excel (Ready) before running.",
+      "withdraw_required": "Upload Total Withdraw Excel (Ready) before running.",
+      "not_found": "Order input not found."
     }
   }
 }

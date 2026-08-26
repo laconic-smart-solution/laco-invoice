@@ -16,6 +16,9 @@ export const ROUTES = {
     orderImports: "/orders/imports",
     orderImportDetail: (importFileId: string | number) =>
       `/orders/imports/${importFileId}`,
+    orderInputs: "/orders/inputs",
+    orderInputDetail: (inputRunId: string | number) =>
+      `/orders/inputs/${inputRunId}`,
     invoices: "/invoices",
     invoiceDetail: (invoiceId: string) => `/invoices/${invoiceId}`,
     customers: "/customers",

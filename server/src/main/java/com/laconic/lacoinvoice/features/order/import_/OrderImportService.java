@@ -80,6 +80,23 @@ public class OrderImportService {
 	 */
 	@Transactional
 	public OrderImportResultDto importExcel(Long storeId, String marketplaceCode, MultipartFile file) {
+		try {
+			byte[] bytes = file.getBytes();
+			String filename = file.getOriginalFilename() != null ? file.getOriginalFilename() : "upload.xlsx";
+			return importExcel(storeId, marketplaceCode, filename, bytes);
+		} catch (IllegalArgumentException ex) {
+			throw ex;
+		} catch (Exception ex) {
+			throw new IllegalArgumentException("Failed to read upload: " + ex.getMessage(), ex);
+		}
+	}
+
+	@Transactional
+	public OrderImportResultDto importExcel(
+			Long storeId,
+			String marketplaceCode,
+			String originalFilename,
+			byte[] content) {
 		Store store = storeRepository.findById(storeId)
 				.orElseThrow(() -> new IllegalArgumentException("Store not found: id=" + storeId));
 		Marketplace marketplace = marketplaceRepository.findByCodeIgnoreCase(marketplaceCode)
@@ -88,7 +105,8 @@ public class OrderImportService {
 		OrderImportFile importFile = new OrderImportFile();
 		importFile.setStore(store);
 		importFile.setMarketplace(marketplace);
-		importFile.setOriginalFilename(file.getOriginalFilename() != null ? file.getOriginalFilename() : "upload.xlsx");
+		importFile.setOriginalFilename(
+				StringUtils.hasText(originalFilename) ? originalFilename : "upload.xlsx");
 		importFile.setStatus(OrderImportStatus.COMPLETED);
 		importFile = importFileRepository.save(importFile);
 
@@ -96,7 +114,8 @@ public class OrderImportService {
 		result.setImportFileId(importFile.getId());
 
 		try {
-			ParsedOrderSkuListWorkbook workbook = excelParser.parse(file);
+			ParsedOrderSkuListWorkbook workbook =
+					excelParser.parse(new java.io.ByteArrayInputStream(content));
 			result.setSheetName(workbook.sheetName());
 			result.setRowCount(workbook.rowCount());
 			importFile.setSheetName(workbook.sheetName());

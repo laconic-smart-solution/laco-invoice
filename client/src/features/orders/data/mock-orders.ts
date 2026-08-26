@@ -93,6 +93,8 @@ function buildMockOrder(globalIndex: number): OrderDetail {
     customerGender: globalIndex % 2 === 0 ? "FEMALE" : "MALE",
     shippingAddress: `${100 + (globalIndex % 900)} Market Street, Suite ${(globalIndex % 40) + 1}, San Francisco, CA 94103`,
     totalAmount,
+    totalFees: 0,
+    totalAdjustments: 0,
     currency: "USD",
     subtotal,
     tax,

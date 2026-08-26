@@ -35,7 +35,9 @@ export const SIDEBAR_NAV_ITEMS: SidebarNavItem[] = [
     icon: ShoppingCart,
     children: [
       { key: "order_list", path: ROUTES.dashboard.orders },
-      { key: "order_imports", path: ROUTES.dashboard.orderImports },
+      // Temporarily hidden from navbar — route still works at /orders/imports
+      // { key: "order_imports", path: ROUTES.dashboard.orderImports },
+      { key: "order_inputs", path: ROUTES.dashboard.orderInputs },
     ],
   },
   { key: "invoices", path: ROUTES.dashboard.invoices, icon: FileText },

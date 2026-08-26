@@ -58,6 +58,13 @@ interface OrderImportDialogProps {
   onOpenChange: (open: boolean) => void
   stores: Store[]
   defaultStoreId?: string
+  /** When set, dialog opens directly on the preview step (no upload). */
+  initialPreview?: ApiOrderImportPreviewBatchDto | null
+  fixedStoreId?: string
+  fixedMarketplaceCode?: MarketplaceCode
+  hideUploadStep?: boolean
+  onCommitted?: (result: ApiOrderImportResultDto) => void | Promise<void>
+  onDismissWithoutCommit?: () => void
 }
 
 type ImportStep = "upload" | "preview" | "result"
@@ -69,6 +76,12 @@ export function OrderImportDialog({
   onOpenChange,
   stores,
   defaultStoreId = "",
+  initialPreview = null,
+  fixedStoreId,
+  fixedMarketplaceCode,
+  hideUploadStep = false,
+  onCommitted,
+  onDismissWithoutCommit,
 }: OrderImportDialogProps) {
   const { t } = useTranslation("orders")
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -76,6 +89,7 @@ export function OrderImportDialog({
   const previewMutation = usePreviewOrderImportMutation()
   const decideMutation = useDecideOrderImportMutation()
   const commitMutation = useCommitOrderImportMutation()
+  const committedRef = useRef(false)
 
   const [storeId, setStoreId] = useState(defaultStoreId)
   const [marketplaceCode, setMarketplaceCode] = useState<MarketplaceCode>("TIKTOK")
@@ -91,27 +105,52 @@ export function OrderImportDialog({
   const [excelRowsPreview, setExcelRowsPreview] =
     useState<ApiOrderImportPreviewOrderDto | null>(null)
 
+  const applyPreview = useCallback((data: ApiOrderImportPreviewBatchDto) => {
+    setPreview(data)
+    setStep("preview")
+    setVisibleCount(PREVIEW_PAGE_SIZE)
+    setMultiLineAcked(false)
+    const next = data.orders.find(
+      (row) => row.matchStatus === "DUPLICATE" && row.resolveAction == null
+    )
+    setPromptRow(next ?? null)
+  }, [])
+
   useEffect(() => {
     if (!open) {
       return
     }
-    const initialStoreId = defaultStoreId || (stores[0] ? String(stores[0].id) : "")
+    committedRef.current = false
+    const initialStoreId =
+      fixedStoreId || defaultStoreId || (stores[0] ? String(stores[0].id) : "")
     setStoreId(initialStoreId)
-    setMarketplaceCode("TIKTOK")
+    setMarketplaceCode(fixedMarketplaceCode ?? "TIKTOK")
     setSelectedFile(null)
     setValidationError(null)
-    setStep("upload")
-    setPreview(null)
     setResult(null)
-    setPromptRow(null)
-    setMultiLineAcked(false)
-    setVisibleCount(PREVIEW_PAGE_SIZE)
     setExcelRowsPreview(null)
     previewMutation.reset()
     decideMutation.reset()
     commitMutation.reset()
+
+    if (initialPreview) {
+      applyPreview(initialPreview)
+    } else {
+      setStep("upload")
+      setPreview(null)
+      setPromptRow(null)
+      setMultiLineAcked(false)
+      setVisibleCount(PREVIEW_PAGE_SIZE)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reset form only when dialog opens
-  }, [open, defaultStoreId, stores])
+  }, [open, initialPreview, fixedStoreId, fixedMarketplaceCode, defaultStoreId, stores])
+
+  const handleOpenChange = (next: boolean) => {
+    if (!next && open && !committedRef.current && hideUploadStep) {
+      onDismissWithoutCommit?.()
+    }
+    onOpenChange(next)
+  }
 
   const parsedStoreId = Number(storeId)
   const isBusy =
@@ -163,17 +202,6 @@ export function OrderImportDialog({
     const file = event.target.files?.[0] ?? null
     setSelectedFile(file)
     setValidationError(null)
-  }
-
-  const applyPreview = (data: ApiOrderImportPreviewBatchDto) => {
-    setPreview(data)
-    setStep("preview")
-    setMultiLineAcked(false)
-    setVisibleCount(PREVIEW_PAGE_SIZE)
-    const firstUnresolved = data.orders.find(
-      (row) => row.matchStatus === "DUPLICATE" && row.resolveAction == null
-    )
-    setPromptRow(firstUnresolved ?? null)
   }
 
   const previewOrders = preview?.orders ?? []
@@ -273,19 +301,27 @@ export function OrderImportDialog({
       { storeId: parsedStoreId, batchId: preview.batchId },
       {
         onSuccess: (data) => {
+          committedRef.current = true
           setResult(data)
           setStep("result")
           setPromptRow(null)
+          void Promise.resolve(onCommitted?.(data)).catch(() => {
+            // Parent handles finish-run errors via its own mutation state.
+          })
         },
       }
     )
   }
 
   const handleClose = () => {
-    onOpenChange(false)
+    handleOpenChange(false)
   }
 
   const handleBackToUpload = () => {
+    if (hideUploadStep) {
+      handleClose()
+      return
+    }
     setStep("upload")
     setPreview(null)
     setPromptRow(null)
@@ -312,7 +348,7 @@ export function OrderImportDialog({
 
   return (
     <>
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
         className={step === "preview" ? "sm:max-w-4xl" : "sm:max-w-lg"}
       >
@@ -646,13 +682,17 @@ export function OrderImportDialog({
             <AuthFormError message={mutationError} />
 
             <DialogFooter className="gap-2 sm:justify-between">
-              <Button
-                variant="outline"
-                onClick={handleBackToUpload}
-                disabled={isBusy}
-              >
-                {t("import.back")}
-              </Button>
+              {hideUploadStep ? (
+                <span />
+              ) : (
+                <Button
+                  variant="outline"
+                  onClick={handleBackToUpload}
+                  disabled={isBusy}
+                >
+                  {t("import.back")}
+                </Button>
+              )}
               <div className="flex gap-2">
                 <Button variant="outline" onClick={handleClose} disabled={isBusy}>
                   {t("import.close")}

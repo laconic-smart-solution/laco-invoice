@@ -14,7 +14,10 @@
     "awaiting_invoice": "รอออกใบแจ้งหนี้",
     "awaiting_invoice_value": "{{count}} คำสั่งซื้อ",
     "total_orders": "คำสั่งซื้อทั้งหมด",
-    "total_orders_value": "{{count}} คำสั่งซื้อ"
+    "total_orders_value": "{{count}} คำสั่งซื้อ",
+    "total_revenue": "รายได้รวม",
+    "total_fees": "ค่าธรรมเนียมรวม",
+    "total_adjustments": "รายการปรับปรุงรวม"
   },
   "filters": {
     "store_label": "ร้านค้า",
@@ -45,6 +48,8 @@
       "store": "ร้านค้า",
       "customer": "ลูกค้า",
       "total_amount": "ยอดรวม",
+      "total_fees": "ค่าธรรมเนียมรวม",
+      "total_adjustments": "รายการปรับปรุงรวม",
       "sync_status": "สถานะซิงก์",
       "source": "แหล่งที่มา",
       "action": "การดำเนินการ"
@@ -275,6 +280,122 @@
       "load_failed": "โหลดรายการไฟล์ Excel ไม่สำเร็จ",
       "load_detail_failed": "โหลดไฟล์นำเข้านี้ไม่สำเร็จ",
       "invalid_id": "รหัสไฟล์นำเข้าไม่ถูกต้อง"
+    }
+  },
+  "inputs": {
+    "title": "Order inputs",
+    "subtitle": "สร้างรันพร้อมชื่อเรื่อง อัปโหลด Order Detail + Total Withdraw แล้วกด Run files",
+    "create": "สร้าง order input",
+    "create_title": "สร้าง order input",
+    "create_subtitle": "ตั้งชื่อรันนี้ แล้วอัปโหลดไฟล์ Excel สองไฟล์ในหน้าถัดไป",
+    "create_submit": "สร้าง",
+    "creating": "กำลังสร้าง…",
+    "cancel": "ยกเลิก",
+    "back": "กลับไป Order inputs",
+    "run_files": "รันทั้งสอง",
+    "run_file": "รันไฟล์",
+    "running": "กำลังรัน…",
+    "fields": {
+      "title": "ชื่อเรื่อง",
+      "title_placeholder": "เช่น TikTok May 2026 week 1",
+      "store": "ร้านค้า",
+      "store_placeholder": "เลือกร้านค้า",
+      "marketplace": "Marketplace"
+    },
+    "filters": {
+      "store": "ร้านค้า",
+      "store_all": "ทุกร้าน",
+      "search": "ชื่อเรื่อง",
+      "search_placeholder": "ค้นหาด้วยชื่อเรื่อง…"
+    },
+    "table": {
+      "title": "ชื่อเรื่อง",
+      "store": "ร้านค้า",
+      "marketplace": "Marketplace",
+      "status": "สถานะ",
+      "orders": "คำสั่งซื้อ",
+      "items": "รายการ",
+      "files": "ไฟล์",
+      "file_states": "Detail: {{orderDetail}} · Withdraw: {{withdraw}}",
+      "created_at": "สร้างเมื่อ",
+      "loading": "กำลังโหลด…",
+      "empty": "ยังไม่มี order input",
+      "showing": "แสดง {{start}}-{{end}} จาก {{total}}"
+    },
+    "status": {
+      "draft": "Draft",
+      "running": "Running",
+      "completed": "Completed",
+      "partial": "Partial",
+      "failed": "Failed"
+    },
+    "file_status": {
+      "missing": "Missing",
+      "ready": "Ready",
+      "running": "Running",
+      "succeeded": "Succeeded",
+      "failed": "Failed",
+      "partial": "Partial"
+    },
+    "match": {
+      "matched": "Matched",
+      "unmatched": "Unmatched",
+      "invalid": "Invalid"
+    },
+    "apply": {
+      "pending": "Pending",
+      "applied": "Applied",
+      "skipped": "Skipped",
+      "failed": "Failed"
+    },
+    "detail": {
+      "loading": "กำลังโหลด…",
+      "order_detail_title": "Order detail Excel",
+      "order_detail_description": "TikTok OrderSKUList (.xlsx)",
+      "withdraw_title": "Total withdraw Excel",
+      "withdraw_description": "TikTok Payout Report — Order details (.xlsx)",
+      "no_file": "ยังไม่มีไฟล์",
+      "upload": "อัปโหลดไฟล์",
+      "uploading": "กำลังอัปโหลด…",
+      "withdraw_summary": "{{rows}} แถว · จับคู่ {{matched}} · ไม่จับคู่ {{unmatched}}",
+      "stuck_running": "สถานะค้างที่ Running (เช่น รีเฟรชระหว่างรัน) กดรีเซ็ตเพื่อทำต่อ",
+      "reset_stuck": "รีเซ็ตสถานะ",
+      "tab_orders": "รายการออเดอร์",
+      "tab_withdraw": "แถว withdraw / settlement",
+      "filters": {
+        "order_id": "รหัสคำสั่งซื้อ",
+        "order_id_placeholder": "ค้นหาด้วยรหัสคำสั่งซื้อ…",
+        "match": "การจับคู่",
+        "match_all": "ทุกสถานะจับคู่",
+        "apply": "การนำไปใช้",
+        "apply_all": "ทุกสถานะนำไปใช้"
+      },
+      "orders_empty": "ยังไม่มีออเดอร์จากรอบนี้ รัน Order detail Excel ก่อน",
+      "orders_none": "ไม่มีออเดอร์ใหม่ (แถวอาจเป็น duplicate ทั้งหมด)",
+      "withdraw_rows_title": "แถว withdraw / settlement",
+      "withdraw_rows_empty": "ไม่มีแถว",
+      "withdraw_not_ready": "รัน Total withdraw Excel เพื่อดูแถว settlement",
+      "col_no": "No.",
+      "col_order_id": "Order ID",
+      "col_amount": "Settlement amount",
+      "col_fees": "ค่าธรรมเนียมรวม",
+      "col_adjustments": "รายการปรับปรุงรวม",
+      "col_match": "Match",
+      "col_apply": "Apply",
+      "match_apply_hint": "Unmatched = ยังไม่มีออเดอร์รหัสนี้ในร้าน จึงเป็น Skipped ค่าธรรมเนียมยังอยู่ในตารางนี้ แต่จะขึ้นใน Order list หลังจับคู่สำเร็จ รัน Order detail ก่อน แล้วค่อย Run Withdraw อีกครั้ง",
+      "prev": "ก่อนหน้า",
+      "next": "ถัดไป",
+      "updated_at": "อัปเดต {{value}}"
+    },
+    "errors": {
+      "load_failed": "โหลด order inputs ไม่สำเร็จ",
+      "create_failed": "สร้าง order input ไม่สำเร็จ",
+      "title_required": "กรุณาใส่ชื่อเรื่อง",
+      "store_required": "กรุณาเลือกร้านค้า",
+      "files_required": "อัปโหลดไฟล์ทั้งสองให้เป็น Ready ก่อนรันทั้งคู่",
+      "order_detail_required": "อัปโหลด Order Detail Excel (Ready) ก่อนรัน",
+      "withdraw_required": "อัปโหลด Total Withdraw Excel (Ready) ก่อนรัน",
+      "not_found": "ไม่พบ order input"
     }
   }
 }

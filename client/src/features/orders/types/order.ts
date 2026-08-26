@@ -22,6 +22,8 @@ export interface Order {
   customerPhone?: string
   invoiceId?: string
   totalAmount: number
+  totalFees: number
+  totalAdjustments: number
   currency: string
   syncStatus: OrderSyncStatus
   sourceType: OrderSourceType

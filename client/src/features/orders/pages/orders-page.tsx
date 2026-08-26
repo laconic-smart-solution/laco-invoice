@@ -334,6 +334,9 @@ export function OrdersPage() {
             invoicedOrders: 0,
             awaitingInvoice: 0,
             invoiceCoveragePercent: 0,
+            totalRevenue: 0,
+            totalFees: 0,
+            totalAdjustments: 0,
           }
         }
       />

@@ -25,6 +25,7 @@ interface OrdersFiltersProps {
   onChange: (value: OrderFiltersState) => void
   disabled?: boolean
   hideSourceFilter?: boolean
+  hideStoreFilter?: boolean
 }
 
 export function OrdersFilters({
@@ -33,44 +34,49 @@ export function OrdersFilters({
   onChange,
   disabled = false,
   hideSourceFilter = false,
+  hideStoreFilter = false,
 }: OrdersFiltersProps) {
   const { t } = useTranslation("orders")
   const selectedStoreId = value.storeId || "all"
 
+  const gridClassName = cn(
+    "grid gap-4 md:items-end",
+    hideStoreFilter && hideSourceFilter
+      ? "md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"
+      : hideStoreFilter || hideSourceFilter
+        ? "md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto]"
+        : "md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto]"
+  )
+
   return (
     <section className="border border-border bg-card p-4 shadow-sm">
-      <div
-        className={cn(
-          "grid gap-4 md:items-end",
-          hideSourceFilter
-            ? "md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto]"
-            : "md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto]"
-        )}
-      >
-        <div className="space-y-1.5">
-          <Label className="text-xs text-muted-foreground">
-            {t("filters.store_label")}
-          </Label>
-          <Select
-            value={selectedStoreId}
-            onValueChange={(storeId) =>
-              onChange({ ...value, storeId: storeId === "all" ? "" : storeId })
-            }
-            disabled={disabled || stores.length === 0}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={t("filters.store_placeholder")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t("filters.store_all")}</SelectItem>
-              {stores.map((store) => (
-                <SelectItem key={store.id} value={String(store.id)}>
-                  {store.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <div className={gridClassName}>
+        {!hideStoreFilter ? (
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">
+              {t("filters.store_label")}
+            </Label>
+            <Select
+              value={selectedStoreId}
+              onValueChange={(storeId) =>
+                onChange({ ...value, storeId: storeId === "all" ? "" : storeId })
+              }
+              disabled={disabled || stores.length === 0}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={t("filters.store_placeholder")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t("filters.store_all")}</SelectItem>
+                {stores.map((store) => (
+                  <SelectItem key={store.id} value={String(store.id)}>
+                    {store.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ) : null}
 
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground" htmlFor="orders-search">

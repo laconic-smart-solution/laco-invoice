@@ -12,6 +12,7 @@
     "orders": "คำสั่งซื้อ",
     "order_list": "รายการคำสั่งซื้อ",
     "order_imports": "ไฟล์ Excel ที่นำเข้า",
+    "order_inputs": "Order inputs",
     "invoices": "ใบแจ้งหนี้",
     "customers": "ลูกค้า",
     "users": "ผู้ใช้",

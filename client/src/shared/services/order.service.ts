@@ -29,6 +29,8 @@ export interface ApiOrderDto {
   amountExVat: number | null
   vatAmount: number | null
   totalAmount: number
+  totalFees: number
+  totalAdjustments: number
   currency: string | null
   orderDate: string | null
   createdAt: string
@@ -162,6 +164,9 @@ export interface OrderStats {
   invoicedOrders: number
   awaitingInvoice: number
   invoiceCoveragePercent: number
+  totalRevenue: number
+  totalFees: number
+  totalAdjustments: number
 }
 
 export type OrderBulkGenerateStatus = "RUNNING" | "COMPLETED" | "FAILED"
@@ -232,6 +237,9 @@ export const orderService = {
       invoicedOrders: data?.invoicedOrders ?? 0,
       awaitingInvoice: data?.awaitingInvoice ?? 0,
       invoiceCoveragePercent: data?.invoiceCoveragePercent ?? 0,
+      totalRevenue: Number(data?.totalRevenue ?? 0),
+      totalFees: Number(data?.totalFees ?? 0),
+      totalAdjustments: Number(data?.totalAdjustments ?? 0),
     }
   },
 

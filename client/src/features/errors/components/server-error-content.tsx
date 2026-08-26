@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { ConnectionLostSignal } from "@/features/errors/components/connection-lost-signal"
 import { consumeServerErrorReturnPath } from "@/features/errors/util/server-error-return-path"
+import { useDocumentTitle } from "@/shared/hooks/use-document-title"
 import { useReducedMotion } from "@/shared/hooks/use-reduced-motion"
 import { defaultTransition, fadeIn, slideUp } from "@/shared/motion-variants"
 import { waitForApplicationHealth } from "@/shared/services/health.service"
@@ -20,10 +21,11 @@ export function ServerErrorContent() {
 
   const descriptionId = "server-error-description"
 
+  useDocumentTitle(t("server_error.page_title"))
+
   useEffect(() => {
-    document.title = t("server_error.page_title")
     headingRef.current?.focus()
-  }, [t])
+  }, [])
 
   const attemptRecovery = useCallback(async () => {
     setIsChecking(true)

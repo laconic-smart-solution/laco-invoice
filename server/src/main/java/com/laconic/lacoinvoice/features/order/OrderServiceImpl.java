@@ -1,5 +1,6 @@
 package com.laconic.lacoinvoice.features.order;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
@@ -26,6 +27,7 @@ import com.laconic.lacoinvoice.domain.models.Invoice;
 import com.laconic.lacoinvoice.domain.models.Order;
 import com.laconic.lacoinvoice.domain.repositories.InvoiceRepository;
 import com.laconic.lacoinvoice.domain.repositories.OrderRepository;
+import com.laconic.lacoinvoice.domain.repositories.OrderWithdrawImportRowRepository;
 import com.laconic.lacoinvoice.domain.repositories.StoreRepository;
 import com.laconic.lacoinvoice.features.order.pageable.OrderPageRequest;
 
@@ -68,6 +70,7 @@ public class OrderServiceImpl implements OrderService {
 	private final OrderRepository orderRepository;
 	private final StoreRepository storeRepository;
 	private final InvoiceRepository invoiceRepository;
+	private final OrderWithdrawImportRowRepository orderWithdrawImportRowRepository;
 	private final OrderMapper mapper;
 	private final OrderSyncService orderSyncService;
 
@@ -75,9 +78,11 @@ public class OrderServiceImpl implements OrderService {
 			OrderRepository orderRepository,
 			StoreRepository storeRepository,
 			InvoiceRepository invoiceRepository,
+			OrderWithdrawImportRowRepository orderWithdrawImportRowRepository,
 			OrderMapper mapper,
 			OrderSyncService orderSyncService) {
 		this.orderRepository = orderRepository;
+		this.orderWithdrawImportRowRepository = orderWithdrawImportRowRepository;
 		this.storeRepository = storeRepository;
 		this.invoiceRepository = invoiceRepository;
 		this.mapper = mapper;
@@ -107,28 +112,41 @@ public class OrderServiceImpl implements OrderService {
 						invoice -> invoice.getOrder().getId(),
 						Invoice::getId,
 						(a, b) -> a));
+		Map<Long, Object[]> payoutTotalsByOrderId = orderWithdrawImportRowRepository
+				.sumMoneyByOrderIds(orderIds)
+				.stream()
+				.filter(row -> row.length > 0 && row[0] instanceof Number)
+				.collect(Collectors.toMap(
+						row -> ((Number) row[0]).longValue(),
+						row -> row,
+						(a, b) -> a));
 		List<OrderDto> enriched = data.stream()
-				.map(dto -> new OrderDto(
-						dto.id(),
-						dto.storeId(),
-						dto.storeName(),
-						dto.marketplaceId(),
-						dto.marketplaceCode(),
-						dto.customerId(),
-						dto.customerName(),
-						dto.customerPhone(),
-						invoiceIdByOrderId.get(dto.id()),
-						dto.externalOrderId(),
-						dto.orderStatus(),
-						dto.sourceType(),
-						dto.subtotal(),
-						dto.shippingFee(),
-						dto.amountExVat(),
-						dto.vatAmount(),
-						dto.totalAmount(),
-						dto.currency(),
-						dto.orderDate(),
-						dto.createdAt()))
+				.map(dto -> {
+					Object[] payoutTotals = payoutTotalsByOrderId.get(dto.id());
+					return new OrderDto(
+							dto.id(),
+							dto.storeId(),
+							dto.storeName(),
+							dto.marketplaceId(),
+							dto.marketplaceCode(),
+							dto.customerId(),
+							dto.customerName(),
+							dto.customerPhone(),
+							invoiceIdByOrderId.get(dto.id()),
+							dto.externalOrderId(),
+							dto.orderStatus(),
+							dto.sourceType(),
+							dto.subtotal(),
+							dto.shippingFee(),
+							dto.amountExVat(),
+							dto.vatAmount(),
+							dto.totalAmount(),
+							toBigDecimal(payoutTotals, 1),
+							toBigDecimal(payoutTotals, 2),
+							dto.currency(),
+							dto.orderDate(),
+							dto.createdAt());
+				})
 				.toList();
 		return ApiResponse.ok(response.getMessage(), enriched, response.getMeta());
 	}
@@ -159,7 +177,33 @@ public class OrderServiceImpl implements OrderService {
 		double invoiceCoveragePercent = totalOrders > 0
 				? (invoicedOrders * 100.0) / totalOrders
 				: 0.0;
-		return new OrderStatsDto(totalOrders, invoicedOrders, awaitingInvoice, invoiceCoveragePercent);
+
+		Object[] money = orderWithdrawImportRowRepository.sumMoneyByOptionalStoreId(storeId)
+				.stream()
+				.findFirst()
+				.orElse(null);
+		BigDecimal totalRevenue = toBigDecimal(money, 0);
+		BigDecimal totalFees = toBigDecimal(money, 1);
+		BigDecimal totalAdjustments = toBigDecimal(money, 2);
+
+		return new OrderStatsDto(
+				totalOrders,
+				invoicedOrders,
+				awaitingInvoice,
+				invoiceCoveragePercent,
+				totalRevenue,
+				totalFees,
+				totalAdjustments);
+	}
+
+	private static BigDecimal toBigDecimal(Object[] row, int index) {
+		if (row == null || row.length <= index || row[index] == null) {
+			return BigDecimal.ZERO;
+		}
+		if (row[index] instanceof BigDecimal value) {
+			return value;
+		}
+		return new BigDecimal(row[index].toString());
 	}
 
 	@Override

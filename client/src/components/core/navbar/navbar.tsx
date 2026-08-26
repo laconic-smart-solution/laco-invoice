@@ -1,4 +1,4 @@
-import { CirclePlus, LogOut, Search, UserRound } from "lucide-react"
+import { LogOut, Search, UserRound } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate } from "react-router-dom"
 
@@ -74,11 +74,6 @@ export function Navbar() {
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         <NavbarLanguageToggle />
         <NavbarThemeToggle />
-
-        <Button type="button" className="h-9 gap-2 px-3">
-          <CirclePlus className="size-4" aria-hidden />
-          <span className="hidden sm:inline">{t("generate_invoice")}</span>
-        </Button>
 
         {displayName ? (
           <div className="flex items-center border-l border-border pl-3">

@@ -14,7 +14,10 @@
     "awaiting_invoice": "ငွေတောင်းခံလွှာ စောင့်ဆိုင်း",
     "awaiting_invoice_value": "အော်ဒါ {{count}} ခု",
     "total_orders": "အော်ဒါ စုစုပေါင်း",
-    "total_orders_value": "အော်ဒါ {{count}} ခု"
+    "total_orders_value": "အော်ဒါ {{count}} ခု",
+    "total_revenue": "စုစုပေါင်း ဝင်ငွေ",
+    "total_fees": "စုစုပေါင်း အခကြေးငွေ",
+    "total_adjustments": "စုစုပေါင်း ချိန်ညှိမှု"
   },
   "filters": {
     "store_label": "ဆိုင်",
@@ -45,6 +48,8 @@
       "store": "ဆိုင်",
       "customer": "ဖောက်သည်",
       "total_amount": "စုစုပေါင်း",
+      "total_fees": "စုစုပေါင်း အခကြေးငွေ",
+      "total_adjustments": "စုစုပေါင်း ချိန်ညှိမှု",
       "sync_status": "Sync အခြေအနေ",
       "source": "ရင်းမြစ်",
       "action": "လုပ်ဆောင်ချက်"
@@ -275,6 +280,122 @@
       "load_failed": "တင်သွင်း Excel ဖိုင်များကို မရယူနိုင်ပါ။",
       "load_detail_failed": "ဤတင်သွင်းဖိုင်ကို မရယူနိုင်ပါ။",
       "invalid_id": "တင်သွင်းဖိုင် ID မမှန်ကန်ပါ။"
+    }
+  },
+  "inputs": {
+    "title": "Order inputs",
+    "subtitle": "Title တစ်ခုဖြင့် run ဖန်တီးပြီး Order Detail + Total Withdraw Excel တင်ကာ Run files နှိပ်ပါ။",
+    "create": "Order input အသစ်",
+    "create_title": "Order input အသစ်",
+    "create_subtitle": "Title ထည့်ပြီး နောက်စာမျက်နှာတွင် Excel နှစ်ဖိုင် တင်ပါ။",
+    "create_submit": "ဖန်တီးမည်",
+    "creating": "ဖန်တီးနေသည်…",
+    "cancel": "ပယ်ဖျက်",
+    "back": "Order inputs သို့ ပြန်မည်",
+    "run_files": "နှစ်ခုလုံး Run",
+    "run_file": "Run file",
+    "running": "Run လုပ်နေသည်…",
+    "fields": {
+      "title": "Title",
+      "title_placeholder": "ဥပမာ TikTok May 2026 week 1",
+      "store": "Store",
+      "store_placeholder": "Store ရွေးပါ",
+      "marketplace": "Marketplace"
+    },
+    "filters": {
+      "store": "Store",
+      "store_all": "Store အားလုံး",
+      "search": "Title",
+      "search_placeholder": "Title ဖြင့် ရှာမည်…"
+    },
+    "table": {
+      "title": "Title",
+      "store": "Store",
+      "marketplace": "Marketplace",
+      "status": "Status",
+      "orders": "Orders",
+      "items": "Items",
+      "files": "Files",
+      "file_states": "Detail: {{orderDetail}} · Withdraw: {{withdraw}}",
+      "created_at": "Created",
+      "loading": "တင်နေသည်…",
+      "empty": "Order input မရှိသေးပါ။",
+      "showing": "{{total}} အနက် {{start}}-{{end}}"
+    },
+    "status": {
+      "draft": "Draft",
+      "running": "Running",
+      "completed": "Completed",
+      "partial": "Partial",
+      "failed": "Failed"
+    },
+    "file_status": {
+      "missing": "Missing",
+      "ready": "Ready",
+      "running": "Running",
+      "succeeded": "Succeeded",
+      "failed": "Failed",
+      "partial": "Partial"
+    },
+    "match": {
+      "matched": "Matched",
+      "unmatched": "Unmatched",
+      "invalid": "Invalid"
+    },
+    "apply": {
+      "pending": "Pending",
+      "applied": "Applied",
+      "skipped": "Skipped",
+      "failed": "Failed"
+    },
+    "detail": {
+      "loading": "တင်နေသည်…",
+      "order_detail_title": "Order detail Excel",
+      "order_detail_description": "TikTok OrderSKUList (.xlsx)",
+      "withdraw_title": "Total withdraw Excel",
+      "withdraw_description": "TikTok Payout Report — Order details (.xlsx)",
+      "no_file": "ဖိုင် မတင်ရသေးပါ",
+      "upload": "ဖိုင် တင်မည်",
+      "uploading": "တင်နေသည်…",
+      "withdraw_summary": "အတန်း {{rows}} · ကိုက်ညီ {{matched}} · မကိုက်ညီ {{unmatched}}",
+      "stuck_running": "Running အဖြစ် ကျန်နေသည် (refresh လုပ်မိခြင်း)။ Reset လုပ်ပြီး ဆက်လုပ်ပါ။",
+      "reset_stuck": "Reset status",
+      "tab_orders": "Order list",
+      "tab_withdraw": "Withdraw / settlement rows",
+      "filters": {
+        "order_id": "Order ID",
+        "order_id_placeholder": "Order ID ဖြင့် ရှာရန်…",
+        "match": "Match",
+        "match_all": "Match အားလုံး",
+        "apply": "Apply",
+        "apply_all": "Apply အခြေအနေအားလုံး"
+      },
+      "orders_empty": "ဤ run မှ order မရှိသေးပါ။ Order detail Excel ကို အရင် Run လုပ်ပါ။",
+      "orders_none": "Order အသစ် မဖန်တီးပါ (duplicate အားလုံး ဖြစ်နိုင်သည်)။",
+      "withdraw_rows_title": "Withdraw / settlement အတန်းများ",
+      "withdraw_rows_empty": "အတန်း မရှိပါ",
+      "withdraw_not_ready": "Settlement အတန်းများ ကြည့်ရန် Total withdraw Excel ကို Run လုပ်ပါ။",
+      "col_no": "No.",
+      "col_order_id": "Order ID",
+      "col_amount": "Settlement amount",
+      "col_fees": "စုစုပေါင်း အခကြေးငွေ",
+      "col_adjustments": "စုစုပေါင်း ချိန်ညှိမှု",
+      "col_match": "Match",
+      "col_apply": "Apply",
+      "match_apply_hint": "Unmatched = ဤဆိုင်တွင် Order ID မရှိသေး၍ Apply သည် Skipped ဖြစ်သည်။ Fees များကို ဤဇယားတွင် မြင်ရမည်။ Match အောင်မြင်မှ Order list တွင် ပေါ်မည်။ Order detail ကို အရင် Run လုပ်ပြီး Withdraw ကို ပြန် Run လုပ်ပါ။",
+      "prev": "Prev",
+      "next": "Next",
+      "updated_at": "Updated {{value}}"
+    },
+    "errors": {
+      "load_failed": "Order inputs မရယူနိုင်ပါ။",
+      "create_failed": "Order input မဖန်တီးနိုင်ပါ။",
+      "title_required": "Title ထည့်ပါ။",
+      "store_required": "Store ရွေးပါ။",
+      "files_required": "Excel နှစ်ဖိုင် Ready ဖြစ်မှ နှစ်ခုလုံး Run လုပ်ပါ။",
+      "order_detail_required": "Order Detail Excel Ready ဖြစ်မှ Run လုပ်ပါ။",
+      "withdraw_required": "Total Withdraw Excel Ready ဖြစ်မှ Run လုပ်ပါ။",
+      "not_found": "Order input မတွေ့ပါ။"
     }
   }
 }

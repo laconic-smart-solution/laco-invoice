@@ -7,6 +7,7 @@ import { Link, useNavigate } from "react-router-dom"
 import { ROUTES } from "@/app/constants/routes"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { useDocumentTitle } from "@/shared/hooks/use-document-title"
 import { useReducedMotion } from "@/shared/hooks/use-reduced-motion"
 import { defaultTransition, fadeIn } from "@/shared/motion-variants"
 
@@ -30,10 +31,11 @@ export function SomethingWentWrongContent({
 
   const descriptionId = "something-went-wrong-description"
 
+  useDocumentTitle(t(`${copyKey}.page_title`))
+
   useEffect(() => {
-    document.title = t(`${copyKey}.page_title`)
     headingRef.current?.focus()
-  }, [copyKey, t])
+  }, [])
 
   const handleGoBack = () => {
     if (window.history.length > 1) {
