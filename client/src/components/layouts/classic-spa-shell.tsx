@@ -1,6 +1,5 @@
 import type { ReactNode } from "react"
 
-import { OrderBulkGeneratePanel } from "@/components/common/order-bulk-generate-panel"
 import { ClassicSpaChrome } from "@/components/core/classic-spa/classic-spa-chrome"
 
 interface ClassicSpaShellProps {
@@ -15,7 +14,6 @@ export function ClassicSpaShell({ children }: ClassicSpaShellProps) {
       <main id="main-content" className="flex min-h-0 flex-1 flex-col overflow-hidden">
         {children}
       </main>
-      <OrderBulkGeneratePanel />
     </div>
   )
 }

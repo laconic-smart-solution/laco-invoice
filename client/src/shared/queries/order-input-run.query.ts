@@ -235,8 +235,9 @@ export function getOrderInputRunErrorMessage(
   error: unknown,
   fallback: string
 ): string {
-  if (isAxiosStatusMessage(error)) {
-    return extractApiErrorMessage(error) || fallback
+  const message = extractApiErrorMessage(error, fallback)
+  if (message === fallback || isAxiosStatusMessage(message)) {
+    return fallback
   }
-  return extractApiErrorMessage(error) || fallback
+  return message
 }

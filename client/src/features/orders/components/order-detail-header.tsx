@@ -1,9 +1,7 @@
-import { FileText, RefreshCw, Zap } from "lucide-react"
-import { Link } from "react-router-dom"
+import { RefreshCw } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
 import type { Locale } from "@/app/i18n"
-import { ROUTES } from "@/app/constants/routes"
 import { StatusBadge } from "@/components/common/status-badge"
 import type { StatusBadgeVariant } from "@/components/common/status-badge"
 import { Button } from "@/components/ui/button"
@@ -28,8 +26,6 @@ const SOURCE_TYPE_BADGE: Record<OrderSourceType, StatusBadgeVariant> = {
 interface OrderDetailHeaderProps {
   order: OrderDetail
   locale: Locale
-  onGenerate: () => void
-  isGenerating?: boolean
   onSync?: () => void
   isSyncing?: boolean
   variant?: "page" | "sheet"
@@ -38,8 +34,6 @@ interface OrderDetailHeaderProps {
 export function OrderDetailHeader({
   order,
   locale,
-  onGenerate,
-  isGenerating = false,
   onSync,
   isSyncing = false,
   variant = "page",
@@ -106,23 +100,6 @@ export function OrderDetailHeader({
           />
           {t("actions.sync_orders")}
         </Button>
-        {order.invoiceId ? (
-          <Button variant="outline" size={isSheet ? "sm" : "default"} asChild>
-            <Link to={ROUTES.dashboard.invoiceDetail(order.invoiceId)}>
-              <FileText data-icon="inline-start" />
-              {t("detail.view_invoice")}
-            </Link>
-          </Button>
-        ) : (
-          <Button
-            size={isSheet ? "sm" : "default"}
-            onClick={onGenerate}
-            disabled={isGenerating}
-          >
-            <Zap data-icon="inline-start" />
-            {t("table.actions.generate")}
-          </Button>
-        )}
       </div>
     </div>
   )

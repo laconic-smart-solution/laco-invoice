@@ -13,7 +13,7 @@ export interface BreadcrumbItem {
 
 export function useBreadcrumbs(): BreadcrumbItem[] {
   const { pathname } = useLocation()
-  const { orderId, invoiceId, customerId, productId } = useParams()
+  const { orderId, customerId, productId } = useParams()
   const { t } = useTranslation(["breadcrumb", "sidebar", "common", "products", "customers", "users"])
 
   return useMemo(() => {
@@ -44,14 +44,6 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
       return [
         { label: t("sidebar:nav.dashboard"), href: ROUTES.dashboard.root },
         { label: t(`sidebar:nav.${navItem.key}`) },
-      ]
-    }
-
-    if (invoiceId && pathname.startsWith(`${ROUTES.dashboard.invoices}/`)) {
-      return [
-        { label: t("sidebar:nav.dashboard"), href: ROUTES.dashboard.root },
-        { label: t("sidebar:nav.invoices"), href: ROUTES.dashboard.invoices },
-        { label: invoiceId },
       ]
     }
 
@@ -165,5 +157,5 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
       default:
         return [{ label: t("sidebar:nav.dashboard"), href: ROUTES.dashboard.root }]
     }
-  }, [customerId, invoiceId, orderId, pathname, t])
+  }, [customerId, orderId, pathname, t])
 }

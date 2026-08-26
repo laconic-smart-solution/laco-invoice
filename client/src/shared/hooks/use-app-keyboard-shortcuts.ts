@@ -12,7 +12,6 @@ const GO_ROUTES: Record<string, string> = {
   h: ROUTES.dashboard.root,
   o: ROUTES.dashboard.orders,
   p: ROUTES.dashboard.products,
-  i: ROUTES.dashboard.invoices,
   c: ROUTES.dashboard.customers,
   s: ROUTES.dashboard.stores,
   u: ROUTES.dashboard.users,

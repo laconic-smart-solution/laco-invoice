@@ -429,11 +429,6 @@ export function OrderImportDialog({
                   })}
                 </li>
               </ul>
-              {promptRow.warningCode === "HAS_INVOICE" ? (
-                <p className="mt-2 text-sm text-warning">
-                  {t("import.warning_has_invoice")}
-                </p>
-              ) : null}
             </div>
 
             <AuthFormError message={mutationError} />
@@ -457,7 +452,7 @@ export function OrderImportDialog({
               </Button>
               <Button
                 variant="secondary"
-                disabled={isBusy || promptRow.warningCode === "HAS_INVOICE"}
+                disabled={isBusy}
                 onClick={() => handleRowAction(promptRow, "REPLACE")}
               >
                 {t("import.action_replace")}
@@ -638,7 +633,6 @@ export function OrderImportDialog({
                               </SelectItem>
                               <SelectItem
                                 value="REPLACE"
-                                disabled={row.warningCode === "HAS_INVOICE"}
                               >
                                 {t("import.action_replace")}
                               </SelectItem>
@@ -647,11 +641,7 @@ export function OrderImportDialog({
                         )}
                       </TableCell>
                       <TableCell>
-                        {row.warningCode === "HAS_INVOICE" ? (
-                          <span className="text-xs text-warning">
-                            {t("import.warning_has_invoice")}
-                          </span>
-                        ) : (row.excelItemCount ?? 0) > 1 ? (
+                        {(row.excelItemCount ?? 0) > 1 ? (
                           <span className="text-xs text-muted-foreground">
                             {t("import.warning_multiline")}
                           </span>

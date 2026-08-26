@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom"
+import { Navigate, createBrowserRouter } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
 import {
@@ -7,8 +7,6 @@ import {
   DashboardPage,
   EditCustomerPage,
   ForgotPasswordPage,
-  InvoiceDetailPage,
-  InvoicesPage,
   LoginPage,
   OrderDetailPage,
   OrderImportFilesPage,
@@ -103,12 +101,8 @@ export const router = createBrowserRouter([
                 element: <OrderDetailPage />,
               },
               {
-                path: ROUTES.dashboard.invoices,
-                element: <InvoicesPage />,
-              },
-              {
-                path: `${ROUTES.dashboard.invoices}/:invoiceId`,
-                element: <InvoiceDetailPage />,
+                path: "/invoices/*",
+                element: <Navigate to={ROUTES.dashboard.orders} replace />,
               },
               {
                 path: ROUTES.dashboard.customers,

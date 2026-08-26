@@ -1,4 +1,4 @@
-import { FileText, RefreshCw } from "lucide-react"
+import { RefreshCw } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
@@ -21,10 +21,6 @@ export function DashboardHeader() {
         <Button variant="outline" className="border-primary text-primary">
           <RefreshCw data-icon="inline-start" />
           {t("actions.sync_all_stores")}
-        </Button>
-        <Button variant="outline">
-          <FileText data-icon="inline-start" />
-          {t("actions.bulk_invoices")}
         </Button>
       </div>
     </div>

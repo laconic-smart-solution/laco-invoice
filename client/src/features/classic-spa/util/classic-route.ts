@@ -77,18 +77,6 @@ export function parseClassicRoute(pathname: string): ClassicRouteMatch | null {
     }
   }
 
-  if (pathname === ROUTES.dashboard.invoices) {
-    return { panel: "invoices", detail: null, setup: null }
-  }
-  const invoiceMatch = pathname.match(/^\/invoices\/([^/]+)$/)
-  if (invoiceMatch) {
-    return {
-      panel: "invoices",
-      detail: { type: "invoice", id: invoiceMatch[1] },
-      setup: null,
-    }
-  }
-
   if (pathname === ROUTES.dashboard.customers) {
     return { panel: "customers", detail: null, setup: null }
   }
@@ -128,8 +116,6 @@ export function classicPanelPath(panel: ClassicPanel): string {
       return ROUTES.dashboard.products
     case "stores":
       return ROUTES.dashboard.stores
-    case "invoices":
-      return ROUTES.dashboard.invoices
     case "customers":
       return ROUTES.dashboard.customers
     case "users":
@@ -145,8 +131,6 @@ export function classicDetailPath(detail: ClassicDetail): string {
       return ROUTES.dashboard.productDetail(detail.id)
     case "store":
       return ROUTES.dashboard.storeDetail(detail.id)
-    case "invoice":
-      return ROUTES.dashboard.invoiceDetail(detail.id)
     case "customer":
       return ROUTES.dashboard.customerEdit(detail.id)
     case "user":
@@ -159,7 +143,6 @@ export const CLASSIC_NAV_PANEL_BY_KEY: Record<string, ClassicPanel | null> = {
   orders: "orders",
   products: "products",
   stores: "stores",
-  invoices: "invoices",
   customers: "customers",
   users: "users",
   shortcuts: null,

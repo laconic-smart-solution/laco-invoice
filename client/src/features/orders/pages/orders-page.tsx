@@ -2,11 +2,8 @@ import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import type { ColumnFiltersState, SortingState } from "@tanstack/react-table"
 
-import { ConfirmDialog } from "@/components/common/confirm-dialog"
 import { EMPTY_TABLE_SELECTION } from "@/components/common/data-table/types"
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
-import { useIsClassicEmbed } from "@/features/classic-spa/classic-embed-context"
-import { useClassicWorkspaceStore } from "@/shared/stores/classic-workspace-store"
 import { OrderExportPreviewDialog } from "@/features/orders/components/order-export-preview-dialog"
 import { OrderImportDialog } from "@/features/orders/components/order-import-dialog"
 import { OrdersFilters } from "@/features/orders/components/orders-filters"
@@ -31,14 +28,9 @@ import {
   getOrderErrorMessage,
   useOrderStatsQuery,
   useOrdersPageQuery,
-  useStartBulkGenerateOrdersMutation,
   useTriggerOrderSyncMutation,
 } from "@/shared/queries/order.query"
 import { useStoresPageQuery } from "@/shared/queries/store.query"
-import {
-  selectIsBulkGenerateRunning,
-  useOrderBulkGenerateStore,
-} from "@/shared/stores/order-bulk-generate-store"
 import { getColumnFilterValue } from "@/util/table-column-filters"
 import { sortingToPageSort } from "@/util/table-sort"
 
@@ -59,13 +51,6 @@ const STORES_LIST_REQUEST = {
 
 export function OrdersPage() {
   const { t } = useTranslation("orders")
-  const isClassic = useIsClassicEmbed()
-  const awaitingInvoiceFocus = useClassicWorkspaceStore(
-    (state) => state.panelFilter.ordersAwaitingInvoice === true
-  )
-  const clearPanelFilter = useClassicWorkspaceStore(
-    (state) => state.clearPanelFilter
-  )
   const { page, limit, setPage, setLimit } = usePagination()
   const [filters, setFilters] = useState<OrderFiltersState>(DEFAULT_ORDER_FILTERS)
   const [isImportOpen, setIsImportOpen] = useState(false)
@@ -76,9 +61,6 @@ export function OrdersPage() {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const debouncedColumnFilters = useDebounce(columnFilters)
-
-  const startBulkRun = useOrderBulkGenerateStore((state) => state.startRun)
-  const isBulkRunActive = useOrderBulkGenerateStore(selectIsBulkGenerateRunning)
 
   const { data: storesResponse, isLoading: storesLoading } =
     useStoresPageQuery(STORES_LIST_REQUEST)
@@ -136,10 +118,6 @@ export function OrdersPage() {
 
   const { data, isLoading, isError, error } = useOrdersPageQuery(pageRequest)
   const syncMutation = useTriggerOrderSyncMutation()
-  const startBulkGenerateMutation = useStartBulkGenerateOrdersMutation()
-
-  const isBulkGenerating =
-    startBulkGenerateMutation.isPending || isBulkRunActive
 
   const statsStoreId = useMemo(() => {
     if (!filters.storeId) {
@@ -164,7 +142,6 @@ export function OrdersPage() {
 
   const {
     setSelection,
-    confirmAction,
     closeConfirm,
     requestAction,
     actionError,
@@ -192,23 +169,6 @@ export function OrdersPage() {
       setExportPreviewOpen(true)
     },
     []
-  )
-
-  const runBulkGenerate = useCallback(
-    async (request: OrderExportRequest) => {
-      try {
-        const run = await startBulkGenerateMutation.mutateAsync(request)
-        if (run?.id) {
-          startBulkRun(run)
-        }
-      } catch (err) {
-        setActionError(
-          getOrderErrorMessage(err, t("errors.bulk_generate_failed"))
-        )
-        throw err
-      }
-    },
-    [setActionError, startBulkGenerateMutation, startBulkRun, t]
   )
 
   const handleExportCsv = useCallback(() => {
@@ -248,26 +208,6 @@ export function OrdersPage() {
     onClearSelection: handleClearSelection,
   })
 
-  const handleBulkGenerate = () => {
-    const result = requestAction("bulk")
-    if (result.kind === "need_selection") {
-      setActionError(t("errors.select_to_bulk_generate"))
-      return
-    }
-    if (result.kind === "selected") {
-      void runBulkGenerate({
-        ids: result.ids.map((id) => Number(id)).filter(Number.isFinite),
-      })
-    }
-  }
-
-  const handleConfirmBulkAll = async () => {
-    await runBulkGenerate({
-      exportAll: true,
-      filter: exportFilter,
-    })
-  }
-
   return (
     <div className="space-y-6 p-6">
       <OrdersHeader
@@ -275,8 +215,6 @@ export function OrdersPage() {
         isSyncing={syncMutation.isPending}
         onImport={() => setIsImportOpen(true)}
         onExportCsv={handleExportCsv}
-        onBulkGenerate={handleBulkGenerate}
-        isBulkGenerating={isBulkGenerating}
       />
       <OrderExportPreviewDialog
         open={exportPreviewOpen}
@@ -289,22 +227,6 @@ export function OrdersPage() {
         stores={stores}
         defaultStoreId={filters.storeId}
       />
-      <ConfirmDialog
-        open={confirmAction === "bulk"}
-        onOpenChange={(open) => {
-          if (!open && !isBulkGenerating) {
-            closeConfirm()
-          }
-        }}
-        title={t("confirm.bulk_generate_all.title")}
-        description={t("confirm.bulk_generate_all.description", {
-          count: totalCount,
-        })}
-        confirmLabel={t("confirm.bulk_generate_all.confirm")}
-        cancelLabel={t("confirm.export_all.cancel")}
-        onConfirm={handleConfirmBulkAll}
-        isLoading={isBulkGenerating}
-      />
       <AuthFormError message={syncError} />
       <OrdersFilters
         stores={stores}
@@ -312,28 +234,10 @@ export function OrdersPage() {
         onChange={handleFiltersChange}
         disabled={storesLoading}
       />
-      {isClassic && awaitingInvoiceFocus ? (
-        <div className="flex items-center justify-between gap-2 border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-          <span>
-            {t("stats.awaiting_invoice")}:{" "}
-            {stats?.awaitingInvoice ?? 0}
-          </span>
-          <button
-            type="button"
-            className="font-medium text-foreground underline-offset-2 hover:underline"
-            onClick={() => clearPanelFilter()}
-          >
-            {t("filters.status_all")}
-          </button>
-        </div>
-      ) : null}
       <OrdersStatCards
         stats={
           stats ?? {
             totalOrders: 0,
-            invoicedOrders: 0,
-            awaitingInvoice: 0,
-            invoiceCoveragePercent: 0,
             totalRevenue: 0,
             totalFees: 0,
             totalAdjustments: 0,
@@ -365,8 +269,6 @@ export function OrdersPage() {
           setPage(1)
         }}
         onSelectionChange={setSelection}
-        onBulkGenerate={handleBulkGenerate}
-        isBulkGenerating={isBulkGenerating}
       />
     </div>
   )

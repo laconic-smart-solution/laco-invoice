@@ -5,7 +5,6 @@ export type ClassicPanel =
   | "orders"
   | "products"
   | "stores"
-  | "invoices"
   | "customers"
   | "users"
 
@@ -13,7 +12,6 @@ export type ClassicDetailType =
   | "order"
   | "product"
   | "store"
-  | "invoice"
   | "customer"
   | "user"
 
@@ -26,7 +24,7 @@ export interface ClassicDetail {
 
 /** Optional list filters applied when drilling in from overview stats. */
 export interface ClassicPanelFilter {
-  ordersAwaitingInvoice?: boolean
+  // extensible for future panel drilldowns
 }
 
 interface ClassicWorkspaceState {

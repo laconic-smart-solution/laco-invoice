@@ -9,7 +9,6 @@ import { ClassicOverviewPanel } from "@/features/classic-spa/components/classic-
 import type { ClassicRouteMatch } from "@/features/classic-spa/util/classic-route"
 import { classicPanelPath } from "@/features/classic-spa/util/classic-route"
 import { CustomersPage } from "@/features/customers/pages/customers-page"
-import { InvoicesPage } from "@/features/invoices/pages/invoices-page"
 import { OrdersPage } from "@/features/orders/pages/orders-page"
 import { ProductsPage } from "@/features/products/pages/products-page"
 import { CreateStoreDialog } from "@/features/stores/components/create-store-dialog"
@@ -87,7 +86,6 @@ export function ClassicWorkspace({ route }: ClassicWorkspaceProps) {
               {route.panel === "orders" ? <OrdersPage /> : null}
               {route.panel === "products" ? <ProductsPage /> : null}
               {route.panel === "stores" ? <StoresPage /> : null}
-              {route.panel === "invoices" ? <InvoicesPage /> : null}
               {route.panel === "customers" ? <CustomersPage /> : null}
               {route.panel === "users" ? <UsersPage /> : null}
             </div>

@@ -46,18 +46,4 @@ public interface OrderRepository extends BaseRepository<Order> {
 			WHERE (:storeId IS NULL OR o.store.id = :storeId)
 			""")
 	long countByOptionalStoreId(@Param("storeId") Long storeId);
-
-	@Query("""
-			SELECT COUNT(o) FROM Order o
-			WHERE (:storeId IS NULL OR o.store.id = :storeId)
-			  AND EXISTS (SELECT 1 FROM Invoice i WHERE i.order = o)
-			""")
-	long countInvoicedByOptionalStoreId(@Param("storeId") Long storeId);
-
-	@Query("""
-			SELECT COUNT(o) FROM Order o
-			WHERE (:storeId IS NULL OR o.store.id = :storeId)
-			  AND NOT EXISTS (SELECT 1 FROM Invoice i WHERE i.order = o)
-			""")
-	long countAwaitingInvoiceByOptionalStoreId(@Param("storeId") Long storeId);
 }

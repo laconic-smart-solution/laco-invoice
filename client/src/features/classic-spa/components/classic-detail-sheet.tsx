@@ -1,8 +1,6 @@
-import { useCallback, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
 
-import { ConfirmDialog } from "@/components/common/confirm-dialog"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -15,8 +13,6 @@ import {
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
 import { CustomerForm } from "@/features/customers/components/customer-form"
 import type { CustomerFormValues } from "@/features/customers/schemas/customer-form-schema"
-import { InvoiceDetailSidebar } from "@/features/invoices/components/invoice-detail-sidebar"
-import { InvoiceDocument } from "@/features/invoices/components/invoice-document"
 import { OrderDetailHeader } from "@/features/orders/components/order-detail-header"
 import { OrderDetailInfo } from "@/features/orders/components/order-detail-info"
 import { OrderLineItems } from "@/features/orders/components/order-line-items"
@@ -34,11 +30,6 @@ import {
   useCustomerQuery,
   useUpdateCustomerMutation,
 } from "@/shared/queries/customer.query"
-import {
-  getInvoiceErrorMessage,
-  useGenerateInvoiceMutation,
-  useInvoiceDetailQuery,
-} from "@/shared/queries/invoice.query"
 import { useMarketplaceProductDetailQuery } from "@/shared/queries/marketplace-product.query"
 import {
   getOrderErrorMessage,
@@ -78,7 +69,7 @@ export function ClassicDetailSheet({ detail, onClose }: ClassicDetailSheetProps)
       <SheetContent
         side="right"
         className={
-          detail?.type === "invoice" || detail?.type === "order"
+          detail?.type === "order"
             ? "w-full gap-0 overflow-hidden p-0 sm:max-w-3xl lg:max-w-4xl"
             : "w-full gap-0 overflow-y-auto sm:max-w-2xl"
         }
@@ -88,7 +79,7 @@ export function ClassicDetailSheet({ detail, onClose }: ClassicDetailSheetProps)
         </SheetHeader>
         <div
           className={
-            detail?.type === "invoice" || detail?.type === "order"
+            detail?.type === "order"
               ? "min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4"
               : "p-4"
           }
@@ -101,9 +92,6 @@ export function ClassicDetailSheet({ detail, onClose }: ClassicDetailSheetProps)
           ) : null}
           {detail?.type === "product" ? (
             <ProductDetailBody id={detail.id} />
-          ) : null}
-          {detail?.type === "invoice" ? (
-            <InvoiceDetailBody id={detail.id} />
           ) : null}
           {detail?.type === "customer" ? (
             <CustomerDetailBody id={detail.id} onSaved={onClose} />
@@ -217,9 +205,7 @@ function UserDetailBody({ id }: { id: string }) {
 
 function OrderDetailBody({ id }: { id: string }) {
   const { t } = useTranslation("orders")
-  const navigate = useNavigate()
   const locale = useLocaleStore((state) => state.locale)
-  const [isGenerateOpen, setIsGenerateOpen] = useState(false)
   const numericOrderId = Number.parseInt(id, 10)
 
   const {
@@ -229,22 +215,11 @@ function OrderDetailBody({ id }: { id: string }) {
     error,
   } = useOrderDetailQuery(Number.isFinite(numericOrderId) ? numericOrderId : null)
   const syncMutation = useTriggerOrderSyncMutation()
-  const generateMutation = useGenerateInvoiceMutation()
 
   const order = useMemo(
     () => (orderDetail ? mapOrderDetailDtoToOrderDetail(orderDetail) : null),
     [orderDetail]
   )
-
-  const handleConfirmGenerate = useCallback(async () => {
-    if (!Number.isFinite(numericOrderId)) {
-      setIsGenerateOpen(false)
-      return
-    }
-    const invoice = await generateMutation.mutateAsync(numericOrderId)
-    setIsGenerateOpen(false)
-    void navigate(`/invoices/${invoice.id}`, { replace: true })
-  }, [generateMutation, navigate, numericOrderId])
 
   if (isLoading) {
     return (
@@ -266,29 +241,10 @@ function OrderDetailBody({ id }: { id: string }) {
 
   return (
     <div className="min-w-0 space-y-4">
-      <ConfirmDialog
-        open={isGenerateOpen}
-        onOpenChange={(open) => {
-          if (!open && !generateMutation.isPending) {
-            setIsGenerateOpen(false)
-          } else {
-            setIsGenerateOpen(open)
-          }
-        }}
-        title={t("confirm.generate.title")}
-        description={t("confirm.generate.description", {
-          orderId: order.orderId,
-        })}
-        confirmLabel={t("table.actions.generate")}
-        onConfirm={handleConfirmGenerate}
-        isLoading={generateMutation.isPending}
-      />
       <OrderDetailHeader
         order={order}
         locale={locale}
         variant="sheet"
-        onGenerate={() => setIsGenerateOpen(true)}
-        isGenerating={generateMutation.isPending}
         onSync={() => syncMutation.mutate()}
         isSyncing={syncMutation.isPending}
       />
@@ -370,40 +326,6 @@ function ProductDetailBody({ id }: { id: string }) {
     <div className="space-y-4">
       <ProductDetailHeader product={product} locale={locale} />
       <ProductDetailContent product={product} locale={locale} />
-    </div>
-  )
-}
-
-function InvoiceDetailBody({ id }: { id: string }) {
-  const { t } = useTranslation("invoices")
-  const locale = useLocaleStore((state) => state.locale)
-  const numericId = Number.parseInt(id, 10)
-  const { data: invoice, isLoading, isError, error } = useInvoiceDetailQuery(
-    Number.isFinite(numericId) ? numericId : null
-  )
-
-  if (isLoading) {
-    return (
-      <p className="text-sm text-muted-foreground">{t("detail.loading")}</p>
-    )
-  }
-
-  if (!invoice) {
-    return (
-      <AuthFormError
-        message={
-          isError && error
-            ? getInvoiceErrorMessage(error, t("errors.load_failed"))
-            : t("detail.not_found_title")
-        }
-      />
-    )
-  }
-
-  return (
-    <div className="min-w-0 space-y-4">
-      <InvoiceDocument invoice={invoice} locale={locale} variant="sheet" />
-      <InvoiceDetailSidebar invoice={invoice} locale={locale} compact />
     </div>
   )
 }

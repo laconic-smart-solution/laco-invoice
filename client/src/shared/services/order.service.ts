@@ -20,7 +20,6 @@ export interface ApiOrderDto {
   customerId: number | null
   customerName: string | null
   customerPhone: string | null
-  invoiceId: number | null
   externalOrderId: string
   orderStatus: ApiOrderStatus
   sourceType: ApiOrderSourceType | null
@@ -185,27 +184,9 @@ export interface OrderImportCommitRequest {
 
 export interface OrderStats {
   totalOrders: number
-  invoicedOrders: number
-  awaitingInvoice: number
-  invoiceCoveragePercent: number
   totalRevenue: number
   totalFees: number
   totalAdjustments: number
-}
-
-export type OrderBulkGenerateStatus = "RUNNING" | "COMPLETED" | "FAILED"
-
-export interface OrderBulkGenerateRun {
-  id: number
-  status: OrderBulkGenerateStatus
-  totalCount: number
-  processedCount: number
-  successCount: number
-  failedCount: number
-  zipFilename: string | null
-  errorMessage: string | null
-  startedAt: string
-  completedAt: string | null
 }
 
 export interface OrderExportRequest {
@@ -270,9 +251,6 @@ export const orderService = {
     const data = response.data.data
     return {
       totalOrders: data?.totalOrders ?? 0,
-      invoicedOrders: data?.invoicedOrders ?? 0,
-      awaitingInvoice: data?.awaitingInvoice ?? 0,
-      invoiceCoveragePercent: data?.invoiceCoveragePercent ?? 0,
       totalRevenue: Number(data?.totalRevenue ?? 0),
       totalFees: Number(data?.totalFees ?? 0),
       totalAdjustments: Number(data?.totalAdjustments ?? 0),
@@ -363,37 +341,6 @@ export const orderService = {
       const filename = filenameFromContentDisposition(
         response.headers["content-disposition"] as string | undefined,
         "orders-export.xlsx"
-      )
-      downloadBlob(response.data, filename)
-    } catch (error) {
-      await rethrowBlobApiError(error)
-    }
-  },
-
-  startBulkGenerate: async (request: OrderExportRequest) => {
-    const response = await apiClient.post<ApiResponse<OrderBulkGenerateRun>>(
-      "/v1/orders/bulk-generate",
-      request
-    )
-    return response.data.data
-  },
-
-  getBulkGenerateRun: async (runId: number) => {
-    const response = await apiClient.get<ApiResponse<OrderBulkGenerateRun>>(
-      `/v1/orders/bulk-generate/${runId}`
-    )
-    return response.data.data
-  },
-
-  downloadBulkGenerateZip: async (runId: number) => {
-    try {
-      const response = await apiClient.get<Blob>(
-        `/v1/orders/bulk-generate/${runId}/download`,
-        { responseType: "blob" }
-      )
-      const filename = filenameFromContentDisposition(
-        response.headers["content-disposition"] as string | undefined,
-        "orders-invoices.zip"
       )
       downloadBlob(response.data, filename)
     } catch (error) {

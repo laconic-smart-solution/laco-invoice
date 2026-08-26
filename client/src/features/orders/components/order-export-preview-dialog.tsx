@@ -44,7 +44,6 @@ const DEFAULT_VISIBLE_COLUMNS = [
   "marketplaceCode",
   "customerName",
   "customerPhone",
-  "invoiceId",
   "orderStatus",
   "sourceType",
   "subtotal",
@@ -98,7 +97,6 @@ export function OrderExportPreviewDialog({
       marketplaceCode: t("export.columns.marketplace"),
       customerName: t("table.columns.customer"),
       customerPhone: t("export.columns.customer_phone"),
-      invoiceId: t("export.columns.invoice_id"),
       orderStatus: t("table.columns.sync_status"),
       sourceType: t("table.columns.source"),
       subtotal: t("export.columns.subtotal"),
@@ -149,11 +147,6 @@ export function OrderExportPreviewDialog({
       {
         accessorKey: "customerPhone",
         header: t("export.columns.customer_phone"),
-      },
-      {
-        accessorKey: "invoiceId",
-        header: t("export.columns.invoice_id"),
-        cell: ({ getValue }) => getValue<number | null>() ?? "—",
       },
       {
         accessorKey: "orderStatus",

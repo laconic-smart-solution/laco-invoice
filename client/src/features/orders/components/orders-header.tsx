@@ -1,4 +1,4 @@
-import { Download, RefreshCw, Upload, Zap } from "lucide-react"
+import { Download, RefreshCw, Upload } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
@@ -10,8 +10,6 @@ interface OrdersHeaderProps {
   onImport?: () => void
   onExportCsv?: () => void
   isExporting?: boolean
-  onBulkGenerate?: () => void
-  isBulkGenerating?: boolean
 }
 
 export function OrdersHeader({
@@ -20,12 +18,10 @@ export function OrdersHeader({
   onImport,
   onExportCsv,
   isExporting = false,
-  onBulkGenerate,
-  isBulkGenerating = false,
 }: OrdersHeaderProps) {
   const { t } = useTranslation("orders")
   const isClassic = useIsClassicEmbed()
-  const busy = isExporting || isBulkGenerating
+  const busy = isExporting
 
   const actions = (
     <div className="flex flex-wrap items-center gap-2">
@@ -64,18 +60,6 @@ export function OrdersHeader({
       >
         <Download data-icon="inline-start" />
         {isExporting ? t("actions.exporting") : t("actions.export_csv")}
-      </Button>
-      <Button
-        type="button"
-        size={isClassic ? "sm" : "default"}
-        onClick={onBulkGenerate}
-        disabled={busy || !onBulkGenerate}
-        aria-busy={isBulkGenerating}
-      >
-        <Zap data-icon="inline-start" />
-        {isBulkGenerating
-          ? t("actions.bulk_generating")
-          : t("actions.bulk_generate")}
       </Button>
     </div>
   )

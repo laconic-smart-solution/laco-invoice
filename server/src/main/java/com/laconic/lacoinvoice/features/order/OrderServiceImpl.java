@@ -23,9 +23,7 @@ import com.laconic.lacoinvoice.common.pagination.PageQuerySupport;
 import com.laconic.lacoinvoice.common.pagination.SpecQuerySupport;
 import com.laconic.lacoinvoice.common.web.ApiResponse;
 import com.laconic.lacoinvoice.common.web.PageMeta;
-import com.laconic.lacoinvoice.domain.models.Invoice;
 import com.laconic.lacoinvoice.domain.models.Order;
-import com.laconic.lacoinvoice.domain.repositories.InvoiceRepository;
 import com.laconic.lacoinvoice.domain.repositories.OrderRepository;
 import com.laconic.lacoinvoice.domain.repositories.OrderWithdrawImportRowRepository;
 import com.laconic.lacoinvoice.domain.repositories.StoreRepository;
@@ -53,7 +51,6 @@ public class OrderServiceImpl implements OrderService {
 		columns.put("marketplaceCode", new ExportColumnSelector.ColumnDef<>("Marketplace", OrderDto::marketplaceCode));
 		columns.put("customerName", new ExportColumnSelector.ColumnDef<>("Customer", OrderDto::customerName));
 		columns.put("customerPhone", new ExportColumnSelector.ColumnDef<>("Customer Phone", OrderDto::customerPhone));
-		columns.put("invoiceId", new ExportColumnSelector.ColumnDef<>("Invoice ID", OrderDto::invoiceId));
 		columns.put("orderStatus", new ExportColumnSelector.ColumnDef<>("Status", OrderDto::orderStatus));
 		columns.put("sourceType", new ExportColumnSelector.ColumnDef<>("Source", OrderDto::sourceType));
 		columns.put("subtotal", new ExportColumnSelector.ColumnDef<>("Subtotal", OrderDto::subtotal));
@@ -69,7 +66,6 @@ public class OrderServiceImpl implements OrderService {
 
 	private final OrderRepository orderRepository;
 	private final StoreRepository storeRepository;
-	private final InvoiceRepository invoiceRepository;
 	private final OrderWithdrawImportRowRepository orderWithdrawImportRowRepository;
 	private final OrderMapper mapper;
 	private final OrderSyncService orderSyncService;
@@ -77,14 +73,12 @@ public class OrderServiceImpl implements OrderService {
 	public OrderServiceImpl(
 			OrderRepository orderRepository,
 			StoreRepository storeRepository,
-			InvoiceRepository invoiceRepository,
 			OrderWithdrawImportRowRepository orderWithdrawImportRowRepository,
 			OrderMapper mapper,
 			OrderSyncService orderSyncService) {
 		this.orderRepository = orderRepository;
 		this.orderWithdrawImportRowRepository = orderWithdrawImportRowRepository;
 		this.storeRepository = storeRepository;
-		this.invoiceRepository = invoiceRepository;
 		this.mapper = mapper;
 		this.orderSyncService = orderSyncService;
 	}
@@ -106,12 +100,6 @@ public class OrderServiceImpl implements OrderService {
 			return response;
 		}
 		List<Long> orderIds = data.stream().map(OrderDto::id).filter(Objects::nonNull).toList();
-		Map<Long, Long> invoiceIdByOrderId = invoiceRepository.findByOrder_IdIn(orderIds).stream()
-				.filter(invoice -> invoice.getOrder() != null && invoice.getOrder().getId() != null)
-				.collect(Collectors.toMap(
-						invoice -> invoice.getOrder().getId(),
-						Invoice::getId,
-						(a, b) -> a));
 		Map<Long, Object[]> payoutTotalsByOrderId = orderWithdrawImportRowRepository
 				.sumMoneyByOrderIds(orderIds)
 				.stream()
@@ -132,7 +120,6 @@ public class OrderServiceImpl implements OrderService {
 							dto.customerId(),
 							dto.customerName(),
 							dto.customerPhone(),
-							invoiceIdByOrderId.get(dto.id()),
 							dto.externalOrderId(),
 							dto.orderStatus(),
 							dto.sourceType(),
@@ -157,12 +144,11 @@ public class OrderServiceImpl implements OrderService {
 	public OrderDetailDto getDetailById(Long id) {
 		Order order = orderRepository.findDetailById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Order not found: id=" + id));
-		Long invoiceId = invoiceRepository.findByOrder_Id(id).map(Invoice::getId).orElse(null);
 		List<OrderItemDto> items = orderRepository.findItemsByOrderId(id).stream()
 				.map(mapper::toItemDto)
 				.toList();
 		return new OrderDetailDto(
-				mapper.toDto(order, invoiceId),
+				mapper.toDto(order),
 				mapper.toCustomerDto(order.getCustomer()),
 				items);
 	}
@@ -172,11 +158,6 @@ public class OrderServiceImpl implements OrderService {
 	@PreAuthorize("@authz.isOwnerOrAdmin()")
 	public OrderStatsDto stats(Long storeId) {
 		long totalOrders = orderRepository.countByOptionalStoreId(storeId);
-		long invoicedOrders = orderRepository.countInvoicedByOptionalStoreId(storeId);
-		long awaitingInvoice = orderRepository.countAwaitingInvoiceByOptionalStoreId(storeId);
-		double invoiceCoveragePercent = totalOrders > 0
-				? (invoicedOrders * 100.0) / totalOrders
-				: 0.0;
 
 		Object[] money = orderWithdrawImportRowRepository.sumMoneyByOptionalStoreId(storeId)
 				.stream()
@@ -188,9 +169,6 @@ public class OrderServiceImpl implements OrderService {
 
 		return new OrderStatsDto(
 				totalOrders,
-				invoicedOrders,
-				awaitingInvoice,
-				invoiceCoveragePercent,
 				totalRevenue,
 				totalFees,
 				totalAdjustments);
@@ -258,17 +236,11 @@ public class OrderServiceImpl implements OrderService {
 		Map<Long, Order> byId = entities.stream()
 				.filter(order -> order.getId() != null)
 				.collect(Collectors.toMap(Order::getId, order -> order, (a, b) -> a));
-		Map<Long, Long> invoiceIdByOrderId = invoiceRepository.findByOrder_IdIn(pageIds).stream()
-				.filter(invoice -> invoice.getOrder() != null && invoice.getOrder().getId() != null)
-				.collect(Collectors.toMap(
-						invoice -> invoice.getOrder().getId(),
-						Invoice::getId,
-						(a, b) -> a));
 
 		List<OrderDto> ordered = pageIds.stream()
 				.map(byId::get)
 				.filter(Objects::nonNull)
-				.map(order -> mapper.toDto(order, invoiceIdByOrderId.get(order.getId())))
+				.map(mapper::toDto)
 				.toList();
 		PageMeta meta = ExportPreviewPaging.meta(pageNumber, pageSize, allIds.size());
 		return ApiResponse.ok("OK", ordered, meta);
@@ -284,17 +256,11 @@ public class OrderServiceImpl implements OrderService {
 		Map<Long, Order> byId = entities.stream()
 				.filter(order -> order.getId() != null)
 				.collect(Collectors.toMap(Order::getId, order -> order, (a, b) -> a));
-		Map<Long, Long> invoiceIdByOrderId = invoiceRepository.findByOrder_IdIn(orderIds).stream()
-				.filter(invoice -> invoice.getOrder() != null && invoice.getOrder().getId() != null)
-				.collect(Collectors.toMap(
-						invoice -> invoice.getOrder().getId(),
-						Invoice::getId,
-						(a, b) -> a));
 
 		return orderIds.stream()
 				.map(byId::get)
 				.filter(Objects::nonNull)
-				.map(order -> mapper.toDto(order, invoiceIdByOrderId.get(order.getId())))
+				.map(mapper::toDto)
 				.toList();
 	}
 

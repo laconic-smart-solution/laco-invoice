@@ -104,7 +104,6 @@ function buildMockOrder(globalIndex: number): OrderDetail {
     syncStatus,
     sourceType: globalIndex % 3 === 0 ? "IMPORT" : "API",
     lineItems,
-    invoiceId: syncStatus === "synced" ? `INV-${90000 + globalIndex}` : undefined,
     lastSyncedAt:
       syncStatus === "synced"
         ? `2023-10-${String((globalIndex % 24) + 1).padStart(2, "0")}T14:30:00Z`

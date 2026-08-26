@@ -1,4 +1,4 @@
-import { Calendar, FileText, Mail, MapPin, Phone, Store, User } from "lucide-react"
+import { Calendar, Mail, MapPin, Phone, Store, User } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 
@@ -87,13 +87,6 @@ export function OrderDetailInfo({
               icon={Calendar}
               label={t("detail.last_synced")}
               value={formatDateTime(order.lastSyncedAt, locale)}
-            />
-          ) : null}
-          {order.invoiceId ? (
-            <DetailField
-              icon={FileText}
-              label={t("detail.invoice_id")}
-              value={order.invoiceId}
             />
           ) : null}
         </div>

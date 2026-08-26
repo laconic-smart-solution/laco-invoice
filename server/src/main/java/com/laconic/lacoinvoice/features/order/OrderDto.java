@@ -18,7 +18,6 @@ public record OrderDto(
 		Long customerId,
 		String customerName,
 		String customerPhone,
-		Long invoiceId,
 		String externalOrderId,
 		OrderStatus orderStatus,
 		OrderSourceType sourceType,

@@ -183,9 +183,10 @@ export function OrderImportFileDetailPage() {
                 {t("imports.detail.subtitle")}
               </p>
             </div>
-            <StatusBadge variant={STATUS_BADGE[file.status]}>
-              {t(`import.status_${file.status.toLowerCase()}`)}
-            </StatusBadge>
+            <StatusBadge
+              status={STATUS_BADGE[file.status]}
+              label={t(`import.status_${file.status.toLowerCase()}`)}
+            />
           </div>
 
           <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

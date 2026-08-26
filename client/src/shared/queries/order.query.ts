@@ -1,7 +1,6 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import type {
-  OrderBulkGenerateStatus,
   OrderExportRequest,
   OrderImportCommitRequest,
   OrderImportDecideRequest,
@@ -26,7 +25,6 @@ export const orderKeys = {
   stats: (storeId?: number) => [...orderKeys.all, "stats", storeId ?? "all"] as const,
   exportPreview: (request: Omit<OrderExportRequest, "pageNumber" | "pageSize" | "columns">) =>
     [...orderKeys.all, "export-preview", request] as const,
-  bulkGenerate: (runId: number) => [...orderKeys.all, "bulk-generate", runId] as const,
   importPreviewExcelRows: (
     storeId: number,
     batchId: number,
@@ -40,11 +38,6 @@ export const orderKeys = {
       previewOrderId,
     ] as const,
 }
-
-export const TERMINAL_BULK_GENERATE_STATUSES: OrderBulkGenerateStatus[] = [
-  "COMPLETED",
-  "FAILED",
-]
 
 export function useOrdersPageQuery(request: OrderPageRequest, enabled = true) {
   return useQuery({
@@ -200,51 +193,6 @@ export function useOrderExportPreviewQuery(
 export function useExportOrdersMutation() {
   return useMutation({
     mutationFn: (request: OrderExportRequest) => orderService.exportExcel(request),
-  })
-}
-
-export function useStartBulkGenerateOrdersMutation() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: (request: OrderExportRequest) => orderService.startBulkGenerate(request),
-    onSuccess: (run) => {
-      if (run?.id) {
-        queryClient.setQueryData(orderKeys.bulkGenerate(run.id), run)
-      }
-    },
-  })
-}
-
-const BULK_GENERATE_POLL_MS = 2000
-
-export function useBulkGenerateRunQuery(
-  runId: number | null,
-  enabled = true,
-  options?: { pollingEnabled?: boolean }
-) {
-  const pollingEnabled = options?.pollingEnabled ?? false
-
-  return useQuery({
-    queryKey: orderKeys.bulkGenerate(runId ?? 0),
-    queryFn: () => orderService.getBulkGenerateRun(runId as number),
-    enabled: enabled && runId != null && runId > 0,
-    refetchInterval: (query) => {
-      if (!pollingEnabled) {
-        return false
-      }
-      const status = query.state.data?.status
-      if (status && TERMINAL_BULK_GENERATE_STATUSES.includes(status)) {
-        return false
-      }
-      return BULK_GENERATE_POLL_MS
-    },
-  })
-}
-
-export function useDownloadBulkGenerateZipMutation() {
-  return useMutation({
-    mutationFn: (runId: number) => orderService.downloadBulkGenerateZip(runId),
   })
 }
 

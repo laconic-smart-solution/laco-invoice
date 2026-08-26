@@ -178,7 +178,6 @@ export function OrderInputRunDetailPage() {
     isLocallyRunning,
   ])
 
-  const isRunPending = isLocallyRunning || resetStuckMutation.isPending
   const displayStatus: ApiOrderInputRunStatus = isLocallyRunning
     ? "RUNNING"
     : (run?.status ?? "DRAFT")

@@ -174,9 +174,10 @@ export function OrderImportFilesPage() {
           />
         ),
         cell: ({ row }) => (
-          <StatusBadge variant={STATUS_BADGE[row.original.status]}>
-            {t(`import.status_${row.original.status.toLowerCase()}`)}
-          </StatusBadge>
+          <StatusBadge
+            status={STATUS_BADGE[row.original.status]}
+            label={t(`import.status_${row.original.status.toLowerCase()}`)}
+          />
         ),
       },
       {

@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 
 import {
   orderImportFileService,
@@ -37,10 +37,11 @@ export function getOrderImportFileErrorMessage(
   error: unknown,
   fallback: string
 ): string {
-  if (isAxiosStatusMessage(error)) {
-    return extractApiErrorMessage(error) || fallback
+  const message = extractApiErrorMessage(error, fallback)
+  if (message === fallback || isAxiosStatusMessage(message)) {
+    return fallback
   }
-  return extractApiErrorMessage(error) || fallback
+  return message
 }
 
 /** Invalidate import-file lists after a successful order import commit. */

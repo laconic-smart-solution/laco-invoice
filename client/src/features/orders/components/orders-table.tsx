@@ -10,7 +10,6 @@ import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
-import { ConfirmDialog } from "@/components/common/confirm-dialog"
 import { DataTable } from "@/components/common/data-table/data-table"
 import { DataTableColumnControls } from "@/components/common/data-table/data-table-column-controls"
 import { DataTableColumnHeader } from "@/components/common/data-table/data-table-column-header"
@@ -26,17 +25,12 @@ import {
 import { StatusBadge } from "@/components/common/status-badge"
 import type { StatusBadgeVariant } from "@/components/common/status-badge"
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { AuthFormError } from "@/features/auth/components/auth-form-error"
 import { OrderHistoryDialog } from "@/features/orders/components/order-history-dialog"
 import type {
   Order,
   OrderSourceType,
   OrderSyncStatus,
 } from "@/features/orders/types/order"
-import {
-  getInvoiceErrorMessage,
-  useGenerateInvoiceMutation,
-} from "@/shared/queries/invoice.query"
 import { useLocaleStore } from "@/shared/stores/locale-store"
 import { formatCurrency, formatDate } from "@/util/format"
 
@@ -58,36 +52,14 @@ const DEFAULT_HIDDEN_ORDER_COLUMNS: VisibilityState = {
 
 interface OrderRowActionProps {
   order: Order
-  onGenerate: (order: Order) => void
   onHistory: (order: Order) => void
 }
 
-function OrderRowAction({ order, onGenerate, onHistory }: OrderRowActionProps) {
+function OrderRowAction({ order, onHistory }: OrderRowActionProps) {
   const { t } = useTranslation("orders")
-  const navigate = useNavigate()
-
-  if (order.invoiceId) {
-    return (
-      <DataTableRowActions>
-        <DropdownMenuItem
-          onSelect={() => {
-            void navigate(ROUTES.dashboard.invoiceDetail(order.invoiceId as string))
-          }}
-        >
-          {t("table.actions.view_invoice")}
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => onHistory(order)}>
-          {t("table.actions.history")}
-        </DropdownMenuItem>
-      </DataTableRowActions>
-    )
-  }
 
   return (
     <DataTableRowActions>
-      <DropdownMenuItem onSelect={() => onGenerate(order)}>
-        {t("table.actions.generate")}
-      </DropdownMenuItem>
       <DropdownMenuItem onSelect={() => onHistory(order)}>
         {t("table.actions.history")}
       </DropdownMenuItem>
@@ -113,8 +85,6 @@ interface OrdersTableProps {
   columnFilters: ColumnFiltersState
   onColumnFiltersChange: (filters: ColumnFiltersState) => void
   onSelectionChange?: (selection: DataTableSelection) => void
-  onBulkGenerate?: () => void
-  isBulkGenerating?: boolean
 }
 
 export function OrdersTable({
@@ -135,20 +105,16 @@ export function OrdersTable({
   columnFilters,
   onColumnFiltersChange,
   onSelectionChange,
-  onBulkGenerate,
-  isBulkGenerating = false,
 }: OrdersTableProps) {
   const { t } = useTranslation("orders")
   const navigate = useNavigate()
   const locale = useLocaleStore((state) => state.locale)
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
   const [isAllMatchingSelected, setIsAllMatchingSelected] = useState(false)
-  const [orderToGenerate, setOrderToGenerate] = useState<Order | null>(null)
   const [historyOrder, setHistoryOrder] = useState<Order | null>(null)
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     DEFAULT_HIDDEN_ORDER_COLUMNS
   )
-  const generateMutation = useGenerateInvoiceMutation()
 
   const pageRowIdsKey = useMemo(
     () => orders.map((order) => order.id).join(","),
@@ -171,35 +137,9 @@ export function OrdersTable({
     setRowSelection(next)
   }, [isAllMatchingSelected, orders, pageRowIdsKey])
 
-  const handleGenerateRequest = useCallback((order: Order) => {
-    setOrderToGenerate(order)
-  }, [])
-
   const handleHistoryRequest = useCallback((order: Order) => {
     setHistoryOrder(order)
   }, [])
-
-  const handleConfirmGenerate = useCallback(async () => {
-    if (!orderToGenerate) {
-      return
-    }
-    const orderId = Number.parseInt(orderToGenerate.id, 10)
-    if (!Number.isFinite(orderId)) {
-      setOrderToGenerate(null)
-      return
-    }
-    const invoice = await generateMutation.mutateAsync(orderId)
-    setOrderToGenerate(null)
-    void navigate(ROUTES.dashboard.invoiceDetail(String(invoice.id)))
-  }, [generateMutation, navigate, orderToGenerate])
-
-  const generateError =
-    generateMutation.isError && generateMutation.error
-      ? getInvoiceErrorMessage(
-          generateMutation.error,
-          t("errors.generate_invoice_failed")
-        )
-      : null
 
   const handleRowClick = useCallback(
     (order: Order) => {
@@ -416,13 +356,12 @@ export function OrdersTable({
         cell: ({ row }) => (
           <OrderRowAction
             order={row.original}
-            onGenerate={handleGenerateRequest}
             onHistory={handleHistoryRequest}
           />
         ),
       },
     ],
-    [handleGenerateRequest, handleHistoryRequest, locale, t]
+    [handleHistoryRequest, locale, t]
   )
 
   const table = useDataTable({
@@ -472,27 +411,6 @@ export function OrdersTable({
 
   return (
     <section className="border border-border bg-card shadow-sm">
-      <AuthFormError message={generateError} />
-      <ConfirmDialog
-        open={orderToGenerate !== null}
-        onOpenChange={(open) => {
-          if (!open && !generateMutation.isPending) {
-            setOrderToGenerate(null)
-          }
-        }}
-        title={t("confirm.generate.title")}
-        description={
-          orderToGenerate
-            ? t("confirm.generate.description", {
-                orderId: orderToGenerate.orderId,
-              })
-            : undefined
-        }
-        confirmLabel={t("table.actions.generate")}
-        onConfirm={handleConfirmGenerate}
-        isLoading={generateMutation.isPending}
-      />
-
       <OrderHistoryDialog
         open={historyOrder !== null}
         onOpenChange={(open) => {
@@ -511,12 +429,6 @@ export function OrdersTable({
           table={table}
           selectedCount={toolbarSelectedCount}
           selectedLabel={(count) => t("table.selected_count", { count })}
-          bulkActionLabel={
-            isBulkGenerating
-              ? t("actions.bulk_generating")
-              : t("table.bulk_generate")
-          }
-          onBulkAction={onBulkGenerate}
           className="border-b-0"
         />
         <DataTableColumnControls

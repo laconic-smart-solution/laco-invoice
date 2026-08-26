@@ -34,7 +34,6 @@ import com.laconic.lacoinvoice.domain.models.OrderImportResolveAction;
 import com.laconic.lacoinvoice.domain.models.OrderImportStatus;
 import com.laconic.lacoinvoice.domain.models.OrderItem;
 import com.laconic.lacoinvoice.domain.models.Store;
-import com.laconic.lacoinvoice.domain.repositories.InvoiceRepository;
 import com.laconic.lacoinvoice.domain.repositories.MarketplaceRepository;
 import com.laconic.lacoinvoice.domain.repositories.OrderImportBatchRepository;
 import com.laconic.lacoinvoice.domain.repositories.OrderImportFileRepository;
@@ -51,7 +50,6 @@ public class OrderImportPreviewService {
 
 	private static final Logger log = LoggerFactory.getLogger(OrderImportPreviewService.class);
 	private static final long PREVIEW_TTL_HOURS = 24;
-	private static final String WARNING_HAS_INVOICE = "HAS_INVOICE";
 	private static final String RESOLVE_SOURCE_AUTO = "AUTO";
 	private static final String RESOLVE_SOURCE_USER = "USER";
 
@@ -63,7 +61,6 @@ public class OrderImportPreviewService {
 	private final MarketplaceRepository marketplaceRepository;
 	private final OrderRepository orderRepository;
 	private final OrderItemRepository orderItemRepository;
-	private final InvoiceRepository invoiceRepository;
 	private final OrderImportBatchRepository batchRepository;
 	private final OrderImportPreviewOrderRepository previewOrderRepository;
 	private final OrderImportPreviewItemRepository previewItemRepository;
@@ -76,7 +73,6 @@ public class OrderImportPreviewService {
 			MarketplaceRepository marketplaceRepository,
 			OrderRepository orderRepository,
 			OrderItemRepository orderItemRepository,
-			InvoiceRepository invoiceRepository,
 			OrderImportBatchRepository batchRepository,
 			OrderImportPreviewOrderRepository previewOrderRepository,
 			OrderImportPreviewItemRepository previewItemRepository,
@@ -87,7 +83,6 @@ public class OrderImportPreviewService {
 		this.marketplaceRepository = marketplaceRepository;
 		this.orderRepository = orderRepository;
 		this.orderItemRepository = orderItemRepository;
-		this.invoiceRepository = invoiceRepository;
 		this.batchRepository = batchRepository;
 		this.previewOrderRepository = previewOrderRepository;
 		this.previewItemRepository = previewItemRepository;
@@ -170,9 +165,6 @@ public class OrderImportPreviewService {
 				preview.setExistingOrder(existing);
 				preview.setExistingItemCount((int) orderItemRepository.countByOrder_Id(existing.getId()));
 				preview.setExistingTotalAmount(existing.getTotalAmount());
-				if (invoiceRepository.existsByOrder_Id(existing.getId())) {
-					preview.setWarningCode(WARNING_HAS_INVOICE);
-				}
 				duplicateCount++;
 			} else {
 				preview.setMatchStatus(OrderImportMatchStatus.NEW);
@@ -271,10 +263,7 @@ public class OrderImportPreviewService {
 				int items;
 				switch (action) {
 					case CREATE -> items = importService.createOrder(store, marketplace, importFile, row);
-					case REPLACE -> {
-						assertReplaceAllowed(preview);
-						items = importService.replaceOrder(store, marketplace, importFile, row);
-					}
+					case REPLACE -> items = importService.replaceOrder(store, marketplace, importFile, row);
 					case MERGE -> {
 						Order existing = preview.getExistingOrder();
 						if (existing == null) {
@@ -339,9 +328,6 @@ public class OrderImportPreviewService {
 			}
 		} else {
 			validateDuplicateAction(action);
-			if (action == OrderImportResolveAction.REPLACE) {
-				assertReplaceAllowed(preview);
-			}
 		}
 		preview.setResolveAction(action);
 		preview.setResolveSource(source);
@@ -353,20 +339,6 @@ public class OrderImportPreviewService {
 				&& action != OrderImportResolveAction.REPLACE) {
 			throw new IllegalArgumentException(
 					"Duplicate orders require MERGE, SKIP, or REPLACE; got " + action);
-		}
-	}
-
-	private void assertReplaceAllowed(OrderImportPreviewOrder preview) {
-		if (WARNING_HAS_INVOICE.equals(preview.getWarningCode())) {
-			throw new IllegalArgumentException(
-					"REPLACE blocked for order " + preview.getExternalOrderId()
-							+ " because an invoice already exists. Use MERGE or SKIP.");
-		}
-		if (preview.getExistingOrder() != null
-				&& invoiceRepository.existsByOrder_Id(preview.getExistingOrder().getId())) {
-			throw new IllegalArgumentException(
-					"REPLACE blocked for order " + preview.getExternalOrderId()
-							+ " because an invoice already exists. Use MERGE or SKIP.");
 		}
 	}
 

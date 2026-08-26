@@ -1,6 +1,5 @@
 import type { ReactNode } from "react"
 
-import { OrderBulkGeneratePanel } from "@/components/common/order-bulk-generate-panel"
 import { Navbar } from "@/components/core/navbar/navbar"
 import { Sidebar } from "@/components/core/sidebar/sidebar"
 import { SidebarToggle } from "@/components/core/sidebar/sidebar-toggle"
@@ -36,7 +35,6 @@ export function ModernDashboardShell({ children }: ModernDashboardShellProps) {
           {children}
         </main>
       </div>
-      <OrderBulkGeneratePanel />
     </div>
   )
 }

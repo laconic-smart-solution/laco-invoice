@@ -71,12 +71,6 @@ export const APP_SHORTCUTS: AppShortcut[] = [
     descriptionKey: "items.go_products",
   },
   {
-    id: "go-invoices",
-    keys: ["I"],
-    chordPrefix: "G",
-    descriptionKey: "items.go_invoices",
-  },
-  {
     id: "go-customers",
     keys: ["C"],
     chordPrefix: "G",

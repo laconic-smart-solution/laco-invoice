@@ -24,7 +24,6 @@ import com.laconic.lacoinvoice.domain.models.OrderTaxInvoice;
 import com.laconic.lacoinvoice.domain.models.Product;
 import com.laconic.lacoinvoice.domain.models.Store;
 import com.laconic.lacoinvoice.domain.repositories.CustomerInfoRepository;
-import com.laconic.lacoinvoice.domain.repositories.InvoiceRepository;
 import com.laconic.lacoinvoice.domain.repositories.MarketplaceRepository;
 import com.laconic.lacoinvoice.domain.repositories.OrderImportFileRepository;
 import com.laconic.lacoinvoice.domain.repositories.OrderItemRepository;
@@ -50,7 +49,6 @@ public class OrderImportService {
 	private final CustomerInfoRepository customerInfoRepository;
 	private final ProductRepository productRepository;
 	private final OrderTaxInvoiceRepository orderTaxInvoiceRepository;
-	private final InvoiceRepository invoiceRepository;
 	private final OrderSkuListExcelParser excelParser;
 	private final OrderHistoryRecorder orderHistoryRecorder;
 
@@ -63,7 +61,6 @@ public class OrderImportService {
 			CustomerInfoRepository customerInfoRepository,
 			ProductRepository productRepository,
 			OrderTaxInvoiceRepository orderTaxInvoiceRepository,
-			InvoiceRepository invoiceRepository,
 			OrderSkuListExcelParser excelParser,
 			OrderHistoryRecorder orderHistoryRecorder) {
 		this.storeRepository = storeRepository;
@@ -74,7 +71,6 @@ public class OrderImportService {
 		this.customerInfoRepository = customerInfoRepository;
 		this.productRepository = productRepository;
 		this.orderTaxInvoiceRepository = orderTaxInvoiceRepository;
-		this.invoiceRepository = invoiceRepository;
 		this.excelParser = excelParser;
 		this.orderHistoryRecorder = orderHistoryRecorder;
 	}
@@ -213,10 +209,6 @@ public class OrderImportService {
 				.findByStore_IdAndMarketplace_IdAndExternalOrderId(
 						store.getId(), marketplace.getId(), row.orderId())
 				.orElseThrow(() -> new IllegalStateException("Order not found for REPLACE: " + row.orderId()));
-		if (invoiceRepository.existsByOrder_Id(existing.getId())) {
-			throw new IllegalArgumentException(
-					"REPLACE blocked for order " + row.orderId() + " because an invoice already exists");
-		}
 		OrderHistorySnapshot before = OrderHistorySnapshot.capture(existing);
 		int itemCount = upsertOrder(store, marketplace, importFile, row);
 		Order after = orderRepository

@@ -37,8 +37,9 @@ import lombok.Setter;
 		indexes = {
 			// Oracle identifier limit is 30 chars — keep index names short.
 			@Index(name = "ix_oh_order_perf", columnList = "order_id, performed_at, id"),
-			@Index(name = "ix_oh_import_file", columnList = "import_file_id"),
-			@Index(name = "ix_oh_user", columnList = "performed_by_user_id"),
+			// Names match indexes created on first deploy (≤30 chars); avoids ORA-01408 on rename.
+			@Index(name = "ix_order_history_import_file", columnList = "import_file_id"),
+			@Index(name = "ix_order_history_user", columnList = "performed_by_user_id"),
 			@Index(name = "ix_oh_source_perf", columnList = "source, performed_at"),
 			@Index(name = "ix_oh_action_perf", columnList = "action, performed_at")
 		})

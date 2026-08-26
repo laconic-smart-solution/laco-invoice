@@ -15,10 +15,6 @@ public class OrderMapper implements BaseMapper<Order, OrderDto> {
 
 	@Override
 	public OrderDto toDto(Order entity) {
-		return toDto(entity, null);
-	}
-
-	public OrderDto toDto(Order entity, Long invoiceId) {
 		if (entity == null) {
 			return null;
 		}
@@ -39,7 +35,6 @@ public class OrderMapper implements BaseMapper<Order, OrderDto> {
 				customerId,
 				customerName,
 				customerPhone,
-				invoiceId,
 				entity.getExternalOrderId(),
 				entity.getOrderStatus(),
 				entity.getSourceType() != null ? entity.getSourceType() : OrderSourceType.API,

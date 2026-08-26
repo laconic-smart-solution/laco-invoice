@@ -1,7 +1,6 @@
 import {
   ClipboardList,
-  FileText,
-  FileWarning,
+  HandCoins,
   Package,
   Store,
   UserCog,
@@ -14,14 +13,13 @@ import { StatCard } from "@/components/common/stat-card"
 import { classicPanelPath } from "@/features/classic-spa/util/classic-route"
 import { useUsersPageQuery } from "@/shared/queries/admin-user.query"
 import { useCustomersPageQuery } from "@/shared/queries/customer.query"
-import { useInvoiceStatsQuery } from "@/shared/queries/invoice.query"
 import { useMarketplaceProductsPageQuery } from "@/shared/queries/marketplace-product.query"
 import { useOrderStatsQuery } from "@/shared/queries/order.query"
 import { useStoresPageQuery } from "@/shared/queries/store.query"
 import { useAuthStore } from "@/shared/stores/auth-store"
 import { useClassicWorkspaceStore } from "@/shared/stores/classic-workspace-store"
 import { useLocaleStore } from "@/shared/stores/locale-store"
-import { formatNumber } from "@/util/format"
+import { formatCurrency, formatNumber } from "@/util/format"
 
 const COUNT_REQUEST = {
   pageNumber: 1,
@@ -36,7 +34,6 @@ export function ClassicOverviewPanel() {
   const setPanel = useClassicWorkspaceStore((state) => state.setPanel)
 
   const { data: orderStats } = useOrderStatsQuery()
-  const { data: invoiceStats } = useInvoiceStatsQuery()
   const { data: storesPage } = useStoresPageQuery(COUNT_REQUEST)
   const { data: productsPage } = useMarketplaceProductsPageQuery(COUNT_REQUEST)
   const { data: customersPage } = useCustomersPageQuery(COUNT_REQUEST)
@@ -51,8 +48,7 @@ export function ClassicOverviewPanel() {
   }
 
   const orders = orderStats?.totalOrders ?? 0
-  const awaiting = orderStats?.awaitingInvoice ?? 0
-  const invoices = invoiceStats?.issuedCount ?? 0
+  const revenue = orderStats?.totalRevenue ?? 0
   const stores = storesPage?.meta?.totalElements ?? 0
   const products = productsPage?.meta?.totalElements ?? 0
   const customers = customersPage?.meta?.totalElements ?? 0
@@ -79,21 +75,12 @@ export function ClassicOverviewPanel() {
           onClick={() => openPanel("orders")}
         />
         <StatCard
-          title={t("overview.stats.awaiting_invoice")}
-          value={formatNumber(awaiting, locale)}
-          icon={FileWarning}
-          iconWrapperClassName="bg-destructive/10 text-destructive"
+          title={t("overview.stats.revenue", { defaultValue: "Total Revenue" })}
+          value={formatCurrency(revenue, locale, "THB")}
+          icon={HandCoins}
+          iconWrapperClassName="bg-success/10 text-success"
           footer={t("overview.hint_click")}
-          onClick={() =>
-            openPanel("orders", { ordersAwaitingInvoice: true })
-          }
-        />
-        <StatCard
-          title={t("overview.stats.invoices")}
-          value={formatNumber(invoices, locale)}
-          icon={FileText}
-          footer={t("overview.hint_click")}
-          onClick={() => openPanel("invoices")}
+          onClick={() => openPanel("orders")}
         />
         <StatCard
           title={t("overview.stats.stores")}

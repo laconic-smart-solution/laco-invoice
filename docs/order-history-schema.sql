@@ -23,8 +23,8 @@ CREATE TABLE order_history (
 );
 
 CREATE INDEX ix_oh_order_perf ON order_history (order_id, performed_at, id);
-CREATE INDEX ix_oh_import_file ON order_history (import_file_id);
-CREATE INDEX ix_oh_user ON order_history (performed_by_user_id);
+CREATE INDEX ix_order_history_import_file ON order_history (import_file_id);
+CREATE INDEX ix_order_history_user ON order_history (performed_by_user_id);
 CREATE INDEX ix_oh_source_perf ON order_history (source, performed_at);
 CREATE INDEX ix_oh_action_perf ON order_history (action, performed_at);
 

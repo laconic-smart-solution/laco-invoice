@@ -20,7 +20,6 @@ export interface Order {
   customer: string
   customerId?: string
   customerPhone?: string
-  invoiceId?: string
   totalAmount: number
   totalFees: number
   totalAdjustments: number
@@ -40,6 +39,5 @@ export interface OrderDetail extends Order {
   vatAmount: number
   shipping: number
   lineItems: OrderLineItem[]
-  invoiceId?: string
   lastSyncedAt?: string
 }
