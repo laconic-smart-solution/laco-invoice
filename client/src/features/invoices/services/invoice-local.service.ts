@@ -1,4 +1,4 @@
-﻿import type { CreateInvoiceRequest, Invoice, InvoiceItemLine, InvoiceOrderSummary, InvoiceStatus } from "../types/invoice"
+import type { CreateInvoiceRequest, Invoice, InvoiceItemLine, InvoiceOrderSummary, InvoiceStatus } from "../types/invoice"
 
 const STORAGE_KEY = "laco_invoices_data_v1"
 

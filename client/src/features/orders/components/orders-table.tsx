@@ -4,7 +4,7 @@ import type {
   OnChangeFn,
   SortingState,
 } from "@tanstack/react-table"
-import { Store } from "lucide-react"
+import { Info, Store } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
@@ -23,6 +23,12 @@ import {
   type VisibilityState,
 } from "@/components/common/data-table/use-data-table"
 import { StatusBadge } from "@/components/common/status-badge"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import type { StatusBadgeVariant } from "@/components/common/status-badge"
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { OrderHistoryDialog } from "@/features/orders/components/order-history-dialog"
@@ -48,6 +54,13 @@ const SOURCE_TYPE_BADGE: Record<OrderSourceType, StatusBadgeVariant> = {
 const DEFAULT_HIDDEN_ORDER_COLUMNS: VisibilityState = {
   syncStatus: false,
   sourceType: false,
+  totalFees: false,
+  totalAdjustments: false,
+  tiktokCommissionFee: true,
+  transactionFee: true,
+  affiliateCommission: true,
+  adsFee: true,
+  shippingFeeDeduction: true,
 }
 
 interface OrderRowActionProps {
@@ -173,6 +186,11 @@ export function OrdersTable({
       customer: t("table.columns.customer"),
       totalAmount: t("table.columns.total_amount"),
       totalFees: t("table.columns.total_fees"),
+      tiktokCommissionFee: t("table.columns.tiktok_commission_fee", "TikTok Commission"),
+      transactionFee: t("table.columns.transaction_fee", "Transaction Fee"),
+      affiliateCommission: t("table.columns.affiliate_commission", "Affiliate Commission"),
+      adsFee: t("table.columns.ads_fee", "Shop Ads Fee"),
+      shippingFeeDeduction: t("table.columns.shipping_fee_deduction", "Shipping Fee / Subsidy"),
       totalAdjustments: t("table.columns.total_adjustments"),
       syncStatus: t("table.columns.sync_status"),
       sourceType: t("table.columns.source"),
@@ -277,14 +295,115 @@ export function OrdersTable({
         enableColumnFilter: false,
         enableSorting: false,
         header: ({ column }) => (
+          <div className="flex items-center gap-1">
+            <DataTableColumnHeader
+              column={column}
+              title={t("table.columns.total_fees")}
+              enableSearch={false}
+            />
+            <TooltipProvider delayDuration={150}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    className="inline-flex size-4 shrink-0 items-center justify-center rounded-full text-muted-foreground/70 hover:text-foreground hover:bg-muted/80 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
+                    aria-label="Information about Total Fees"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Info className="size-3" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" align="center" className="max-w-xs p-3 text-xs leading-relaxed bg-popover text-popover-foreground border border-border shadow-xl rounded-md">
+                  <div className="space-y-1.5 text-left font-sans">
+                    <p className="font-semibold text-foreground border-b border-border/50 pb-1">
+                      Total Platform Deductions & Fees
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Total marketplace deductions extracted from the Service fee / Payout report:
+                    </p>
+                    <ul className="list-disc pl-4 space-y-0.5 text-[11px] text-muted-foreground">
+                      <li>TikTok Shop Commission & Transaction fees</li>
+                      <li>Affiliate commissions & Ads deductions</li>
+                      <li>Platform program fees & shipping subsidies</li>
+                    </ul>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        ),
+        cell: ({ row }) =>
+          formatCurrency(row.original.totalFees, locale, row.original.currency),
+      },
+      {
+        accessorKey: "tiktokCommissionFee",
+        enableColumnFilter: false,
+        enableSorting: false,
+        header: ({ column }) => (
           <DataTableColumnHeader
             column={column}
-            title={t("table.columns.total_fees")}
+            title={t("table.columns.tiktok_commission_fee", "TikTok Commission")}
             enableSearch={false}
           />
         ),
         cell: ({ row }) =>
-          formatCurrency(row.original.totalFees, locale, row.original.currency),
+          formatCurrency(row.original.tiktokCommissionFee ?? 0, locale, row.original.currency),
+      },
+      {
+        accessorKey: "transactionFee",
+        enableColumnFilter: false,
+        enableSorting: false,
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.transaction_fee", "Transaction Fee")}
+            enableSearch={false}
+          />
+        ),
+        cell: ({ row }) =>
+          formatCurrency(row.original.transactionFee ?? 0, locale, row.original.currency),
+      },
+      {
+        accessorKey: "affiliateCommission",
+        enableColumnFilter: false,
+        enableSorting: false,
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.affiliate_commission", "Affiliate Commission")}
+            enableSearch={false}
+          />
+        ),
+        cell: ({ row }) =>
+          formatCurrency(row.original.affiliateCommission ?? 0, locale, row.original.currency),
+      },
+      {
+        accessorKey: "adsFee",
+        enableColumnFilter: false,
+        enableSorting: false,
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.ads_fee", "Shop Ads Fee")}
+            enableSearch={false}
+          />
+        ),
+        cell: ({ row }) =>
+          formatCurrency(row.original.adsFee ?? 0, locale, row.original.currency),
+      },
+      {
+        accessorKey: "shippingFeeDeduction",
+        enableColumnFilter: false,
+        enableSorting: false,
+        header: ({ column }) => (
+          <DataTableColumnHeader
+            column={column}
+            title={t("table.columns.shipping_fee_deduction", "Shipping Fee / Subsidy")}
+            enableSearch={false}
+          />
+        ),
+        cell: ({ row }) =>
+          formatCurrency(row.original.shippingFeeDeduction ?? 0, locale, row.original.currency),
       },
       {
         accessorKey: "totalAdjustments",

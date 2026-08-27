@@ -1,4 +1,4 @@
-﻿import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { formatCurrency, formatDateTime } from "@/util/format"
 import type { Locale } from "@/app/i18n"
 import { Printer, X } from "lucide-react"

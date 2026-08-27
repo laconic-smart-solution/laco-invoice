@@ -115,6 +115,17 @@ public class OrderInputRunService {
 	@Loggable
 	@Transactional
 	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	public OrderInputRunDto updateTitle(Long id, String title) {
+		OrderInputRun run = requireRun(id);
+		if (StringUtils.hasText(title)) {
+			run.setTitle(title.trim());
+		}
+		return mapper.toDto(runRepository.save(run));
+	}
+
+	@Loggable
+	@Transactional
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
 	public OrderInputRunDto create(OrderInputRunCreateRequest request) {
 		Store store = storeRepository.findById(request.getStoreId())
 				.orElseThrow(() -> new IllegalArgumentException("Store not found: id=" + request.getStoreId()));
@@ -227,7 +238,7 @@ public class OrderInputRunService {
 
 	/**
 	 * Clears abandoned RUNNING state (e.g. user refreshed while import preview was open).
-	 * Order-detail preview → back to READY; stuck withdraw RUNNING → back to READY.
+	 * Order-detail preview â†’ back to READY; stuck withdraw RUNNING â†’ back to READY.
 	 */
 	@Loggable
 	@Transactional
@@ -600,3 +611,4 @@ public class OrderInputRunService {
 		return StringUtils.hasText(name) ? name : "upload.xlsx";
 	}
 }
+

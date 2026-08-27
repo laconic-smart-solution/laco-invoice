@@ -87,6 +87,18 @@ export function useOrderInputRunWithdrawRowsQuery(
   })
 }
 
+export function useUpdateOrderInputRunTitleMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, title }: { id: number; title: string }) =>
+      orderInputRunService.updateTitle(id, title),
+    onSuccess: (data) => {
+      queryClient.setQueryData(orderInputRunKeys.detail(data.id), data)
+      void queryClient.invalidateQueries({ queryKey: orderInputRunKeys.lists() })
+    },
+  })
+}
+
 export function useCreateOrderInputRunMutation() {
   const queryClient = useQueryClient()
   return useMutation({
@@ -241,3 +253,4 @@ export function getOrderInputRunErrorMessage(
   }
   return message
 }
+

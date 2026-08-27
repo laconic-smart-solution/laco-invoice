@@ -5,8 +5,12 @@ import {
   ChevronsUpDown,
   Download,
   FileSpreadsheet,
+  Check,
+  Info,
   Loader2,
+  Pencil,
   Play,
+  X,
 } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -38,6 +42,8 @@ import { mapOrderDtoToOrder } from "@/features/orders/util/map-order"
 import type { MarketplaceCode } from "@/features/stores/config/marketplaces"
 import type { ApiOrderStatus } from "@/shared/services/order.service"
 import { Button } from "@/components/ui/button"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Input } from "@/components/ui/input"
 import {
   Table,
   TableBody,
@@ -53,6 +59,7 @@ import {
   useCancelOrderInputRunPreviewMutation,
   useFinishOrderInputRunMutation,
   useOrderInputRunDetailQuery,
+  useUpdateOrderInputRunTitleMutation,
   useOrderInputRunWithdrawRowsQuery,
   useResetStuckOrderInputRunMutation,
   useRunOrderInputWithdrawMutation,
@@ -130,6 +137,31 @@ export function OrderInputRunDetailPage() {
   const runWithdrawMutation = useRunOrderInputWithdrawMutation()
   const resetStuckMutation = useResetStuckOrderInputRunMutation()
   const didAutoResetStuck = useRef(false)
+  const [isEditingTitle, setIsEditingTitle] = useState(false)
+  const [editTitleValue, setEditTitleValue] = useState("")
+  const [editTitleError, setEditTitleError] = useState("")
+  const updateTitleMutation = useUpdateOrderInputRunTitleMutation()
+
+  const handleSaveTitle = (e?: React.FormEvent) => {
+    e?.preventDefault()
+    const trimmed = editTitleValue.trim()
+    if (!trimmed) {
+      setEditTitleError("Title cannot be empty.")
+      return
+    }
+    updateTitleMutation.mutate(
+      { id, title: trimmed },
+      {
+        onSuccess: () => {
+          setIsEditingTitle(false)
+          setEditTitleError("")
+        },
+        onError: (err) => {
+          setEditTitleError(err.message || "Failed to update title.")
+        },
+      }
+    )
+  }
 
   const [activeTab, setActiveTab] = useState<DetailTab>("orders")
   const [localError, setLocalError] = useState<string | null>(null)
@@ -436,9 +468,74 @@ export function OrderInputRunDetailPage() {
           <Button variant="ghost" size="sm" className="px-0" asChild>
             <Link to={ROUTES.dashboard.orderInputs}>{t("inputs.back")}</Link>
           </Button>
-          <h1 className="font-heading text-xl font-semibold tracking-tight">
-            {run.title}
-          </h1>
+          {isEditingTitle ? (
+            <form onSubmit={handleSaveTitle} className="flex items-center gap-1.5 pt-1">
+              <Input
+                value={editTitleValue}
+                onChange={(e) => {
+                  setEditTitleValue(e.target.value)
+                  setEditTitleError("")
+                }}
+                placeholder="Order set title..."
+                className={`h-8 w-64 font-semibold text-sm rounded-none ${
+                  editTitleError
+                    ? "border-destructive text-destructive focus-visible:ring-destructive"
+                    : "text-foreground"
+                }`}
+                autoFocus
+              />
+              <Button
+                type="submit"
+                size="sm"
+                disabled={updateTitleMutation.isPending}
+                className="h-8 px-2.5 text-xs rounded-none bg-primary text-primary-foreground"
+                title="Save title"
+              >
+                {updateTitleMutation.isPending ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <Check className="size-3.5" />
+                )}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-xs rounded-none"
+                onClick={() => {
+                  setIsEditingTitle(false)
+                  setEditTitleError("")
+                }}
+                title="Cancel"
+              >
+                <X className="size-3.5" />
+              </Button>
+              {editTitleError && (
+                <span className="text-xs font-medium text-destructive">
+                  {editTitleError}
+                </span>
+              )}
+            </form>
+          ) : (
+            <div className="flex items-center gap-2">
+              <h1 className="font-heading text-xl font-semibold tracking-tight text-foreground">
+                {run.title}
+              </h1>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsEditingTitle(true)
+                  setEditTitleValue(run.title)
+                  setEditTitleError("")
+                }}
+                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+                title="Edit Name"
+              >
+                <Pencil className="size-3.5" />
+                <span className="underline decoration-dotted">Edit</span>
+              </button>
+            </div>
+          )}
           <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
             <span>{run.storeName ?? "—"}</span>
             <span>·</span>
@@ -728,15 +825,45 @@ export function OrderInputRunDetailPage() {
                           />
                         </TableHead>
                         <TableHead>
-                          <WithdrawSortHeader
-                            label={t("inputs.detail.col_fees")}
-                            columnId="totalFees"
-                            sorting={withdrawSorting}
-                            onSortingChange={(next) => {
-                              setWithdrawSorting(next)
-                              setWithdrawPage(1)
-                            }}
-                          />
+                          <div className="flex items-center gap-1">
+                            <WithdrawSortHeader
+                              label={t("inputs.detail.col_fees")}
+                              columnId="totalFees"
+                              sorting={withdrawSorting}
+                              onSortingChange={(next) => {
+                                setWithdrawSorting(next)
+                                setWithdrawPage(1)
+                              }}
+                            />
+                            <TooltipProvider delayDuration={150}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <button
+                                    type="button"
+                                    className="inline-flex size-4 shrink-0 items-center justify-center rounded-full text-muted-foreground/70 hover:text-foreground hover:bg-muted/80 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
+                                    aria-label="Information about Total Fees"
+                                  >
+                                    <Info className="size-3" />
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" align="center" className="max-w-xs p-3 text-xs leading-relaxed bg-popover text-popover-foreground border border-border shadow-xl rounded-md">
+                                  <div className="space-y-1.5 text-left font-sans">
+                                    <p className="font-semibold text-foreground border-b border-border/50 pb-1">
+                                      Total Platform Deductions & Fees
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                      Total marketplace deductions extracted from the Service fee / Payout report:
+                                    </p>
+                                    <ul className="list-disc pl-4 space-y-0.5 text-[11px] text-muted-foreground">
+                                      <li>TikTok Shop Commission & Transaction fees</li>
+                                      <li>Affiliate commissions & Ads deductions</li>
+                                      <li>Platform program fees & shipping subsidies</li>
+                                    </ul>
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
                         </TableHead>
                         <TableHead>
                           <WithdrawSortHeader
@@ -1126,3 +1253,4 @@ function SelectPageSize({
     </select>
   )
 }
+

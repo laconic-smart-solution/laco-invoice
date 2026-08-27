@@ -1,11 +1,13 @@
 package com.laconic.lacoinvoice.features.order.inputrun;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -48,6 +50,15 @@ public class OrderInputRunController {
 	@Operation(summary = "Get order input run detail")
 	public ApiResponse<OrderInputRunDto> getById(@PathVariable Long id) {
 		return ApiResponse.ok("OK", service.getById(id));
+	}
+
+	@PutMapping("/{id}/title")
+	@Operation(summary = "Update order set title")
+	public ApiResponse<OrderInputRunDto> updateTitle(
+			@PathVariable Long id,
+			@RequestBody Map<String, String> body) {
+		String title = body != null ? body.get("title") : null;
+		return ApiResponse.ok("Title updated", service.updateTitle(id, title));
 	}
 
 	@PostMapping(value = "/{id}/files/order-detail", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

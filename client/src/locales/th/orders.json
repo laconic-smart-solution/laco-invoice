@@ -52,7 +52,12 @@
       "total_adjustments": "รายการปรับปรุงรวม",
       "sync_status": "สถานะซิงก์",
       "source": "แหล่งที่มา",
-      "action": "การดำเนินการ"
+      "action": "การดำเนินการ",
+      "tiktok_commission_fee": "ค่าคอมมิชชั่น TikTok",
+      "transaction_fee": "ค่าธรรมเนียมธุรกรรม",
+      "affiliate_commission": "ค่านายหน้าพันธมิตร",
+      "ads_fee": "ค่าโฆษณา Ads",
+      "shipping_fee_deduction": "ค่าจัดส่ง / ส่วนลดค่าส่ง"
     },
     "actions": {
       "view_invoice": "ดูใบแจ้งหนี้",
@@ -331,15 +336,15 @@
     }
   },
   "inputs": {
-    "title": "Order inputs",
+    "title": "Order sets",
     "subtitle": "สร้างรันพร้อมชื่อเรื่อง อัปโหลด Order Detail + Total Withdraw แล้วกด Run files",
-    "create": "สร้าง order input",
-    "create_title": "สร้าง order input",
+    "create": "สร้าง order set",
+    "create_title": "สร้าง order set",
     "create_subtitle": "ตั้งชื่อรันนี้ แล้วอัปโหลดไฟล์ Excel สองไฟล์ในหน้าถัดไป",
     "create_submit": "สร้าง",
     "creating": "กำลังสร้าง…",
     "cancel": "ยกเลิก",
-    "back": "กลับไป Order inputs",
+    "back": "กลับไป Order sets",
     "run_files": "รันทั้งสอง",
     "run_file": "รันไฟล์",
     "running": "กำลังรัน…",
@@ -367,7 +372,7 @@
       "file_states": "Detail: {{orderDetail}} · Withdraw: {{withdraw}}",
       "created_at": "สร้างเมื่อ",
       "loading": "กำลังโหลด…",
-      "empty": "ยังไม่มี order input",
+      "empty": "ยังไม่มี order set",
       "showing": "แสดง {{start}}-{{end}} จาก {{total}}"
     },
     "status": {
@@ -437,14 +442,14 @@
       "updated_at": "อัปเดต {{value}}"
     },
     "errors": {
-      "load_failed": "โหลด order inputs ไม่สำเร็จ",
-      "create_failed": "สร้าง order input ไม่สำเร็จ",
+      "load_failed": "โหลด order sets ไม่สำเร็จ",
+      "create_failed": "สร้าง order set ไม่สำเร็จ",
       "title_required": "กรุณาใส่ชื่อเรื่อง",
       "store_required": "กรุณาเลือกร้านค้า",
       "files_required": "อัปโหลดไฟล์ทั้งสองให้เป็น Ready ก่อนรันทั้งคู่",
       "order_detail_required": "อัปโหลด Order Detail Excel (Ready) ก่อนรัน",
       "withdraw_required": "อัปโหลด Total Withdraw Excel (Ready) ก่อนรัน",
-      "not_found": "ไม่พบ order input"
+      "not_found": "ไม่พบ order set"
     }
   }
 }

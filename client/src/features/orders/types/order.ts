@@ -23,6 +23,11 @@ export interface Order {
   totalAmount: number
   totalFees: number
   totalAdjustments: number
+  tiktokCommissionFee?: number
+  transactionFee?: number
+  affiliateCommission?: number
+  adsFee?: number
+  shippingFeeDeduction?: number
   currency: string
   syncStatus: OrderSyncStatus
   sourceType: OrderSourceType

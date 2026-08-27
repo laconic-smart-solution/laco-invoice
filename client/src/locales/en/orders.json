@@ -52,7 +52,12 @@
       "total_adjustments": "Total Adjustments",
       "sync_status": "Sync Status",
       "source": "Source",
-      "action": "Action"
+      "action": "Action",
+      "tiktok_commission_fee": "TikTok Commission",
+      "transaction_fee": "Transaction Fee",
+      "affiliate_commission": "Affiliate Commission",
+      "ads_fee": "Shop Ads Fee",
+      "shipping_fee_deduction": "Shipping Fee / Subsidy"
     },
     "actions": {
       "view_invoice": "View Invoice",
@@ -331,15 +336,15 @@
     }
   },
   "inputs": {
-    "title": "Order inputs",
-    "subtitle": "Create a titled run, attach Shipping Fee + Service fee Excels, then Run files.",
-    "create": "New order input",
-    "create_title": "New order input",
-    "create_subtitle": "Give this run a title, then upload both Excel files on the next screen.",
+    "title": "Order sets",
+    "subtitle": "Create a titled order set, attach Shipping Fee + Service fee Excels, then Run files.",
+    "create": "New order set",
+    "create_title": "New order set",
+    "create_subtitle": "Give this order set a title, then upload both Excel files on the next screen.",
     "create_submit": "Create",
     "creating": "Creating…",
     "cancel": "Cancel",
-    "back": "Back to order inputs",
+    "back": "Back to order sets",
     "run_files": "Run both",
     "run_file": "Run file",
     "running": "Running…",
@@ -367,7 +372,7 @@
       "file_states": "Shipping Fee: {{orderDetail}} · Service fee: {{withdraw}}",
       "created_at": "Created",
       "loading": "Loading…",
-      "empty": "No order inputs yet.",
+      "empty": "No order sets yet.",
       "showing": "Showing {{start}}-{{end}} of {{total}}"
     },
     "status": {
@@ -437,14 +442,14 @@
       "updated_at": "Updated {{value}}"
     },
     "errors": {
-      "load_failed": "Unable to load order inputs.",
-      "create_failed": "Unable to create order input.",
+      "load_failed": "Unable to load order sets.",
+      "create_failed": "Unable to create order set.",
       "title_required": "Please enter a title.",
       "store_required": "Please select a store.",
       "files_required": "Upload both Excel files (Ready) before running both.",
       "order_detail_required": "Upload Order Detail Excel (Ready) before running.",
       "withdraw_required": "Upload Total Withdraw Excel (Ready) before running.",
-      "not_found": "Order input not found."
+      "not_found": "Order set not found."
     }
   }
 }

@@ -52,7 +52,12 @@
       "total_adjustments": "စုစုပေါင်း ချိန်ညှိမှု",
       "sync_status": "Sync အခြေအနေ",
       "source": "ရင်းမြစ်",
-      "action": "လုပ်ဆောင်ချက်"
+      "action": "လုပ်ဆောင်ချက်",
+      "tiktok_commission_fee": "TikTok Commission",
+      "transaction_fee": "Transaction Fee",
+      "affiliate_commission": "Affiliate Commission",
+      "ads_fee": "Shop Ads Fee",
+      "shipping_fee_deduction": "Shipping Fee / Subsidy"
     },
     "actions": {
       "view_invoice": "ငွေတောင်းခံလွှာ ကြည့်ရန်",
@@ -331,15 +336,15 @@
     }
   },
   "inputs": {
-    "title": "Order inputs",
+    "title": "Order sets",
     "subtitle": "Title တစ်ခုဖြင့် run ဖန်တီးပြီး Order Detail + Total Withdraw Excel တင်ကာ Run files နှိပ်ပါ။",
-    "create": "Order input အသစ်",
-    "create_title": "Order input အသစ်",
+    "create": "Order set အသစ်",
+    "create_title": "Order set အသစ်",
     "create_subtitle": "Title ထည့်ပြီး နောက်စာမျက်နှာတွင် Excel နှစ်ဖိုင် တင်ပါ။",
     "create_submit": "ဖန်တီးမည်",
     "creating": "ဖန်တီးနေသည်…",
     "cancel": "ပယ်ဖျက်",
-    "back": "Order inputs သို့ ပြန်မည်",
+    "back": "Order sets သို့ ပြန်မည်",
     "run_files": "နှစ်ခုလုံး Run",
     "run_file": "Run file",
     "running": "Run လုပ်နေသည်…",
@@ -367,7 +372,7 @@
       "file_states": "Detail: {{orderDetail}} · Withdraw: {{withdraw}}",
       "created_at": "Created",
       "loading": "တင်နေသည်…",
-      "empty": "Order input မရှိသေးပါ။",
+      "empty": "Order set မရှိသေးပါ။",
       "showing": "{{total}} အနက် {{start}}-{{end}}"
     },
     "status": {
@@ -437,14 +442,14 @@
       "updated_at": "Updated {{value}}"
     },
     "errors": {
-      "load_failed": "Order inputs မရယူနိုင်ပါ။",
-      "create_failed": "Order input မဖန်တီးနိုင်ပါ။",
+      "load_failed": "Order sets မရယူနိုင်ပါ။",
+      "create_failed": "Order set မဖန်တီးနိုင်ပါ။",
       "title_required": "Title ထည့်ပါ။",
       "store_required": "Store ရွေးပါ။",
       "files_required": "Excel နှစ်ဖိုင် Ready ဖြစ်မှ နှစ်ခုလုံး Run လုပ်ပါ။",
       "order_detail_required": "Order Detail Excel Ready ဖြစ်မှ Run လုပ်ပါ။",
       "withdraw_required": "Total Withdraw Excel Ready ဖြစ်မှ Run လုပ်ပါ။",
-      "not_found": "Order input မတွေ့ပါ။"
+      "not_found": "Order set မတွေ့ပါ။"
     }
   }
 }

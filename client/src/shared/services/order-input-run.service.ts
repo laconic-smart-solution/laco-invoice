@@ -109,6 +109,14 @@ export const orderInputRunService = {
     return response.data.data
   },
 
+    updateTitle: async (id: number, title: string) => {
+    const response = await apiClient.put<ApiResponse<ApiOrderInputRunDto>>(
+      `/v1/order-input-runs/${id}/title`,
+      { title }
+    )
+    return response.data.data
+  },
+
   create: async (request: OrderInputRunCreateRequest) => {
     const response = await apiClient.post<ApiResponse<ApiOrderInputRunDto>>(
       "/v1/order-input-runs",
@@ -209,3 +217,4 @@ export const orderInputRunService = {
     return response.data
   },
 }
+

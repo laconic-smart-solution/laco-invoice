@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
@@ -128,7 +128,7 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
                 </div>
                 <div>
                   <DialogTitle className="font-heading text-lg font-bold tracking-tight text-foreground sm:text-xl">
-                    Create Consolidated Invoice
+                    Create Invoice
                   </DialogTitle>
                   <DialogDescription className="text-xs text-muted-foreground">
                     สร้างใบแจ้งหนี้ / ใบกำกับภาษีรวมตามรอบคำสั่งซื้อ พร้อมคำนวณภาษีมูลค่าเพิ่ม 7%
@@ -159,7 +159,7 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
                   }`}
                 >
                   <Layers className={`size-4 ${mode === "run" ? "text-primary-foreground" : "text-muted-foreground"}`} />
-                  From Order Input Run (e.g. Yoik August)
+                  From Order Set (e.g. Yoik August)
                 </button>
                 <button
                   type="button"
@@ -209,7 +209,7 @@ export function CreateInvoiceDialog({ open, onOpenChange }: CreateInvoiceDialogP
 
                   <div className="space-y-2">
                     <Label className="text-xs font-medium text-foreground">
-                      Select Order Input Run <span className="text-destructive">*</span>
+                      Select Order Set <span className="text-destructive">*</span>
                     </Label>
                     <select
                       value={selectedRun}
