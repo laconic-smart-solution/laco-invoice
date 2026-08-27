@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -107,6 +108,25 @@ public class OrderInputRunController {
 	@Operation(summary = "Run Total Withdraw Excel only")
 	public ApiResponse<OrderInputRunDto> runWithdraw(@PathVariable Long id) {
 		return ApiResponse.ok("Withdraw run completed", service.runWithdrawFile(id));
+	}
+
+	@DeleteMapping("/{id}")
+	@Operation(summary = "Delete order input run set and cascade delete all associated data")
+	public ApiResponse<Void> deleteSet(@PathVariable Long id) {
+		service.deleteSet(id);
+		return ApiResponse.ok("Order set deleted successfully", null);
+	}
+
+	@PostMapping("/{id}/rollback/order-detail")
+	@Operation(summary = "Rollback Order Detail file and delete all imported orders")
+	public ApiResponse<OrderInputRunDto> rollbackOrderDetail(@PathVariable Long id) {
+		return ApiResponse.ok("Order detail file rolled back and data deleted", service.rollbackOrderDetail(id));
+	}
+
+	@PostMapping("/{id}/rollback/withdraw")
+	@Operation(summary = "Rollback Withdraw file and delete all settlement rows")
+	public ApiResponse<OrderInputRunDto> rollbackWithdraw(@PathVariable Long id) {
+		return ApiResponse.ok("Withdraw file rolled back and data deleted", service.rollbackWithdraw(id));
 	}
 
 	@GetMapping("/{id}/withdraw-rows")

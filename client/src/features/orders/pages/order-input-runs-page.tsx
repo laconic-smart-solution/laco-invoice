@@ -1,5 +1,5 @@
 import type { ColumnDef, SortingState } from "@tanstack/react-table"
-import { Plus, Search } from "lucide-react"
+import { Loader2, Plus, Search, Trash2 } from "lucide-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate } from "react-router-dom"
@@ -14,6 +14,14 @@ import type { StatusBadgeVariant } from "@/components/common/status-badge"
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
 import { OrderInputRunCreateDialog } from "@/features/orders/components/order-input-run-create-dialog"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -27,6 +35,7 @@ import { useDebounce } from "@/shared/hooks/use-debounce"
 import { getPaginationMeta, usePagination } from "@/shared/hooks/use-pagination"
 import {
   getOrderInputRunErrorMessage,
+  useDeleteOrderInputRunMutation,
   useOrderInputRunsPageQuery,
 } from "@/shared/queries/order-input-run.query"
 import { useStoresPageQuery } from "@/shared/queries/store.query"
@@ -71,6 +80,9 @@ export function OrderInputRunsPage() {
     { id: "createdAt", desc: true },
   ])
   const [createOpen, setCreateOpen] = useState(false)
+  const [deleteRunTarget, setDeleteRunTarget] = useState<ApiOrderInputRunDto | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const deleteSetMutation = useDeleteOrderInputRunMutation()
 
   const { data: storesResponse } = useStoresPageQuery(STORES_LIST_REQUEST)
   const stores = Array.isArray(storesResponse?.data) ? storesResponse.data : []
@@ -197,6 +209,29 @@ export function OrderInputRunsPage() {
         ),
         cell: ({ row }) => formatDateTime(row.original.createdAt, locale),
       },
+      {
+        id: "actions",
+        header: "",
+        cell: ({ row }) => (
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              title={t("inputs.detail.delete_set")}
+              onClick={(e) => {
+                e.stopPropagation()
+                setDeleteError(null)
+                setDeleteRunTarget(row.original)
+              }}
+            >
+              <Trash2 className="size-4" />
+            </Button>
+          </div>
+        ),
+        enableSorting: false,
+      },
     ],
     [locale, t]
   )
@@ -290,7 +325,69 @@ export function OrderInputRunsPage() {
             void navigate(ROUTES.dashboard.orderInputDetail(row.id))
           }
         />
-        <DataTableFooter
+        <Dialog
+        open={deleteRunTarget != null}
+        onOpenChange={(open) => {
+          if (!open && !deleteSetMutation.isPending) {
+            setDeleteRunTarget(null)
+            setDeleteError(null)
+          }
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t("inputs.detail.delete_set_title")}</DialogTitle>
+            <DialogDescription className="text-xs leading-relaxed text-muted-foreground pt-2">
+              {t("inputs.detail.delete_set_description")}
+            </DialogDescription>
+          </DialogHeader>
+          {deleteError ? <AuthFormError message={deleteError} /> : null}
+          <DialogFooter className="flex gap-2 sm:justify-end mt-4">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={deleteSetMutation.isPending}
+              onClick={() => {
+                setDeleteRunTarget(null)
+                setDeleteError(null)
+              }}
+            >
+              {t("common.cancel", "Cancel")}
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              disabled={deleteSetMutation.isPending}
+              onClick={async () => {
+                if (!deleteRunTarget) return
+                try {
+                  await deleteSetMutation.mutateAsync(deleteRunTarget.id)
+                  setDeleteRunTarget(null)
+                  setDeleteError(null)
+                } catch (err: unknown) {
+                  setDeleteError(
+                    getOrderInputRunErrorMessage(
+                      err,
+                      t("inputs.errors.load_failed")
+                    )
+                  )
+                }
+              }}
+            >
+              {deleteSetMutation.isPending ? (
+                <Loader2 data-icon="inline-start" className="animate-spin" />
+              ) : (
+                <Trash2 data-icon="inline-start" />
+              )}
+              {t("inputs.detail.delete_set_confirm_btn")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <DataTableFooter
           page={page}
           totalPages={totalPages}
           totalCount={totalCount}

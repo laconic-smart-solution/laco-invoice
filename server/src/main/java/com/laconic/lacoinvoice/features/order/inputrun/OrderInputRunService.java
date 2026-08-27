@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -68,6 +69,7 @@ public class OrderInputRunService {
 	private final OrderImportPreviewService orderImportPreviewService;
 	private final OrderWithdrawExcelParser withdrawExcelParser;
 	private final OrderInputRunMapper mapper;
+	private final JdbcTemplate jdbcTemplate;
 
 	public OrderInputRunService(
 			OrderInputRunRepository runRepository,
@@ -79,7 +81,8 @@ public class OrderInputRunService {
 			OrderImportBatchRepository importBatchRepository,
 			OrderImportPreviewService orderImportPreviewService,
 			OrderWithdrawExcelParser withdrawExcelParser,
-			OrderInputRunMapper mapper) {
+			OrderInputRunMapper mapper,
+			JdbcTemplate jdbcTemplate) {
 		this.runRepository = runRepository;
 		this.withdrawRowRepository = withdrawRowRepository;
 		this.storeRepository = storeRepository;
@@ -90,6 +93,7 @@ public class OrderInputRunService {
 		this.orderImportPreviewService = orderImportPreviewService;
 		this.withdrawExcelParser = withdrawExcelParser;
 		this.mapper = mapper;
+		this.jdbcTemplate = jdbcTemplate;
 	}
 
 	@Loggable
@@ -574,6 +578,233 @@ public class OrderInputRunService {
 		row.setCustomerBankForPayment(parsed.customerBankForPayment());
 		return row;
 	}
+
+	@Loggable
+	@Transactional
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	public void deleteSet(Long id) {
+		OrderInputRun run = requireRun(id);
+		assertNotRunning(run);
+
+		log.info("Cascading complete deletion for order input run id={}", id);
+
+		Long importFileId = run.getOrderDetailImportFile() != null ? run.getOrderDetailImportFile().getId() : null;
+		Long batchId = run.getOrderDetailBatch() != null ? run.getOrderDetailBatch().getId() : null;
+
+		// 1. Delete preview items (temp table)
+		if (batchId != null) {
+			jdbcTemplate.update("""
+					DELETE FROM order_import_preview_items
+					WHERE preview_order_id IN (
+						SELECT id FROM order_import_preview_orders WHERE batch_id = ?
+					)
+					""", batchId);
+			jdbcTemplate.update("DELETE FROM order_import_preview_orders WHERE batch_id = ?", batchId);
+			jdbcTemplate.update("DELETE FROM order_import_batches WHERE id = ?", batchId);
+		}
+
+		if (importFileId != null) {
+			// Delete preview items & orders for batches committed to this file
+			jdbcTemplate.update("""
+					DELETE FROM order_import_preview_items
+					WHERE preview_order_id IN (
+						SELECT po.id FROM order_import_preview_orders po
+						JOIN order_import_batches b ON po.batch_id = b.id
+						WHERE b.committed_import_file_id = ?
+					)
+					""", importFileId);
+			jdbcTemplate.update("""
+					DELETE FROM order_import_preview_orders
+					WHERE batch_id IN (
+						SELECT id FROM order_import_batches WHERE committed_import_file_id = ?
+					)
+					""", importFileId);
+			jdbcTemplate.update("DELETE FROM order_import_batches WHERE committed_import_file_id = ?", importFileId);
+
+			// Delete history changes
+			jdbcTemplate.update("""
+					DELETE FROM order_history_changes
+					WHERE history_id IN (
+						SELECT oh.id FROM order_history oh
+						JOIN lco_orders o ON oh.order_id = o.id
+						WHERE o.source_type = 'IMPORT' AND o.source_id = ?
+					)
+					""", importFileId);
+
+			// Delete history
+			jdbcTemplate.update("""
+					DELETE FROM order_history
+					WHERE order_id IN (
+						SELECT id FROM lco_orders WHERE source_type = 'IMPORT' AND source_id = ?
+					)
+					""", importFileId);
+
+			// Delete tax invoices
+			jdbcTemplate.update("""
+					DELETE FROM order_tax_invoices
+					WHERE order_id IN (
+						SELECT id FROM lco_orders WHERE source_type = 'IMPORT' AND source_id = ?
+					)
+					""", importFileId);
+
+			// Delete order items
+			jdbcTemplate.update("""
+					DELETE FROM lco_order_items
+					WHERE order_id IN (
+						SELECT id FROM lco_orders WHERE source_type = 'IMPORT' AND source_id = ?
+					)
+					""", importFileId);
+
+			// Delete orders
+			jdbcTemplate.update(
+					"DELETE FROM lco_orders WHERE source_type = 'IMPORT' AND source_id = ?",
+					importFileId);
+		}
+
+		// 2. Delete withdraw settlement rows (temp table)
+		jdbcTemplate.update("DELETE FROM order_withdraw_import_rows WHERE order_input_run_id = ?", id);
+
+		// 3. Unlink references on order_input_runs before file deletion
+		jdbcTemplate.update(
+				"UPDATE order_input_runs SET order_detail_batch_id = NULL, order_detail_import_file_id = NULL WHERE id = ?",
+				id);
+
+		// 4. Delete import file record if existed
+		if (importFileId != null) {
+			jdbcTemplate.update("DELETE FROM order_import_files WHERE id = ?", importFileId);
+		}
+
+		// 5. Delete orphan customers that no longer belong to any order
+		jdbcTemplate.update("""
+				DELETE FROM customers_info
+				WHERE id NOT IN (
+					SELECT DISTINCT customer_id FROM lco_orders WHERE customer_id IS NOT NULL
+				)
+				""");
+
+		// 6. Delete orphan products that are no longer referenced in any order item
+		jdbcTemplate.update("""
+				DELETE FROM products
+				WHERE id NOT IN (
+					SELECT DISTINCT product_id FROM lco_order_items WHERE product_id IS NOT NULL
+				)
+				""");
+
+		// 7. Delete the order input run itself
+		jdbcTemplate.update("DELETE FROM order_input_runs WHERE id = ?", id);
+	}
+
+	@Loggable
+	@Transactional
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	public OrderInputRunDto rollbackOrderDetail(Long id) {
+		OrderInputRun run = requireRun(id);
+		assertNotRunning(run);
+
+		OrderImportFile importFile = run.getOrderDetailImportFile();
+		if (importFile != null) {
+			Long importFileId = importFile.getId();
+			log.info("Rolling back order detail import file id={} for run id={}", importFileId, id);
+
+			// 1. Bulk delete history changes using single indexed subquery
+			jdbcTemplate.update(
+					"""
+					DELETE FROM order_history_changes
+					WHERE history_id IN (
+						SELECT oh.id FROM order_history oh
+						JOIN lco_orders o ON oh.order_id = o.id
+						WHERE o.source_type = 'IMPORT' AND o.source_id = ?
+					)
+					""",
+					importFileId);
+
+			// 2. Bulk delete history events
+			jdbcTemplate.update(
+					"""
+					DELETE FROM order_history
+					WHERE order_id IN (
+						SELECT o.id FROM lco_orders o
+						WHERE o.source_type = 'IMPORT' AND o.source_id = ?
+					)
+					""",
+					importFileId);
+
+			// 3. Bulk delete order items
+			jdbcTemplate.update(
+					"""
+					DELETE FROM lco_order_items
+					WHERE order_id IN (
+						SELECT o.id FROM lco_orders o
+						WHERE o.source_type = 'IMPORT' AND o.source_id = ?
+					)
+					""",
+					importFileId);
+
+			// 4. Bulk delete orders
+			jdbcTemplate.update(
+					"DELETE FROM lco_orders WHERE source_type = 'IMPORT' AND source_id = ?",
+					importFileId);
+
+			// 5. Delete import file record
+			run.setOrderDetailImportFile(null);
+			run.setOrderDetailBatch(null);
+			jdbcTemplate.update("DELETE FROM order_import_files WHERE id = ?", importFileId);
+		}
+
+		run.setOrderDetailFilename(null);
+		run.setOrderDetailContent(null);
+		run.setOrderDetailSize(null);
+		run.setOrderDetailStatus(OrderInputFileStatus.MISSING);
+		run.setOrderDetailError(null);
+		run.setOrderDetailStartedAt(null);
+		run.setOrderDetailFinishedAt(null);
+
+		if (run.getWithdrawStatus() == OrderInputFileStatus.MISSING) {
+			run.setStatus(OrderInputRunStatus.DRAFT);
+		} else if (run.getWithdrawStatus() == OrderInputFileStatus.SUCCEEDED) {
+			run.setStatus(OrderInputRunStatus.COMPLETED);
+		} else {
+			run.setStatus(OrderInputRunStatus.PARTIAL);
+		}
+
+		return mapper.toDto(runRepository.save(run));
+	}
+
+	@Loggable
+	@Transactional
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	public OrderInputRunDto rollbackWithdraw(Long id) {
+		OrderInputRun run = requireRun(id);
+		assertNotRunning(run);
+
+		log.info("Rolling back withdraw settlement rows for run id={}", id);
+
+		// Fast direct bulk delete via JdbcTemplate
+		jdbcTemplate.update("DELETE FROM order_withdraw_import_rows WHERE order_input_run_id = ?", id);
+
+		run.setWithdrawFilename(null);
+		run.setWithdrawContent(null);
+		run.setWithdrawSize(null);
+		run.setWithdrawStatus(OrderInputFileStatus.MISSING);
+		run.setWithdrawError(null);
+		run.setWithdrawStartedAt(null);
+		run.setWithdrawFinishedAt(null);
+		run.setWithdrawRowCount(null);
+		run.setWithdrawMatchedCount(null);
+		run.setWithdrawUnmatchedCount(null);
+
+		if (run.getOrderDetailStatus() == OrderInputFileStatus.MISSING) {
+			run.setStatus(OrderInputRunStatus.DRAFT);
+		} else if (run.getOrderDetailStatus() == OrderInputFileStatus.SUCCEEDED) {
+			run.setStatus(OrderInputRunStatus.COMPLETED);
+		} else {
+			run.setStatus(OrderInputRunStatus.PARTIAL);
+		}
+
+		return mapper.toDto(runRepository.save(run));
+	}
+
+
 
 	private OrderInputRun requireRun(Long id) {
 		return runRepository.findById(id)

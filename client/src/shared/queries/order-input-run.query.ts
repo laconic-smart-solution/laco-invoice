@@ -243,6 +243,57 @@ export function useRunOrderInputWithdrawMutation() {
   })
 }
 
+export function useDeleteOrderInputRunMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => orderInputRunService.deleteSet(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: orderInputRunKeys.all,
+      })
+      queryClient.invalidateQueries({
+        queryKey: ["orders"],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ["invoices"],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ["customers"],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ["products"],
+      })
+    },
+  })
+}
+
+export function useRollbackOrderInputOrderDetailMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => orderInputRunService.rollbackOrderDetail(id),
+    onSuccess: (data) => {
+      queryClient.setQueryData(orderInputRunKeys.detail(data.id), data)
+      void queryClient.invalidateQueries({ queryKey: orderInputRunKeys.lists() })
+      void queryClient.invalidateQueries({ queryKey: ["orders"] })
+    },
+  })
+}
+
+export function useRollbackOrderInputWithdrawMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => orderInputRunService.rollbackWithdraw(id),
+    onSuccess: (data) => {
+      queryClient.setQueryData(orderInputRunKeys.detail(data.id), data)
+      void queryClient.invalidateQueries({ queryKey: orderInputRunKeys.lists() })
+      void queryClient.invalidateQueries({
+        queryKey: [...orderInputRunKeys.detail(data.id), "withdraw-rows"],
+      })
+      void queryClient.invalidateQueries({ queryKey: ["orders"] })
+    },
+  })
+}
+
 export function getOrderInputRunErrorMessage(
   error: unknown,
   fallback: string

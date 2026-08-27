@@ -439,7 +439,18 @@
       "match_apply_hint": "Unmatched = ဤဆိုင်တွင် Order ID မရှိသေး၍ Apply သည် Skipped ဖြစ်သည်။ Fees များကို ဤဇယားတွင် မြင်ရမည်။ Match အောင်မြင်မှ Order list တွင် ပေါ်မည်။ Order detail ကို အရင် Run လုပ်ပြီး Withdraw ကို ပြန် Run လုပ်ပါ။",
       "prev": "Prev",
       "next": "Next",
-      "updated_at": "Updated {{value}}"
+      "updated_at": "Updated {{value}}",
+      "rollback_btn": "Rollback",
+      "rollback_order_detail_title": "Rollback Shipping Fee File?",
+      "rollback_order_detail_description": "Are you sure you want to rollback this file? All imported orders and related records created from this file will be permanently deleted.",
+      "rollback_withdraw_title": "Rollback Service Fee File?",
+      "rollback_withdraw_description": "Are you sure you want to rollback this file? All imported fee and payout settlement rows for this set will be deleted.",
+      "rollback_confirm_btn": "Rollback & Delete Data",
+      "delete_set": "အော်ဒါတွဲ ဖျက်မည်",
+      "delete_set_title": "ဤအော်ဒါတွဲကို ဖျက်မှာ သေချာပါသလား?",
+      "delete_set_description": "ဤအော်ဒါတွဲကို ဖျက်မှာ သေချာပါသလား? ၎င်းနှင့်သက်ဆိုင်သော အော်ဒါများ၊ ကုန်ပစ္စည်းစာရင်းများ၊ အခွန်ပြေစာများ၊ ငွေစာရင်းတွက်ချက်မှုများနှင့် ယာယီဇယားများအားလုံးကို အပြီးတိုင် ဖျက်ပစ်မည်ဖြစ်ပါသည်။",
+      "delete_set_confirm_btn": "အော်ဒါတွဲနှင့် အချက်အလက်အားလုံး ဖျက်မည်",
+      "delete_set_success": "အော်ဒါတွဲနှင့် သက်ဆိုင်ရာ အချက်အလက်အားလုံးကို အောင်မြင်စွာ ဖျက်ပြီးပါပြီ။"
     },
     "errors": {
       "load_failed": "Order sets မရယူနိုင်ပါ။",

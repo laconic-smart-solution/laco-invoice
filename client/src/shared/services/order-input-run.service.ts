@@ -183,6 +183,24 @@ export const orderInputRunService = {
     return response.data.data
   },
 
+  deleteSet: async (id: number): Promise<void> => {
+    await apiClient.delete<ApiResponse<void>>(`/v1/order-input-runs/${id}`)
+  },
+
+  rollbackOrderDetail: async (id: number) => {
+    const response = await apiClient.post<ApiResponse<ApiOrderInputRunDto>>(
+      `/v1/order-input-runs/${id}/rollback/order-detail`
+    )
+    return response.data.data
+  },
+
+  rollbackWithdraw: async (id: number) => {
+    const response = await apiClient.post<ApiResponse<ApiOrderInputRunDto>>(
+      `/v1/order-input-runs/${id}/rollback/withdraw`
+    )
+    return response.data.data
+  },
+
   pageWithdrawRows: async (
     id: number,
     pageNumber = 1,

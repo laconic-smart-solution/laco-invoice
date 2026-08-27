@@ -10,11 +10,13 @@ import {
   Loader2,
   Pencil,
   Play,
+  RotateCcw,
+  Trash2,
   X,
 } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Link, useParams } from "react-router-dom"
+import { Link, useNavigate, useParams } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
 import { StatusBadge } from "@/components/common/status-badge"
@@ -42,6 +44,14 @@ import { mapOrderDtoToOrder } from "@/features/orders/util/map-order"
 import type { MarketplaceCode } from "@/features/stores/config/marketplaces"
 import type { ApiOrderStatus } from "@/shared/services/order.service"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Input } from "@/components/ui/input"
 import {
@@ -63,6 +73,9 @@ import {
   useOrderInputRunWithdrawRowsQuery,
   useResetStuckOrderInputRunMutation,
   useRunOrderInputWithdrawMutation,
+  useRollbackOrderInputOrderDetailMutation,
+  useRollbackOrderInputWithdrawMutation,
+  useDeleteOrderInputRunMutation,
   useStartOrderInputRunPreviewMutation,
   useUploadOrderInputOrderDetailMutation,
   useUploadOrderInputWithdrawMutation,
@@ -119,6 +132,7 @@ function canRunFile(status: ApiOrderInputFileStatus) {
 
 export function OrderInputRunDetailPage() {
   const { t } = useTranslation("orders")
+  const navigate = useNavigate()
   const { inputRunId } = useParams<{ inputRunId: string }>()
   const id = Number(inputRunId)
   const locale = useLocaleStore((state) => state.locale)
@@ -135,6 +149,11 @@ export function OrderInputRunDetailPage() {
   const cancelPreviewMutation = useCancelOrderInputRunPreviewMutation()
   const finishRunMutation = useFinishOrderInputRunMutation()
   const runWithdrawMutation = useRunOrderInputWithdrawMutation()
+  const rollbackOrderDetailMutation = useRollbackOrderInputOrderDetailMutation()
+  const rollbackWithdrawMutation = useRollbackOrderInputWithdrawMutation()
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const deleteSetMutation = useDeleteOrderInputRunMutation()
+  const [rollbackTarget, setRollbackTarget] = useState<"orderDetail" | "withdraw" | null>(null)
   const resetStuckMutation = useResetStuckOrderInputRunMutation()
   const didAutoResetStuck = useRef(false)
   const [isEditingTitle, setIsEditingTitle] = useState(false)
@@ -194,6 +213,8 @@ export function OrderInputRunDetailPage() {
     startPreviewMutation.isPending ||
     finishRunMutation.isPending ||
     runWithdrawMutation.isPending ||
+    rollbackOrderDetailMutation.isPending ||
+    rollbackWithdrawMutation.isPending ||
     previewOpen
   const isStuckRunning =
     run != null &&
@@ -354,6 +375,8 @@ export function OrderInputRunDetailPage() {
       (startPreviewMutation.isError && startPreviewMutation.error) ||
       (finishRunMutation.isError && finishRunMutation.error) ||
       (runWithdrawMutation.isError && runWithdrawMutation.error) ||
+      (rollbackOrderDetailMutation.isError && rollbackOrderDetailMutation.error) ||
+      (rollbackWithdrawMutation.isError && rollbackWithdrawMutation.error) ||
       (detailQuery.isError && detailQuery.error) ||
       null
     return err
@@ -370,6 +393,10 @@ export function OrderInputRunDetailPage() {
     finishRunMutation.error,
     runWithdrawMutation.isError,
     runWithdrawMutation.error,
+    rollbackOrderDetailMutation.isError,
+    rollbackOrderDetailMutation.error,
+    rollbackWithdrawMutation.isError,
+    rollbackWithdrawMutation.error,
     detailQuery.isError,
     detailQuery.error,
     t,
@@ -405,6 +432,14 @@ export function OrderInputRunDetailPage() {
     canRunFile(run.withdrawStatus) &&
     run.withdrawFilename != null
   const canRunBoth = canRunOrderDetail && canRunWithdraw
+  const canRollbackOrderDetail =
+    run != null &&
+    !isBusy &&
+    (run.orderDetailStatus !== "MISSING" || run.orderDetailFilename != null)
+  const canRollbackWithdraw =
+    run != null &&
+    !isBusy &&
+    (run.withdrawStatus !== "MISSING" || run.withdrawFilename != null)
 
   const startOrderDetailPreview = (alsoRunWithdraw: boolean) => {
     if (!run) {
@@ -546,29 +581,45 @@ export function OrderInputRunDetailPage() {
             />
           </div>
         </div>
-        <Button
-          onClick={() => {
-            if (!canRunBoth) {
-              setLocalError(t("inputs.errors.files_required"))
-              return
-            }
-            startOrderDetailPreview(true)
-          }}
-          disabled={!canRunBoth || isBusy}
-        >
-          {startPreviewMutation.isPending ||
-          finishRunMutation.isPending ||
-          runWithdrawMutation.isPending ? (
-            <Loader2 data-icon="inline-start" className="animate-spin" />
-          ) : (
-            <Play data-icon="inline-start" />
-          )}
-          {startPreviewMutation.isPending ||
-          finishRunMutation.isPending ||
-          runWithdrawMutation.isPending
-            ? t("inputs.running")
-            : t("inputs.run_files")}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setDeleteDialogOpen(true)}
+            disabled={isBusy || deleteSetMutation.isPending}
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30"
+          >
+            {deleteSetMutation.isPending ? (
+              <Loader2 data-icon="inline-start" className="animate-spin" />
+            ) : (
+              <Trash2 data-icon="inline-start" />
+            )}
+            {t("inputs.detail.delete_set")}
+          </Button>
+          <Button
+            onClick={() => {
+              if (!canRunBoth) {
+                setLocalError(t("inputs.errors.files_required"))
+                return
+              }
+              startOrderDetailPreview(true)
+            }}
+            disabled={!canRunBoth || isBusy}
+          >
+            {startPreviewMutation.isPending ||
+            finishRunMutation.isPending ||
+            runWithdrawMutation.isPending ? (
+              <Loader2 data-icon="inline-start" className="animate-spin" />
+            ) : (
+              <Play data-icon="inline-start" />
+            )}
+            {startPreviewMutation.isPending ||
+            finishRunMutation.isPending ||
+            runWithdrawMutation.isPending
+              ? t("inputs.running")
+              : t("inputs.run_files")}
+          </Button>
+        </div>
       </div>
 
       <AuthFormError message={localError} />
@@ -659,6 +710,9 @@ export function OrderInputRunDetailPage() {
           canRun={canRunOrderDetail}
           running={startPreviewMutation.isPending || previewOpen}
           onRun={() => startOrderDetailPreview(false)}
+          canRollback={canRollbackOrderDetail}
+          rollingBack={rollbackOrderDetailMutation.isPending}
+          onRollback={() => setRollbackTarget("orderDetail")}
           t={t}
         />
         <FileUploadCard
@@ -677,6 +731,9 @@ export function OrderInputRunDetailPage() {
           canRun={canRunWithdraw}
           running={runWithdrawMutation.isPending}
           onRun={handleRunWithdraw}
+          canRollback={canRollbackWithdraw}
+          rollingBack={rollbackWithdrawMutation.isPending}
+          onRollback={() => setRollbackTarget("withdraw")}
           t={t}
         />
       </div>
@@ -1018,6 +1075,126 @@ export function OrderInputRunDetailPage() {
         )}
       </div>
 
+      <Dialog
+        open={rollbackTarget != null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setRollbackTarget(null)
+          }
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {rollbackTarget === "orderDetail"
+                ? t("inputs.detail.rollback_order_detail_title")
+                : t("inputs.detail.rollback_withdraw_title")}
+            </DialogTitle>
+            <DialogDescription className="text-xs leading-relaxed text-muted-foreground pt-2">
+              {rollbackTarget === "orderDetail"
+                ? t("inputs.detail.rollback_order_detail_description")
+                : t("inputs.detail.rollback_withdraw_description")}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2 sm:justify-end mt-4">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={
+                rollbackOrderDetailMutation.isPending ||
+                rollbackWithdrawMutation.isPending
+              }
+              onClick={() => setRollbackTarget(null)}
+            >
+              {t("inputs.cancel", { defaultValue: "Cancel" })}
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              disabled={
+                rollbackOrderDetailMutation.isPending ||
+                rollbackWithdrawMutation.isPending
+              }
+              onClick={async () => {
+                if (!run) return
+                if (rollbackTarget === "orderDetail") {
+                  await rollbackOrderDetailMutation.mutateAsync(run.id)
+                } else if (rollbackTarget === "withdraw") {
+                  await rollbackWithdrawMutation.mutateAsync(run.id)
+                }
+                setRollbackTarget(null)
+              }}
+            >
+              {rollbackOrderDetailMutation.isPending ||
+              rollbackWithdrawMutation.isPending ? (
+                <Loader2 data-icon="inline-start" className="animate-spin" />
+              ) : (
+                <RotateCcw data-icon="inline-start" />
+              )}
+              {t("inputs.detail.rollback_confirm_btn")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => {
+          if (!open && !deleteSetMutation.isPending) {
+            setDeleteDialogOpen(false)
+          }
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t("inputs.detail.delete_set_title")}</DialogTitle>
+            <DialogDescription className="text-xs leading-relaxed text-muted-foreground pt-2">
+              {t("inputs.detail.delete_set_description")}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2 sm:justify-end mt-4">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={deleteSetMutation.isPending}
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              {t("common.cancel", "Cancel")}
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              disabled={deleteSetMutation.isPending}
+              onClick={async () => {
+                try {
+                  await deleteSetMutation.mutateAsync(run.id)
+                  navigate(ROUTES.dashboard.orderInputs)
+                } catch (err: unknown) {
+                  setLocalError(
+                    getOrderInputRunErrorMessage(
+                      err,
+                      t("inputs.errors.load_failed")
+                    )
+                  )
+                  setDeleteDialogOpen(false)
+                }
+              }}
+            >
+              {deleteSetMutation.isPending ? (
+                <Loader2 data-icon="inline-start" className="animate-spin" />
+              ) : (
+                <Trash2 data-icon="inline-start" />
+              )}
+              {t("inputs.detail.delete_set_confirm_btn")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <p className="text-xs text-muted-foreground">
         {t("inputs.detail.updated_at", {
           value: formatDateTime(run.updatedAt, locale),
@@ -1115,6 +1292,9 @@ interface FileUploadCardProps {
   onPick: () => void
   onFile: (file: File) => void
   onRun: () => void
+  canRollback?: boolean
+  rollingBack?: boolean
+  onRollback?: () => void
   t: (key: string, options?: Record<string, unknown>) => string
 }
 
@@ -1134,6 +1314,9 @@ function FileUploadCard({
   onPick,
   onFile,
   onRun,
+  canRollback,
+  rollingBack,
+  onRollback,
   t,
 }: FileUploadCardProps) {
   return (
@@ -1220,6 +1403,23 @@ function FileUploadCard({
               <Download data-icon="inline-start" aria-hidden />
               {t("inputs.detail.download_sample")}
             </a>
+          </Button>
+        ) : null}
+        {canRollback ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={disabled || rollingBack}
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30"
+            onClick={onRollback}
+          >
+            {rollingBack ? (
+              <Loader2 data-icon="inline-start" className="animate-spin" />
+            ) : (
+              <RotateCcw data-icon="inline-start" />
+            )}
+            {t("inputs.detail.rollback_btn")}
           </Button>
         ) : null}
       </div>

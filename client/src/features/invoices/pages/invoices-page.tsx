@@ -163,7 +163,7 @@ export function InvoicesPage() {
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard
             title="TOTAL INVOICES"
-            value={`${totalInvoicesCount} Invoices (${formatNumber(totalOrdersCount, locale)} Orders)`}
+            value={`${totalInvoicesCount} (${formatNumber(totalOrdersCount, locale)} Orders)`}
             icon={ClipboardList}
             iconWrapperClassName="bg-info/10 text-info"
           />
