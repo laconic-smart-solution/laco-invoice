@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+﻿import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { invoiceLocalService } from "../services/invoice-local.service"
 import type { CreateInvoiceRequest, InvoiceStatus } from "../types/invoice"
 
@@ -36,6 +36,20 @@ export function useCreateInvoiceMutation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: INVOICES_QUERY_KEY })
+    },
+  })
+}
+
+export function useUpdateInvoiceNumberMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, invoiceNumber }: { id: string; invoiceNumber: string }) => {
+      await new Promise((r) => setTimeout(r, 150))
+      return invoiceLocalService.updateInvoiceNumber(id, invoiceNumber)
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: INVOICES_QUERY_KEY })
+      queryClient.invalidateQueries({ queryKey: [...INVOICES_QUERY_KEY, variables.id] })
     },
   })
 }

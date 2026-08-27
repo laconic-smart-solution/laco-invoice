@@ -1,7 +1,6 @@
-import { useState } from "react"
-import { Link } from "react-router-dom"
+﻿import { useState } from "react"
+import { Link, useNavigate } from "react-router-dom"
 import {
-  ChevronRight,
   ClipboardList,
   FileText,
   HandCoins,
@@ -49,6 +48,7 @@ function getInvoiceStatusBadgeVariant(status: string): StatusBadgeVariant {
 }
 
 export function InvoicesPage() {
+  const navigate = useNavigate()
   const locale = useLocaleStore((state) => state.locale)
 
   const [search, setSearch] = useState("")
@@ -233,11 +233,16 @@ export function InvoicesPage() {
                 </tr>
               ) : (
                 filteredInvoices.map((inv) => (
-                  <tr key={inv.id} className="transition-colors hover:bg-muted/30">
+                  <tr
+                    key={inv.id}
+                    className="cursor-pointer transition-colors hover:bg-muted/50"
+                    onClick={() => navigate(ROUTES.dashboard.invoiceDetail(inv.id))}
+                  >
                     <td className="px-4 py-3.5">
                       <Link
                         to={ROUTES.dashboard.invoiceDetail(inv.id)}
                         className="font-mono font-medium text-primary hover:underline"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         {inv.invoiceNumber}
                       </Link>
@@ -282,18 +287,12 @@ export function InvoicesPage() {
                           size="sm"
                           className="size-8 p-0"
                           title="Print / PDF Tax Invoice"
-                          onClick={() => setPreviewInvoice(inv)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setPreviewInvoice(inv)
+                          }}
                         >
                           <Printer className="size-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          asChild
-                        >
-                          <Link to={ROUTES.dashboard.invoiceDetail(inv.id)}>
-                            View <ChevronRight className="ml-1 size-3" />
-                          </Link>
                         </Button>
                       </div>
                     </td>

@@ -1,4 +1,4 @@
-import type { CreateInvoiceRequest, Invoice, InvoiceItemLine, InvoiceOrderSummary, InvoiceStatus } from "../types/invoice"
+﻿import type { CreateInvoiceRequest, Invoice, InvoiceItemLine, InvoiceOrderSummary, InvoiceStatus } from "../types/invoice"
 
 const STORAGE_KEY = "laco_invoices_data_v1"
 
@@ -7,7 +7,7 @@ function generateMockOrdersAndItems(count: number, baseDate: string): { orders: 
   const items: InvoiceItemLine[] = []
 
   const sampleProducts = [
-    { name: "【KINBATA】 Oxygen Bleach ผงซักผ้าขจัดคราบ", sku: "N-706", price: 330, disc: 128.77 },
+    { name: "【KINBATA】 Oxygen Bleach ผงฟอกผ้าขาวขจัดคราบฝังแน่น", sku: "N-706", price: 330, disc: 128.77 },
     { name: "【KINBATA】 Fabric Stain Cleaner 1.1kg", sku: "N-545", price: 478, disc: 189.30 },
     { name: "Multi-purpose Kitchen Decontamination Wipes", sku: "K-102", price: 159, disc: 40.00 },
     { name: "Japanese Glass & Window Cleaner 500ml", sku: "G-880", price: 219, disc: 60.00 },
@@ -150,8 +150,32 @@ export const invoiceLocalService = {
     return list.find((inv) => inv.id === id || inv.invoiceNumber === id)
   },
 
+  isInvoiceNumberTaken(invoiceNumber: string, excludeId?: string): boolean {
+    const list = this.getAll()
+    const target = invoiceNumber.trim().toLowerCase()
+    return list.some((i) => i.id !== excludeId && i.invoiceNumber.trim().toLowerCase() === target)
+  },
+
+  getNextInvoiceNumber(): string {
+    const list = this.getAll()
+    const now = new Date()
+    const prefix = `INV-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}-`
+    let nextIdx = list.length + 1
+    let candidate = `${prefix}${String(nextIdx).padStart(3, "0")}`
+    while (this.isInvoiceNumberTaken(candidate)) {
+      nextIdx++
+      candidate = `${prefix}${String(nextIdx).padStart(3, "0")}`
+    }
+    return candidate
+  },
+
   create(req: CreateInvoiceRequest): Invoice {
     const list = this.getAll()
+    const candidateNumber = req.invoiceNumber?.trim() || this.getNextInvoiceNumber()
+    if (this.isInvoiceNumberTaken(candidateNumber)) {
+      throw new Error(`Invoice number "${candidateNumber}" already exists. Please choose a unique number.`)
+    }
+
     const count = req.orderRunTitle?.includes("Yoik") ? 441 : Math.floor(25 + Math.random() * 100)
     const { orders, items } = generateMockOrdersAndItems(count, req.startDate)
     const grandTotal = orders.reduce((sum, o) => sum + o.totalAmount, 0)
@@ -160,11 +184,9 @@ export const invoiceLocalService = {
     const vatAmount = Number((grandTotal - subtotal).toFixed(2))
 
     const now = new Date().toISOString()
-    const invoiceNumber = `INV-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, "0")}-${String(list.length + 1).padStart(3, "0")}`
-
     const newInvoice: Invoice = {
       id: `inv-${Date.now()}`,
-      invoiceNumber,
+      invoiceNumber: candidateNumber,
       title: req.title || `${req.storeName} Invoice`,
       storeId: req.storeId,
       storeName: req.storeName,
@@ -197,6 +219,26 @@ export const invoiceLocalService = {
     return newInvoice
   },
 
+  updateInvoiceNumber(id: string, invoiceNumber: string): Invoice {
+    const list = this.getAll()
+    const trimmed = invoiceNumber.trim()
+    if (!trimmed) {
+      throw new Error("Invoice number cannot be empty")
+    }
+    if (this.isInvoiceNumberTaken(trimmed, id)) {
+      throw new Error(`Invoice number "${trimmed}" already exists. Please choose a unique number.`)
+    }
+    const idx = list.findIndex((i) => i.id === id)
+    if (idx === -1) throw new Error("Invoice not found")
+    list[idx] = {
+      ...list[idx],
+      invoiceNumber: trimmed,
+      updatedAt: new Date().toISOString(),
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list))
+    return list[idx]
+  },
+
   updateStatus(id: string, status: InvoiceStatus): Invoice | undefined {
     const list = this.getAll()
     const idx = list.findIndex((i) => i.id === id)
@@ -204,7 +246,7 @@ export const invoiceLocalService = {
     list[idx] = {
       ...list[idx],
       status,
-      paidAt: status === "PAID" ? new Date().toISOString() : list[idx].paidAt,
+      paidAt: status === "PAID" ? new Date().toISOString() : undefined,
       updatedAt: new Date().toISOString(),
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(list))

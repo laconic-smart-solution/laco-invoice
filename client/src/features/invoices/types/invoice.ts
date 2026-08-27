@@ -1,4 +1,4 @@
-export type InvoiceStatus = "DRAFT" | "ISSUED" | "PAID" | "VOID"
+﻿export type InvoiceStatus = "DRAFT" | "ISSUED" | "PAID" | "VOID"
 
 export interface InvoiceItemLine {
   id: string
@@ -60,6 +60,7 @@ export interface Invoice {
 }
 
 export interface CreateInvoiceRequest {
+  invoiceNumber?: string
   title: string
   storeId: string
   storeName: string

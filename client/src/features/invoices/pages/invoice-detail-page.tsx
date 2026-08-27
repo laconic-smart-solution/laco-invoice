@@ -1,29 +1,54 @@
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { useParams, Link } from "react-router-dom"
 import {
   ArrowLeft,
   Printer,
   FileText,
-  Building2,
   Calendar,
   Layers,
   Receipt,
   Search,
   Check,
+  CheckCircle2,
+  X,
+  Pencil,
+  RotateCcw,
+  Loader2,
+  AlertCircle,
+  AlertTriangle,
   Store,
   HandCoins,
   ClipboardList,
   Scale,
+  SlidersHorizontal,
+  DollarSign,
+  User,
+  FilterX,
+  CreditCard,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { StatCard } from "@/components/common/stat-card"
 import { StatusBadge, type StatusBadgeVariant } from "@/components/common/status-badge"
 import { formatCurrency, formatNumber } from "@/util/format"
 import { useLocaleStore } from "@/shared/stores/locale-store"
 import { ROUTES } from "@/app/constants/routes"
-import { useInvoiceDetailQuery, useUpdateInvoiceStatusMutation } from "../queries/invoice.query"
+import {
+  useInvoiceDetailQuery,
+  useUpdateInvoiceStatusMutation,
+  useUpdateInvoiceNumberMutation,
+} from "../queries/invoice.query"
+import { invoiceLocalService } from "../services/invoice-local.service"
 import { InvoiceTaxPreview } from "../components/invoice-tax-preview"
 
 function getInvoiceStatusBadgeVariant(status: string): StatusBadgeVariant {
@@ -44,19 +69,135 @@ export function InvoiceDetailPage() {
   const { id } = useParams<{ id: string }>()
   const locale = useLocaleStore((state) => state.locale)
 
-  const [activeTab, setActiveTab] = useState<"orders" | "items" | "tax">("orders")
-  const [orderSearch, setOrderSearch] = useState("")
+  const [activeTab, setActiveTab] = useState<"orders" | "items">("orders")
   const [showTaxPreview, setShowTaxPreview] = useState(false)
+  const [showMarkPaidConfirm, setShowMarkPaidConfirm] = useState(false)
+  const [showRollbackConfirm, setShowRollbackConfirm] = useState(false)
+
+  // Inline edit state for invoice number
+  const [isEditingNumber, setIsEditingNumber] = useState(false)
+  const [editNumberValue, setEditNumberValue] = useState("")
+  const [editNumberError, setEditNumberError] = useState("")
+
+  // Filter States
+  const [isFilterExpanded, setIsFilterExpanded] = useState(true)
+  const [search, setSearch] = useState("")
+  const [buyerQuery, setBuyerQuery] = useState("")
+  const [buyerTaxStatus, setBuyerTaxStatus] = useState<"all" | "has_tax_id" | "no_tax_id">("all")
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
+  const [minAmount, setMinAmount] = useState("")
+  const [maxAmount, setMaxAmount] = useState("")
 
   const invoiceQuery = useInvoiceDetailQuery(id)
   const updateStatusMutation = useUpdateInvoiceStatusMutation()
+  const updateNumberMutation = useUpdateInvoiceNumberMutation()
 
   const invoice = invoiceQuery.data
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0
+    if (search.trim()) count++
+    if (buyerQuery.trim()) count++
+    if (buyerTaxStatus !== "all") count++
+    if (startDate) count++
+    if (endDate) count++
+    if (minAmount !== "") count++
+    if (maxAmount !== "") count++
+    return count
+  }, [search, buyerQuery, buyerTaxStatus, startDate, endDate, minAmount, maxAmount])
+
+  const handleResetFilters = () => {
+    setSearch("")
+    setBuyerQuery("")
+    setBuyerTaxStatus("all")
+    setStartDate("")
+    setEndDate("")
+    setMinAmount("")
+    setMaxAmount("")
+  }
+
+  // Filtered Orders Calculation
+  const filteredOrders = useMemo(() => {
+    if (!invoice?.orders) return []
+    return invoice.orders.filter((o) => {
+      // Search Order ID
+      if (search.trim()) {
+        const q = search.trim().toLowerCase()
+        const match = o.externalOrderId.toLowerCase().includes(q) || o.orderId.toLowerCase().includes(q)
+        if (!match) return false
+      }
+
+      // Buyer Query
+      if (buyerQuery.trim()) {
+        const q = buyerQuery.trim().toLowerCase()
+        const match =
+          (o.buyerName && o.buyerName.toLowerCase().includes(q)) ||
+          (o.buyerTaxId && o.buyerTaxId.toLowerCase().includes(q))
+        if (!match) return false
+      }
+
+      // Buyer Tax ID registered status
+      if (buyerTaxStatus === "has_tax_id" && !o.buyerTaxId) return false
+      if (buyerTaxStatus === "no_tax_id" && o.buyerTaxId) return false
+
+      // Date Range
+      if (startDate && o.orderDate < startDate) return false
+      if (endDate && o.orderDate > endDate) return false
+
+      // Amount Range
+      const min = parseFloat(minAmount)
+      if (!isNaN(min) && o.totalAmount < min) return false
+
+      const max = parseFloat(maxAmount)
+      if (!isNaN(max) && o.totalAmount > max) return false
+
+      return true
+    })
+  }, [invoice?.orders, search, buyerQuery, buyerTaxStatus, startDate, endDate, minAmount, maxAmount])
+
+  // Filtered Items Calculation
+  const filteredItems = useMemo(() => {
+    if (!invoice?.items) return []
+    return invoice.items.filter((item) => {
+      // General search
+      if (search.trim()) {
+        const q = search.trim().toLowerCase()
+        const match =
+          item.externalOrderId.toLowerCase().includes(q) ||
+          item.sellerSku.toLowerCase().includes(q) ||
+          item.platformSkuId.toLowerCase().includes(q) ||
+          item.productName.toLowerCase().includes(q)
+        if (!match) return false
+      }
+
+      // Date Range
+      if (startDate && item.orderDate < startDate) return false
+      if (endDate && item.orderDate > endDate) return false
+
+      // Amount Range
+      const min = parseFloat(minAmount)
+      if (!isNaN(min) && item.totalAmount < min) return false
+
+      const max = parseFloat(maxAmount)
+      if (!isNaN(max) && item.totalAmount > max) return false
+
+      return true
+    })
+  }, [invoice?.items, search, startDate, endDate, minAmount, maxAmount])
+
+  // Filtered Total Stats
+  const filteredSummary = useMemo(() => {
+    const totalAmount = filteredOrders.reduce((sum, o) => sum + o.totalAmount, 0)
+    const vatAmount = filteredOrders.reduce((sum, o) => sum + o.vatAmount, 0)
+    const exVat = filteredOrders.reduce((sum, o) => sum + o.amountExVat, 0)
+    return { totalAmount, vatAmount, exVat }
+  }, [filteredOrders])
 
   if (invoiceQuery.isLoading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center p-6 text-sm text-muted-foreground">
-        Loading invoice details…
+        Loading invoice details...
       </div>
     )
   }
@@ -76,15 +217,51 @@ export function InvoiceDetailPage() {
     )
   }
 
-  const filteredOrders = (invoice.orders || []).filter(
-    (o) =>
-      o.externalOrderId.toLowerCase().includes(orderSearch.toLowerCase()) ||
-      (o.buyerName && o.buyerName.toLowerCase().includes(orderSearch.toLowerCase())) ||
-      (o.buyerTaxId && o.buyerTaxId.includes(orderSearch))
-  )
+  const handleConfirmMarkPaid = () => {
+    updateStatusMutation.mutate(
+      { id: invoice.id, status: "PAID" },
+      {
+        onSuccess: () => {
+          setShowMarkPaidConfirm(false)
+        },
+      }
+    )
+  }
 
-  const handleMarkPaid = () => {
-    updateStatusMutation.mutate({ id: invoice.id, status: "PAID" })
+  const handleConfirmRollback = () => {
+    updateStatusMutation.mutate(
+      { id: invoice.id, status: "ISSUED" },
+      {
+        onSuccess: () => {
+          setShowRollbackConfirm(false)
+        },
+      }
+    )
+  }
+
+  const handleSaveInvoiceNumber = (e?: React.FormEvent) => {
+    e?.preventDefault()
+    const trimmed = editNumberValue.trim()
+    if (!trimmed) {
+      setEditNumberError("Invoice number is required.")
+      return
+    }
+    if (invoiceLocalService.isInvoiceNumberTaken(trimmed, invoice.id)) {
+      setEditNumberError(`Invoice number "${trimmed}" is already in use.`)
+      return
+    }
+    updateNumberMutation.mutate(
+      { id: invoice.id, invoiceNumber: trimmed },
+      {
+        onSuccess: () => {
+          setIsEditingNumber(false)
+          setEditNumberError("")
+        },
+        onError: (err: any) => {
+          setEditNumberError(err.message || "Failed to update invoice number.")
+        },
+      }
+    )
   }
 
   return (
@@ -109,20 +286,86 @@ export function InvoiceDetailPage() {
                 label={invoice.status}
               />
             </div>
-            <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-              <span className="font-mono font-semibold text-foreground">{invoice.invoiceNumber}</span>
-              <span>·</span>
+            <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+              {/* Editable Invoice Number with Duplicate Validation */}
+              {isEditingNumber ? (
+                <form onSubmit={handleSaveInvoiceNumber} className="flex items-center gap-1.5">
+                  <Input
+                    value={editNumberValue}
+                    onChange={(e) => {
+                      setEditNumberValue(e.target.value)
+                      setEditNumberError("")
+                    }}
+                    placeholder="e.g. INV-202608-001"
+                    className={`h-7 w-48 font-mono font-bold text-xs rounded-none ${
+                      editNumberError ? "border-destructive text-destructive focus-visible:ring-destructive" : "text-primary"
+                    }`}
+                    autoFocus
+                  />
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={updateNumberMutation.isPending}
+                    className="h-7 px-2 text-xs rounded-none bg-primary text-primary-foreground"
+                    title="Save"
+                  >
+                    {updateNumberMutation.isPending ? (
+                      <Loader2 className="size-3 animate-spin" />
+                    ) : (
+                      <Check className="size-3.5" />
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs rounded-none"
+                    onClick={() => {
+                      setIsEditingNumber(false)
+                      setEditNumberError("")
+                    }}
+                    title="Cancel"
+                  >
+                    <X className="size-3.5" />
+                  </Button>
+                  {editNumberError && (
+                    <span className="flex items-center gap-1 text-[11px] font-medium text-destructive">
+                      <AlertCircle className="size-3 shrink-0" />
+                      {editNumberError}
+                    </span>
+                  )}
+                </form>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <span className="font-mono font-bold text-foreground">{invoice.invoiceNumber}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsEditingNumber(true)
+                      setEditNumberValue(invoice.invoiceNumber)
+                      setEditNumberError("")
+                    }}
+                    className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+                    title="Edit Invoice Number"
+                  >
+                    <Pencil className="size-3" />
+                    <span className="underline decoration-dotted">Edit</span>
+                  </button>
+                </div>
+              )}
+
+              <span>•</span>
               <span className="flex items-center gap-1">
                 <Store className="size-3.5" /> {invoice.storeName}
               </span>
-              <span>·</span>
+              <span>•</span>
               <span className="flex items-center gap-1">
                 <Calendar className="size-3.5" /> {invoice.startDate} → {invoice.endDate}
               </span>
               {invoice.orderRunTitle && (
                 <>
-                  <span>·</span>
-                  <span className="rounded bg-primary/10 px-1.5 py-0.5 text-primary font-medium">
+                  <span>•</span>
+                  <span className="rounded-none bg-primary/10 px-1.5 py-0.5 text-primary font-medium">
                     Batch: {invoice.orderRunTitle}
                   </span>
                 </>
@@ -135,20 +378,33 @@ export function InvoiceDetailPage() {
               type="button"
               variant="outline"
               onClick={() => setShowTaxPreview(true)}
+              className="rounded-none"
             >
               <Printer className="size-4" />
               Tax Invoice PDF
             </Button>
-            {invoice.status !== "PAID" && (
+            {invoice.status !== "PAID" ? (
               <Button
                 type="button"
-                className="border-primary text-primary"
+                className="border-primary text-primary rounded-none hover:bg-primary/10"
                 variant="outline"
-                onClick={handleMarkPaid}
+                onClick={() => setShowMarkPaidConfirm(true)}
                 disabled={updateStatusMutation.isPending}
               >
                 <Check className="size-4" />
                 Mark as Paid
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                className="border-warning/80 text-warning hover:bg-warning/10 rounded-none transition-colors"
+                variant="outline"
+                onClick={() => setShowRollbackConfirm(true)}
+                disabled={updateStatusMutation.isPending}
+                title="Rollback status from PAID to ISSUED"
+              >
+                <RotateCcw className="size-4" />
+                Rollback to Issued
               </Button>
             )}
           </div>
@@ -183,68 +439,238 @@ export function InvoiceDetailPage() {
         />
       </div>
 
-      {/* Tabs & Table Layout */}
+      {/* Tabs & Filter Layout */}
       <div className="space-y-4">
         <div className="flex gap-2 border-b border-border text-sm">
           <button
             type="button"
             onClick={() => setActiveTab("orders")}
-            className={`flex items-center gap-1.5 border-b-2 px-3 py-2 text-xs font-medium transition-colors ${
+            className={`flex items-center gap-1.5 border-b-2 px-3 py-2 text-xs font-medium transition-colors rounded-none ${
               activeTab === "orders"
-                ? "border-primary text-foreground"
+                ? "border-primary text-foreground font-semibold"
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
             <Receipt className="size-4" />
-            Orders Listing ({invoice.orderCount})
+            Orders Listing ({filteredOrders.length} / {invoice.orderCount})
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("items")}
-            className={`flex items-center gap-1.5 border-b-2 px-3 py-2 text-xs font-medium transition-colors ${
+            className={`flex items-center gap-1.5 border-b-2 px-3 py-2 text-xs font-medium transition-colors rounded-none ${
               activeTab === "items"
-                ? "border-primary text-foreground"
+                ? "border-primary text-foreground font-semibold"
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
             <Layers className="size-4" />
-            Order Line Items ({invoice.items?.length || 0})
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("tax")}
-            className={`flex items-center gap-1.5 border-b-2 px-3 py-2 text-xs font-medium transition-colors ${
-              activeTab === "tax"
-                ? "border-primary text-foreground"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <Building2 className="size-4" />
-            Buyer & Tax Info
+            Order Line Items ({filteredItems.length} / {invoice.items?.length || 0})
           </button>
         </div>
 
-        {/* Tab 1: Orders Listing */}
-        {activeTab === "orders" && (
-          <div className="border border-border bg-card shadow-sm">
-            <div className="flex items-center justify-between border-b border-border p-4">
-              <div className="relative w-72">
+        {/* Rich Filter Panel */}
+        <div className="border border-border bg-card shadow-sm rounded-none">
+          {/* Main Filter Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-3 p-4 border-b border-border bg-muted/20">
+            <div className="flex flex-1 flex-wrap items-center gap-3">
+              {/* Order ID / Keyword Search */}
+              <div className="relative min-w-[220px] flex-1 sm:max-w-xs">
                 <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Search order ID, buyer…"
-                  value={orderSearch}
-                  onChange={(e) => setOrderSearch(e.target.value)}
-                  className="h-9 pl-8 text-xs"
+                  placeholder={activeTab === "orders" ? "Search Order ID..." : "Search Order ID, SKU, product..."}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="h-9 pl-8 text-xs rounded-none"
                 />
+                {search && (
+                  <button
+                    type="button"
+                    onClick={() => setSearch("")}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                )}
               </div>
-              <p className="text-xs text-muted-foreground">
-                Showing {filteredOrders.length} of {invoice.orderCount} orders
-              </p>
+
+              {/* Buyer Info Search (for orders) */}
+              {activeTab === "orders" && (
+                <div className="relative min-w-[200px] flex-1 sm:max-w-xs">
+                  <User className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search Buyer Name, Tax ID..."
+                    value={buyerQuery}
+                    onChange={(e) => setBuyerQuery(e.target.value)}
+                    className="h-9 pl-8 text-xs rounded-none"
+                  />
+                  {buyerQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setBuyerQuery("")}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* Toggle Advanced Filters Button */}
+              <Button
+                type="button"
+                variant={isFilterExpanded ? "default" : "outline"}
+                size="sm"
+                onClick={() => setIsFilterExpanded(!isFilterExpanded)}
+                className={`h-9 text-xs rounded-none font-medium gap-1.5 ${
+                  isFilterExpanded ? "bg-primary text-primary-foreground" : ""
+                }`}
+              >
+                <SlidersHorizontal className="size-3.5" />
+                <span>Filters</span>
+                {activeFilterCount > 0 && (
+                  <span className="ml-1 px-1.5 py-0.2 text-[10px] font-bold bg-background text-foreground rounded-none">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </Button>
+
+              {/* Reset Filters */}
+              {activeFilterCount > 0 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleResetFilters}
+                  className="h-9 text-xs rounded-none text-muted-foreground hover:text-destructive gap-1.5"
+                >
+                  <FilterX className="size-3.5" />
+                  <span>Reset All</span>
+                </Button>
+              )}
             </div>
 
-            <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+            {/* Filter Summary Results Badge */}
+            <div className="text-xs text-muted-foreground font-medium">
+              Showing <strong className="font-mono text-foreground">{activeTab === "orders" ? filteredOrders.length : filteredItems.length}</strong> of{" "}
+              <span className="font-mono">{activeTab === "orders" ? invoice.orderCount : invoice.items?.length || 0}</span> records
+            </div>
+          </div>
+
+          {/* Expandable Advanced Filters Drawer */}
+          {isFilterExpanded && (
+            <div className="p-4 border-b border-border bg-muted/5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {/* Date Range: From */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                  <Calendar className="size-3.5 text-primary" />
+                  Order Date From
+                </Label>
+                <Input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="h-8.5 text-xs font-mono rounded-none"
+                />
+              </div>
+
+              {/* Date Range: To */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                  <Calendar className="size-3.5 text-primary" />
+                  Order Date To
+                </Label>
+                <Input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="h-8.5 text-xs font-mono rounded-none"
+                />
+              </div>
+
+              {/* Amount Range: Min & Max */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                  <DollarSign className="size-3.5 text-primary" />
+                  Total Amount Range (THB)
+                </Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    placeholder="Min"
+                    value={minAmount}
+                    onChange={(e) => setMinAmount(e.target.value)}
+                    className="h-8.5 text-xs font-mono rounded-none w-1/2"
+                  />
+                  <span className="text-xs text-muted-foreground">to</span>
+                  <Input
+                    type="number"
+                    placeholder="Max"
+                    value={maxAmount}
+                    onChange={(e) => setMaxAmount(e.target.value)}
+                    className="h-8.5 text-xs font-mono rounded-none w-1/2"
+                  />
+                </div>
+              </div>
+
+              {/* Buyer Tax ID Status Filter */}
+              {activeTab === "orders" ? (
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                    <CreditCard className="size-3.5 text-primary" />
+                    Buyer Tax ID Status
+                  </Label>
+                  <select
+                    value={buyerTaxStatus}
+                    onChange={(e) => setBuyerTaxStatus(e.target.value as any)}
+                    className="w-full h-8.5 border border-input bg-background px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-ring rounded-none"
+                  >
+                    <option value="all">All Buyers (With or Without Tax ID)</option>
+                    <option value="has_tax_id">Registered Tax ID Only</option>
+                    <option value="no_tax_id">No Tax ID (Standard Retail)</option>
+                  </select>
+                </div>
+              ) : (
+                <div className="flex items-end">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleResetFilters}
+                    disabled={activeFilterCount === 0}
+                    className="h-8.5 text-xs rounded-none w-full text-muted-foreground"
+                  >
+                    Clear Filter Inputs
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Filtered Dynamic Total Bar (when active filters are applied) */}
+          {activeFilterCount > 0 && (
+            <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 bg-primary/5 text-xs border-b border-border">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <span className="font-semibold text-foreground">Filtered Results Total:</span>
+                <span className="font-mono font-bold text-foreground">
+                  {formatCurrency(filteredSummary.totalAmount, locale, invoice.currency)}
+                </span>
+                <span>(Ex-VAT: <strong className="font-mono text-foreground">{formatCurrency(filteredSummary.exVat, locale, invoice.currency)}</strong>, VAT 7%: <strong className="font-mono text-primary">{formatCurrency(filteredSummary.vatAmount, locale, invoice.currency)}</strong>)</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className="text-[11px] font-medium text-primary hover:underline cursor-pointer"
+              >
+                Clear all filters
+              </button>
+            </div>
+          )}
+
+          {/* Tab 1: Orders Listing Table */}
+          {activeTab === "orders" && (
+            <div className="overflow-x-auto max-h-[520px] overflow-y-auto">
               <table className="w-full text-left text-xs">
-                <thead className="sticky top-0 bg-muted/90 backdrop-blur font-medium text-muted-foreground border-b border-border">
+                <thead className="sticky top-0 bg-muted/95 backdrop-blur font-medium text-muted-foreground border-b border-border z-10">
                   <tr>
                     <th className="px-4 py-3">#</th>
                     <th className="px-4 py-3">ORDER ID</th>
@@ -258,41 +684,51 @@ export function InvoiceDetailPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {filteredOrders.map((ord, idx) => (
-                    <tr key={ord.orderId} className="transition-colors hover:bg-muted/30">
-                      <td className="px-4 py-3 text-muted-foreground">{idx + 1}</td>
-                      <td className="px-4 py-3 font-mono font-medium text-foreground">
-                        {ord.externalOrderId}
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground">{ord.orderDate}</td>
-                      <td className="px-4 py-3">{ord.buyerName || "—"}</td>
-                      <td className="px-4 py-3 font-mono text-[11px] text-muted-foreground">
-                        {ord.buyerTaxId || "—"}
-                      </td>
-                      <td className="px-4 py-3 text-center font-mono">{ord.itemCount}</td>
-                      <td className="px-4 py-3 text-right font-mono">
-                        {formatCurrency(ord.amountExVat, locale, invoice.currency)}
-                      </td>
-                      <td className="px-4 py-3 text-right font-mono text-primary font-medium">
-                        {formatCurrency(ord.vatAmount, locale, invoice.currency)}
-                      </td>
-                      <td className="px-4 py-3 text-right font-mono font-bold text-foreground">
-                        {formatCurrency(ord.totalAmount, locale, invoice.currency)}
+                  {filteredOrders.length === 0 ? (
+                    <tr>
+                      <td colSpan={9} className="py-12 text-center text-xs text-muted-foreground">
+                        No orders match the selected filter criteria.
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    filteredOrders.map((ord, idx) => (
+                      <tr key={ord.orderId} className="transition-colors hover:bg-muted/30">
+                        <td className="px-4 py-3 text-muted-foreground">{idx + 1}</td>
+                        <td className="px-4 py-3 font-mono font-medium text-foreground">
+                          {ord.externalOrderId}
+                        </td>
+                        <td className="px-4 py-3 text-muted-foreground">{ord.orderDate}</td>
+                        <td className="px-4 py-3">{ord.buyerName || "-"}</td>
+                        <td className="px-4 py-3 font-mono text-[11px] text-muted-foreground">
+                          {ord.buyerTaxId ? (
+                            <span className="font-semibold text-foreground">{ord.buyerTaxId}</span>
+                          ) : (
+                            "-"
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-center font-mono">{ord.itemCount}</td>
+                        <td className="px-4 py-3 text-right font-mono">
+                          {formatCurrency(ord.amountExVat, locale, invoice.currency)}
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono text-primary font-medium">
+                          {formatCurrency(ord.vatAmount, locale, invoice.currency)}
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono font-bold text-foreground">
+                          {formatCurrency(ord.totalAmount, locale, invoice.currency)}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Tab 2: Line Items Breakdown */}
-        {activeTab === "items" && (
-          <div className="border border-border bg-card shadow-sm">
-            <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+          {/* Tab 2: Line Items Breakdown Table */}
+          {activeTab === "items" && (
+            <div className="overflow-x-auto max-h-[520px] overflow-y-auto">
               <table className="w-full text-left text-xs">
-                <thead className="sticky top-0 bg-muted/90 backdrop-blur font-medium text-muted-foreground border-b border-border">
+                <thead className="sticky top-0 bg-muted/95 backdrop-blur font-medium text-muted-foreground border-b border-border z-10">
                   <tr>
                     <th className="px-4 py-3">#</th>
                     <th className="px-4 py-3">ORDER ID</th>
@@ -306,65 +742,137 @@ export function InvoiceDetailPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {(invoice.items || []).map((item, idx) => (
-                    <tr key={item.id} className="transition-colors hover:bg-muted/30">
-                      <td className="px-4 py-3 text-muted-foreground">{idx + 1}</td>
-                      <td className="px-4 py-3 font-mono text-[11px] text-muted-foreground">
-                        {item.externalOrderId}
-                      </td>
-                      <td className="px-4 py-3 font-medium text-foreground max-w-xs truncate">
-                        {item.productName}
-                      </td>
-                      <td className="px-4 py-3 font-mono text-muted-foreground">{item.sellerSku}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{item.variation || "—"}</td>
-                      <td className="px-4 py-3 text-center font-mono font-medium">{item.quantity}</td>
-                      <td className="px-4 py-3 text-right font-mono">
-                        {formatCurrency(item.unitPrice, locale, invoice.currency)}
-                      </td>
-                      <td className="px-4 py-3 text-right font-mono text-muted-foreground">
-                        -{formatCurrency(item.discount, locale, invoice.currency)}
-                      </td>
-                      <td className="px-4 py-3 text-right font-mono font-bold text-foreground">
-                        {formatCurrency(item.totalAmount, locale, invoice.currency)}
+                  {filteredItems.length === 0 ? (
+                    <tr>
+                      <td colSpan={9} className="py-12 text-center text-xs text-muted-foreground">
+                        No item lines match the selected filter criteria.
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    filteredItems.map((item, idx) => (
+                      <tr key={item.id} className="transition-colors hover:bg-muted/30">
+                        <td className="px-4 py-3 text-muted-foreground">{idx + 1}</td>
+                        <td className="px-4 py-3 font-mono text-[11px] text-muted-foreground">
+                          {item.externalOrderId}
+                        </td>
+                        <td className="px-4 py-3 font-medium text-foreground max-w-xs truncate">
+                          {item.productName}
+                        </td>
+                        <td className="px-4 py-3 font-mono text-muted-foreground">{item.sellerSku}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{item.variation || "-"}</td>
+                        <td className="px-4 py-3 text-center font-mono font-medium">{item.quantity}</td>
+                        <td className="px-4 py-3 text-right font-mono">
+                          {formatCurrency(item.unitPrice, locale, invoice.currency)}
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono text-muted-foreground">
+                          -{formatCurrency(item.discount, locale, invoice.currency)}
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono font-bold text-foreground">
+                          {formatCurrency(item.totalAmount, locale, invoice.currency)}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
-          </div>
-        )}
-
-        {/* Tab 3: Buyer & Tax Info */}
-        {activeTab === "tax" && (
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="border border-border bg-card p-5 space-y-3 shadow-sm">
-              <h3 className="font-heading text-sm font-semibold text-foreground">Issuer / Seller Information</h3>
-              <div className="space-y-1.5 text-xs text-muted-foreground">
-                <p><strong className="text-foreground">Store:</strong> {invoice.storeName}</p>
-                <p><strong className="text-foreground">Tax ID:</strong> 0105558123456 (Head Office)</p>
-                <p><strong className="text-foreground">Channel:</strong> {invoice.marketplaceCode} Shop</p>
-                <p><strong className="text-foreground">Currency:</strong> {invoice.currency}</p>
-                <p><strong className="text-foreground">VAT Rate:</strong> {(invoice.vatRate * 100).toFixed(0)}% Standard Tax</p>
-              </div>
-            </div>
-
-            <div className="border border-border bg-card p-5 space-y-3 shadow-sm">
-              <h3 className="font-heading text-sm font-semibold text-foreground">Customer / Buyer Information</h3>
-              <div className="space-y-1.5 text-xs text-muted-foreground">
-                <p><strong className="text-foreground">Buyer Name:</strong> {invoice.buyerName || "—"}</p>
-                <p><strong className="text-foreground">Buyer Tax ID:</strong> {invoice.buyerTaxId || "N/A"}</p>
-                <p><strong className="text-foreground">Address:</strong> {invoice.buyerAddress || "—"}</p>
-                {invoice.notes && (
-                  <p className="mt-2 pt-2 border-t border-border">
-                    <strong className="text-foreground">Notes:</strong> {invoice.notes}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
+
+      {/* Mark as Paid Confirmation Modal */}
+      <Dialog open={showMarkPaidConfirm} onOpenChange={setShowMarkPaidConfirm}>
+        <DialogContent className="max-w-md w-full rounded-none border-border bg-card shadow-2xl p-6">
+          <DialogHeader className="space-y-2 text-left">
+            <div className="flex size-9 items-center justify-center rounded-none bg-primary/10 text-primary border border-primary/20">
+              <CheckCircle2 className="size-5" />
+            </div>
+            <DialogTitle className="font-heading text-base font-bold text-foreground">
+              Confirm Payment Settlement
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground leading-relaxed">
+              Are you sure you want to mark invoice <strong className="font-mono text-foreground">{invoice.invoiceNumber}</strong> as <strong className="text-success font-semibold">PAID</strong>? This will record the payment settlement date and update the status.
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter className="mt-6 flex flex-row items-center justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowMarkPaidConfirm(false)}
+              disabled={updateStatusMutation.isPending}
+              className="rounded-none text-xs h-9 px-4 font-medium"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleConfirmMarkPaid}
+              disabled={updateStatusMutation.isPending}
+              className="rounded-none bg-primary text-primary-foreground hover:bg-primary/90 text-xs h-9 px-4 font-semibold"
+            >
+              {updateStatusMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-1.5 size-3.5 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                <>
+                  <Check className="mr-1.5 size-3.5" />
+                  Confirm Mark as Paid
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rollback Status Confirmation Modal */}
+      <Dialog open={showRollbackConfirm} onOpenChange={setShowRollbackConfirm}>
+        <DialogContent className="max-w-md w-full rounded-none border-border bg-card shadow-2xl p-6">
+          <DialogHeader className="space-y-2 text-left">
+            <div className="flex size-9 items-center justify-center rounded-none bg-warning/10 text-warning border border-warning/20">
+              <AlertTriangle className="size-5" />
+            </div>
+            <DialogTitle className="font-heading text-base font-bold text-foreground">
+              Confirm Status Rollback
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground leading-relaxed">
+              Are you sure you want to revert invoice <strong className="font-mono text-foreground">{invoice.invoiceNumber}</strong> status from <strong className="text-success font-semibold">PAID</strong> back to <strong className="text-primary font-semibold">ISSUED</strong>?
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter className="mt-6 flex flex-row items-center justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowRollbackConfirm(false)}
+              disabled={updateStatusMutation.isPending}
+              className="rounded-none text-xs h-9 px-4 font-medium"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleConfirmRollback}
+              disabled={updateStatusMutation.isPending}
+              className="rounded-none bg-warning text-warning-foreground hover:bg-warning/90 text-xs h-9 px-4 font-semibold"
+            >
+              {updateStatusMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-1.5 size-3.5 animate-spin" />
+                  Rolling back...
+                </>
+              ) : (
+                <>
+                  <RotateCcw className="mr-1.5 size-3.5" />
+                  Confirm Rollback
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Tax Invoice Printable Preview Modal */}
       {showTaxPreview && (
