@@ -6,6 +6,7 @@ import i18n from "@/app/i18n"
 import { ThemeProvider } from "@/components/theme-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { router } from "@/app/routes"
+import { MockApiBanner } from "@/components/common/mock-api-banner"
 import { AuthHydrate } from "@/features/auth/components/auth-hydrate"
 import { queryClient } from "@/shared/queries/query-client"
 import { useLocaleStore } from "@/shared/stores/locale-store"
@@ -32,6 +33,7 @@ export function AppProviders({ children }: AppProvidersProps) {
         <TooltipProvider>
           <AuthHydrate />
           <LocaleSync />
+          <MockApiBanner />
           {children ?? <RouterProvider router={router} />}
         </TooltipProvider>
       </ThemeProvider>

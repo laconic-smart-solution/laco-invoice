@@ -7,4 +7,6 @@ export const env = {
     import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8091/api"
   ),
   applicationCode: import.meta.env.VITE_APPLICATION_CODE ?? "laco-invoice",
+  /** When true, all API calls are simulated locally (no backend required). */
+  useMockApi: import.meta.env.VITE_USE_MOCK_API === "true",
 } as const

@@ -1,3 +1,5 @@
+import { env } from "@/app/config/env"
+import { MOCK_USER } from "@/shared/mock/mock-user"
 import { meService } from "@/shared/services/me.service"
 import type { MeProfile } from "@/shared/types/auth.types"
 import { create } from "zustand"
@@ -18,6 +20,15 @@ export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
   isHydrated: false,
   hydrate: async () => {
+    if (env.useMockApi) {
+      set({
+        user: MOCK_USER,
+        isAuthenticated: true,
+        isHydrated: true,
+      })
+      return
+    }
+
     try {
       const profile = await meService.getProfile({ skipAuthRefresh: true })
       set({
@@ -51,11 +62,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     })
   },
   logout: async () => {
-    const { authService } = await import("@/shared/services/auth.service")
-    try {
-      await authService.logout()
-    } catch {
-      // Clear local state even when the server session is already gone.
+    if (!env.useMockApi) {
+      const { authService } = await import("@/shared/services/auth.service")
+      try {
+        await authService.logout()
+      } catch {
+        // Clear local state even when the server session is already gone.
+      }
     }
     set({
       user: null,
