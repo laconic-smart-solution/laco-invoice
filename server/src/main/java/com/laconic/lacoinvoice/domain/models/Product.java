@@ -30,7 +30,7 @@ public class Product extends StoreScopedEntity {
 	@Column(name = "marketplace_code", length = 20)
 	private String marketplaceCode;
 
-	@Column(name = "external_product_id", length = 64)
+	@Column(name = "external_product_id", length = 400)
 	private String externalProductId;
 
 	@Column(length = 3)

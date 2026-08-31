@@ -10,10 +10,8 @@ import { FormCheckBox } from "@/components/common/form-inputs/form-check-box"
 import { Button } from "@/components/ui/button"
 import { Form } from "@/components/ui/form"
 import { AuthCard } from "@/features/auth/components/auth-card"
-import { AuthDivider } from "@/features/auth/components/auth-divider"
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
 import { AuthIconInput } from "@/features/auth/components/auth-icon-input"
-import { OauthProviderButtons } from "@/features/auth/components/oauth-provider-buttons"
 import { useLogin } from "@/features/auth/hooks/use-login"
 import {
   createLoginSchema,
@@ -115,9 +113,6 @@ export function LoginPage() {
             {t("login.submit")}
             <ArrowRight className="size-4" aria-hidden />
           </Button>
-
-          <AuthDivider label={t("login.or_continue_with")} />
-          <OauthProviderButtons />
         </form>
       </Form>
     </AuthCard>

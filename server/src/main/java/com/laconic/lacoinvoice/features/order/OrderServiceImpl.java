@@ -165,13 +165,13 @@ public class OrderServiceImpl implements OrderService {
 				.orElse(null);
 		BigDecimal totalRevenue = toBigDecimal(money, 0);
 		BigDecimal totalFees = toBigDecimal(money, 1);
-		BigDecimal totalAdjustments = toBigDecimal(money, 2);
+		BigDecimal totalAdsFee = toBigDecimal(money, 2);
 
 		return new OrderStatsDto(
 				totalOrders,
 				totalRevenue,
 				totalFees,
-				totalAdjustments);
+				totalAdsFee);
 	}
 
 	private static BigDecimal toBigDecimal(Object[] row, int index) {

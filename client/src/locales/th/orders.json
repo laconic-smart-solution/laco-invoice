@@ -17,7 +17,8 @@
     "total_orders_value": "{{count}} คำสั่งซื้อ",
     "total_revenue": "รายได้รวม",
     "total_fees": "ค่าธรรมเนียมรวม",
-    "total_adjustments": "รายการปรับปรุงรวม"
+    "total_adjustments": "รายการปรับปรุงรวม",
+    "total_ads_fee": "ค่าโฆษณาทั้งหมด"
   },
   "filters": {
     "store_label": "ร้านค้า",
@@ -461,6 +462,12 @@
       "order_detail_required": "อัปโหลด Order Detail Excel (Ready) ก่อนรัน",
       "withdraw_required": "อัปโหลด Total Withdraw Excel (Ready) ก่อนรัน",
       "not_found": "ไม่พบ order set"
-    }
+    },
+    "create_modal_subtitle": "ตั้งชื่อชุดคำสั่งซื้อและแนบไฟล์ Excel ค่าจัดส่งและค่าบริการ (ไม่บังคับ)",
+    "download_template": "ดาวน์โหลดแม่แบบ",
+    "choose_shipping_file": "คลิกเพื่อเลือกไฟล์ Excel ค่าจัดส่ง (Shipping Fee)",
+    "choose_service_file": "คลิกเพื่อเลือกไฟล์ Excel ค่าบริการ (Service Fee)",
+    "uploading_order_detail": "กำลังอัปโหลดไฟล์ Excel ค่าจัดส่ง...",
+    "uploading_withdraw": "กำลังอัปโหลดไฟล์ Excel ค่าบริการ..."
   }
 }

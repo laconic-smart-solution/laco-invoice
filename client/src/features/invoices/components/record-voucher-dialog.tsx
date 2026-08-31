@@ -7,12 +7,15 @@ import {
   Layers,
   Loader2,
   Receipt,
+  Search,
   Sparkles,
+  X,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
   DialogContent,
@@ -74,6 +77,10 @@ export function RecordVoucherDialog({
   const [totalReceivedAmount, setTotalReceivedAmount] = useState<string>("")
   const [notes, setNotes] = useState("")
 
+  // Filter & Search states
+  const [searchQuery, setSearchQuery] = useState("")
+  const [filterMode, setFilterMode] = useState<"all" | "selected" | "unselected" | "unpaid">("all")
+
   const [orderRows, setOrderRows] = useState<OrderAllocationRow[]>([])
   const createVoucherMutation = useCreateVoucherMutation()
 
@@ -84,6 +91,8 @@ export function RecordVoucherDialog({
       setVoucherNumber(nextNo)
       setVoucherNumberError("")
       setBankReference(`TRF-${Math.floor(100000 + Math.random() * 900000)}`)
+      setSearchQuery("")
+      setFilterMode("all")
 
       // Collect available orders from invoice or fallback to all existing invoices
       let targetOrders = preselectedOrders || invoice?.orders || []
@@ -103,7 +112,7 @@ export function RecordVoucherDialog({
           previousPaidAmount: summary.totalPaidAmount,
           remainingBalance: summary.remainingBalance,
           allocatedAmount: 0,
-          isIncluded: summary.remainingBalance > 0.01,
+          isIncluded: true,
         }
       })
       setOrderRows(rows)
@@ -123,11 +132,87 @@ export function RecordVoucherDialog({
     return orderRows.reduce((sum, r) => (r.isIncluded ? sum + (r.allocatedAmount || 0) : sum), 0)
   }, [orderRows])
 
+  const selectedOrdersCount = useMemo(() => {
+    return orderRows.filter((r) => r.isIncluded).length
+  }, [orderRows])
+
+  const selectedOrdersTotal = useMemo(() => {
+    return orderRows.filter((r) => r.isIncluded).reduce((sum, r) => sum + r.remainingBalance, 0)
+  }, [orderRows])
+
   const unallocatedCredit = useMemo(() => {
     return Math.max(0, Number((numReceived - totalAllocated).toFixed(2)))
   }, [numReceived, totalAllocated])
 
   const isOverAllocated = totalAllocated > numReceived + 0.001
+
+  // Filtered rows for the view
+  const visibleRows = useMemo(() => {
+    return orderRows.filter((row) => {
+      // Search text
+      if (searchQuery.trim()) {
+        const q = searchQuery.trim().toLowerCase()
+        const matchId = row.externalOrderId.toLowerCase().includes(q)
+        const matchBuyer = (row.buyerName || "").toLowerCase().includes(q)
+        const matchTax = (row.buyerTaxId || "").toLowerCase().includes(q)
+        if (!matchId && !matchBuyer && !matchTax) return false
+      }
+      // Mode filter
+      if (filterMode === "selected") return row.isIncluded
+      if (filterMode === "unselected") return !row.isIncluded
+      if (filterMode === "unpaid") return row.remainingBalance > 0.01
+      return true
+    })
+  }, [orderRows, searchQuery, filterMode])
+
+  // Select all / deselect all helpers
+  const isAllVisibleSelected = visibleRows.length > 0 && visibleRows.every((r) => r.isIncluded)
+
+  const handleToggleSelectAllVisible = (checked: boolean) => {
+    const visibleIds = new Set(visibleRows.map((r) => r.orderId))
+    setOrderRows((prev) =>
+      prev.map((row) => {
+        if (!visibleIds.has(row.orderId)) return row
+        return {
+          ...row,
+          isIncluded: checked,
+          allocatedAmount: checked ? row.allocatedAmount : 0,
+        }
+      })
+    )
+  }
+
+  const handleSelectAll = () => {
+    setOrderRows((prev) => prev.map((r) => ({ ...r, isIncluded: true })))
+  }
+
+  const handleDeselectAll = () => {
+    setOrderRows((prev) => prev.map((r) => ({ ...r, isIncluded: false, allocatedAmount: 0 })))
+  }
+
+  const handleSelectUnpaidOnly = () => {
+    setOrderRows((prev) =>
+      prev.map((r) => ({
+        ...r,
+        isIncluded: r.remainingBalance > 0.01,
+        allocatedAmount: r.remainingBalance > 0.01 ? r.allocatedAmount : 0,
+      }))
+    )
+  }
+
+  const handleToggleRowSelect = (orderId: string) => {
+    setOrderRows((prev) =>
+      prev.map((row) => {
+        if (row.orderId !== orderId) return row
+        const nextIncluded = !row.isIncluded
+        return {
+          ...row,
+          isIncluded: nextIncluded,
+          allocatedAmount: nextIncluded ? row.allocatedAmount : 0,
+        }
+      })
+    )
+  }
 
   // Handle Voucher No. validation
   const handleVoucherNumberChange = (value: string) => {
@@ -143,7 +228,7 @@ export function RecordVoucherDialog({
     }
   }
 
-  // FIFO Auto-allocation algorithm
+  // FIFO Auto-allocation algorithm (across SELECTED rows only)
   const handleAutoAllocateFIFO = () => {
     let pool = numReceived
     const updated = orderRows.map((row) => {
@@ -161,14 +246,18 @@ export function RecordVoucherDialog({
     setOrderRows(updated)
   }
 
-  // Set single row allocation
+  // Set single row allocation (auto checks the row)
   const handleRowAllocationChange = (orderId: string, val: string) => {
     const amount = parseFloat(val) || 0
     setOrderRows((prev) =>
       prev.map((row) => {
         if (row.orderId !== orderId) return row
         const capped = Math.min(amount, row.remainingBalance)
-        return { ...row, allocatedAmount: Math.max(0, capped) }
+        return {
+          ...row,
+          isIncluded: true,
+          allocatedAmount: Math.max(0, capped),
+        }
       })
     )
   }
@@ -178,7 +267,7 @@ export function RecordVoucherDialog({
     setOrderRows((prev) =>
       prev.map((row) => {
         if (row.orderId !== orderId) return row
-        return { ...row, allocatedAmount: row.remainingBalance }
+        return { ...row, isIncluded: true, allocatedAmount: row.remainingBalance }
       })
     )
   }
@@ -268,7 +357,7 @@ export function RecordVoucherDialog({
                     Record Payment Voucher & Partial Allocation
                   </DialogTitle>
                   <DialogDescription className="text-xs text-muted-foreground">
-                    บันทึกใบสำคัญรับเงิน / รับชำระเงินจากลูกค้า พร้อมตัดยอดชำระแบบบางส่วน (Partial) หลายรายการคำสั่งซื้อ
+                    บันทึกใบสำคัญรับเงิน / รับชำระเงินจากลูกค้าและจัดสรรยอดชำระแบบบางส่วน (Partial) หลายรายการคำสั่งซื้อ
                   </DialogDescription>
                 </div>
               </div>
@@ -278,8 +367,8 @@ export function RecordVoucherDialog({
           {/* Form Scrollable Body */}
           <div className="overflow-y-auto px-6 py-5 space-y-6 text-xs">
             {/* Section 1: Voucher Header Details */}
-            <div className="border border-border/80 bg-muted/10 p-4 space-y-4 rounded-none">
-              <div className="flex items-center gap-2 font-semibold text-muted-foreground uppercase tracking-wider text-[11px]">
+            <div className="border border-border bg-muted/10 p-4 space-y-4 rounded-none">
+              <div className="flex items-center gap-2 font-heading font-semibold text-foreground text-xs border-b border-border/60 pb-2">
                 <FileCheck2 className="size-3.5 text-primary" />
                 <span>1. Payment Voucher Details (ข้อมูลใบสำคัญรับเงิน)</span>
               </div>
@@ -347,7 +436,7 @@ export function RecordVoucherDialog({
                     <option value="BANK_TRANSFER">Bank Transfer (โอนเงินผ่านธนาคาร)</option>
                     <option value="PROMPTPAY">PromptPay (พร้อมเพย์)</option>
                     <option value="CREDIT_CARD">Credit Card / Gateway (บัตรเครดิต)</option>
-                    <option value="PLATFORM_PAYOUT">Platform Settlement (ตัดจ่ายผ่านแพลตฟอร์ม)</option>
+                    <option value="PLATFORM_PAYOUT">Platform Settlement (ยอดโอนจากแพลตฟอร์ม)</option>
                     <option value="CASH">Cash (เงินสด)</option>
                     <option value="CHEQUE">Cheque (เช็คเงินสด)</option>
                   </select>
@@ -411,6 +500,9 @@ export function RecordVoucherDialog({
                   <span className="font-heading font-semibold text-foreground text-xs">
                     2. Order Lines Allocation Matrix ({orderRows.length} Orders)
                   </span>
+                  <span className="ml-1 inline-flex items-center px-2 py-0.5 rounded-none text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">
+                    Selected: {selectedOrdersCount} / {orderRows.length} ({formatCurrency(selectedOrdersTotal, locale, "THB")})
+                  </span>
                 </div>
 
                 {/* Auto Allocation Button */}
@@ -420,21 +512,121 @@ export function RecordVoucherDialog({
                     variant="outline"
                     size="sm"
                     onClick={handleAutoAllocateFIFO}
-                    disabled={numReceived <= 0}
-                    className="h-7.5 text-xs rounded-none border-primary text-primary hover:bg-primary/10 gap-1.5"
+                    disabled={numReceived <= 0 || selectedOrdersCount === 0}
+                    className="h-7.5 text-xs rounded-none border-primary text-primary hover:bg-primary/10 gap-1.5 font-semibold"
                   >
                     <Sparkles className="size-3.5" />
-                    Auto-Allocate FIFO (จัดสรรยอดอัตโนมัติ)
+                    Auto-Allocate FIFO ({selectedOrdersCount} Selected)
                   </Button>
                 </div>
               </div>
 
-              {/* Order Allocation Table */}
+              {/* Search & Quick Selection Toolbar */}
+              <div className="flex flex-wrap items-center justify-between gap-2.5 pt-1 border-t border-border/60">
+                <div className="flex items-center gap-2 flex-1 min-w-[240px] max-w-sm">
+                  <div className="relative w-full">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+                    <Input
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search Order ID, Buyer, Tax ID..."
+                      className="h-7.5 pl-8 pr-7 text-xs rounded-none bg-background"
+                    />
+                    {searchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setSearchQuery("")}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        <X className="size-3" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Quick Selection Buttons */}
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleSelectAll}
+                    className="h-7 px-2 text-[11px] font-medium text-foreground hover:bg-muted rounded-none"
+                  >
+                    Select All ({orderRows.length})
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleDeselectAll}
+                    className="h-7 px-2 text-[11px] font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-none"
+                  >
+                    Deselect All
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleSelectUnpaidOnly}
+                    className="h-7 px-2 text-[11px] font-medium text-primary hover:bg-primary/10 rounded-none"
+                  >
+                    Select Unpaid Only
+                  </Button>
+
+                  {/* Filter chips */}
+                  <div className="inline-flex border border-border p-0.5 bg-muted/40 rounded-none text-[10px]">
+                    <button
+                      type="button"
+                      onClick={() => setFilterMode("all")}
+                      className={`px-2 py-0.5 font-medium transition-colors ${
+                        filterMode === "all"
+                          ? "bg-background text-foreground shadow-sm font-bold"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      All ({orderRows.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFilterMode("selected")}
+                      className={`px-2 py-0.5 font-medium transition-colors ${
+                        filterMode === "selected"
+                          ? "bg-background text-primary shadow-sm font-bold"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      Selected ({selectedOrdersCount})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFilterMode("unselected")}
+                      className={`px-2 py-0.5 font-medium transition-colors ${
+                        filterMode === "unselected"
+                          ? "bg-background text-muted-foreground shadow-sm font-bold"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      Unselected ({orderRows.length - selectedOrdersCount})
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Order Allocation Table with Checkboxes */}
               <div className="overflow-x-auto max-h-[320px] overflow-y-auto border border-border">
                 <table className="w-full text-left text-[11px]">
                   <thead className="sticky top-0 bg-muted/95 backdrop-blur font-medium text-muted-foreground border-b border-border z-10">
                     <tr>
-                      <th className="px-3 py-2">#</th>
+                      <th className="px-3 py-2 w-10 text-center">
+                        <Checkbox
+                          checked={isAllVisibleSelected}
+                          onCheckedChange={(checked) => handleToggleSelectAllVisible(!!checked)}
+                          aria-label="Select all visible orders"
+                          className="rounded-none"
+                        />
+                      </th>
+                      <th className="px-2 py-2">#</th>
                       <th className="px-3 py-2">ORDER ID</th>
                       <th className="px-3 py-2">BUYER</th>
                       <th className="px-3 py-2 text-right">TOTAL AMOUNT</th>
@@ -445,16 +637,35 @@ export function RecordVoucherDialog({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border font-mono">
-                    {orderRows.length === 0 ? (
+                    {visibleRows.length === 0 ? (
                       <tr>
-                        <td colSpan={8} className="py-8 text-center text-muted-foreground font-sans">
-                          No orders available for allocation.
+                        <td colSpan={9} className="py-8 text-center text-muted-foreground font-sans">
+                          No orders match the current filter or search criteria.
                         </td>
                       </tr>
                     ) : (
-                      orderRows.map((row, idx) => (
-                        <tr key={row.orderId} className="transition-colors hover:bg-muted/30">
-                          <td className="px-3 py-2 text-muted-foreground font-sans">{idx + 1}</td>
+                      visibleRows.map((row, idx) => (
+                        <tr
+                          key={row.orderId}
+                          onClick={() => handleToggleRowSelect(row.orderId)}
+                          className={`transition-colors cursor-pointer select-none ${
+                            row.isIncluded
+                              ? "bg-primary/[0.03] hover:bg-primary/[0.07]"
+                              : "opacity-60 bg-muted/10 hover:bg-muted/30"
+                          }`}
+                        >
+                          <td
+                            className="px-3 py-2 text-center"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Checkbox
+                              checked={row.isIncluded}
+                              onCheckedChange={() => handleToggleRowSelect(row.orderId)}
+                              aria-label={`Select order ${row.externalOrderId}`}
+                              className="rounded-none"
+                            />
+                          </td>
+                          <td className="px-2 py-2 text-muted-foreground font-sans">{idx + 1}</td>
                           <td className="px-3 py-2 font-semibold text-foreground">
                             {row.externalOrderId}
                           </td>
@@ -468,7 +679,10 @@ export function RecordVoucherDialog({
                           <td className="px-3 py-2 text-right font-bold text-foreground">
                             {formatCurrency(row.remainingBalance, locale, "THB")}
                           </td>
-                          <td className="px-3 py-2 text-right">
+                          <td
+                            className="px-3 py-2 text-right"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <Input
                               type="number"
                               step="0.01"
@@ -477,10 +691,14 @@ export function RecordVoucherDialog({
                                 handleRowAllocationChange(row.orderId, e.target.value)
                               }
                               placeholder="0.00"
-                              className="h-7 text-right text-xs font-mono font-bold text-primary rounded-none"
+                              disabled={!row.isIncluded}
+                              className="h-7 text-right text-xs font-mono font-bold text-primary rounded-none disabled:opacity-40"
                             />
                           </td>
-                          <td className="px-3 py-2 text-center font-sans">
+                          <td
+                            className="px-3 py-2 text-center font-sans"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <div className="flex items-center justify-center gap-1">
                               <button
                                 type="button"
@@ -519,7 +737,7 @@ export function RecordVoucherDialog({
 
                 <div className="border border-border p-2.5 bg-background text-xs rounded-none">
                   <span className="text-[10px] uppercase text-muted-foreground block font-sans">
-                    Total Allocated to Orders
+                    Total Allocated to Selected Orders
                   </span>
                   <span
                     className={`text-sm font-bold ${
@@ -538,22 +756,29 @@ export function RecordVoucherDialog({
                   }`}
                 >
                   <span className="text-[10px] uppercase text-muted-foreground block font-sans">
-                    Unallocated Credit Balance (ยอดคงเหลือ)
+                    {isOverAllocated ? "Over-Allocated Excess (Error)" : "Unallocated Credit Balance"}
                   </span>
-                  <span className="text-sm font-bold text-foreground">
+                  <span
+                    className={`text-sm font-bold ${
+                      isOverAllocated ? "text-destructive" : "text-success"
+                    }`}
+                  >
                     {isOverAllocated
-                      ? "Over-Allocated!"
+                      ? `-${formatCurrency(totalAllocated - numReceived, locale, "THB")}`
                       : formatCurrency(unallocatedCredit, locale, "THB")}
                   </span>
                 </div>
               </div>
 
               {isOverAllocated && (
-                <div className="flex items-center gap-1.5 p-2 bg-destructive/10 text-destructive text-xs border border-destructive/30">
+                <div className="flex items-center gap-2 p-2 bg-destructive/10 border border-destructive/30 text-destructive text-[11px] rounded-none">
                   <AlertCircle className="size-4 shrink-0" />
                   <span>
-                    The total allocated amount ({formatCurrency(totalAllocated, locale, "THB")}) exceeds
-                    the received voucher amount ({formatCurrency(numReceived, locale, "THB")}).
+                    Total allocated amount exceeds the received payment amount by{" "}
+                    <strong>
+                      {formatCurrency(totalAllocated - numReceived, locale, "THB")}
+                    </strong>
+                    . Please reduce row allocations.
                   </span>
                 </div>
               )}
@@ -561,36 +786,43 @@ export function RecordVoucherDialog({
           </div>
 
           {/* Footer Actions */}
-          <div className="border-t border-border/80 bg-muted/20 px-6 py-3.5">
-            <DialogFooter className="flex flex-row items-center justify-end gap-2">
+          <DialogFooter className="border-t border-border/80 bg-muted/20 px-6 py-3 flex items-center justify-between sm:justify-between">
+            <div className="text-[11px] text-muted-foreground">
+              {orderRows.filter((r) => r.isIncluded && r.allocatedAmount > 0).length} order(s) will be updated with this payment voucher.
+            </div>
+            <div className="flex items-center gap-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-                disabled={createVoucherMutation.isPending}
-                className="h-9 px-5 text-xs rounded-none"
+                className="h-8 text-xs rounded-none"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                disabled={createVoucherMutation.isPending || isOverAllocated || numReceived <= 0}
-                className="h-9 px-6 text-xs font-semibold rounded-none bg-primary text-primary-foreground disabled:opacity-50"
+                disabled={
+                  createVoucherMutation.isPending ||
+                  numReceived <= 0 ||
+                  isOverAllocated ||
+                  orderRows.filter((r) => r.isIncluded && r.allocatedAmount > 0).length === 0
+                }
+                className="h-8 text-xs rounded-none bg-primary text-primary-foreground hover:bg-primary/90 gap-1.5"
               >
                 {createVoucherMutation.isPending ? (
                   <>
-                    <Loader2 className="mr-2 size-3.5 animate-spin" />
-                    Recording Voucher...
+                    <Loader2 className="size-3.5 animate-spin" />
+                    Recording...
                   </>
                 ) : (
                   <>
-                    <CheckCircle2 className="mr-2 size-3.5" />
+                    <CheckCircle2 className="size-3.5" />
                     Record Voucher & Apply Allocations
                   </>
                 )}
               </Button>
-            </DialogFooter>
-          </div>
+            </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

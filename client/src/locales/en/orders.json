@@ -17,7 +17,8 @@
     "total_orders_value": "{{count}} Orders",
     "total_revenue": "Total Revenue",
     "total_fees": "Total Fees",
-    "total_adjustments": "Total Adjustments"
+    "total_adjustments": "Total Adjustments",
+    "total_ads_fee": "Total Ads Fee"
   },
   "filters": {
     "store_label": "Store",
@@ -461,6 +462,12 @@
       "order_detail_required": "Upload Order Detail Excel (Ready) before running.",
       "withdraw_required": "Upload Total Withdraw Excel (Ready) before running.",
       "not_found": "Order set not found."
-    }
+    },
+    "create_modal_subtitle": "Give this order set a title and optionally attach Shipping Fee & Service Fee Excels.",
+    "download_template": "Download Template",
+    "choose_shipping_file": "Click to select Shipping Fee Excel file",
+    "choose_service_file": "Click to select Service Fee Excel file",
+    "uploading_order_detail": "Uploading Shipping Fee Excel...",
+    "uploading_withdraw": "Uploading Service Fee Excel..."
   }
 }

@@ -29,7 +29,7 @@ export interface ApiOrderDto {
   vatAmount: number | null
   totalAmount: number
   totalFees: number
-  totalAdjustments: number
+  totalAdsFee: number
   currency: string | null
   orderDate: string | null
   createdAt: string
@@ -186,7 +186,8 @@ export interface OrderStats {
   totalOrders: number
   totalRevenue: number
   totalFees: number
-  totalAdjustments: number
+  totalAdsFee: number
+  totalAdjustments?: number
 }
 
 export interface OrderExportRequest {
@@ -253,7 +254,7 @@ export const orderService = {
       totalOrders: data?.totalOrders ?? 0,
       totalRevenue: Number(data?.totalRevenue ?? 0),
       totalFees: Number(data?.totalFees ?? 0),
-      totalAdjustments: Number(data?.totalAdjustments ?? 0),
+      totalAdsFee: Number((data as any)?.totalAdsFee ?? (data as any)?.totalAdjustments ?? 0),
     }
   },
 

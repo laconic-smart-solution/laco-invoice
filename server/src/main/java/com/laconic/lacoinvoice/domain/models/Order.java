@@ -56,7 +56,7 @@ public class Order extends StoreScopedEntity {
 	@Column(name = "cancel_return_type", length = 100)
 	private String cancelReturnType;
 
-	@Column(name = "order_kind", length = 20)
+	@Column(name = "order_kind", length = 100)
 	private String orderKind;
 
 	@Column(precision = 18, scale = 2)

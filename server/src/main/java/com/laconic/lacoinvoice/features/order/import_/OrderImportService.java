@@ -290,10 +290,10 @@ public class OrderImportService {
 				OrderItem item = new OrderItem();
 				item.setOrder(order);
 				item.setProduct(resolveProduct(store, marketplace, line));
-				item.setPlatformSkuId(line.getPlatformSkuId());
-				item.setSku(line.getSellerSku());
-				item.setProductName(line.getProductName());
-				item.setVariation(line.getVariation());
+				item.setPlatformSkuId(safeTruncate(line.getPlatformSkuId(), 400));
+				item.setSku(safeTruncate(line.getSellerSku(), 100));
+				item.setProductName(safeTruncate(line.getProductName(), 255));
+				item.setVariation(safeTruncate(line.getVariation(), 400));
 				item.setQuantity(line.getQuantity());
 				item.setQuantityReturned(line.getQuantityReturned());
 				item.setPrice(line.getUnitPrice());
@@ -302,7 +302,7 @@ public class OrderImportService {
 				item.setItemSellerDiscount(line.getSellerDiscount());
 				item.setLineTotal(line.getLineTotal());
 				item.setWeightKg(line.getWeightKg());
-				item.setProductCategory(line.getProductCategory());
+				item.setProductCategory(safeTruncate(line.getProductCategory(), 255));
 				item.setSourceType(OrderSourceType.IMPORT);
 				item.setSourceId(sourceId);
 				OrderItem saved = orderItemRepository.save(item);
@@ -344,11 +344,11 @@ public class OrderImportService {
 		order.setStore(store);
 		order.setMarketplace(marketplace);
 		order.setCustomer(customer);
-		order.setExternalOrderId(row.orderId());
+		order.setExternalOrderId(safeTruncate(row.orderId(), 100));
 		order.setOrderStatus(OrderStatusTextMapper.parse(row.getOrderStatus()));
-		order.setOrderSubstatus(row.getOrderSubstatus());
-		order.setCancelReturnType(row.getCancelReturnType());
-		order.setOrderKind(row.getOrderKind());
+		order.setOrderSubstatus(safeTruncate(row.getOrderSubstatus(), 100));
+		order.setCancelReturnType(safeTruncate(row.getCancelReturnType(), 100));
+		order.setOrderKind(safeTruncate(row.getOrderKind(), 20));
 		applyShippingAndTotals(order, row);
 		order.setPaymentPlatformDiscount(row.getPaymentPlatformDiscount());
 		order.setRefundAmount(row.getRefundAmount());
@@ -359,19 +359,19 @@ public class OrderImportService {
 		order.setShippedAt(row.getShippedAt());
 		order.setDeliveredAt(row.getDeliveredAt());
 		order.setCancelledAt(row.getCancelledAt());
-		order.setCancelBy(row.getCancelBy());
-		order.setCancelReason(row.getCancelReason());
-		order.setFulfillmentType(row.getFulfillmentType());
-		order.setWarehouseName(row.getWarehouseName());
-		order.setTrackingId(row.getTrackingId());
-		order.setDeliveryOption(row.getDeliveryOption());
-		order.setShippingProviderName(row.getShippingProviderName());
+		order.setCancelBy(safeTruncate(row.getCancelBy(), 100));
+		order.setCancelReason(safeTruncate(row.getCancelReason(), 1000));
+		order.setFulfillmentType(safeTruncate(row.getFulfillmentType(), 100));
+		order.setWarehouseName(safeTruncate(row.getWarehouseName(), 100));
+		order.setTrackingId(safeTruncate(row.getTrackingId(), 200));
+		order.setDeliveryOption(safeTruncate(row.getDeliveryOption(), 200));
+		order.setShippingProviderName(safeTruncate(row.getShippingProviderName(), 200));
 		order.setBuyerMessage(row.getBuyerMessage());
-		order.setPaymentMethod(row.getPaymentMethod());
-		order.setPackageId(row.getPackageId());
+		order.setPaymentMethod(safeTruncate(row.getPaymentMethod(), 100));
+		order.setPackageId(safeTruncate(row.getPackageId(), 200));
 		order.setSellerNote(row.getSellerNote());
-		order.setCheckedStatus(row.getCheckedStatus());
-		order.setCheckedMarkedBy(row.getCheckedMarkedBy());
+		order.setCheckedStatus(safeTruncate(row.getCheckedStatus(), 50));
+		order.setCheckedMarkedBy(safeTruncate(row.getCheckedMarkedBy(), 200));
 		order.setSourceType(OrderSourceType.IMPORT);
 		order.setSourceId(importFile.getId());
 		order.setSubtotal(sumLineTotals(row.lineItems()));
@@ -457,16 +457,16 @@ public class OrderImportService {
 
 	private CustomerInfo applyCustomerFieldsPreferExcel(CustomerInfo customer, OrderSkuListExcelRow row) {
 		if (StringUtils.hasText(row.getBuyerUsername())) {
-			customer.setExternalCustomerId(row.getBuyerUsername().trim());
+			customer.setExternalCustomerId(safeTruncate(row.getBuyerUsername(), 64));
 		}
 		if (StringUtils.hasText(row.getRecipient())) {
-			customer.setName(row.getRecipient().trim());
+			customer.setName(safeTruncate(row.getRecipient(), 255));
 		}
 		if (StringUtils.hasText(row.getPhone())) {
-			customer.setPhone(row.getPhone().trim());
+			customer.setPhone(safeTruncate(row.getPhone(), 100));
 		}
 		if (StringUtils.hasText(row.getDetailAddress())) {
-			customer.setAddress(row.getDetailAddress().trim());
+			customer.setAddress(row.getDetailAddress() != null ? row.getDetailAddress().trim() : null);
 		}
 		if (row.getZipcode() != null) {
 			customer.setZipcode(row.getZipcode());
@@ -509,16 +509,16 @@ public class OrderImportService {
 
 	private CustomerInfo applyCustomerFields(CustomerInfo customer, OrderSkuListExcelRow row) {
 		if (StringUtils.hasText(row.getBuyerUsername())) {
-			customer.setExternalCustomerId(row.getBuyerUsername().trim());
+			customer.setExternalCustomerId(safeTruncate(row.getBuyerUsername(), 64));
 		}
 		if (StringUtils.hasText(row.getRecipient())) {
-			customer.setName(row.getRecipient().trim());
+			customer.setName(safeTruncate(row.getRecipient(), 255));
 		}
 		if (StringUtils.hasText(row.getPhone())) {
-			customer.setPhone(row.getPhone().trim());
+			customer.setPhone(safeTruncate(row.getPhone(), 100));
 		}
 		if (StringUtils.hasText(row.getDetailAddress())) {
-			customer.setAddress(row.getDetailAddress().trim());
+			customer.setAddress(row.getDetailAddress() != null ? row.getDetailAddress().trim() : null);
 		}
 		customer.setZipcode(row.getZipcode());
 		customer.setCountry(row.getCountry());
@@ -538,11 +538,11 @@ public class OrderImportService {
 		}
 		Product placeholder = new Product();
 		placeholder.setStore(store);
-		placeholder.setSku(line.getSellerSku());
-		placeholder.setName(line.getProductName());
+		placeholder.setSku(safeTruncate(line.getSellerSku(), 100));
+		placeholder.setName(safeTruncate(line.getProductName(), 255));
 		placeholder.setPrice(line.getUnitPrice());
 		placeholder.setMarketplaceCode(marketplace.getCode());
-		placeholder.setExternalProductId(line.getPlatformSkuId());
+		placeholder.setExternalProductId(safeTruncate(line.getPlatformSkuId(), 64));
 		placeholder.setCurrency(DEFAULT_CURRENCY);
 		return productRepository.save(placeholder);
 	}
@@ -631,5 +631,16 @@ public class OrderImportService {
 			}
 		}
 		return total.compareTo(BigDecimal.ZERO) == 0 ? null : total;
+	}
+
+	public static String safeTruncate(String value, int maxLength) {
+		if (value == null) {
+			return null;
+		}
+		String trimmed = value.trim();
+		if (trimmed.length() <= maxLength) {
+			return trimmed;
+		}
+		return trimmed.substring(0, maxLength);
 	}
 }

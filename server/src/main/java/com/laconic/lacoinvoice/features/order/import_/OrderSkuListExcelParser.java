@@ -54,9 +54,10 @@ public class OrderSkuListExcelParser {
 			int headerRowIndex = findHeaderRowIndex(sheet);
 			Row headerRow = sheet.getRow(headerRowIndex);
 			Map<String, Integer> columnIndex = buildColumnIndex(headerRow);
-			if (!columnIndex.containsKey(ORDER_ID_HEADER)) {
+			String resolvedOrderIdHeader = resolveHeader(columnIndex, "Order ID", "订单ID", "订单 ID", "订单编号");
+			if (resolvedOrderIdHeader == null) {
 				throw new IllegalArgumentException(
-						"Excel header row must include '" + ORDER_ID_HEADER + "'");
+						"Excel header row must include 'Order ID' or '订单ID'");
 			}
 
 			Map<String, OrderSkuListExcelRow> orders = new HashMap<>();
@@ -97,7 +98,7 @@ public class OrderSkuListExcelParser {
 			}
 			for (Cell cell : row) {
 				String value = formatter.formatCellValue(cell).trim();
-				if (ORDER_ID_HEADER.equals(value)) {
+				if (ORDER_ID_HEADER.equalsIgnoreCase(value) || "订单ID".equals(value) || "订单 ID".equals(value) || "订单编号".equals(value)) {
 					return i;
 				}
 			}
@@ -118,7 +119,8 @@ public class OrderSkuListExcelParser {
 	}
 
 	private boolean isEmptyRow(Row row, Map<String, Integer> columnIndex) {
-		Integer orderCol = columnIndex.get(ORDER_ID_HEADER);
+		String resolved = resolveHeader(columnIndex, "Order ID", "订单ID", "订单 ID", "订单编号");
+		Integer orderCol = resolved != null ? columnIndex.get(resolved) : null;
 		if (orderCol == null) {
 			return true;
 		}
@@ -143,7 +145,7 @@ public class OrderSkuListExcelParser {
 	}
 
 	private OrderSkuListExcelRow toRow(Row row, Map<String, Integer> cols) {
-		String orderId = cell(cols, row, ORDER_ID_HEADER);
+		String orderId = cell(cols, row, "Order ID", "订单ID", "订单 ID", "订单编号");
 		OrderSkuListExcelRow order = new OrderSkuListExcelRow(orderId);
 		order.setOrderStatus(cell(cols, row, "Order Status"));
 		order.setOrderSubstatus(cell(cols, row, "Order Substatus"));
@@ -224,8 +226,32 @@ public class OrderSkuListExcelParser {
 		return values;
 	}
 
-	private String cell(Map<String, Integer> cols, Row row, String name) {
-		Integer idx = cols.get(name);
+	private static String resolveHeader(Map<String, Integer> cols, String... candidates) {
+		for (String candidate : candidates) {
+			if (candidate == null) continue;
+			if (cols.containsKey(candidate)) return candidate;
+		}
+		for (String candidate : candidates) {
+			if (candidate == null) continue;
+			for (String key : cols.keySet()) {
+				if (key.equalsIgnoreCase(candidate)) return key;
+			}
+		}
+		for (String candidate : candidates) {
+			if (candidate == null) continue;
+			String strippedCandidate = candidate.replaceAll("\\s+", "").toLowerCase();
+			for (String key : cols.keySet()) {
+				String strippedKey = key.replaceAll("\\s+", "").toLowerCase();
+				if (strippedKey.equals(strippedCandidate)) return key;
+			}
+		}
+		return null;
+	}
+
+	private String cell(Map<String, Integer> cols, Row row, String... names) {
+		String header = resolveHeader(cols, names);
+		if (header == null) return null;
+		Integer idx = cols.get(header);
 		if (idx == null) {
 			return null;
 		}
@@ -241,8 +267,8 @@ public class OrderSkuListExcelParser {
 		return formatter.formatCellValue(cell).trim();
 	}
 
-	private BigDecimal decimal(Map<String, Integer> cols, Row row, String name) {
-		String raw = cell(cols, row, name);
+	private BigDecimal decimal(Map<String, Integer> cols, Row row, String... names) {
+		String raw = cell(cols, row, names);
 		if (!StringUtils.hasText(raw)) {
 			return null;
 		}
@@ -253,8 +279,8 @@ public class OrderSkuListExcelParser {
 		}
 	}
 
-	private Integer intValue(Map<String, Integer> cols, Row row, String name) {
-		String raw = cell(cols, row, name);
+	private Integer intValue(Map<String, Integer> cols, Row row, String... names) {
+		String raw = cell(cols, row, names);
 		if (!StringUtils.hasText(raw)) {
 			return null;
 		}
@@ -274,8 +300,8 @@ public class OrderSkuListExcelParser {
 		return lower.equals("yes") || lower.equals("true") || lower.equals("1") || lower.contains("request");
 	}
 
-	private Instant instant(Map<String, Integer> cols, Row row, String name) {
-		String raw = cell(cols, row, name);
+	private Instant instant(Map<String, Integer> cols, Row row, String... names) {
+		String raw = cell(cols, row, names);
 		if (!StringUtils.hasText(raw)) {
 			return null;
 		}

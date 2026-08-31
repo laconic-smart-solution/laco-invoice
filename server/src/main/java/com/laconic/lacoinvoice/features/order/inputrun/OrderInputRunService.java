@@ -649,7 +649,7 @@ public class OrderInputRunService {
 
 			// Delete order items
 			jdbcTemplate.update("""
-					DELETE FROM lco_order_items
+					DELETE FROM order_items
 					WHERE order_id IN (
 						SELECT id FROM lco_orders WHERE source_type = 'IMPORT' AND source_id = ?
 					)
@@ -686,7 +686,7 @@ public class OrderInputRunService {
 		jdbcTemplate.update("""
 				DELETE FROM products
 				WHERE id NOT IN (
-					SELECT DISTINCT product_id FROM lco_order_items WHERE product_id IS NOT NULL
+					SELECT DISTINCT product_id FROM order_items WHERE product_id IS NOT NULL
 				)
 				""");
 
@@ -732,7 +732,7 @@ public class OrderInputRunService {
 			// 3. Bulk delete order items
 			jdbcTemplate.update(
 					"""
-					DELETE FROM lco_order_items
+					DELETE FROM order_items
 					WHERE order_id IN (
 						SELECT o.id FROM lco_orders o
 						WHERE o.source_type = 'IMPORT' AND o.source_id = ?

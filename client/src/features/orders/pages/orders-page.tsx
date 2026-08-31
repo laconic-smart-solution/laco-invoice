@@ -240,7 +240,7 @@ export function OrdersPage() {
             totalOrders: 0,
             totalRevenue: 0,
             totalFees: 0,
-            totalAdjustments: 0,
+            totalAdsFee: 0,
           }
         }
       />

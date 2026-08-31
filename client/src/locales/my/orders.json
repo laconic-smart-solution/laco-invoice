@@ -17,7 +17,8 @@
     "total_orders_value": "အော်ဒါ {{count}} ခု",
     "total_revenue": "စုစုပေါင်း ဝင်ငွေ",
     "total_fees": "စုစုပေါင်း အခကြေးငွေ",
-    "total_adjustments": "စုစုပေါင်း ချိန်ညှိမှု"
+    "total_adjustments": "စုစုပေါင်း ချိန်ညှိမှု",
+    "total_ads_fee": "စုစုပေါင်း ကြော်ငြာစရိတ်"
   },
   "filters": {
     "store_label": "ဆိုင်",
@@ -461,6 +462,12 @@
       "order_detail_required": "Order Detail Excel Ready ဖြစ်မှ Run လုပ်ပါ။",
       "withdraw_required": "Total Withdraw Excel Ready ဖြစ်မှ Run လုပ်ပါ။",
       "not_found": "Order set မတွေ့ပါ။"
-    }
+    },
+    "create_modal_subtitle": "အော်ဒါအုပ်စုအမည်ပေးပြီး ပို့ဆောင်ခနှင့် ဝန်ဆောင်ခ Excel ဖိုင်များကို ထည့်သွင်းပါ။",
+    "download_template": "ပုံစံခွက် ဒေါင်းလုဒ်ရယူရန်",
+    "choose_shipping_file": "ပို့ဆောင်ခ (Shipping Fee) Excel ဖိုင် ရွေးချယ်ရန် နှိပ်ပါ",
+    "choose_service_file": "ဝန်ဆောင်ခ (Service Fee) Excel ဖိုင် ရွေးချယ်ရန် နှိပ်ပါ",
+    "uploading_order_detail": "ပို့ဆောင်ခ Excel ဖိုင် တင်နေသည်...",
+    "uploading_withdraw": "ဝန်ဆောင်ခ Excel ဖိုင် တင်နေသည်..."
   }
 }

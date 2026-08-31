@@ -1,4 +1,4 @@
-import { ClipboardList, HandCoins, Receipt, Scale } from "lucide-react"
+import { ClipboardList, HandCoins, Receipt, Megaphone } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
 import { StatCard } from "@/components/common/stat-card"
@@ -37,9 +37,9 @@ export function OrdersStatCards({ stats }: OrdersStatCardsProps) {
         iconWrapperClassName="bg-destructive/10 text-destructive"
       />
       <StatCard
-        title={t("stats.total_adjustments")}
-        value={formatCurrency(stats.totalAdjustments, locale, "THB")}
-        icon={Scale}
+        title={t("stats.total_ads_fee", "Total Ads Fee")}
+        value={formatCurrency(stats.totalAdsFee, locale, "THB")}
+        icon={Megaphone}
         iconWrapperClassName="bg-warning/10 text-warning"
       />
     </div>

@@ -24,7 +24,7 @@ public class CustomerInfo extends StoreScopedEntity {
 	@JoinColumn(name = "marketplace_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
 	private Marketplace marketplace;
 
-	@Column(name = "external_customer_id", length = 64)
+	@Column(name = "external_customer_id", length = 255)
 	private String externalCustomerId;
 
 	@Column(length = 255)

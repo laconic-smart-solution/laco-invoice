@@ -247,6 +247,13 @@ public class OrderImportPreviewService {
 		result.setSheetName(batch.getSheetName());
 		result.setRowCount(batch.getRowCount() != null ? batch.getRowCount() : 0);
 
+		Map<Long, OrderSkuListExcelRow> rowsByPreviewId = new LinkedHashMap<>();
+		for (OrderImportPreviewOrder preview : previews) {
+			if (preview.getResolveAction() != OrderImportResolveAction.SKIP) {
+				rowsByPreviewId.put(preview.getId(), reconstructRow(preview));
+			}
+		}
+
 		int orderCount = 0;
 		int itemCount = 0;
 		int failedOrders = 0;
@@ -258,8 +265,11 @@ public class OrderImportPreviewService {
 				skipped++;
 				continue;
 			}
+			OrderSkuListExcelRow row = rowsByPreviewId.get(preview.getId());
+			if (row == null) {
+				continue;
+			}
 			try {
-				OrderSkuListExcelRow row = reconstructRow(preview);
 				int items;
 				switch (action) {
 					case CREATE -> items = importService.createOrder(store, marketplace, importFile, row);

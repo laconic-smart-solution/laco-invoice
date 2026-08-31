@@ -58,7 +58,7 @@ export function mapOrderDtoToOrder(dto: ApiOrderDto): Order {
     customerPhone: dto.customerPhone?.trim() || undefined,
     totalAmount: dto.totalAmount,
     totalFees: dto.totalFees ?? 0,
-    totalAdjustments: dto.totalAdjustments ?? 0,
+    totalAdjustments: (dto as any).totalAdjustments ?? (dto as any).totalAdsFee ?? 0,
     tiktokCommissionFee: (dto as any).tiktokCommissionFee ?? (dto as any).tiktokShopCommissionFee ?? 0,
     transactionFee: (dto as any).transactionFee ?? 0,
     affiliateCommission: (dto as any).affiliateCommission ?? 0,

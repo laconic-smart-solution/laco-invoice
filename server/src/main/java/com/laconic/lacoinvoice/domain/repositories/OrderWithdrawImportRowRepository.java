@@ -57,7 +57,7 @@ public interface OrderWithdrawImportRowRepository extends BaseRepository<OrderWi
 	@Query("""
 			SELECT COALESCE(SUM(r.totalRevenue), 0),
 			       COALESCE(SUM(r.totalFees), 0),
-			       COALESCE(SUM(r.adjustmentAmount), 0)
+			       COALESCE(SUM(COALESCE(r.affiliateShopAdsCommission, 0) + COALESCE(r.affiliatePartnerShopAdsCommission, 0)), 0)
 			FROM OrderWithdrawImportRow r
 			WHERE (:storeId IS NULL OR r.orderInputRun.store.id = :storeId)
 			""")
@@ -71,12 +71,11 @@ public interface OrderWithdrawImportRowRepository extends BaseRepository<OrderWi
 	@Query("""
 			SELECT o.id,
 			       COALESCE(SUM(r.totalFees), 0),
-			       COALESCE(SUM(r.adjustmentAmount), 0)
+			       COALESCE(SUM(COALESCE(r.affiliateShopAdsCommission, 0) + COALESCE(r.affiliatePartnerShopAdsCommission, 0)), 0)
 			FROM OrderWithdrawImportRow r, Order o
 			WHERE o.id IN :orderIds
 			  AND r.externalOrderId = o.externalOrderId
 			  AND r.orderInputRun.store.id = o.store.id
-			  AND r.orderInputRun.marketplace.id = o.marketplace.id
 			GROUP BY o.id
 			""")
 	List<Object[]> sumMoneyByOrderIds(@Param("orderIds") Collection<Long> orderIds);
