@@ -410,6 +410,15 @@
       "loading": "กำลังโหลด…",
       "order_detail_title": "Shipping Fee excel",
       "order_detail_description": "TikTok OrderSKUList (.xlsx)",
+      "invoice_pdf_title": "ใบแจ้งหนี้ PDF",
+      "invoice_pdf_description": "ใบเสร็จ/ใบกำกับภาษีโลจิสติกส์ สำหรับจับคู่ยอดกับ Excel",
+      "invoice_receipt_number": "เลขที่ใบเสร็จ",
+      "invoice_receipt_date": "วันที่ใบเสร็จ",
+      "invoice_period": "ช่วงเวลา",
+      "invoice_buyer": "ออกให้",
+      "invoice_pdf_amount": "ยอดใน PDF",
+      "excel_matched_amount": "ยอดใน Excel",
+      "invoice_match_difference": "ส่วนต่าง",
       "withdraw_title": "Service fee excel",
       "withdraw_description": "TikTok Payout Report — Order details (.xlsx)",
       "no_file": "ยังไม่มีไฟล์",
@@ -466,12 +475,13 @@
       "title_required": "กรุณาใส่ชื่อเรื่อง",
       "store_required": "กรุณาเลือกร้านค้า",
       "file_required": "กรุณาอัปโหลดไฟล์ Excel ตามประเภทที่เลือก",
+      "invoice_pdf_required": "กรุณาอัปโหลดไฟล์ PDF ใบแจ้งหนี้เพื่อจับคู่กับ Excel",
       "order_detail_required": "อัปโหลด Shipping Fee Excel (Ready) ก่อนรัน",
       "withdraw_required": "อัปโหลด Service Fee Excel (Ready) ก่อนรัน",
       "not_found": "ไม่พบ order data input"
     },
-    "create_modal_subtitle": "เลือกประเภทไฟล์ input แล้วอัปโหลด Excel ที่ตรงกัน",
-    "create_modal_subtitle_ai": "อัปโหลดไฟล์ Excel — ระบบจะตรวจจับประเภทไฟล์ให้อัตโนมัติ",
+    "create_modal_subtitle": "เลือกประเภทไฟล์ input แล้วอัปโหลด Excel และ PDF ใบแจ้งหนี้ที่ตรงกัน",
+    "create_modal_subtitle_ai": "อัปโหลดไฟล์ Excel และ PDF ใบแจ้งหนี้ — ระบบจะตรวจจับประเภท Excel ให้อัตโนมัติ",
     "detecting_file_type": "กำลังตรวจจับประเภทไฟล์...",
     "upload_excel_file": "ไฟล์ Excel",
     "choose_excel_file": "คลิกเพื่อเลือกไฟล์ Excel",
@@ -480,6 +490,16 @@
     "choose_shipping_file": "คลิกเพื่อเลือกไฟล์ Excel ค่าจัดส่ง (Shipping Fee)",
     "choose_service_file": "คลิกเพื่อเลือกไฟล์ Excel ค่าบริการ (Service Fee)",
     "uploading_order_detail": "กำลังอัปโหลดไฟล์ Excel ค่าจัดส่ง...",
-    "uploading_withdraw": "กำลังอัปโหลดไฟล์ Excel ค่าบริการ..."
+    "uploading_withdraw": "กำลังอัปโหลดไฟล์ Excel ค่าบริการ...",
+    "uploading_invoice_pdf": "กำลังอัปโหลด PDF ใบแจ้งหนี้...",
+    "upload_invoice_pdf": "ใบแจ้งหนี้ PDF",
+    "upload_invoice_pdf_hint": "ไฟล์ใบเสร็จ/ใบกำกับภาษี ระบบจะจับคู่ยอดค่าจัดส่งหรือโลจิสติกส์ใน Excel กับเอกสารนี้",
+    "choose_invoice_pdf": "คลิกเพื่อเลือกไฟล์ PDF ใบแจ้งหนี้",
+    "invoice_match": {
+      "missing": "ยังไม่จับคู่",
+      "matched": "ยอดตรงกัน",
+      "mismatch": "ยอดไม่ตรง",
+      "unparsed": "อ่าน PDF ไม่ได้"
+    }
   }
 }

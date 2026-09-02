@@ -144,6 +144,18 @@ export function useUploadOrderInputWithdrawMutation() {
   })
 }
 
+export function useUploadOrderInputInvoicePdfMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, file }: { id: number; file: File }) =>
+      orderInputRunService.uploadInvoicePdf(id, file),
+    onSuccess: (data) => {
+      queryClient.setQueryData(orderInputRunKeys.detail(data.id), data)
+      void queryClient.invalidateQueries({ queryKey: orderInputRunKeys.lists() })
+    },
+  })
+}
+
 export function useStartOrderInputRunPreviewMutation() {
   const queryClient = useQueryClient()
   return useMutation({
@@ -309,6 +321,18 @@ export function useDownloadOrderInputFileMutation() {
       id: number
       fallbackFilename: string
     }) => orderInputRunService.downloadInputFile(id, fallbackFilename),
+  })
+}
+
+export function useDownloadOrderInputInvoicePdfMutation() {
+  return useMutation({
+    mutationFn: ({
+      id,
+      fallbackFilename,
+    }: {
+      id: number
+      fallbackFilename: string
+    }) => orderInputRunService.downloadInvoicePdf(id, fallbackFilename),
   })
 }
 

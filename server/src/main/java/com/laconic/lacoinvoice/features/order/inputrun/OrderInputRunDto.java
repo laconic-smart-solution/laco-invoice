@@ -1,7 +1,10 @@
 package com.laconic.lacoinvoice.features.order.inputrun;
 
+import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 
+import com.laconic.lacoinvoice.domain.models.InvoicePdfMatchStatus;
 import com.laconic.lacoinvoice.domain.models.OrderInputFileStatus;
 import com.laconic.lacoinvoice.domain.models.OrderInputFileType;
 import com.laconic.lacoinvoice.domain.models.OrderInputRunStatus;
@@ -35,6 +38,24 @@ public record OrderInputRunDto(
 		Integer withdrawRowCount,
 		Integer withdrawMatchedCount,
 		Integer withdrawUnmatchedCount,
+		String invoicePdfFilename,
+		Long invoicePdfSize,
+		OrderInputFileStatus invoicePdfStatus,
+		String invoicePdfError,
+		String invoiceReceiptNumber,
+		LocalDate invoiceReceiptDate,
+		LocalDate invoicePeriodStart,
+		LocalDate invoicePeriodEnd,
+		String invoiceIssuerName,
+		String invoiceIssuerTaxId,
+		String invoiceBuyerName,
+		String invoiceBuyerTaxId,
+		BigDecimal invoiceTotalAmount,
+		BigDecimal invoiceWithholdingTaxAmount,
+		BigDecimal invoiceWithholdingTaxRate,
+		BigDecimal excelMatchedAmount,
+		InvoicePdfMatchStatus invoiceMatchStatus,
+		BigDecimal invoiceMatchDifference,
 		Integer orderCount,
 		Integer itemCount,
 		Instant createdAt,

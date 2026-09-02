@@ -1,6 +1,8 @@
 import type { InternalAxiosRequestConfig } from "axios"
 
 import type { CustomerCreateInput } from "@/features/customers/types/customer"
+import type { CreateInvoiceRequest, InvoiceStatus } from "@/features/invoices/types/invoice"
+import type { CreateVoucherRequest } from "@/features/invoices/types/voucher"
 import type {
   MarketplaceCode,
   StoreCreateInput,
@@ -23,6 +25,27 @@ import {
   getMockOrderHistory,
   getMockOrderStats,
 } from "@/shared/mock/mock-order-bridge"
+import {
+  checkMockInvoiceNumber,
+  checkMockVoucherNumber,
+  createMockInvoice,
+  createMockVoucher,
+  deleteMockInvoice,
+  deleteMockVoucher,
+  getMockInvoiceDetail,
+  getMockInvoiceRecord,
+  getMockNextInvoiceNumber,
+  getMockNextVoucherNumber,
+  getMockVoucher,
+  listMockVouchersByInvoice,
+  MockApiError,
+  pageMockInvoices,
+  pageMockVouchers,
+  previewMockInvoice,
+  updateMockInvoiceNumber,
+  updateMockInvoiceStatus,
+  buildInvoicePaymentSummary,
+} from "@/shared/mock/mock-invoice-bridge"
 import { MOCK_USER } from "@/shared/mock/mock-user"
 import {
   emptyBlob,
@@ -159,6 +182,25 @@ function authSession(email = MOCK_USER.email): AuthSessionResponse {
     email,
     otpVerified: true,
   }
+}
+
+function fail(status: number, message: string): MockHandlerResult {
+  return {
+    status,
+    body: {
+      success: false,
+      code: status,
+      message,
+      data: null,
+    },
+  }
+}
+
+function handleMockApiError(error: unknown): MockHandlerResult {
+  if (error instanceof MockApiError) {
+    return fail(error.status, error.message)
+  }
+  throw error
 }
 
 function matchPath(pattern: RegExp, path: string): RegExpMatchArray | null {
@@ -639,6 +681,55 @@ export async function handleMockRequest(
     }
   }
 
+  const inputRunInvoicePdf = matchPath(
+    /^\/v1\/order-input-runs\/(\d+)\/files\/invoice-pdf$/,
+    path
+  )
+  if (method === "GET" && inputRunInvoicePdf) {
+    const run = getInputRunById(Number(inputRunInvoicePdf[1]))
+    if (!run?.invoicePdfFilename) {
+      return fail(404, "No invoice PDF uploaded for this order data input.")
+    }
+    return {
+      status: 200,
+      body: emptyBlob(),
+      isBlob: true,
+      headers: {
+        "content-type": "application/pdf",
+        "content-disposition": `attachment; filename="${run.invoicePdfFilename}"`,
+      },
+    }
+  }
+  if (method === "POST" && inputRunInvoicePdf) {
+    const run = getInputRunById(Number(inputRunInvoicePdf[1]))
+    if (!run) {
+      return fail(404, "Order input run not found.")
+    }
+    const filename = extractUploadFilename(config.data) ?? "invoice.pdf"
+    run.invoicePdfFilename = filename
+    run.invoicePdfSize = 48000
+    run.invoicePdfStatus = "READY"
+    run.invoicePdfError = null
+    run.invoiceReceiptNumber = "THJV202610002306645"
+    run.invoiceReceiptDate = "2026-05-26"
+    run.invoicePeriodStart = "2026-05-20"
+    run.invoicePeriodEnd = "2026-05-26"
+    run.invoiceIssuerName = "Thai Happy Logistics Ltd."
+    run.invoiceIssuerTaxId = "0105566107906"
+    run.invoiceBuyerName = "Lian Feng Co., Ltd."
+    run.invoiceBuyerTaxId = "0115565023667"
+    run.invoiceTotalAmount = 1918
+    run.invoiceWithholdingTaxAmount = 19.18
+    run.invoiceWithholdingTaxRate = 0.01
+    const hasExcel =
+      run.orderDetailStatus !== "MISSING" || run.withdrawStatus !== "MISSING"
+    run.excelMatchedAmount = hasExcel ? 1918 : null
+    run.invoiceMatchStatus = hasExcel ? "MATCHED" : "MISSING"
+    run.invoiceMatchDifference = hasExcel ? 0 : null
+    run.updatedAt = NOW
+    return { status: 200, body: ok(run) }
+  }
+
   const inputRunGet = matchPath(/^\/v1\/order-input-runs\/(\d+)$/, path)
   if (method === "GET" && inputRunGet) {
     return {
@@ -682,6 +773,24 @@ export async function handleMockRequest(
       withdrawRowCount: null,
       withdrawMatchedCount: null,
       withdrawUnmatchedCount: null,
+      invoicePdfFilename: null,
+      invoicePdfSize: null,
+      invoicePdfStatus: "MISSING" as const,
+      invoicePdfError: null,
+      invoiceReceiptNumber: null,
+      invoiceReceiptDate: null,
+      invoicePeriodStart: null,
+      invoicePeriodEnd: null,
+      invoiceIssuerName: null,
+      invoiceIssuerTaxId: null,
+      invoiceBuyerName: null,
+      invoiceBuyerTaxId: null,
+      invoiceTotalAmount: null,
+      invoiceWithholdingTaxAmount: null,
+      invoiceWithholdingTaxRate: null,
+      excelMatchedAmount: null,
+      invoiceMatchStatus: "MISSING" as const,
+      invoiceMatchDifference: null,
       orderCount: null,
       itemCount: null,
       createdAt: NOW,
@@ -741,6 +850,59 @@ export async function handleMockRequest(
   if (inputRunMutation) {
     const id = Number(path.match(/\/v1\/order-input-runs\/(\d+)/)?.[1])
     const run = getInputRunById(id)
+    if (run && (inputRunMutation.includes("/files/order-detail") || inputRunMutation.includes("/files/withdraw"))) {
+      const filename = extractUploadFilename(config.data)
+      if (inputRunMutation.includes("order-detail")) {
+        run.orderDetailFilename = filename ?? "order-detail.xlsx"
+        run.orderDetailStatus = "READY"
+        run.orderDetailSize = 12000
+      } else {
+        run.withdrawFilename = filename ?? "service-fee.xlsx"
+        run.withdrawStatus = "READY"
+        run.withdrawSize = 8000
+      }
+      if (run.invoicePdfFilename) {
+        run.excelMatchedAmount = run.invoiceTotalAmount
+        run.invoiceMatchStatus = "MATCHED"
+        run.invoiceMatchDifference = 0
+        run.invoicePdfError = null
+      }
+      run.updatedAt = NOW
+      return { status: 200, body: ok(run) }
+    }
+    if (run && inputRunMutation.includes("rollback")) {
+      if (inputRunMutation.includes("order-detail")) {
+        run.orderDetailFilename = null
+        run.orderDetailSize = null
+        run.orderDetailStatus = "MISSING"
+        run.orderDetailError = null
+        run.orderDetailStartedAt = null
+        run.orderDetailFinishedAt = null
+        run.orderDetailBatchId = null
+        run.orderDetailImportFileId = null
+        run.orderCount = null
+        run.itemCount = null
+      } else {
+        run.withdrawFilename = null
+        run.withdrawSize = null
+        run.withdrawStatus = "MISSING"
+        run.withdrawError = null
+        run.withdrawStartedAt = null
+        run.withdrawFinishedAt = null
+        run.withdrawRowCount = null
+        run.withdrawMatchedCount = null
+        run.withdrawUnmatchedCount = null
+      }
+      run.excelMatchedAmount = null
+      run.invoiceMatchDifference = null
+      run.invoiceMatchStatus = "MISSING"
+      if (run.invoicePdfStatus !== "FAILED") {
+        run.invoicePdfError = null
+      }
+      run.status = "DRAFT"
+      run.updatedAt = NOW
+      return { status: 200, body: ok(run) }
+    }
     if (run && inputRunMutation.includes("preview")) {
       return {
         status: 200,
@@ -961,6 +1123,181 @@ export async function handleMockRequest(
     const revokeConn = matchPath(/^\/connections\/([^/]+)$/, suffix)
     if (method === "DELETE" && revokeConn) {
       return { status: 200, body: ok(null) }
+    }
+  }
+
+  if (method === "POST" && path === "/v1/invoices/pageable") {
+    const { data, meta } = pageMockInvoices(body)
+    return { status: 200, body: ok(data, meta) }
+  }
+
+  if (method === "GET" && path === "/v1/invoices/next-number") {
+    return { status: 200, body: ok(getMockNextInvoiceNumber()) }
+  }
+
+  if (method === "GET" && path === "/v1/invoices/number-availability") {
+    const invoiceNumber = String(params?.invoiceNumber ?? "")
+    const excludeId =
+      params?.excludeId == null || params.excludeId === ""
+        ? undefined
+        : Number(params.excludeId)
+    return {
+      status: 200,
+      body: ok(checkMockInvoiceNumber(invoiceNumber, excludeId)),
+    }
+  }
+
+  if (method === "POST" && path === "/v1/invoices/preview") {
+    try {
+      return {
+        status: 200,
+        body: ok(previewMockInvoice(body as unknown as CreateInvoiceRequest)),
+      }
+    } catch (error) {
+      return handleMockApiError(error)
+    }
+  }
+
+  if (method === "POST" && path === "/v1/invoices") {
+    try {
+      return {
+        status: 200,
+        body: ok(createMockInvoice(body as unknown as CreateInvoiceRequest)),
+      }
+    } catch (error) {
+      return handleMockApiError(error)
+    }
+  }
+
+  const invoicePaymentSummary = matchPath(
+    /^\/v1\/invoices\/(\d+)\/payment-summary$/,
+    path
+  )
+  if (method === "GET" && invoicePaymentSummary) {
+    try {
+      const record = getMockInvoiceRecord(Number(invoicePaymentSummary[1]))
+      if (!record) {
+        return fail(404, `Invoice not found: id=${invoicePaymentSummary[1]}`)
+      }
+      return {
+        status: 200,
+        body: ok(buildInvoicePaymentSummary(record.invoice)),
+      }
+    } catch (error) {
+      return handleMockApiError(error)
+    }
+  }
+
+  const invoiceNumberUpdate = matchPath(/^\/v1\/invoices\/(\d+)\/number$/, path)
+  if (method === "PUT" && invoiceNumberUpdate) {
+    try {
+      return {
+        status: 200,
+        body: ok(
+          updateMockInvoiceNumber(
+            Number(invoiceNumberUpdate[1]),
+            String(body.invoiceNumber ?? "")
+          )
+        ),
+      }
+    } catch (error) {
+      return handleMockApiError(error)
+    }
+  }
+
+  const invoiceStatusUpdate = matchPath(/^\/v1\/invoices\/(\d+)\/status$/, path)
+  if (method === "PATCH" && invoiceStatusUpdate) {
+    try {
+      return {
+        status: 200,
+        body: ok(
+          updateMockInvoiceStatus(
+            Number(invoiceStatusUpdate[1]),
+            String(body.status) as InvoiceStatus
+          )
+        ),
+      }
+    } catch (error) {
+      return handleMockApiError(error)
+    }
+  }
+
+  const invoiceGet = matchPath(/^\/v1\/invoices\/(\d+)$/, path)
+  if (method === "GET" && invoiceGet) {
+    try {
+      return { status: 200, body: ok(getMockInvoiceDetail(Number(invoiceGet[1]))) }
+    } catch (error) {
+      return handleMockApiError(error)
+    }
+  }
+
+  if (method === "DELETE" && invoiceGet) {
+    try {
+      deleteMockInvoice(Number(invoiceGet[1]))
+      return { status: 200, body: ok(null) }
+    } catch (error) {
+      return handleMockApiError(error)
+    }
+  }
+
+  if (method === "POST" && path === "/v1/payment-vouchers/pageable") {
+    const { data, meta } = pageMockVouchers(body)
+    return { status: 200, body: ok(data, meta) }
+  }
+
+  if (method === "GET" && path === "/v1/payment-vouchers/next-number") {
+    return { status: 200, body: ok(getMockNextVoucherNumber()) }
+  }
+
+  if (method === "GET" && path === "/v1/payment-vouchers/number-availability") {
+    const voucherNumber = String(params?.voucherNumber ?? "")
+    const excludeId =
+      params?.excludeId == null || params.excludeId === ""
+        ? undefined
+        : Number(params.excludeId)
+    return {
+      status: 200,
+      body: ok(checkMockVoucherNumber(voucherNumber, excludeId)),
+    }
+  }
+
+  const vouchersByInvoice = matchPath(
+    /^\/v1\/payment-vouchers\/by-invoice\/(\d+)$/,
+    path
+  )
+  if (method === "GET" && vouchersByInvoice) {
+    return {
+      status: 200,
+      body: ok(listMockVouchersByInvoice(Number(vouchersByInvoice[1]))),
+    }
+  }
+
+  if (method === "POST" && path === "/v1/payment-vouchers") {
+    try {
+      return {
+        status: 200,
+        body: ok(createMockVoucher(body as unknown as CreateVoucherRequest)),
+      }
+    } catch (error) {
+      return handleMockApiError(error)
+    }
+  }
+
+  const voucherGet = matchPath(/^\/v1\/payment-vouchers\/(\d+)$/, path)
+  if (method === "GET" && voucherGet) {
+    try {
+      return { status: 200, body: ok(getMockVoucher(Number(voucherGet[1]))) }
+    } catch (error) {
+      return handleMockApiError(error)
+    }
+  }
+
+  if (method === "DELETE" && voucherGet) {
+    try {
+      deleteMockVoucher(Number(voucherGet[1]))
+      return { status: 200, body: ok(null) }
+    } catch (error) {
+      return handleMockApiError(error)
     }
   }
 

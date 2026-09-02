@@ -34,6 +34,12 @@ export type ApiOrderWithdrawApplyStatus =
 
 export type ApiOrderInputFileType = "SHIPPING_FEE" | "SERVICE_FEE"
 
+export type ApiInvoicePdfMatchStatus =
+  | "MISSING"
+  | "MATCHED"
+  | "MISMATCH"
+  | "UNPARSED"
+
 export interface ApiOrderInputRunDto {
   id: number
   storeId: number | null
@@ -60,6 +66,24 @@ export interface ApiOrderInputRunDto {
   withdrawRowCount: number | null
   withdrawMatchedCount: number | null
   withdrawUnmatchedCount: number | null
+  invoicePdfFilename: string | null
+  invoicePdfSize: number | null
+  invoicePdfStatus: ApiOrderInputFileStatus | null
+  invoicePdfError: string | null
+  invoiceReceiptNumber: string | null
+  invoiceReceiptDate: string | null
+  invoicePeriodStart: string | null
+  invoicePeriodEnd: string | null
+  invoiceIssuerName: string | null
+  invoiceIssuerTaxId: string | null
+  invoiceBuyerName: string | null
+  invoiceBuyerTaxId: string | null
+  invoiceTotalAmount: number | null
+  invoiceWithholdingTaxAmount: number | null
+  invoiceWithholdingTaxRate: number | null
+  excelMatchedAmount: number | null
+  invoiceMatchStatus: ApiInvoicePdfMatchStatus | null
+  invoiceMatchDifference: number | null
   orderCount: number | null
   itemCount: number | null
   createdAt: string
@@ -169,6 +193,33 @@ export const orderInputRunService = {
       { headers: { "Content-Type": "multipart/form-data" } }
     )
     return response.data.data
+  },
+
+  uploadInvoicePdf: async (id: number, file: File) => {
+    const formData = new FormData()
+    formData.append("file", file)
+    const response = await apiClient.post<ApiResponse<ApiOrderInputRunDto>>(
+      `/v1/order-input-runs/${id}/files/invoice-pdf`,
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    )
+    return response.data.data
+  },
+
+  downloadInvoicePdf: async (id: number, fallbackFilename: string) => {
+    try {
+      const response = await apiClient.get<Blob>(
+        `/v1/order-input-runs/${id}/files/invoice-pdf`,
+        { responseType: "blob" }
+      )
+      const filename = filenameFromContentDisposition(
+        response.headers["content-disposition"] as string | undefined,
+        fallbackFilename
+      )
+      downloadBlob(response.data, filename)
+    } catch (error) {
+      await rethrowBlobApiError(error)
+    }
   },
 
   downloadInputFile: async (id: number, fallbackFilename: string) => {

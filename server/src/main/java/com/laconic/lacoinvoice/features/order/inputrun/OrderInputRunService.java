@@ -24,6 +24,7 @@ import com.laconic.lacoinvoice.common.pagination.PageQuerySupport;
 import com.laconic.lacoinvoice.common.persistence.AuditUserContext;
 import com.laconic.lacoinvoice.common.web.ApiResponse;
 import com.laconic.lacoinvoice.common.web.PageMeta;
+import com.laconic.lacoinvoice.domain.models.InvoicePdfMatchStatus;
 import com.laconic.lacoinvoice.domain.models.Marketplace;
 import com.laconic.lacoinvoice.domain.models.Order;
 import com.laconic.lacoinvoice.domain.models.OrderImportBatch;
@@ -79,6 +80,8 @@ public class OrderInputRunService {
 	private final JdbcTemplate jdbcTemplate;
 	private final UserSettingsService userSettingsService;
 	private final OrderInputFileTypeClassifier inputFileTypeClassifier;
+	private final InvoicePdfParser invoicePdfParser;
+	private final InvoicePdfExcelMatcher invoicePdfExcelMatcher;
 
 	public OrderInputRunService(
 			OrderInputRunRepository runRepository,
@@ -93,7 +96,9 @@ public class OrderInputRunService {
 			OrderInputRunMapper mapper,
 			JdbcTemplate jdbcTemplate,
 			UserSettingsService userSettingsService,
-			OrderInputFileTypeClassifier inputFileTypeClassifier) {
+			OrderInputFileTypeClassifier inputFileTypeClassifier,
+			InvoicePdfParser invoicePdfParser,
+			InvoicePdfExcelMatcher invoicePdfExcelMatcher) {
 		this.runRepository = runRepository;
 		this.withdrawRowRepository = withdrawRowRepository;
 		this.storeRepository = storeRepository;
@@ -107,6 +112,8 @@ public class OrderInputRunService {
 		this.jdbcTemplate = jdbcTemplate;
 		this.userSettingsService = userSettingsService;
 		this.inputFileTypeClassifier = inputFileTypeClassifier;
+		this.invoicePdfParser = invoicePdfParser;
+		this.invoicePdfExcelMatcher = invoicePdfExcelMatcher;
 	}
 
 	@Loggable
@@ -158,6 +165,8 @@ public class OrderInputRunService {
 		run.setStatus(OrderInputRunStatus.DRAFT);
 		run.setOrderDetailStatus(OrderInputFileStatus.MISSING);
 		run.setWithdrawStatus(OrderInputFileStatus.MISSING);
+		run.setInvoicePdfStatus(OrderInputFileStatus.MISSING);
+		run.setInvoiceMatchStatus(InvoicePdfMatchStatus.MISSING);
 		return mapper.toDto(runRepository.save(run));
 	}
 
@@ -185,7 +194,7 @@ public class OrderInputRunService {
 			if (content == null || content.length == 0) {
 				throw new ResourceNotFoundException("No uploaded file for this order data input.");
 			}
-			return new OrderInputFileDownload(
+			return OrderInputFileDownload.excel(
 					resolveDownloadFilename(run.getOrderDetailFilename(), "order-detail.xlsx"),
 					content);
 		}
@@ -193,7 +202,7 @@ public class OrderInputRunService {
 		if (content == null || content.length == 0) {
 			throw new ResourceNotFoundException("No uploaded file for this order data input.");
 		}
-		return new OrderInputFileDownload(
+		return OrderInputFileDownload.excel(
 				resolveDownloadFilename(run.getWithdrawFilename(), "service-fee.xlsx"),
 				content);
 	}
@@ -216,6 +225,7 @@ public class OrderInputRunService {
 		run.setOrderDetailBatch(null);
 		run.setOrderDetailImportFile(null);
 		run.setStatus(OrderInputRunStatus.DRAFT);
+		applyInvoicePdfMatch(run);
 		return mapper.toDto(runRepository.save(run));
 	}
 
@@ -238,7 +248,53 @@ public class OrderInputRunService {
 		run.setWithdrawMatchedCount(null);
 		run.setWithdrawUnmatchedCount(null);
 		run.setStatus(OrderInputRunStatus.DRAFT);
+		applyInvoicePdfMatch(run);
 		return mapper.toDto(runRepository.save(run));
+	}
+
+	@Loggable
+	@Transactional
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	public OrderInputRunDto uploadInvoicePdf(Long id, MultipartFile file) {
+		OrderInputRun run = requireRun(id);
+		assertNotRunning(run);
+		String filename = safeFilename(file);
+		if (!filename.toLowerCase().endsWith(".pdf")) {
+			throw new IllegalArgumentException("Invoice file must be a PDF.");
+		}
+		byte[] content = readBytes(file);
+		run.setInvoicePdfFilename(filename);
+		run.setInvoicePdfContent(content);
+		run.setInvoicePdfSize((long) content.length);
+		run.setInvoicePdfStatus(OrderInputFileStatus.READY);
+		run.setInvoicePdfError(null);
+		try {
+			InvoicePdfExtract extract = invoicePdfParser.parse(content);
+			applyInvoiceExtract(run, extract);
+		} catch (RuntimeException ex) {
+			clearInvoiceExtract(run);
+			run.setInvoicePdfStatus(OrderInputFileStatus.FAILED);
+			run.setInvoicePdfError(ex.getMessage());
+			run.setInvoiceMatchStatus(InvoicePdfMatchStatus.UNPARSED);
+		}
+		if (run.getInvoicePdfStatus() == OrderInputFileStatus.READY) {
+			applyInvoicePdfMatch(run);
+		}
+		return mapper.toDto(runRepository.save(run));
+	}
+
+	@Loggable
+	@Transactional(readOnly = true)
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	public OrderInputFileDownload downloadInvoicePdf(Long id) {
+		OrderInputRun run = requireRun(id);
+		byte[] content = run.getInvoicePdfContent();
+		if (content == null || content.length == 0) {
+			throw new ResourceNotFoundException("No invoice PDF uploaded for this order data input.");
+		}
+		return OrderInputFileDownload.pdf(
+				resolveDownloadFilename(run.getInvoicePdfFilename(), "invoice.pdf"),
+				content);
 	}
 
 	@Loggable
@@ -850,6 +906,7 @@ public class OrderInputRunService {
 		run.setOrderDetailFinishedAt(null);
 
 		recomputeFromOrderDetailStatus(run);
+		applyInvoicePdfMatch(run);
 
 		return mapper.toDto(runRepository.save(run));
 	}
@@ -878,11 +935,10 @@ public class OrderInputRunService {
 		run.setWithdrawUnmatchedCount(null);
 
 		recomputeFromWithdrawStatus(run);
+		applyInvoicePdfMatch(run);
 
 		return mapper.toDto(runRepository.save(run));
 	}
-
-
 
 	private OrderInputRun requireRun(Long id) {
 		return runRepository.findById(id)
@@ -897,6 +953,49 @@ public class OrderInputRunService {
 		}
 	}
 
+	private void applyInvoiceExtract(OrderInputRun run, InvoicePdfExtract extract) {
+		run.setInvoiceReceiptNumber(extract.receiptNumber());
+		run.setInvoiceReceiptDate(extract.receiptDate());
+		run.setInvoicePeriodStart(extract.periodStart());
+		run.setInvoicePeriodEnd(extract.periodEnd());
+		run.setInvoiceIssuerName(extract.issuerName());
+		run.setInvoiceIssuerTaxId(extract.issuerTaxId());
+		run.setInvoiceBuyerName(extract.buyerName());
+		run.setInvoiceBuyerTaxId(extract.buyerTaxId());
+		run.setInvoiceTotalAmount(extract.totalAmount());
+		run.setInvoiceWithholdingTaxAmount(extract.withholdingTaxAmount());
+		run.setInvoiceWithholdingTaxRate(extract.withholdingTaxRate());
+	}
+
+	private static void clearInvoiceExtract(OrderInputRun run) {
+		run.setInvoiceReceiptNumber(null);
+		run.setInvoiceReceiptDate(null);
+		run.setInvoicePeriodStart(null);
+		run.setInvoicePeriodEnd(null);
+		run.setInvoiceIssuerName(null);
+		run.setInvoiceIssuerTaxId(null);
+		run.setInvoiceBuyerName(null);
+		run.setInvoiceBuyerTaxId(null);
+		run.setInvoiceTotalAmount(null);
+		run.setInvoiceWithholdingTaxAmount(null);
+		run.setInvoiceWithholdingTaxRate(null);
+		run.setExcelMatchedAmount(null);
+		run.setInvoiceMatchStatus(InvoicePdfMatchStatus.MISSING);
+		run.setInvoiceMatchDifference(null);
+	}
+
+	private void applyInvoicePdfMatch(OrderInputRun run) {
+		InvoicePdfExcelMatcher.MatchResult result = invoicePdfExcelMatcher.match(run);
+		run.setExcelMatchedAmount(result.excelAmount());
+		run.setInvoiceMatchStatus(result.status());
+		run.setInvoiceMatchDifference(result.difference());
+		if (run.getInvoicePdfStatus() != OrderInputFileStatus.FAILED) {
+			boolean showMessage = result.status() == InvoicePdfMatchStatus.MISMATCH
+					|| result.status() == InvoicePdfMatchStatus.UNPARSED;
+			run.setInvoicePdfError(showMessage ? result.message() : null);
+		}
+	}
+
 	private static boolean isRunnable(OrderInputFileStatus status) {
 		return status == OrderInputFileStatus.READY
 				|| status == OrderInputFileStatus.FAILED
@@ -906,7 +1005,7 @@ public class OrderInputRunService {
 
 	private static byte[] readBytes(MultipartFile file) {
 		if (file == null || file.isEmpty()) {
-			throw new IllegalArgumentException("Excel file is required");
+			throw new IllegalArgumentException("File is required");
 		}
 		try {
 			return file.getBytes();

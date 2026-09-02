@@ -22,6 +22,7 @@ import { ROUTES } from "@/app/constants/routes"
 import { StatusBadge } from "@/components/common/status-badge"
 import type { StatusBadgeVariant } from "@/components/common/status-badge"
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
+import { InvoicePdfCard } from "@/features/orders/components/invoice-pdf-card"
 import { OrderImportDialog } from "@/features/orders/components/order-import-dialog"
 import { OrdersFilters } from "@/features/orders/components/orders-filters"
 import { OrdersTable } from "@/features/orders/components/orders-table"
@@ -77,9 +78,11 @@ import {
   useRollbackOrderInputWithdrawMutation,
   useDeleteOrderInputRunMutation,
   useDownloadOrderInputFileMutation,
+  useDownloadOrderInputInvoicePdfMutation,
   useStartOrderInputRunPreviewMutation,
   useUploadOrderInputOrderDetailMutation,
   useUploadOrderInputWithdrawMutation,
+  useUploadOrderInputInvoicePdfMutation,
 } from "@/shared/queries/order-input-run.query"
 import {
   getOrderErrorMessage,
@@ -151,7 +154,9 @@ export function OrderInputRunDetailPage() {
   )
   const uploadOrderDetail = useUploadOrderInputOrderDetailMutation()
   const uploadWithdraw = useUploadOrderInputWithdrawMutation()
+  const uploadInvoicePdf = useUploadOrderInputInvoicePdfMutation()
   const downloadInputFileMutation = useDownloadOrderInputFileMutation()
+  const downloadInvoicePdfMutation = useDownloadOrderInputInvoicePdfMutation()
   const startPreviewMutation = useStartOrderInputRunPreviewMutation()
   const cancelPreviewMutation = useCancelOrderInputRunPreviewMutation()
   const finishRunMutation = useFinishOrderInputRunMutation()
@@ -364,6 +369,7 @@ export function OrderInputRunDetailPage() {
   const isBusy =
     uploadOrderDetail.isPending ||
     uploadWithdraw.isPending ||
+    uploadInvoicePdf.isPending ||
     startPreviewMutation.isPending ||
     finishRunMutation.isPending ||
     cancelPreviewMutation.isPending ||
@@ -377,6 +383,7 @@ export function OrderInputRunDetailPage() {
     const err =
       (uploadOrderDetail.isError && uploadOrderDetail.error) ||
       (uploadWithdraw.isError && uploadWithdraw.error) ||
+      (uploadInvoicePdf.isError && uploadInvoicePdf.error) ||
       (startPreviewMutation.isError && startPreviewMutation.error) ||
       (finishRunMutation.isError && finishRunMutation.error) ||
       (runWithdrawMutation.isError && runWithdrawMutation.error) ||
@@ -392,6 +399,8 @@ export function OrderInputRunDetailPage() {
     uploadOrderDetail.error,
     uploadWithdraw.isError,
     uploadWithdraw.error,
+    uploadInvoicePdf.isError,
+    uploadInvoicePdf.error,
     startPreviewMutation.isError,
     startPreviewMutation.error,
     finishRunMutation.isError,
@@ -484,6 +493,26 @@ export function OrderInputRunDetailPage() {
     setLocalError(null)
     downloadInputFileMutation.mutate(
       { id: run.id, fallbackFilename },
+      {
+        onError: (err) => {
+          setLocalError(
+            getOrderInputRunErrorMessage(err, t("inputs.detail.download_failed"))
+          )
+        },
+      }
+    )
+  }
+
+  const handleDownloadInvoicePdf = () => {
+    if (!run) {
+      return
+    }
+    setLocalError(null)
+    downloadInvoicePdfMutation.mutate(
+      {
+        id: run.id,
+        fallbackFilename: run.invoicePdfFilename ?? "invoice.pdf",
+      },
       {
         onError: (err) => {
           setLocalError(
@@ -711,7 +740,16 @@ export function OrderInputRunDetailPage() {
           setPreviewBatch(null)
         }}
       />
-      <div className="grid gap-4 md:grid-cols-1">
+      <div className="grid gap-4 md:grid-cols-2 md:items-stretch">
+        <InvoicePdfCard
+          run={run}
+          locale={locale}
+          disabled={isBusy}
+          uploading={uploadInvoicePdf.isPending}
+          downloading={downloadInvoicePdfMutation.isPending}
+          onUpload={(file) => uploadInvoicePdf.mutate({ id: run.id, file })}
+          onDownload={handleDownloadInvoicePdf}
+        />
         {isShippingFeeInput ? (
           <FileUploadCard
             title={t("inputs.detail.order_detail_title")}
@@ -1328,7 +1366,7 @@ function FileUploadCard({
   t,
 }: FileUploadCardProps) {
   return (
-    <div className="space-y-3 rounded-md border border-border bg-card p-4">
+    <div className="flex h-full flex-col space-y-3 rounded-md border border-border bg-card p-4">
       <div className="flex items-start justify-between gap-2">
         <div>
           <h2 className="font-heading text-sm font-semibold">{title}</h2>

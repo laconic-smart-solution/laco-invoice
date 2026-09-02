@@ -1,6 +1,8 @@
 package com.laconic.lacoinvoice.domain.models;
 
+import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 
 import com.laconic.lacoinvoice.common.store.StoreScopedEntity;
 
@@ -103,4 +105,65 @@ public class OrderInputRun extends StoreScopedEntity {
 
 	@Column(name = "withdraw_unmatched_count")
 	private Integer withdrawUnmatchedCount;
+
+	@Column(name = "invoice_pdf_filename", length = 500)
+	private String invoicePdfFilename;
+
+	@Lob
+	@Column(name = "invoice_pdf_content")
+	private byte[] invoicePdfContent;
+
+	@Column(name = "invoice_pdf_size")
+	private Long invoicePdfSize;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "invoice_pdf_status", length = 20)
+	private OrderInputFileStatus invoicePdfStatus = OrderInputFileStatus.MISSING;
+
+	@Lob
+	@Column(name = "invoice_pdf_error")
+	private String invoicePdfError;
+
+	@Column(name = "invoice_receipt_number", length = 100)
+	private String invoiceReceiptNumber;
+
+	@Column(name = "invoice_receipt_date")
+	private LocalDate invoiceReceiptDate;
+
+	@Column(name = "invoice_period_start")
+	private LocalDate invoicePeriodStart;
+
+	@Column(name = "invoice_period_end")
+	private LocalDate invoicePeriodEnd;
+
+	@Column(name = "invoice_issuer_name", length = 255)
+	private String invoiceIssuerName;
+
+	@Column(name = "invoice_issuer_tax_id", length = 50)
+	private String invoiceIssuerTaxId;
+
+	@Column(name = "invoice_buyer_name", length = 255)
+	private String invoiceBuyerName;
+
+	@Column(name = "invoice_buyer_tax_id", length = 50)
+	private String invoiceBuyerTaxId;
+
+	@Column(name = "invoice_total_amount", precision = 18, scale = 2)
+	private BigDecimal invoiceTotalAmount;
+
+	@Column(name = "invoice_wht_amount", precision = 18, scale = 2)
+	private BigDecimal invoiceWithholdingTaxAmount;
+
+	@Column(name = "invoice_wht_rate", precision = 8, scale = 4)
+	private BigDecimal invoiceWithholdingTaxRate;
+
+	@Column(name = "excel_matched_amount", precision = 18, scale = 2)
+	private BigDecimal excelMatchedAmount;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "invoice_match_status", length = 20)
+	private InvoicePdfMatchStatus invoiceMatchStatus = InvoicePdfMatchStatus.MISSING;
+
+	@Column(name = "invoice_match_difference", precision = 18, scale = 2)
+	private BigDecimal invoiceMatchDifference;
 }

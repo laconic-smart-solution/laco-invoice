@@ -404,6 +404,15 @@
       "loading": "加载中…",
       "order_detail_title": "Shipping Fee excel",
       "order_detail_description": "TikTok OrderSKUList (.xlsx)",
+      "invoice_pdf_title": "发票 PDF",
+      "invoice_pdf_description": "物流/税务发票收据，用于核对 Excel 合计",
+      "invoice_receipt_number": "收据编号",
+      "invoice_receipt_date": "收据日期",
+      "invoice_period": "期间",
+      "invoice_buyer": "收票方",
+      "invoice_pdf_amount": "PDF 金额",
+      "excel_matched_amount": "Excel 金额",
+      "invoice_match_difference": "差额",
       "withdraw_title": "Service fee excel",
       "withdraw_description": "TikTok Payout Report — Order details (.xlsx)",
       "no_file": "尚未上传文件",
@@ -449,12 +458,13 @@
       "title_required": "请输入标题。",
       "store_required": "请选择店铺。",
       "file_required": "请上传与所选类型匹配的 Excel 文件。",
+      "invoice_pdf_required": "请上传发票 PDF，以便与 Excel 金额核对。",
       "order_detail_required": "请先上传 Shipping Fee Excel（Ready）再运行。",
       "withdraw_required": "请先上传 Service Fee Excel（Ready）再运行。",
       "not_found": "未找到 order data input。"
     },
-    "create_modal_subtitle": "选择输入文件类型，然后上传匹配的 Excel 文件。",
-    "create_modal_subtitle_ai": "上传 Excel 文件 — 系统将自动检测输入类型。",
+    "create_modal_subtitle": "选择输入文件类型，然后上传匹配的 Excel 和发票 PDF。",
+    "create_modal_subtitle_ai": "上传 Excel 和发票 PDF — 系统将自动检测 Excel 类型。",
     "detecting_file_type": "正在检测文件类型...",
     "upload_excel_file": "Excel 文件",
     "choose_excel_file": "点击选择 Excel 文件",
@@ -463,6 +473,16 @@
     "choose_shipping_file": "点击选择运费 Excel 文件",
     "choose_service_file": "点击选择服务费 Excel 文件",
     "uploading_order_detail": "正在上传运费 Excel...",
-    "uploading_withdraw": "正在上传服务费 Excel..."
+    "uploading_withdraw": "正在上传服务费 Excel...",
+    "uploading_invoice_pdf": "正在上传发票 PDF...",
+    "upload_invoice_pdf": "发票 PDF",
+    "upload_invoice_pdf_hint": "收据/税务发票 PDF。系统会将 Excel 中的运费或物流合计与此文件核对。",
+    "choose_invoice_pdf": "点击选择发票 PDF",
+    "invoice_match": {
+      "missing": "尚未核对",
+      "matched": "金额一致",
+      "mismatch": "金额不符",
+      "unparsed": "无法解析"
+    }
   }
 }

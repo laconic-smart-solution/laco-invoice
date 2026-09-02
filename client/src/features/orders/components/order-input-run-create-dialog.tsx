@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { FileSpreadsheet, Loader2, UploadCloud, X } from "lucide-react"
+import { FileSpreadsheet, FileText, Loader2, UploadCloud, X } from "lucide-react"
 
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
 import {
@@ -36,6 +36,7 @@ import {
   useDetectOrderInputFileTypeMutation,
   useUploadOrderInputOrderDetailMutation,
   useUploadOrderInputWithdrawMutation,
+  useUploadOrderInputInvoicePdfMutation,
 } from "@/shared/queries/order-input-run.query"
 import { useMeProfileQuery } from "@/shared/queries/me.query"
 import type { ApiOrderInputFileType } from "@/shared/services/order-input-run.service"
@@ -67,6 +68,7 @@ export function OrderInputRunCreateDialog({
   const detectFileTypeMutation = useDetectOrderInputFileTypeMutation()
   const uploadOrderDetailMutation = useUploadOrderInputOrderDetailMutation()
   const uploadWithdrawMutation = useUploadOrderInputWithdrawMutation()
+  const uploadInvoicePdfMutation = useUploadOrderInputInvoicePdfMutation()
 
   const aiAutoChoose = meProfile?.orderInputAiAutoChoose === true
 
@@ -77,18 +79,21 @@ export function OrderInputRunCreateDialog({
   const [inputFileType, setInputFileType] =
     useState<ApiOrderInputFileType>("SHIPPING_FEE")
   const [uploadFile, setUploadFile] = useState<File | null>(null)
+  const [invoicePdfFile, setInvoicePdfFile] = useState<File | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [uploadStep, setUploadStep] = useState<string | null>(null)
   const { hasOpenOverlay, onOverlayOpenChange, resetOverlays } =
     useDialogNestedOverlayOpen()
 
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const pdfInputRef = useRef<HTMLInputElement | null>(null)
 
   const isSubmitting =
     createMutation.isPending ||
     detectFileTypeMutation.isPending ||
     uploadOrderDetailMutation.isPending ||
-    uploadWithdrawMutation.isPending
+    uploadWithdrawMutation.isPending ||
+    uploadInvoicePdfMutation.isPending
 
   const resolvedFileType: ApiOrderInputFileType = inputFileType
   const isShippingFee = resolvedFileType === "SHIPPING_FEE"
@@ -104,6 +109,13 @@ export function OrderInputRunCreateDialog({
     setMarketplaceCode("TIKTOK")
     setInputFileType("SHIPPING_FEE")
     setUploadFile(null)
+    setInvoicePdfFile(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+    if (pdfInputRef.current) {
+      pdfInputRef.current.value = ""
+    }
     setError(null)
     setUploadStep(null)
     resetOverlays()
@@ -150,6 +162,10 @@ export function OrderInputRunCreateDialog({
       setError(t("inputs.errors.file_required"))
       return
     }
+    if (!invoicePdfFile) {
+      setError(t("inputs.errors.invoice_pdf_required"))
+      return
+    }
 
     setError(null)
     try {
@@ -182,6 +198,12 @@ export function OrderInputRunCreateDialog({
           file: uploadFile,
         })
       }
+
+      setUploadStep(t("inputs.uploading_invoice_pdf"))
+      await uploadInvoicePdfMutation.mutateAsync({
+        id: data.id,
+        file: invoicePdfFile,
+      })
 
       onOpenChange(false)
       onCreated?.(data.id)
@@ -322,6 +344,66 @@ export function OrderInputRunCreateDialog({
               </Select>
             </div>
           ) : null}
+
+          <div className="rounded-lg border border-border/80 bg-muted/20 p-3 space-y-2">
+            <Label className="text-xs font-semibold flex items-center gap-1.5">
+              <FileText className="size-4 text-muted-foreground" />
+              {t("inputs.upload_invoice_pdf")}
+            </Label>
+            <p className="text-[11px] text-muted-foreground">
+              {t("inputs.upload_invoice_pdf_hint")}
+            </p>
+            <input
+              ref={pdfInputRef}
+              type="file"
+              accept="application/pdf,.pdf"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0] || null
+                setInvoicePdfFile(file)
+              }}
+              disabled={isSubmitting}
+            />
+            {invoicePdfFile ? (
+              <div className="flex items-center justify-between rounded border border-border bg-background/50 px-3 py-2 text-xs">
+                <div className="flex items-center gap-2 truncate">
+                  <FileText className="size-4 shrink-0 text-muted-foreground" />
+                  <span className="font-medium truncate">{invoicePdfFile.name}</span>
+                  <span className="text-[11px] text-muted-foreground shrink-0">
+                    ({formatFileSize(invoicePdfFile.size)})
+                  </span>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="size-6 text-muted-foreground hover:text-destructive shrink-0"
+                  onClick={() => {
+                    setInvoicePdfFile(null)
+                    if (pdfInputRef.current) pdfInputRef.current.value = ""
+                  }}
+                  disabled={isSubmitting}
+                >
+                  <X className="size-3.5" />
+                </Button>
+              </div>
+            ) : (
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => pdfInputRef.current?.click()}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    pdfInputRef.current?.click()
+                  }
+                }}
+                className="flex items-center justify-center gap-2 rounded border border-dashed border-muted-foreground/30 hover:border-primary/50 bg-background/50 hover:bg-muted/40 py-3 px-4 cursor-pointer transition-colors text-xs text-muted-foreground"
+              >
+                <UploadCloud className="size-4 text-muted-foreground" />
+                <span>{t("inputs.choose_invoice_pdf")}</span>
+              </div>
+            )}
+          </div>
 
           <div className="rounded-lg border border-border/80 bg-muted/20 p-3 space-y-2">
             <div className="flex items-center justify-between">

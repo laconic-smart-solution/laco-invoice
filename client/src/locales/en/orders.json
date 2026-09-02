@@ -410,6 +410,15 @@
       "loading": "Loading…",
       "order_detail_title": "Shipping Fee excel",
       "order_detail_description": "TikTok OrderSKUList export (.xlsx)",
+      "invoice_pdf_title": "Invoice PDF",
+      "invoice_pdf_description": "Logistics / tax invoice receipt used to match Excel totals",
+      "invoice_receipt_number": "Receipt no.",
+      "invoice_receipt_date": "Receipt date",
+      "invoice_period": "Period",
+      "invoice_buyer": "Bill to",
+      "invoice_pdf_amount": "PDF amount",
+      "excel_matched_amount": "Excel amount",
+      "invoice_match_difference": "Difference",
       "withdraw_title": "Service fee excel",
       "withdraw_description": "TikTok Payout Report — Order details sheet (.xlsx)",
       "no_file": "No file uploaded",
@@ -466,12 +475,13 @@
       "title_required": "Please enter a title.",
       "store_required": "Please select a store.",
       "file_required": "Please upload an Excel file for the selected input type.",
+      "invoice_pdf_required": "Please upload an invoice PDF to match with the Excel file.",
       "order_detail_required": "Upload Shipping Fee Excel (Ready) before running.",
       "withdraw_required": "Upload Service Fee Excel (Ready) before running.",
       "not_found": "Order data input not found."
     },
-    "create_modal_subtitle": "Choose input file type, then upload the matching Excel file.",
-    "create_modal_subtitle_ai": "Upload your Excel file — we'll detect the input type automatically.",
+    "create_modal_subtitle": "Choose input file type, then upload the matching Excel file and invoice PDF.",
+    "create_modal_subtitle_ai": "Upload your Excel file and invoice PDF — we'll detect the Excel type automatically.",
     "detecting_file_type": "Detecting file type...",
     "upload_excel_file": "Excel file",
     "choose_excel_file": "Click to select Excel file",
@@ -480,6 +490,16 @@
     "choose_shipping_file": "Click to select Shipping Fee Excel file",
     "choose_service_file": "Click to select Service Fee Excel file",
     "uploading_order_detail": "Uploading Shipping Fee Excel...",
-    "uploading_withdraw": "Uploading Service Fee Excel..."
+    "uploading_withdraw": "Uploading Service Fee Excel...",
+    "uploading_invoice_pdf": "Uploading invoice PDF...",
+    "upload_invoice_pdf": "Invoice PDF",
+    "upload_invoice_pdf_hint": "Receipt / tax invoice PDF. Excel shipping or logistics totals will be matched to this document.",
+    "choose_invoice_pdf": "Click to select invoice PDF",
+    "invoice_match": {
+      "missing": "Not matched yet",
+      "matched": "Matched",
+      "mismatch": "Amount mismatch",
+      "unparsed": "Could not parse"
+    }
   }
 }

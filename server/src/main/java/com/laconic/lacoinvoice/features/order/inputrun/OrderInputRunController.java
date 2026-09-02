@@ -34,9 +34,6 @@ import jakarta.validation.Valid;
 @Tag(name = "Order input runs")
 public class OrderInputRunController {
 
-	private static final MediaType XLSX = MediaType.parseMediaType(
-			"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
 	private final OrderInputRunService service;
 
 	public OrderInputRunController(OrderInputRunService service) {
@@ -100,7 +97,26 @@ public class OrderInputRunController {
 		return ResponseEntity.status(HttpStatus.OK)
 				.header(HttpHeaders.CONTENT_DISPOSITION,
 						"attachment; filename=\"" + file.filename() + "\"")
-				.contentType(XLSX)
+				.contentType(file.contentType())
+				.body(file.content());
+	}
+
+	@PostMapping(value = "/{id}/files/invoice-pdf", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@Operation(summary = "Upload invoice / receipt PDF to match against the Excel totals")
+	public ApiResponse<OrderInputRunDto> uploadInvoicePdf(
+			@PathVariable Long id,
+			@RequestParam("file") MultipartFile file) {
+		return ApiResponse.ok("Invoice PDF uploaded", service.uploadInvoicePdf(id, file));
+	}
+
+	@GetMapping("/{id}/files/invoice-pdf")
+	@Operation(summary = "Download the uploaded invoice PDF")
+	public ResponseEntity<byte[]> downloadInvoicePdf(@PathVariable Long id) {
+		OrderInputFileDownload file = service.downloadInvoicePdf(id);
+		return ResponseEntity.status(HttpStatus.OK)
+				.header(HttpHeaders.CONTENT_DISPOSITION,
+						"attachment; filename=\"" + file.filename() + "\"")
+				.contentType(file.contentType())
 				.body(file.content());
 	}
 

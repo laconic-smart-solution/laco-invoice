@@ -410,6 +410,15 @@
       "loading": "တင်နေသည်…",
       "order_detail_title": "Shipping Fee excel",
       "order_detail_description": "TikTok OrderSKUList (.xlsx)",
+      "invoice_pdf_title": "Invoice PDF",
+      "invoice_pdf_description": "Excel စုစုပေါင်းနှင့် ကိုက်ညီစစ်ဆေးရန် logistics/tax invoice",
+      "invoice_receipt_number": "Receipt no.",
+      "invoice_receipt_date": "Receipt date",
+      "invoice_period": "Period",
+      "invoice_buyer": "Bill to",
+      "invoice_pdf_amount": "PDF amount",
+      "excel_matched_amount": "Excel amount",
+      "invoice_match_difference": "ကွာခြားချက်",
       "withdraw_title": "Service fee excel",
       "withdraw_description": "TikTok Payout Report — Order details (.xlsx)",
       "no_file": "ဖိုင် မတင်ရသေးပါ",
@@ -466,12 +475,13 @@
       "title_required": "Title ထည့်ပါ။",
       "store_required": "Store ရွေးပါ။",
       "file_required": "ရွေးချယ်ထားသော အမျိုးအစားအတွက် Excel ဖိုင် တင်ပါ။",
+      "invoice_pdf_required": "Excel နှင့် ကိုက်ညီစစ်ဆေးရန် invoice PDF တင်ပါ။",
       "order_detail_required": "Shipping Fee Excel Ready ဖြစ်မှ Run လုပ်ပါ။",
       "withdraw_required": "Service Fee Excel Ready ဖြစ်မှ Run လုပ်ပါ။",
       "not_found": "Order data input မတွေ့ပါ။"
     },
-    "create_modal_subtitle": "Input file type ရွေးပြီး ကိုက်ညီ Excel တင်ပါ။",
-    "create_modal_subtitle_ai": "Excel တင်ပါ — input type ကို အလိုအလျောက် ခွဲခြားပေးပါမည်။",
+    "create_modal_subtitle": "Input file type ရွေးပြီး ကိုက်ညီ Excel နှင့် invoice PDF တင်ပါ။",
+    "create_modal_subtitle_ai": "Excel နှင့် invoice PDF တင်ပါ — Excel type ကို အလိုအလျောက် ခွဲခြားပေးပါမည်။",
     "detecting_file_type": "ဖိုင်အမျိုးအစား ခွဲခြားနေသည်...",
     "upload_excel_file": "Excel ဖိုင်",
     "choose_excel_file": "Excel ဖိုင် ရွေးရန် နှိပ်ပါ",
@@ -480,6 +490,16 @@
     "choose_shipping_file": "ပို့ဆောင်ခ (Shipping Fee) Excel ဖိုင် ရွေးချယ်ရန် နှိပ်ပါ",
     "choose_service_file": "ဝန်ဆောင်ခ (Service Fee) Excel ဖိုင် ရွေးချယ်ရန် နှိပ်ပါ",
     "uploading_order_detail": "ပို့ဆောင်ခ Excel ဖိုင် တင်နေသည်...",
-    "uploading_withdraw": "ဝန်ဆောင်ခ Excel ဖိုင် တင်နေသည်..."
+    "uploading_withdraw": "ဝန်ဆောင်ခ Excel ဖိုင် တင်နေသည်...",
+    "uploading_invoice_pdf": "Invoice PDF တင်နေသည်...",
+    "upload_invoice_pdf": "Invoice PDF",
+    "upload_invoice_pdf_hint": "Receipt / tax invoice PDF. Excel ပို့ဆောင်ခ သို့မဟုတ် logistics စုစုပေါင်းကို ဤဖိုင်နှင့် ကိုက်ညီစစ်ဆေးမည်။",
+    "choose_invoice_pdf": "Invoice PDF ရွေးရန် နှိပ်ပါ",
+    "invoice_match": {
+      "missing": "မစစ်ဆေးရသေး",
+      "matched": "ပမာဏ ကိုက်ညီ",
+      "mismatch": "ပမာဏ မကိုက်ညီ",
+      "unparsed": "ဖတ်၍မရ"
+    }
   }
 }
