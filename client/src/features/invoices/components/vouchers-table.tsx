@@ -34,7 +34,7 @@ export function VouchersTable({ vouchers, isLoading }: VouchersTableProps) {
         const q = search.trim().toLowerCase()
         const match =
           v.voucherNumber.toLowerCase().includes(q) ||
-          v.customerName.toLowerCase().includes(q) ||
+          (v.customerName?.toLowerCase().includes(q) ?? false) ||
           (v.bankReference && v.bankReference.toLowerCase().includes(q)) ||
           v.allocations.some((a) => a.externalOrderId.toLowerCase().includes(q))
         if (!match) return false
@@ -161,7 +161,7 @@ export function VouchersTable({ vouchers, isLoading }: VouchersTableProps) {
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">{v.date}</td>
                     <td className="px-4 py-3 font-sans font-medium text-foreground">
-                      {v.customerName}
+                      {v.customerName ?? "-"}
                     </td>
                     <td className="px-4 py-3 font-sans text-[11px] text-muted-foreground">
                       <div className="flex flex-col">

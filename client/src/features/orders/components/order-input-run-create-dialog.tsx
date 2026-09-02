@@ -1,14 +1,12 @@
 import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Download, FileSpreadsheet, Loader2, UploadCloud, X } from "lucide-react"
+import { FileSpreadsheet, Loader2, UploadCloud, X } from "lucide-react"
 
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
 import {
-  SERVICE_FEE_SAMPLE_FILENAME,
-  SERVICE_FEE_SAMPLE_HREF,
-  SHIPPING_FEE_SAMPLE_FILENAME,
-  SHIPPING_FEE_SAMPLE_HREF,
-} from "@/features/orders/constants/order-import-sample"
+  getOrderInputFileTemplate,
+} from "@/features/orders/constants/order-input-file-templates"
+import { OrderInputTemplateDownload } from "@/features/orders/components/order-input-template-download"
 import {
   SUPPORTED_MARKETPLACES,
   type MarketplaceCode,
@@ -35,26 +33,19 @@ import {
 import {
   getOrderInputRunErrorMessage,
   useCreateOrderInputRunMutation,
+  useDetectOrderInputFileTypeMutation,
   useUploadOrderInputOrderDetailMutation,
   useUploadOrderInputWithdrawMutation,
 } from "@/shared/queries/order-input-run.query"
-
+import { useMeProfileQuery } from "@/shared/queries/me.query"
+import type { ApiOrderInputFileType } from "@/shared/services/order-input-run.service"
+import { isDialogNestedLayer } from "@/shared/utils/dialog-nested-layer"
+import { useDialogNestedOverlayOpen } from "@/shared/hooks/use-dialog-nested-overlay-open"
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
-
-function isSelectLayer(target: EventTarget | null): boolean {
-  return (
-    target instanceof Element &&
-    Boolean(
-      target.closest(
-        '[data-slot="select-content"], [data-radix-select-viewport], [data-radix-popper-content-wrapper]'
-      )
-    )
-  )
 }
 
 interface OrderInputRunCreateDialogProps {
@@ -71,26 +62,38 @@ export function OrderInputRunCreateDialog({
   onCreated,
 }: OrderInputRunCreateDialogProps) {
   const { t } = useTranslation("orders")
+  const { data: meProfile } = useMeProfileQuery(open)
   const createMutation = useCreateOrderInputRunMutation()
+  const detectFileTypeMutation = useDetectOrderInputFileTypeMutation()
   const uploadOrderDetailMutation = useUploadOrderInputOrderDetailMutation()
   const uploadWithdrawMutation = useUploadOrderInputWithdrawMutation()
+
+  const aiAutoChoose = meProfile?.orderInputAiAutoChoose === true
 
   const [title, setTitle] = useState("")
   const [storeId, setStoreId] = useState("")
   const [marketplaceCode, setMarketplaceCode] =
     useState<MarketplaceCode>("TIKTOK")
-  const [orderDetailFile, setOrderDetailFile] = useState<File | null>(null)
-  const [withdrawFile, setWithdrawFile] = useState<File | null>(null)
+  const [inputFileType, setInputFileType] =
+    useState<ApiOrderInputFileType>("SHIPPING_FEE")
+  const [uploadFile, setUploadFile] = useState<File | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [uploadStep, setUploadStep] = useState<string | null>(null)
+  const { hasOpenOverlay, onOverlayOpenChange, resetOverlays } =
+    useDialogNestedOverlayOpen()
 
-  const orderDetailInputRef = useRef<HTMLInputElement | null>(null)
-  const withdrawInputRef = useRef<HTMLInputElement | null>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const isSubmitting =
     createMutation.isPending ||
+    detectFileTypeMutation.isPending ||
     uploadOrderDetailMutation.isPending ||
     uploadWithdrawMutation.isPending
+
+  const resolvedFileType: ApiOrderInputFileType = inputFileType
+  const isShippingFee = resolvedFileType === "SHIPPING_FEE"
+  const showTypeSpecificUpload = !aiAutoChoose || uploadFile != null
+  const selectedTemplate = getOrderInputFileTemplate(resolvedFileType)
 
   useEffect(() => {
     if (!open) {
@@ -99,11 +102,13 @@ export function OrderInputRunCreateDialog({
     setTitle("")
     setStoreId(stores[0] ? String(stores[0].id) : "")
     setMarketplaceCode("TIKTOK")
-    setOrderDetailFile(null)
-    setWithdrawFile(null)
+    setInputFileType("SHIPPING_FEE")
+    setUploadFile(null)
     setError(null)
     setUploadStep(null)
+    resetOverlays()
     createMutation.reset()
+    detectFileTypeMutation.reset()
     // Only reset when the dialog opens.
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional open-gated reset
   }, [open])
@@ -115,14 +120,14 @@ export function OrderInputRunCreateDialog({
     onOpenChange(next)
   }
 
-  const handleFileChange = (
-    type: "orderDetail" | "withdraw",
-    file: File | null
-  ) => {
-    if (type === "orderDetail") {
-      setOrderDetailFile(file)
-    } else {
-      setWithdrawFile(file)
+  const shouldIgnoreOutsideDismiss = (target: EventTarget | null) =>
+    isSubmitting || isDialogNestedLayer(target) || hasOpenOverlay
+
+  const handleInputFileTypeChange = (value: ApiOrderInputFileType) => {
+    setInputFileType(value)
+    setUploadFile(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
     }
   }
 
@@ -141,33 +146,40 @@ export function OrderInputRunCreateDialog({
       setError(t("inputs.errors.store_required", "Store is required"))
       return
     }
+    if (!uploadFile) {
+      setError(t("inputs.errors.file_required"))
+      return
+    }
 
     setError(null)
     try {
-      setUploadStep(t("inputs.creating", "Creating order set..."))
+      let resolvedInputFileType = inputFileType
+      if (aiAutoChoose) {
+        setUploadStep(t("inputs.detecting_file_type"))
+        const detected = await detectFileTypeMutation.mutateAsync(uploadFile)
+        resolvedInputFileType = detected.inputFileType
+        setInputFileType(resolvedInputFileType)
+      }
+
+      setUploadStep(t("inputs.creating"))
       const data = await createMutation.mutateAsync({
         title: trimmedTitle,
         storeId: parsedStoreId,
         marketplaceCode,
+        inputFileType: resolvedInputFileType,
       })
 
-      if (orderDetailFile) {
-        setUploadStep(
-          t("inputs.uploading_order_detail", "Uploading Shipping Fee Excel...")
-        )
+      if (resolvedInputFileType === "SHIPPING_FEE") {
+        setUploadStep(t("inputs.uploading_order_detail"))
         await uploadOrderDetailMutation.mutateAsync({
           id: data.id,
-          file: orderDetailFile,
+          file: uploadFile,
         })
-      }
-
-      if (withdrawFile) {
-        setUploadStep(
-          t("inputs.uploading_withdraw", "Uploading Service Fee Excel...")
-        )
+      } else {
+        setUploadStep(t("inputs.uploading_withdraw"))
         await uploadWithdrawMutation.mutateAsync({
           id: data.id,
-          file: withdrawFile,
+          file: uploadFile,
         })
       }
 
@@ -177,7 +189,7 @@ export function OrderInputRunCreateDialog({
       setError(
         getOrderInputRunErrorMessage(
           err,
-          t("inputs.errors.create_failed", "Failed to create order set")
+          t("inputs.errors.create_failed")
         )
       )
     } finally {
@@ -196,17 +208,22 @@ export function OrderInputRunCreateDialog({
           titleInput?.focus()
         }}
         onPointerDownOutside={(event) => {
-          if (isSubmitting || isSelectLayer(event.target)) {
+          if (shouldIgnoreOutsideDismiss(event.target)) {
             event.preventDefault()
           }
         }}
         onFocusOutside={(event) => {
-          if (isSubmitting || isSelectLayer(event.target)) {
+          if (shouldIgnoreOutsideDismiss(event.target)) {
             event.preventDefault()
           }
         }}
         onInteractOutside={(event) => {
-          if (isSubmitting || isSelectLayer(event.target)) {
+          if (shouldIgnoreOutsideDismiss(event.target)) {
+            event.preventDefault()
+          }
+        }}
+        onEscapeKeyDown={(event) => {
+          if (hasOpenOverlay) {
             event.preventDefault()
           }
         }}
@@ -214,10 +231,9 @@ export function OrderInputRunCreateDialog({
         <DialogHeader>
           <DialogTitle>{t("inputs.create_title")}</DialogTitle>
           <DialogDescription>
-            {t(
-              "inputs.create_modal_subtitle",
-              "Give this order set a title and optionally attach Shipping Fee & Service Fee Excels."
-            )}
+            {aiAutoChoose
+              ? t("inputs.create_modal_subtitle_ai")
+              : t("inputs.create_modal_subtitle")}
           </DialogDescription>
         </DialogHeader>
 
@@ -241,6 +257,7 @@ export function OrderInputRunCreateDialog({
               <Select
                 value={storeId || undefined}
                 onValueChange={setStoreId}
+                onOpenChange={onOverlayOpenChange}
                 disabled={isSubmitting || stores.length === 0}
               >
                 <SelectTrigger className="w-full">
@@ -263,6 +280,7 @@ export function OrderInputRunCreateDialog({
                 onValueChange={(value) =>
                   setMarketplaceCode(value as MarketplaceCode)
                 }
+                onOpenChange={onOverlayOpenChange}
                 disabled={isSubmitting}
               >
                 <SelectTrigger className="w-full">
@@ -279,46 +297,97 @@ export function OrderInputRunCreateDialog({
             </div>
           </div>
 
-          {/* Upload Section: Shipping Fee File */}
+          {!aiAutoChoose ? (
+            <div className="space-y-1.5">
+              <Label>{t("inputs.fields.input_file_type")}</Label>
+              <Select
+                value={inputFileType}
+                onValueChange={(value) =>
+                  handleInputFileTypeChange(value as ApiOrderInputFileType)
+                }
+                onOpenChange={onOverlayOpenChange}
+                disabled={isSubmitting}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent position="popper">
+                  <SelectItem value="SHIPPING_FEE">
+                    {t("inputs.input_file_type.shipping_fee")}
+                  </SelectItem>
+                  <SelectItem value="SERVICE_FEE">
+                    {t("inputs.input_file_type.service_fee")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          ) : null}
+
           <div className="rounded-lg border border-border/80 bg-muted/20 p-3 space-y-2">
             <div className="flex items-center justify-between">
               <Label className="text-xs font-semibold flex items-center gap-1.5">
-                <FileSpreadsheet className="size-4 text-emerald-600" />
-                {t("inputs.detail_files.order_detail_title", "Shipping Fee File")}
-                <span className="text-[10px] text-muted-foreground font-normal">
-                  (OrderSKUList .xlsx)
-                </span>
+                <FileSpreadsheet
+                  className={`size-4 ${
+                    showTypeSpecificUpload
+                      ? isShippingFee
+                        ? "text-emerald-600"
+                        : "text-sky-600"
+                      : "text-muted-foreground"
+                  }`}
+                />
+                {aiAutoChoose && !showTypeSpecificUpload
+                  ? t("inputs.upload_excel_file")
+                  : isShippingFee
+                    ? t("inputs.detail.order_detail_title")
+                    : t("inputs.detail.withdraw_title")}
+                {showTypeSpecificUpload && selectedTemplate ? (
+                  <span className="text-[10px] text-muted-foreground font-normal">
+                    ({selectedTemplate.fileHint})
+                  </span>
+                ) : null}
               </Label>
-              <a
-                href={SHIPPING_FEE_SAMPLE_HREF}
-                download={SHIPPING_FEE_SAMPLE_FILENAME}
-                className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-medium"
-                title="Download Shipping Fee Sample Template"
-              >
-                <Download className="size-3.5" />
-                {t("inputs.download_template", "Download Template")}
-              </a>
+              <OrderInputTemplateDownload
+                selectedType={aiAutoChoose ? undefined : resolvedFileType}
+                disabled={isSubmitting}
+                onMenuOpenChange={onOverlayOpenChange}
+              />
             </div>
 
             <input
-              ref={orderDetailInputRef}
+              ref={fileInputRef}
               type="file"
               accept=".xlsx,.xls,.csv"
               className="hidden"
               onChange={(e) => {
                 const file = e.target.files?.[0] || null
-                handleFileChange("orderDetail", file)
+                setUploadFile(file)
               }}
               disabled={isSubmitting}
             />
 
-            {orderDetailFile ? (
-              <div className="flex items-center justify-between rounded border border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/20 px-3 py-2 text-xs">
+            {uploadFile ? (
+              <div
+                className={`flex items-center justify-between rounded border px-3 py-2 text-xs ${
+                  showTypeSpecificUpload
+                    ? isShippingFee
+                      ? "border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/20"
+                      : "border-sky-500/30 bg-sky-50/50 dark:bg-sky-950/20"
+                    : "border-border bg-background/50"
+                }`}
+              >
                 <div className="flex items-center gap-2 truncate">
-                  <FileSpreadsheet className="size-4 text-emerald-600 shrink-0" />
-                  <span className="font-medium truncate">{orderDetailFile.name}</span>
+                  <FileSpreadsheet
+                    className={`size-4 shrink-0 ${
+                      showTypeSpecificUpload
+                        ? isShippingFee
+                          ? "text-emerald-600"
+                          : "text-sky-600"
+                        : "text-muted-foreground"
+                    }`}
+                  />
+                  <span className="font-medium truncate">{uploadFile.name}</span>
                   <span className="text-[11px] text-muted-foreground shrink-0">
-                    ({formatFileSize(orderDetailFile.size)})
+                    ({formatFileSize(uploadFile.size)})
                   </span>
                 </div>
                 <Button
@@ -327,8 +396,8 @@ export function OrderInputRunCreateDialog({
                   size="icon"
                   className="size-6 text-muted-foreground hover:text-destructive shrink-0"
                   onClick={() => {
-                    handleFileChange("orderDetail", null)
-                    if (orderDetailInputRef.current) orderDetailInputRef.current.value = ""
+                    setUploadFile(null)
+                    if (fileInputRef.current) fileInputRef.current.value = ""
                   }}
                   disabled={isSubmitting}
                 >
@@ -339,93 +408,21 @@ export function OrderInputRunCreateDialog({
               <div
                 role="button"
                 tabIndex={0}
-                onClick={() => orderDetailInputRef.current?.click()}
+                onClick={() => fileInputRef.current?.click()}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
-                    orderDetailInputRef.current?.click()
+                    fileInputRef.current?.click()
                   }
                 }}
                 className="flex items-center justify-center gap-2 rounded border border-dashed border-muted-foreground/30 hover:border-primary/50 bg-background/50 hover:bg-muted/40 py-3 px-4 cursor-pointer transition-colors text-xs text-muted-foreground"
               >
                 <UploadCloud className="size-4 text-muted-foreground" />
                 <span>
-                  {t("inputs.choose_shipping_file", "Click to select Shipping Fee Excel file")}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Upload Section: Service Fee File */}
-          <div className="rounded-lg border border-border/80 bg-muted/20 p-3 space-y-2">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs font-semibold flex items-center gap-1.5">
-                <FileSpreadsheet className="size-4 text-sky-600" />
-                {t("inputs.detail_files.withdraw_title", "Service Fee File")}
-                <span className="text-[10px] text-muted-foreground font-normal">
-                  (Payout Report .xlsx)
-                </span>
-              </Label>
-              <a
-                href={SERVICE_FEE_SAMPLE_HREF}
-                download={SERVICE_FEE_SAMPLE_FILENAME}
-                className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-medium"
-                title="Download Service Fee Sample Template"
-              >
-                <Download className="size-3.5" />
-                {t("inputs.download_template", "Download Template")}
-              </a>
-            </div>
-
-            <input
-              ref={withdrawInputRef}
-              type="file"
-              accept=".xlsx,.xls,.csv"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0] || null
-                handleFileChange("withdraw", file)
-              }}
-              disabled={isSubmitting}
-            />
-
-            {withdrawFile ? (
-              <div className="flex items-center justify-between rounded border border-sky-500/30 bg-sky-50/50 dark:bg-sky-950/20 px-3 py-2 text-xs">
-                <div className="flex items-center gap-2 truncate">
-                  <FileSpreadsheet className="size-4 text-sky-600 shrink-0" />
-                  <span className="font-medium truncate">{withdrawFile.name}</span>
-                  <span className="text-[11px] text-muted-foreground shrink-0">
-                    ({formatFileSize(withdrawFile.size)})
-                  </span>
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="size-6 text-muted-foreground hover:text-destructive shrink-0"
-                  onClick={() => {
-                    handleFileChange("withdraw", null)
-                    if (withdrawInputRef.current) withdrawInputRef.current.value = ""
-                  }}
-                  disabled={isSubmitting}
-                >
-                  <X className="size-3.5" />
-                </Button>
-              </div>
-            ) : (
-              <div
-                role="button"
-                tabIndex={0}
-                onClick={() => withdrawInputRef.current?.click()}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    withdrawInputRef.current?.click()
-                  }
-                }}
-                className="flex items-center justify-center gap-2 rounded border border-dashed border-muted-foreground/30 hover:border-primary/50 bg-background/50 hover:bg-muted/40 py-3 px-4 cursor-pointer transition-colors text-xs text-muted-foreground"
-              >
-                <UploadCloud className="size-4 text-muted-foreground" />
-                <span>
-                  {t("inputs.choose_service_file", "Click to select Service Fee Excel file")}
+                  {aiAutoChoose
+                    ? t("inputs.choose_excel_file")
+                    : isShippingFee
+                      ? t("inputs.choose_shipping_file")
+                      : t("inputs.choose_service_file")}
                 </span>
               </div>
             )}

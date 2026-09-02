@@ -1,5 +1,6 @@
 package com.laconic.lacoinvoice.domain.repositories;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -46,4 +47,43 @@ public interface OrderRepository extends BaseRepository<Order> {
 			WHERE (:storeId IS NULL OR o.store.id = :storeId)
 			""")
 	long countByOptionalStoreId(@Param("storeId") Long storeId);
+
+	/** Billable orders of a store/marketplace whose order date falls in [from, to). */
+	@Query("""
+			SELECT o FROM Order o
+			LEFT JOIN FETCH o.customer
+			WHERE o.store.id = :storeId
+			AND o.marketplace.id = :marketplaceId
+			AND o.orderDate >= :from
+			AND o.orderDate < :to
+			ORDER BY o.orderDate ASC, o.id ASC
+			""")
+	List<Order> findBillableByPeriod(
+			@Param("storeId") Long storeId,
+			@Param("marketplaceId") Long marketplaceId,
+			@Param("from") Instant from,
+			@Param("to") Instant to);
+
+	/** Billable orders imported by a specific Excel import file. */
+	@Query("""
+			SELECT o FROM Order o
+			LEFT JOIN FETCH o.customer
+			WHERE o.store.id = :storeId
+			AND o.marketplace.id = :marketplaceId
+			AND o.sourceType = com.laconic.lacoinvoice.domain.models.OrderSourceType.IMPORT
+			AND o.sourceId = :importFileId
+			ORDER BY o.orderDate ASC, o.id ASC
+			""")
+	List<Order> findBillableByImportFile(
+			@Param("storeId") Long storeId,
+			@Param("marketplaceId") Long marketplaceId,
+			@Param("importFileId") Long importFileId);
+
+	@Query("""
+			SELECT oi FROM OrderItem oi
+			LEFT JOIN FETCH oi.product
+			WHERE oi.order.id IN :orderIds
+			ORDER BY oi.order.id ASC, oi.id ASC
+			""")
+	List<OrderItem> findItemsByOrderIds(@Param("orderIds") Collection<Long> orderIds);
 }

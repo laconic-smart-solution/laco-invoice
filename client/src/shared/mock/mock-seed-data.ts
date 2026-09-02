@@ -223,6 +223,9 @@ function buildInputRuns(): ApiOrderInputRunDto[] {
     const storeId = (index % 3) + 1
     const marketplaceId = storeId === 3 ? 1 : 3
     const status = statuses[index % statuses.length]
+    const inputFileType = index % 2 === 0 ? "SHIPPING_FEE" : "SERVICE_FEE"
+    const isShipping = inputFileType === "SHIPPING_FEE"
+    const hasFile = index > 0
 
     return {
       id: index + 1,
@@ -231,26 +234,27 @@ function buildInputRuns(): ApiOrderInputRunDto[] {
       marketplaceId,
       marketplaceCode: marketplaceId === 1 ? "LAZADA" : "TIKTOK",
       title: `Input run ${index + 1}`,
+      inputFileType,
       status,
-      orderDetailFilename: index > 0 ? `order-detail-${index}.xlsx` : null,
-      orderDetailSize: index > 0 ? 12000 + index * 100 : null,
-      orderDetailStatus: index > 0 ? "SUCCEEDED" : "MISSING",
+      orderDetailFilename: isShipping && hasFile ? `order-detail-${index}.xlsx` : null,
+      orderDetailSize: isShipping && hasFile ? 12000 + index * 100 : null,
+      orderDetailStatus: isShipping && hasFile ? "SUCCEEDED" : "MISSING",
       orderDetailError: null,
-      orderDetailStartedAt: index > 0 ? NOW : null,
-      orderDetailFinishedAt: index > 0 ? NOW : null,
-      orderDetailBatchId: index > 0 ? index : null,
-      orderDetailImportFileId: index > 0 ? index : null,
-      withdrawFilename: index > 2 ? `withdraw-${index}.xlsx` : null,
-      withdrawSize: index > 2 ? 8000 : null,
-      withdrawStatus: index > 2 ? "SUCCEEDED" : "MISSING",
+      orderDetailStartedAt: isShipping && hasFile ? NOW : null,
+      orderDetailFinishedAt: isShipping && hasFile ? NOW : null,
+      orderDetailBatchId: isShipping && hasFile ? index : null,
+      orderDetailImportFileId: isShipping && hasFile ? index : null,
+      withdrawFilename: !isShipping && hasFile ? `withdraw-${index}.xlsx` : null,
+      withdrawSize: !isShipping && hasFile ? 8000 : null,
+      withdrawStatus: !isShipping && hasFile ? "SUCCEEDED" : "MISSING",
       withdrawError: null,
-      withdrawStartedAt: index > 2 ? NOW : null,
-      withdrawFinishedAt: index > 2 ? NOW : null,
-      withdrawRowCount: index > 2 ? 25 : null,
-      withdrawMatchedCount: index > 2 ? 20 : null,
-      withdrawUnmatchedCount: index > 2 ? 5 : null,
-      orderCount: 15 + index,
-      itemCount: 30 + index * 2,
+      withdrawStartedAt: !isShipping && hasFile ? NOW : null,
+      withdrawFinishedAt: !isShipping && hasFile ? NOW : null,
+      withdrawRowCount: !isShipping && hasFile ? 25 : null,
+      withdrawMatchedCount: !isShipping && hasFile ? 20 : null,
+      withdrawUnmatchedCount: !isShipping && hasFile ? 5 : null,
+      orderCount: isShipping ? 15 + index : null,
+      itemCount: isShipping ? 30 + index * 2 : null,
       createdAt: NOW,
       updatedAt: NOW,
     }

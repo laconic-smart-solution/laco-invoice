@@ -331,16 +331,15 @@
     }
   },
   "inputs": {
-    "title": "订单输入",
-    "subtitle": "创建带标题的运行，上传订单明细与提现 Excel，然后点击 Run files。",
-    "create": "新建订单输入",
-    "create_title": "新建订单输入",
-    "create_subtitle": "先填写标题，然后在下一页上传两个 Excel 文件。",
+    "title": "Order Data Input",
+    "subtitle": "创建带标题的输入，选择 Shipping Fee 或 Service Fee，上传一个 Excel 后运行。",
+    "create": "新建数据输入",
+    "create_title": "新建 order data input",
+    "create_subtitle": "选择输入文件类型并上传对应的 Excel。",
     "create_submit": "创建",
     "creating": "创建中…",
     "cancel": "取消",
-    "back": "返回订单输入",
-    "run_files": "全部运行",
+    "back": "返回 Order Data Input",
     "run_file": "运行文件",
     "running": "运行中…",
     "fields": {
@@ -348,7 +347,12 @@
       "title_placeholder": "例如 TikTok May 2026 week 1",
       "store": "店铺",
       "store_placeholder": "选择店铺",
-      "marketplace": "平台"
+      "marketplace": "平台",
+      "input_file_type": "输入文件类型"
+    },
+    "input_file_type": {
+      "shipping_fee": "Shipping Fee",
+      "service_fee": "Service Fee"
     },
     "filters": {
       "store": "店铺",
@@ -363,11 +367,11 @@
       "status": "状态",
       "orders": "订单",
       "items": "明细行",
-      "files": "文件",
-      "file_states": "明细: {{orderDetail}} · 提现: {{withdraw}}",
+      "input_file_type": "输入类型",
+      "file_status": "文件状态",
       "created_at": "创建时间",
       "loading": "加载中…",
-      "empty": "暂无订单输入。",
+      "empty": "暂无 order data input。",
       "showing": "显示第 {{start}}-{{end}} 条，共 {{total}} 条"
     },
     "status": {
@@ -406,6 +410,9 @@
       "upload": "上传文件",
       "uploading": "上传中…",
       "download_sample": "下载示例",
+      "download_file": "下载文件",
+      "downloading_file": "正在下载…",
+      "download_failed": "无法下载已上传的文件。",
       "withdraw_summary": "{{rows}} 行 · 匹配 {{matched}} · 未匹配 {{unmatched}}",
       "stuck_running": "运行状态已中断（例如刷新页面）。请重置后继续。",
       "reset_stuck": "重置状态",
@@ -437,14 +444,25 @@
       "updated_at": "更新于 {{value}}"
     },
     "errors": {
-      "load_failed": "无法加载订单输入。",
-      "create_failed": "无法创建订单输入。",
+      "load_failed": "无法加载 order data input。",
+      "create_failed": "无法创建 order data input。",
       "title_required": "请输入标题。",
       "store_required": "请选择店铺。",
-      "files_required": "请先上传两个 Excel（Ready）再全部运行。",
-      "order_detail_required": "请先上传 Order Detail Excel（Ready）再运行。",
-      "withdraw_required": "请先上传 Total Withdraw Excel（Ready）再运行。",
-      "not_found": "未找到订单输入。"
-    }
+      "file_required": "请上传与所选类型匹配的 Excel 文件。",
+      "order_detail_required": "请先上传 Shipping Fee Excel（Ready）再运行。",
+      "withdraw_required": "请先上传 Service Fee Excel（Ready）再运行。",
+      "not_found": "未找到 order data input。"
+    },
+    "create_modal_subtitle": "选择输入文件类型，然后上传匹配的 Excel 文件。",
+    "create_modal_subtitle_ai": "上传 Excel 文件 — 系统将自动检测输入类型。",
+    "detecting_file_type": "正在检测文件类型...",
+    "upload_excel_file": "Excel 文件",
+    "choose_excel_file": "点击选择 Excel 文件",
+    "download_template": "下载模板",
+    "download_templates": "模板",
+    "choose_shipping_file": "点击选择运费 Excel 文件",
+    "choose_service_file": "点击选择服务费 Excel 文件",
+    "uploading_order_detail": "正在上传运费 Excel...",
+    "uploading_withdraw": "正在上传服务费 Excel..."
   }
 }

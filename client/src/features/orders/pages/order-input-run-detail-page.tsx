@@ -76,6 +76,7 @@ import {
   useRollbackOrderInputOrderDetailMutation,
   useRollbackOrderInputWithdrawMutation,
   useDeleteOrderInputRunMutation,
+  useDownloadOrderInputFileMutation,
   useStartOrderInputRunPreviewMutation,
   useUploadOrderInputOrderDetailMutation,
   useUploadOrderInputWithdrawMutation,
@@ -87,10 +88,10 @@ import {
 import type { ApiOrderImportPreviewBatchDto } from "@/shared/services/order.service"
 import type {
   ApiOrderInputFileStatus,
+  ApiOrderInputFileType,
   ApiOrderInputRunStatus,
 } from "@/shared/services/order-input-run.service"
 import { useLocaleStore } from "@/shared/stores/locale-store"
-import { cn } from "@/lib/utils"
 import { formatCurrency, formatDateTime, formatNumber } from "@/util/format"
 import { getColumnFilterValue } from "@/util/table-column-filters"
 import { sortingToPageSort } from "@/util/table-sort"
@@ -120,14 +121,19 @@ const ORDER_SORT_FIELD_MAP: Record<string, string> = {
   totalAmount: "totalAmount",
 }
 
-type DetailTab = "orders" | "withdraw"
-
 function canRunFile(status: ApiOrderInputFileStatus) {
   return (
     status === "READY" ||
     status === "FAILED" ||
     status === "PARTIAL"
   )
+}
+
+function canDownloadInputFile(
+  filename: string | null,
+  status: ApiOrderInputFileStatus
+): boolean {
+  return status !== "MISSING" && filename != null
 }
 
 export function OrderInputRunDetailPage() {
@@ -145,6 +151,7 @@ export function OrderInputRunDetailPage() {
   )
   const uploadOrderDetail = useUploadOrderInputOrderDetailMutation()
   const uploadWithdraw = useUploadOrderInputWithdrawMutation()
+  const downloadInputFileMutation = useDownloadOrderInputFileMutation()
   const startPreviewMutation = useStartOrderInputRunPreviewMutation()
   const cancelPreviewMutation = useCancelOrderInputRunPreviewMutation()
   const finishRunMutation = useFinishOrderInputRunMutation()
@@ -182,12 +189,10 @@ export function OrderInputRunDetailPage() {
     )
   }
 
-  const [activeTab, setActiveTab] = useState<DetailTab>("orders")
   const [localError, setLocalError] = useState<string | null>(null)
   const [previewOpen, setPreviewOpen] = useState(false)
   const [previewBatch, setPreviewBatch] =
     useState<ApiOrderImportPreviewBatchDto | null>(null)
-  const [runBothAfterCommit, setRunBothAfterCommit] = useState(false)
 
   const [ordersPage, setOrdersPage] = useState(1)
   const [ordersLimit, setOrdersLimit] = useState(20)
@@ -209,6 +214,9 @@ export function OrderInputRunDetailPage() {
   const debouncedWithdrawSearch = useDebounce(withdrawFilters.search)
 
   const run = detailQuery.data
+  const inputFileType: ApiOrderInputFileType = run?.inputFileType ?? "SHIPPING_FEE"
+  const isShippingFeeInput = inputFileType === "SHIPPING_FEE"
+
   const isLocallyRunning =
     startPreviewMutation.isPending ||
     finishRunMutation.isPending ||
@@ -252,18 +260,15 @@ export function OrderInputRunDetailPage() {
     startPreviewMutation.isPending || previewOpen
       ? "RUNNING"
       : (run?.orderDetailStatus ?? "MISSING")
-  const displayWithdrawStatus: ApiOrderInputFileStatus =
-    finishRunMutation.isPending && runBothAfterCommit
-      ? "RUNNING"
-      : runWithdrawMutation.isPending
-        ? "RUNNING"
-        : (run?.withdrawStatus ?? "MISSING")
+  const displayWithdrawStatus: ApiOrderInputFileStatus = runWithdrawMutation.isPending
+    ? "RUNNING"
+    : (run?.withdrawStatus ?? "MISSING")
 
   const importFileId = run?.orderDetailImportFileId ?? null
   const showWithdrawRows =
     run != null &&
+    isShippingFeeInput === false &&
     !runWithdrawMutation.isPending &&
-    !(finishRunMutation.isPending && runBothAfterCommit) &&
     (run.withdrawStatus === "SUCCEEDED" ||
       run.withdrawStatus === "PARTIAL" ||
       run.withdrawStatus === "FAILED")
@@ -315,7 +320,7 @@ export function OrderInputRunDetailPage() {
 
   const ordersQuery = useOrdersPageQuery(
     ordersPageRequest,
-    activeTab === "orders" && importFileId != null
+    isShippingFeeInput && importFileId != null
   )
 
   const withdrawRowsFilter = useMemo(() => {
@@ -349,11 +354,11 @@ export function OrderInputRunDetailPage() {
   ])
 
   const withdrawRowsQuery = useOrderInputRunWithdrawRowsQuery(
-    showWithdrawRows && activeTab === "withdraw" ? id : null,
+    showWithdrawRows ? id : null,
     withdrawPage,
     withdrawLimit,
     withdrawRowsFilter,
-    showWithdrawRows && activeTab === "withdraw"
+    showWithdrawRows
   )
 
   const isBusy =
@@ -421,6 +426,8 @@ export function OrderInputRunDetailPage() {
     withdrawTotal
   )
 
+  const isRunCompleted = run?.status === "COMPLETED"
+
   const canRunOrderDetail =
     run != null &&
     !isBusy &&
@@ -431,7 +438,7 @@ export function OrderInputRunDetailPage() {
     !isBusy &&
     canRunFile(run.withdrawStatus) &&
     run.withdrawFilename != null
-  const canRunBoth = canRunOrderDetail && canRunWithdraw
+  const canRunActiveFile = isShippingFeeInput ? canRunOrderDetail : canRunWithdraw
   const canRollbackOrderDetail =
     run != null &&
     !isBusy &&
@@ -441,7 +448,7 @@ export function OrderInputRunDetailPage() {
     !isBusy &&
     (run.withdrawStatus !== "MISSING" || run.withdrawFilename != null)
 
-  const startOrderDetailPreview = (alsoRunWithdraw: boolean) => {
+  const startOrderDetailPreview = () => {
     if (!run) {
       return
     }
@@ -450,14 +457,10 @@ export function OrderInputRunDetailPage() {
       setLocalError(t("inputs.errors.order_detail_required"))
       return
     }
-    setRunBothAfterCommit(alsoRunWithdraw)
     startPreviewMutation.mutate(run.id, {
       onSuccess: (preview) => {
         setPreviewBatch(preview)
         setPreviewOpen(true)
-      },
-      onError: () => {
-        setRunBothAfterCommit(false)
       },
     })
   }
@@ -471,9 +474,24 @@ export function OrderInputRunDetailPage() {
       setLocalError(t("inputs.errors.withdraw_required"))
       return
     }
-    runWithdrawMutation.mutate(run.id, {
-      onSuccess: () => setActiveTab("withdraw"),
-    })
+    runWithdrawMutation.mutate(run.id)
+  }
+
+  const handleDownloadInputFile = (fallbackFilename: string) => {
+    if (!run) {
+      return
+    }
+    setLocalError(null)
+    downloadInputFileMutation.mutate(
+      { id: run.id, fallbackFilename },
+      {
+        onError: (err) => {
+          setLocalError(
+            getOrderInputRunErrorMessage(err, t("inputs.detail.download_failed"))
+          )
+        },
+      }
+    )
   }
 
   if (detailQuery.isLoading) {
@@ -575,6 +593,10 @@ export function OrderInputRunDetailPage() {
             <span>{run.storeName ?? "—"}</span>
             <span>·</span>
             <span>{run.marketplaceCode ?? "—"}</span>
+            <span>·</span>
+            <span>
+              {t(`inputs.input_file_type.${inputFileType === "SHIPPING_FEE" ? "shipping_fee" : "service_fee"}`)}
+            </span>
             <StatusBadge
               status={RUN_STATUS_BADGE[displayStatus]}
               label={t(`inputs.status.${displayStatus.toLowerCase()}`)}
@@ -598,13 +620,21 @@ export function OrderInputRunDetailPage() {
           </Button>
           <Button
             onClick={() => {
-              if (!canRunBoth) {
-                setLocalError(t("inputs.errors.files_required"))
+              if (!canRunActiveFile) {
+                setLocalError(
+                  isShippingFeeInput
+                    ? t("inputs.errors.order_detail_required")
+                    : t("inputs.errors.withdraw_required")
+                )
                 return
               }
-              startOrderDetailPreview(true)
+              if (isShippingFeeInput) {
+                startOrderDetailPreview()
+              } else {
+                handleRunWithdraw()
+              }
             }}
-            disabled={!canRunBoth || isBusy}
+            disabled={!canRunActiveFile || isBusy}
           >
             {startPreviewMutation.isPending ||
             finishRunMutation.isPending ||
@@ -617,7 +647,7 @@ export function OrderInputRunDetailPage() {
             finishRunMutation.isPending ||
             runWithdrawMutation.isPending
               ? t("inputs.running")
-              : t("inputs.run_files")}
+              : t("inputs.run_file")}
           </Button>
         </div>
       </div>
@@ -673,92 +703,86 @@ export function OrderInputRunDetailPage() {
             id: run.id,
             importResult,
           })
-          if (runBothAfterCommit) {
-            await runWithdrawMutation.mutateAsync(run.id)
-            setActiveTab("withdraw")
-          } else {
-            setActiveTab("orders")
-          }
-          setRunBothAfterCommit(false)
           setPreviewBatch(null)
           setPreviewOpen(false)
         }}
         onDismissWithoutCommit={() => {
           cancelPreviewMutation.mutate(run.id)
           setPreviewBatch(null)
-          setRunBothAfterCommit(false)
         }}
       />
-      <div className="grid gap-4 md:grid-cols-2">
-        <FileUploadCard
-          title={t("inputs.detail.order_detail_title")}
-          description={t("inputs.detail.order_detail_description")}
-          filename={run.orderDetailFilename}
-          status={displayOrderDetailStatus}
-          error={
-            startPreviewMutation.isPending || previewOpen
-              ? null
-              : run.orderDetailError
-          }
-          inputRef={orderDetailInputRef}
-          disabled={isBusy}
-          sampleHref={SHIPPING_FEE_SAMPLE_HREF}
-          sampleFilename={SHIPPING_FEE_SAMPLE_FILENAME}
-          onPick={() => orderDetailInputRef.current?.click()}
-          onFile={(file) => uploadOrderDetail.mutate({ id: run.id, file })}
-          uploading={uploadOrderDetail.isPending}
-          canRun={canRunOrderDetail}
-          running={startPreviewMutation.isPending || previewOpen}
-          onRun={() => startOrderDetailPreview(false)}
-          canRollback={canRollbackOrderDetail}
-          rollingBack={rollbackOrderDetailMutation.isPending}
-          onRollback={() => setRollbackTarget("orderDetail")}
-          t={t}
-        />
-        <FileUploadCard
-          title={t("inputs.detail.withdraw_title")}
-          description={t("inputs.detail.withdraw_description")}
-          filename={run.withdrawFilename}
-          status={displayWithdrawStatus}
-          error={runWithdrawMutation.isPending ? null : run.withdrawError}
-          inputRef={withdrawInputRef}
-          disabled={isBusy}
-          sampleHref={SERVICE_FEE_SAMPLE_HREF}
-          sampleFilename={SERVICE_FEE_SAMPLE_FILENAME}
-          onPick={() => withdrawInputRef.current?.click()}
-          onFile={(file) => uploadWithdraw.mutate({ id: run.id, file })}
-          uploading={uploadWithdraw.isPending}
-          canRun={canRunWithdraw}
-          running={runWithdrawMutation.isPending}
-          onRun={handleRunWithdraw}
-          canRollback={canRollbackWithdraw}
-          rollingBack={rollbackWithdrawMutation.isPending}
-          onRollback={() => setRollbackTarget("withdraw")}
-          t={t}
-        />
+      <div className="grid gap-4 md:grid-cols-1">
+        {isShippingFeeInput ? (
+          <FileUploadCard
+            title={t("inputs.detail.order_detail_title")}
+            description={t("inputs.detail.order_detail_description")}
+            filename={run.orderDetailFilename}
+            status={displayOrderDetailStatus}
+            error={
+              startPreviewMutation.isPending || previewOpen
+                ? null
+                : run.orderDetailError
+            }
+            inputRef={orderDetailInputRef}
+            disabled={isBusy}
+            sampleHref={SHIPPING_FEE_SAMPLE_HREF}
+            sampleFilename={SHIPPING_FEE_SAMPLE_FILENAME}
+            onPick={() => orderDetailInputRef.current?.click()}
+            onFile={(file) => uploadOrderDetail.mutate({ id: run.id, file })}
+            uploading={uploadOrderDetail.isPending}
+            canRun={canRunOrderDetail}
+            running={startPreviewMutation.isPending || previewOpen}
+            onRun={() => startOrderDetailPreview()}
+            canRollback={canRollbackOrderDetail}
+            rollingBack={rollbackOrderDetailMutation.isPending}
+            onRollback={() => setRollbackTarget("orderDetail")}
+            completed={isRunCompleted}
+            canDownload={canDownloadInputFile(
+              run.orderDetailFilename,
+              displayOrderDetailStatus
+            )}
+            downloading={downloadInputFileMutation.isPending}
+            onDownload={() =>
+              handleDownloadInputFile(run.orderDetailFilename ?? "order-detail.xlsx")
+            }
+            t={t}
+          />
+        ) : (
+          <FileUploadCard
+            title={t("inputs.detail.withdraw_title")}
+            description={t("inputs.detail.withdraw_description")}
+            filename={run.withdrawFilename}
+            status={displayWithdrawStatus}
+            error={runWithdrawMutation.isPending ? null : run.withdrawError}
+            inputRef={withdrawInputRef}
+            disabled={isBusy}
+            sampleHref={SERVICE_FEE_SAMPLE_HREF}
+            sampleFilename={SERVICE_FEE_SAMPLE_FILENAME}
+            onPick={() => withdrawInputRef.current?.click()}
+            onFile={(file) => uploadWithdraw.mutate({ id: run.id, file })}
+            uploading={uploadWithdraw.isPending}
+            canRun={canRunWithdraw}
+            running={runWithdrawMutation.isPending}
+            onRun={handleRunWithdraw}
+            canRollback={canRollbackWithdraw}
+            rollingBack={rollbackWithdrawMutation.isPending}
+            onRollback={() => setRollbackTarget("withdraw")}
+            completed={isRunCompleted}
+            canDownload={canDownloadInputFile(
+              run.withdrawFilename,
+              displayWithdrawStatus
+            )}
+            downloading={downloadInputFileMutation.isPending}
+            onDownload={() =>
+              handleDownloadInputFile(run.withdrawFilename ?? "service-fee.xlsx")
+            }
+            t={t}
+          />
+        )}
       </div>
 
       <div className="space-y-4">
-        <div
-          role="tablist"
-          aria-label={t("inputs.title")}
-          className="flex gap-1 border-b border-border"
-        >
-          <TabButton
-            active={activeTab === "orders"}
-            onClick={() => setActiveTab("orders")}
-          >
-            {t("inputs.detail.tab_orders")}
-          </TabButton>
-          <TabButton
-            active={activeTab === "withdraw"}
-            onClick={() => setActiveTab("withdraw")}
-          >
-            {t("inputs.detail.tab_withdraw")}
-          </TabButton>
-        </div>
-
-        {activeTab === "orders" ? (
+        {isShippingFeeInput ? (
           <div role="tabpanel" className="space-y-3">
             {importFileId == null ? (
               <p className="rounded-md border border-border px-4 py-8 text-center text-sm text-muted-foreground">
@@ -1204,12 +1228,6 @@ export function OrderInputRunDetailPage() {
   )
 }
 
-interface TabButtonProps {
-  active: boolean
-  onClick: () => void
-  children: React.ReactNode
-}
-
 interface WithdrawSortHeaderProps {
   label: string
   columnId: string
@@ -1257,25 +1275,6 @@ function WithdrawSortHeader({
   )
 }
 
-function TabButton({ active, onClick, children }: TabButtonProps) {
-  return (
-    <button
-      type="button"
-      role="tab"
-      aria-selected={active}
-      onClick={onClick}
-      className={cn(
-        "-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors",
-        active
-          ? "border-primary text-foreground"
-          : "border-transparent text-muted-foreground hover:text-foreground"
-      )}
-    >
-      {children}
-    </button>
-  )
-}
-
 interface FileUploadCardProps {
   title: string
   description: string
@@ -1295,6 +1294,11 @@ interface FileUploadCardProps {
   canRollback?: boolean
   rollingBack?: boolean
   onRollback?: () => void
+  /** When true, hide uploaded filename and sample download (completed run). */
+  completed?: boolean
+  canDownload?: boolean
+  downloading?: boolean
+  onDownload?: () => void
   t: (key: string, options?: Record<string, unknown>) => string
 }
 
@@ -1317,6 +1321,10 @@ function FileUploadCard({
   canRollback,
   rollingBack,
   onRollback,
+  completed = false,
+  canDownload = false,
+  downloading = false,
+  onDownload,
   t,
 }: FileUploadCardProps) {
   return (
@@ -1331,18 +1339,20 @@ function FileUploadCard({
           label={t(`inputs.file_status.${status.toLowerCase()}`)}
         />
       </div>
-      <p className="truncate text-sm">
-        {filename ? (
-          <span className="inline-flex items-center gap-1.5">
-            <FileSpreadsheet className="size-4 text-muted-foreground" />
-            {filename}
-          </span>
-        ) : (
-          <span className="text-muted-foreground">
-            {t("inputs.detail.no_file")}
-          </span>
-        )}
-      </p>
+      {!completed ? (
+        <p className="truncate text-sm">
+          {filename ? (
+            <span className="inline-flex items-center gap-1.5">
+              <FileSpreadsheet className="size-4 text-muted-foreground" />
+              {filename}
+            </span>
+          ) : (
+            <span className="text-muted-foreground">
+              {t("inputs.detail.no_file")}
+            </span>
+          )}
+        </p>
+      ) : null}
       {error ? (
         <p className="text-xs text-destructive break-words">{error}</p>
       ) : null}
@@ -1388,7 +1398,25 @@ function FileUploadCard({
           )}
           {running ? t("inputs.running") : t("inputs.run_file")}
         </Button>
-        {sampleHref ? (
+        {canDownload && onDownload ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={disabled || downloading}
+            onClick={onDownload}
+          >
+            {downloading ? (
+              <Loader2 data-icon="inline-start" className="animate-spin" />
+            ) : (
+              <Download data-icon="inline-start" aria-hidden />
+            )}
+            {downloading
+              ? t("inputs.detail.downloading_file")
+              : t("inputs.detail.download_file")}
+          </Button>
+        ) : null}
+        {sampleHref && !completed ? (
           <Button
             type="button"
             variant="outline"

@@ -26,25 +26,28 @@ import {
 } from "@/components/ui/dialog"
 import { formatCurrency } from "@/util/format"
 import type { Locale } from "@/app/i18n"
-import type { Invoice, InvoiceOrderSummary } from "../types/invoice"
+import { extractApiErrorMessage } from "@/shared/api/extract-api-error-message"
+import { paymentVoucherService } from "@/shared/services/payment-voucher.service"
+import type { InvoiceDetail, InvoiceOrderSummary } from "../types/invoice"
 import type { PaymentMethod } from "../types/voucher"
-import { voucherLocalService } from "../services/voucher-local.service"
-import { invoiceLocalService } from "../services/invoice-local.service"
-import { useCreateVoucherMutation } from "../queries/voucher.query"
+import {
+  useCreateVoucherMutation,
+  useNextVoucherNumberQuery,
+} from "../queries/voucher.query"
 
 interface RecordVoucherDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  invoice?: Invoice | null
+  invoice?: InvoiceDetail | null
   preselectedOrders?: InvoiceOrderSummary[]
   onSuccess?: () => void
 }
 
 interface OrderAllocationRow {
-  orderId: string
+  orderId: number
   externalOrderId: string
-  buyerName?: string
-  buyerTaxId?: string
+  buyerName?: string | null
+  buyerTaxId?: string | null
   orderTotalAmount: number
   previousPaidAmount: number
   remainingBalance: number
@@ -66,16 +69,13 @@ export function RecordVoucherDialog({
   const [voucherNumber, setVoucherNumber] = useState("")
   const [voucherNumberError, setVoucherNumberError] = useState("")
   const [paymentDate, setPaymentDate] = useState(() => new Date().toISOString().split("T")[0])
-  const [storeId] = useState(invoice?.storeId || "1")
-  const [storeName] = useState(invoice?.storeName || "Tiktok Shop (1) By Dev Alvin")
-  const [customerName, setCustomerName] = useState(
-    invoice?.buyerName || "Yoik Global Trading Co., Ltd."
-  )
-  const [customerTaxId, setCustomerTaxId] = useState(invoice?.buyerTaxId || "0105559876543")
+  const [customerName, setCustomerName] = useState(invoice?.buyerName ?? "")
+  const [customerTaxId, setCustomerTaxId] = useState(invoice?.buyerTaxId ?? "")
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("BANK_TRANSFER")
   const [bankReference, setBankReference] = useState("")
   const [totalReceivedAmount, setTotalReceivedAmount] = useState<string>("")
   const [notes, setNotes] = useState("")
+  const [submitError, setSubmitError] = useState("")
 
   // Filter & Search states
   const [searchQuery, setSearchQuery] = useState("")
@@ -83,45 +83,42 @@ export function RecordVoucherDialog({
 
   const [orderRows, setOrderRows] = useState<OrderAllocationRow[]>([])
   const createVoucherMutation = useCreateVoucherMutation()
+  const nextNumberQuery = useNextVoucherNumberQuery(open)
+
+  useEffect(() => {
+    if (open && nextNumberQuery.data) {
+      setVoucherNumber(nextNumberQuery.data.number)
+    }
+  }, [open, nextNumberQuery.data])
 
   // Initialize form when opening
   useEffect(() => {
     if (open) {
-      const nextNo = voucherLocalService.getNextVoucherNumber()
-      setVoucherNumber(nextNo)
       setVoucherNumberError("")
-      setBankReference(`TRF-${Math.floor(100000 + Math.random() * 900000)}`)
+      setSubmitError("")
+      setBankReference("")
       setSearchQuery("")
       setFilterMode("all")
+      setCustomerName(invoice?.buyerName ?? "")
+      setCustomerTaxId(invoice?.buyerTaxId ?? "")
 
-      // Collect available orders from invoice or fallback to all existing invoices
-      let targetOrders = preselectedOrders || invoice?.orders || []
-      if (targetOrders.length === 0) {
-        const allInvoices = invoiceLocalService.getAll()
-        targetOrders = allInvoices.flatMap((inv) => inv.orders || [])
-      }
-
-      const rows: OrderAllocationRow[] = targetOrders.map((ord) => {
-        const summary = voucherLocalService.getOrderPaymentSummary(ord.orderId, ord.totalAmount)
-        return {
-          orderId: ord.orderId,
-          externalOrderId: ord.externalOrderId,
-          buyerName: ord.buyerName,
-          buyerTaxId: ord.buyerTaxId,
-          orderTotalAmount: ord.totalAmount,
-          previousPaidAmount: summary.totalPaidAmount,
-          remainingBalance: summary.remainingBalance,
-          allocatedAmount: 0,
-          isIncluded: true,
-        }
-      })
+      const targetOrders = preselectedOrders ?? invoice?.orders ?? []
+      const rows: OrderAllocationRow[] = targetOrders.map((ord) => ({
+        orderId: ord.orderId,
+        externalOrderId: ord.externalOrderId,
+        buyerName: ord.buyerName,
+        buyerTaxId: ord.buyerTaxId,
+        orderTotalAmount: ord.totalAmount,
+        previousPaidAmount: ord.totalPaidAmount,
+        remainingBalance: ord.remainingBalance,
+        allocatedAmount: 0,
+        isIncluded: true,
+      }))
       setOrderRows(rows)
 
       // Set default received amount to sum of remaining balances
       const totalRemaining = rows.reduce((sum, r) => sum + r.remainingBalance, 0)
-      if (totalRemaining > 0) {
-        setTotalReceivedAmount(totalRemaining.toFixed(2))
-      }
+      setTotalReceivedAmount(totalRemaining > 0 ? totalRemaining.toFixed(2) : "")
     }
   }, [open, invoice, preselectedOrders])
 
@@ -200,7 +197,7 @@ export function RecordVoucherDialog({
     )
   }
 
-  const handleToggleRowSelect = (orderId: string) => {
+  const handleToggleRowSelect = (orderId: number) => {
     setOrderRows((prev) =>
       prev.map((row) => {
         if (row.orderId !== orderId) return row
@@ -215,16 +212,17 @@ export function RecordVoucherDialog({
   }
 
   // Handle Voucher No. validation
-  const handleVoucherNumberChange = (value: string) => {
+  const handleVoucherNumberChange = async (value: string) => {
     setVoucherNumber(value)
-    if (value.trim()) {
-      if (voucherLocalService.isVoucherNumberTaken(value.trim())) {
-        setVoucherNumberError(`Voucher number "${value.trim()}" already exists.`)
-      } else {
-        setVoucherNumberError("")
-      }
-    } else {
+    const trimmed = value.trim()
+    if (!trimmed) {
       setVoucherNumberError("Voucher number is required.")
+      return
+    }
+    setVoucherNumberError("")
+    const result = await paymentVoucherService.checkNumberAvailability(trimmed)
+    if (!result.available) {
+      setVoucherNumberError(`Voucher number "${trimmed}" already exists.`)
     }
   }
 
@@ -247,7 +245,7 @@ export function RecordVoucherDialog({
   }
 
   // Set single row allocation (auto checks the row)
-  const handleRowAllocationChange = (orderId: string, val: string) => {
+  const handleRowAllocationChange = (orderId: number, val: string) => {
     const amount = parseFloat(val) || 0
     setOrderRows((prev) =>
       prev.map((row) => {
@@ -263,7 +261,7 @@ export function RecordVoucherDialog({
   }
 
   // Allocate full remaining for single row
-  const handlePayFullRow = (orderId: string) => {
+  const handlePayFullRow = (orderId: number) => {
     setOrderRows((prev) =>
       prev.map((row) => {
         if (row.orderId !== orderId) return row
@@ -273,7 +271,7 @@ export function RecordVoucherDialog({
   }
 
   // Clear single row allocation
-  const handleClearRow = (orderId: string) => {
+  const handleClearRow = (orderId: number) => {
     setOrderRows((prev) =>
       prev.map((row) => {
         if (row.orderId !== orderId) return row
@@ -284,23 +282,26 @@ export function RecordVoucherDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    setSubmitError("")
     const targetNo = voucherNumber.trim()
     if (!targetNo) {
       setVoucherNumberError("Please enter a voucher number.")
       return
     }
-    if (voucherLocalService.isVoucherNumberTaken(targetNo)) {
-      setVoucherNumberError(`Voucher number "${targetNo}" is already taken.`)
+    if (voucherNumberError) return
+
+    if (!invoice?.storeId) {
+      setSubmitError("An invoice with a store is required to record a voucher.")
       return
     }
 
     if (numReceived <= 0) {
-      alert("Please enter a valid received amount greater than 0.")
+      setSubmitError("Please enter a valid received amount greater than 0.")
       return
     }
 
     if (isOverAllocated) {
-      alert("Total allocated amount cannot exceed received voucher amount.")
+      setSubmitError("Total allocated amount cannot exceed received voucher amount.")
       return
     }
 
@@ -308,13 +309,8 @@ export function RecordVoucherDialog({
       .filter((r) => r.isIncluded && r.allocatedAmount > 0)
       .map((r) => ({
         orderId: r.orderId,
-        externalOrderId: r.externalOrderId,
-        invoiceId: invoice?.id,
-        invoiceNumber: invoice?.invoiceNumber,
-        orderTotalAmount: r.orderTotalAmount,
+        invoiceId: invoice.id,
         allocatedAmount: r.allocatedAmount,
-        previousPaidAmount: r.previousPaidAmount,
-        buyerName: r.buyerName,
         notes: r.notes,
       }))
 
@@ -322,9 +318,8 @@ export function RecordVoucherDialog({
       {
         voucherNumber: targetNo,
         date: paymentDate,
-        storeId,
-        storeName,
-        customerName: customerName.trim() || "Retail Customer",
+        storeId: invoice.storeId,
+        customerName: customerName.trim() || undefined,
         customerTaxId: customerTaxId.trim() || undefined,
         totalAmount: numReceived,
         paymentMethod,
@@ -337,6 +332,8 @@ export function RecordVoucherDialog({
           onOpenChange(false)
           onSuccess?.()
         },
+        onError: (error) =>
+          setSubmitError(extractApiErrorMessage(error, "Failed to record the payment voucher.")),
       }
     )
   }
@@ -780,6 +777,13 @@ export function RecordVoucherDialog({
                     </strong>
                     . Please reduce row allocations.
                   </span>
+                </div>
+              )}
+
+              {submitError && (
+                <div className="flex items-center gap-2 p-2 bg-destructive/10 border border-destructive/30 text-destructive text-[11px] rounded-none">
+                  <AlertCircle className="size-4 shrink-0" />
+                  <span>{submitError}</span>
                 </div>
               )}
             </div>

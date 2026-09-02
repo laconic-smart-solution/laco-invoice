@@ -337,16 +337,15 @@
     }
   },
   "inputs": {
-    "title": "Order sets",
-    "subtitle": "สร้างรันพร้อมชื่อเรื่อง อัปโหลด Order Detail + Total Withdraw แล้วกด Run files",
-    "create": "สร้าง order set",
-    "create_title": "สร้าง order set",
-    "create_subtitle": "ตั้งชื่อรันนี้ แล้วอัปโหลดไฟล์ Excel สองไฟล์ในหน้าถัดไป",
+    "title": "Order Data Input",
+    "subtitle": "สร้าง input พร้อมชื่อเรื่อง เลือก Shipping Fee หรือ Service Fee อัปโหลด Excel หนึ่งไฟล์ แล้วกด Run",
+    "create": "สร้าง data input",
+    "create_title": "สร้าง order data input",
+    "create_subtitle": "เลือกประเภทไฟล์ input แล้วอัปโหลด Excel ที่ตรงกัน",
     "create_submit": "สร้าง",
     "creating": "กำลังสร้าง…",
     "cancel": "ยกเลิก",
-    "back": "กลับไป Order sets",
-    "run_files": "รันทั้งสอง",
+    "back": "กลับไป Order Data Input",
     "run_file": "รันไฟล์",
     "running": "กำลังรัน…",
     "fields": {
@@ -354,7 +353,12 @@
       "title_placeholder": "เช่น TikTok May 2026 week 1",
       "store": "ร้านค้า",
       "store_placeholder": "เลือกร้านค้า",
-      "marketplace": "Marketplace"
+      "marketplace": "Marketplace",
+      "input_file_type": "ประเภทไฟล์ input"
+    },
+    "input_file_type": {
+      "shipping_fee": "Shipping Fee",
+      "service_fee": "Service Fee"
     },
     "filters": {
       "store": "ร้านค้า",
@@ -369,11 +373,11 @@
       "status": "สถานะ",
       "orders": "คำสั่งซื้อ",
       "items": "รายการ",
-      "files": "ไฟล์",
-      "file_states": "Detail: {{orderDetail}} · Withdraw: {{withdraw}}",
+      "input_file_type": "ประเภท input",
+      "file_status": "สถานะไฟล์",
       "created_at": "สร้างเมื่อ",
       "loading": "กำลังโหลด…",
-      "empty": "ยังไม่มี order set",
+      "empty": "ยังไม่มี order data input",
       "showing": "แสดง {{start}}-{{end}} จาก {{total}}"
     },
     "status": {
@@ -412,6 +416,9 @@
       "upload": "อัปโหลดไฟล์",
       "uploading": "กำลังอัปโหลด…",
       "download_sample": "ดาวน์โหลดตัวอย่าง",
+      "download_file": "ดาวน์โหลดไฟล์",
+      "downloading_file": "กำลังดาวน์โหลด…",
+      "download_failed": "ไม่สามารถดาวน์โหลดไฟล์ที่อัปโหลดได้",
       "withdraw_summary": "{{rows}} แถว · จับคู่ {{matched}} · ไม่จับคู่ {{unmatched}}",
       "stuck_running": "สถานะค้างที่ Running (เช่น รีเฟรชระหว่างรัน) กดรีเซ็ตเพื่อทำต่อ",
       "reset_stuck": "รีเซ็ตสถานะ",
@@ -454,17 +461,22 @@
       "delete_set_success": "ลบชุดข้อมูลและข้อมูลทั้งหมดสำเร็จแล้ว"
     },
     "errors": {
-      "load_failed": "โหลด order sets ไม่สำเร็จ",
-      "create_failed": "สร้าง order set ไม่สำเร็จ",
+      "load_failed": "โหลด order data input ไม่สำเร็จ",
+      "create_failed": "สร้าง order data input ไม่สำเร็จ",
       "title_required": "กรุณาใส่ชื่อเรื่อง",
       "store_required": "กรุณาเลือกร้านค้า",
-      "files_required": "อัปโหลดไฟล์ทั้งสองให้เป็น Ready ก่อนรันทั้งคู่",
-      "order_detail_required": "อัปโหลด Order Detail Excel (Ready) ก่อนรัน",
-      "withdraw_required": "อัปโหลด Total Withdraw Excel (Ready) ก่อนรัน",
-      "not_found": "ไม่พบ order set"
+      "file_required": "กรุณาอัปโหลดไฟล์ Excel ตามประเภทที่เลือก",
+      "order_detail_required": "อัปโหลด Shipping Fee Excel (Ready) ก่อนรัน",
+      "withdraw_required": "อัปโหลด Service Fee Excel (Ready) ก่อนรัน",
+      "not_found": "ไม่พบ order data input"
     },
-    "create_modal_subtitle": "ตั้งชื่อชุดคำสั่งซื้อและแนบไฟล์ Excel ค่าจัดส่งและค่าบริการ (ไม่บังคับ)",
+    "create_modal_subtitle": "เลือกประเภทไฟล์ input แล้วอัปโหลด Excel ที่ตรงกัน",
+    "create_modal_subtitle_ai": "อัปโหลดไฟล์ Excel — ระบบจะตรวจจับประเภทไฟล์ให้อัตโนมัติ",
+    "detecting_file_type": "กำลังตรวจจับประเภทไฟล์...",
+    "upload_excel_file": "ไฟล์ Excel",
+    "choose_excel_file": "คลิกเพื่อเลือกไฟล์ Excel",
     "download_template": "ดาวน์โหลดแม่แบบ",
+    "download_templates": "แม่แบบ",
     "choose_shipping_file": "คลิกเพื่อเลือกไฟล์ Excel ค่าจัดส่ง (Shipping Fee)",
     "choose_service_file": "คลิกเพื่อเลือกไฟล์ Excel ค่าบริการ (Service Fee)",
     "uploading_order_detail": "กำลังอัปโหลดไฟล์ Excel ค่าจัดส่ง...",

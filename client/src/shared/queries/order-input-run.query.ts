@@ -110,6 +110,12 @@ export function useCreateOrderInputRunMutation() {
   })
 }
 
+export function useDetectOrderInputFileTypeMutation() {
+  return useMutation({
+    mutationFn: (file: File) => orderInputRunService.detectInputFileType(file),
+  })
+}
+
 export function useUploadOrderInputOrderDetailMutation() {
   const queryClient = useQueryClient()
   return useMutation({
@@ -291,6 +297,18 @@ export function useRollbackOrderInputWithdrawMutation() {
       })
       void queryClient.invalidateQueries({ queryKey: ["orders"] })
     },
+  })
+}
+
+export function useDownloadOrderInputFileMutation() {
+  return useMutation({
+    mutationFn: ({
+      id,
+      fallbackFilename,
+    }: {
+      id: number
+      fallbackFilename: string
+    }) => orderInputRunService.downloadInputFile(id, fallbackFilename),
   })
 }
 

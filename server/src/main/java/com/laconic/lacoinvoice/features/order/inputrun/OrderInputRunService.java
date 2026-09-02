@@ -10,15 +10,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.laconic.lacoinvoice.common.aspect.Loggable;
 import com.laconic.lacoinvoice.common.exception.ResourceNotFoundException;
 import com.laconic.lacoinvoice.common.pagination.PageQuerySupport;
+import com.laconic.lacoinvoice.common.persistence.AuditUserContext;
 import com.laconic.lacoinvoice.common.web.ApiResponse;
 import com.laconic.lacoinvoice.common.web.PageMeta;
 import com.laconic.lacoinvoice.domain.models.Marketplace;
@@ -28,6 +31,7 @@ import com.laconic.lacoinvoice.domain.models.OrderImportBatchStatus;
 import com.laconic.lacoinvoice.domain.models.OrderImportFile;
 import com.laconic.lacoinvoice.domain.models.OrderImportStatus;
 import com.laconic.lacoinvoice.domain.models.OrderInputFileStatus;
+import com.laconic.lacoinvoice.domain.models.OrderInputFileType;
 import com.laconic.lacoinvoice.domain.models.OrderInputRun;
 import com.laconic.lacoinvoice.domain.models.OrderInputRunStatus;
 import com.laconic.lacoinvoice.domain.models.OrderWithdrawApplyStatus;
@@ -45,7 +49,10 @@ import com.laconic.lacoinvoice.features.order.import_.OrderImportPreviewBatchDto
 import com.laconic.lacoinvoice.features.order.import_.OrderImportPreviewService;
 import com.laconic.lacoinvoice.features.order.import_.OrderImportResultDto;
 import com.laconic.lacoinvoice.features.order.inputrun.ParsedWithdrawWorkbook.ParsedWithdrawRow;
+import com.laconic.lacoinvoice.features.order.inputrun.dto.OrderInputFileTypeDetectResultDto;
+import com.laconic.lacoinvoice.features.order.inputrun.dto.OrderInputFileDownload;
 import com.laconic.lacoinvoice.features.order.inputrun.pageable.OrderInputRunPageRequest;
+import com.laconic.lacoinvoice.features.usersettings.UserSettingsService;
 
 @Service
 public class OrderInputRunService {
@@ -70,6 +77,8 @@ public class OrderInputRunService {
 	private final OrderWithdrawExcelParser withdrawExcelParser;
 	private final OrderInputRunMapper mapper;
 	private final JdbcTemplate jdbcTemplate;
+	private final UserSettingsService userSettingsService;
+	private final OrderInputFileTypeClassifier inputFileTypeClassifier;
 
 	public OrderInputRunService(
 			OrderInputRunRepository runRepository,
@@ -82,7 +91,9 @@ public class OrderInputRunService {
 			OrderImportPreviewService orderImportPreviewService,
 			OrderWithdrawExcelParser withdrawExcelParser,
 			OrderInputRunMapper mapper,
-			JdbcTemplate jdbcTemplate) {
+			JdbcTemplate jdbcTemplate,
+			UserSettingsService userSettingsService,
+			OrderInputFileTypeClassifier inputFileTypeClassifier) {
 		this.runRepository = runRepository;
 		this.withdrawRowRepository = withdrawRowRepository;
 		this.storeRepository = storeRepository;
@@ -94,6 +105,8 @@ public class OrderInputRunService {
 		this.withdrawExcelParser = withdrawExcelParser;
 		this.mapper = mapper;
 		this.jdbcTemplate = jdbcTemplate;
+		this.userSettingsService = userSettingsService;
+		this.inputFileTypeClassifier = inputFileTypeClassifier;
 	}
 
 	@Loggable
@@ -141,10 +154,48 @@ public class OrderInputRunService {
 		run.setStore(store);
 		run.setMarketplace(marketplace);
 		run.setTitle(request.getTitle().trim());
+		run.setInputFileType(request.getInputFileType());
 		run.setStatus(OrderInputRunStatus.DRAFT);
 		run.setOrderDetailStatus(OrderInputFileStatus.MISSING);
 		run.setWithdrawStatus(OrderInputFileStatus.MISSING);
 		return mapper.toDto(runRepository.save(run));
+	}
+
+	@Loggable
+	@Transactional(readOnly = true)
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	public OrderInputFileTypeDetectResultDto detectInputFileType(MultipartFile file) {
+		Long userId = AuditUserContext.getCurrentLocalUserId()
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated."));
+		if (!userSettingsService.isAiAutoChooseInputFileType(userId)) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+					"AI auto-choose input file type is not enabled for this user.");
+		}
+		return new OrderInputFileTypeDetectResultDto(inputFileTypeClassifier.classify(file));
+	}
+
+	@Loggable
+	@Transactional(readOnly = true)
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	public OrderInputFileDownload downloadInputFile(Long id) {
+		OrderInputRun run = requireRun(id);
+		OrderInputFileType type = resolveInputFileType(run);
+		if (type == OrderInputFileType.SHIPPING_FEE) {
+			byte[] content = run.getOrderDetailContent();
+			if (content == null || content.length == 0) {
+				throw new ResourceNotFoundException("No uploaded file for this order data input.");
+			}
+			return new OrderInputFileDownload(
+					resolveDownloadFilename(run.getOrderDetailFilename(), "order-detail.xlsx"),
+					content);
+		}
+		byte[] content = run.getWithdrawContent();
+		if (content == null || content.length == 0) {
+			throw new ResourceNotFoundException("No uploaded file for this order data input.");
+		}
+		return new OrderInputFileDownload(
+				resolveDownloadFilename(run.getWithdrawFilename(), "service-fee.xlsx"),
+				content);
 	}
 
 	@Loggable
@@ -153,6 +204,7 @@ public class OrderInputRunService {
 	public OrderInputRunDto uploadOrderDetail(Long id, MultipartFile file) {
 		OrderInputRun run = requireRun(id);
 		assertNotRunning(run);
+		assertInputFileType(run, OrderInputFileType.SHIPPING_FEE);
 		byte[] content = readBytes(file);
 		run.setOrderDetailFilename(safeFilename(file));
 		run.setOrderDetailContent(content);
@@ -173,6 +225,7 @@ public class OrderInputRunService {
 	public OrderInputRunDto uploadWithdraw(Long id, MultipartFile file) {
 		OrderInputRun run = requireRun(id);
 		assertNotRunning(run);
+		assertInputFileType(run, OrderInputFileType.SERVICE_FEE);
 		byte[] content = readBytes(file);
 		run.setWithdrawFilename(safeFilename(file));
 		run.setWithdrawContent(content);
@@ -194,6 +247,7 @@ public class OrderInputRunService {
 	public OrderImportPreviewBatchDto startRunPreview(Long id) {
 		OrderInputRun run = requireRun(id);
 		assertNotRunning(run);
+		assertInputFileType(run, OrderInputFileType.SHIPPING_FEE);
 
 		boolean orderReady = isRunnable(run.getOrderDetailStatus()) && run.getOrderDetailContent() != null;
 		if (!orderReady) {
@@ -325,6 +379,7 @@ public class OrderInputRunService {
 	public OrderInputRunDto runWithdrawFile(Long id) {
 		OrderInputRun run = requireRun(id);
 		assertNotRunning(run);
+		assertInputFileType(run, OrderInputFileType.SERVICE_FEE);
 
 		boolean withdrawReady = isRunnable(run.getWithdrawStatus()) && run.getWithdrawContent() != null;
 		if (!withdrawReady) {
@@ -487,26 +542,61 @@ public class OrderInputRunService {
 	}
 
 	private void recomputeOverallStatus(OrderInputRun run) {
-		OrderInputFileStatus od = run.getOrderDetailStatus();
-		OrderInputFileStatus wd = run.getWithdrawStatus();
-
-		if (od == OrderInputFileStatus.RUNNING || wd == OrderInputFileStatus.RUNNING) {
-			run.setStatus(OrderInputRunStatus.RUNNING);
+		OrderInputFileType type = resolveInputFileType(run);
+		if (type == OrderInputFileType.SERVICE_FEE) {
+			recomputeFromWithdrawStatus(run);
 			return;
 		}
-		boolean odOk = od == OrderInputFileStatus.SUCCEEDED;
-		boolean wdOk = wd == OrderInputFileStatus.SUCCEEDED;
-		boolean odBad = od == OrderInputFileStatus.FAILED || od == OrderInputFileStatus.PARTIAL;
-		boolean wdBad = wd == OrderInputFileStatus.FAILED || wd == OrderInputFileStatus.PARTIAL;
+		recomputeFromOrderDetailStatus(run);
+	}
 
-		if (odOk && wdOk) {
+	private static void recomputeFromOrderDetailStatus(OrderInputRun run) {
+		OrderInputFileStatus status = run.getOrderDetailStatus();
+		if (status == OrderInputFileStatus.RUNNING) {
+			run.setStatus(OrderInputRunStatus.RUNNING);
+		} else if (status == OrderInputFileStatus.SUCCEEDED) {
 			run.setStatus(OrderInputRunStatus.COMPLETED);
-		} else if (od == OrderInputFileStatus.FAILED && wd == OrderInputFileStatus.FAILED) {
+		} else if (status == OrderInputFileStatus.FAILED) {
 			run.setStatus(OrderInputRunStatus.FAILED);
-		} else if (odBad || wdBad) {
+		} else if (status == OrderInputFileStatus.PARTIAL) {
 			run.setStatus(OrderInputRunStatus.PARTIAL);
 		} else {
 			run.setStatus(OrderInputRunStatus.DRAFT);
+		}
+	}
+
+	private static void recomputeFromWithdrawStatus(OrderInputRun run) {
+		OrderInputFileStatus status = run.getWithdrawStatus();
+		if (status == OrderInputFileStatus.RUNNING) {
+			run.setStatus(OrderInputRunStatus.RUNNING);
+		} else if (status == OrderInputFileStatus.SUCCEEDED) {
+			run.setStatus(OrderInputRunStatus.COMPLETED);
+		} else if (status == OrderInputFileStatus.FAILED) {
+			run.setStatus(OrderInputRunStatus.FAILED);
+		} else if (status == OrderInputFileStatus.PARTIAL) {
+			run.setStatus(OrderInputRunStatus.PARTIAL);
+		} else {
+			run.setStatus(OrderInputRunStatus.DRAFT);
+		}
+	}
+
+	private static OrderInputFileType resolveInputFileType(OrderInputRun run) {
+		if (run.getInputFileType() != null) {
+			return run.getInputFileType();
+		}
+		if (run.getWithdrawContent() != null
+				|| run.getWithdrawFilename() != null
+				|| run.getWithdrawStatus() != OrderInputFileStatus.MISSING) {
+			return OrderInputFileType.SERVICE_FEE;
+		}
+		return OrderInputFileType.SHIPPING_FEE;
+	}
+
+	private static void assertInputFileType(OrderInputRun run, OrderInputFileType expected) {
+		OrderInputFileType actual = resolveInputFileType(run);
+		if (actual != expected) {
+			throw new IllegalArgumentException(
+					"This order data input accepts only " + expected.name().replace('_', ' ') + " uploads");
 		}
 	}
 
@@ -759,13 +849,7 @@ public class OrderInputRunService {
 		run.setOrderDetailStartedAt(null);
 		run.setOrderDetailFinishedAt(null);
 
-		if (run.getWithdrawStatus() == OrderInputFileStatus.MISSING) {
-			run.setStatus(OrderInputRunStatus.DRAFT);
-		} else if (run.getWithdrawStatus() == OrderInputFileStatus.SUCCEEDED) {
-			run.setStatus(OrderInputRunStatus.COMPLETED);
-		} else {
-			run.setStatus(OrderInputRunStatus.PARTIAL);
-		}
+		recomputeFromOrderDetailStatus(run);
 
 		return mapper.toDto(runRepository.save(run));
 	}
@@ -793,13 +877,7 @@ public class OrderInputRunService {
 		run.setWithdrawMatchedCount(null);
 		run.setWithdrawUnmatchedCount(null);
 
-		if (run.getOrderDetailStatus() == OrderInputFileStatus.MISSING) {
-			run.setStatus(OrderInputRunStatus.DRAFT);
-		} else if (run.getOrderDetailStatus() == OrderInputFileStatus.SUCCEEDED) {
-			run.setStatus(OrderInputRunStatus.COMPLETED);
-		} else {
-			run.setStatus(OrderInputRunStatus.PARTIAL);
-		}
+		recomputeFromWithdrawStatus(run);
 
 		return mapper.toDto(runRepository.save(run));
 	}
@@ -840,6 +918,14 @@ public class OrderInputRunService {
 	private static String safeFilename(MultipartFile file) {
 		String name = file.getOriginalFilename();
 		return StringUtils.hasText(name) ? name : "upload.xlsx";
+	}
+
+	private static String resolveDownloadFilename(String filename, String fallback) {
+		if (!StringUtils.hasText(filename)) {
+			return fallback;
+		}
+		String trimmed = filename.trim();
+		return trimmed.replace("\"", "'");
 	}
 }
 

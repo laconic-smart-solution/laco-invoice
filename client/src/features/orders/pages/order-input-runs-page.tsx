@@ -183,20 +183,28 @@ export function OrderInputRunsPage() {
         enableSorting: false,
       },
       {
-        id: "files",
-        header: t("inputs.table.files"),
-        cell: ({ row }) => (
-          <span className="text-xs text-muted-foreground">
-            {t("inputs.table.file_states", {
-              orderDetail: t(
-                `inputs.file_status.${row.original.orderDetailStatus.toLowerCase()}`
-              ),
-              withdraw: t(
-                `inputs.file_status.${row.original.withdrawStatus.toLowerCase()}`
-              ),
-            })}
-          </span>
-        ),
+        accessorKey: "inputFileType",
+        header: t("inputs.table.input_file_type"),
+        cell: ({ row }) =>
+          t(
+            `inputs.input_file_type.${row.original.inputFileType === "SHIPPING_FEE" ? "shipping_fee" : "service_fee"}`
+          ),
+        enableSorting: false,
+      },
+      {
+        id: "fileStatus",
+        header: t("inputs.table.file_status"),
+        cell: ({ row }) => {
+          const isShipping = row.original.inputFileType === "SHIPPING_FEE"
+          const status = isShipping
+            ? row.original.orderDetailStatus
+            : row.original.withdrawStatus
+          return (
+            <span className="text-xs text-muted-foreground">
+              {t(`inputs.file_status.${status.toLowerCase()}`)}
+            </span>
+          )
+        },
         enableSorting: false,
       },
       {

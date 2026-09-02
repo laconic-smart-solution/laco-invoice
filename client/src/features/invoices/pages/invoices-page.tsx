@@ -27,13 +27,18 @@ import { StatusBadge, type StatusBadgeVariant } from "@/components/common/status
 import { formatCurrency, formatNumber } from "@/util/format"
 import { useLocaleStore } from "@/shared/stores/locale-store"
 import { ROUTES } from "@/app/constants/routes"
-import { useInvoicesQuery } from "../queries/invoice.query"
+import { useStoresPageQuery } from "@/shared/queries/store.query"
+import { useInvoiceDetailQuery, useInvoicesQuery } from "../queries/invoice.query"
 import { useVouchersQuery } from "../queries/voucher.query"
 import { CreateInvoiceDialog } from "../components/create-invoice-dialog"
 import { InvoiceTaxPreview } from "../components/invoice-tax-preview"
 import { RecordVoucherDialog } from "../components/record-voucher-dialog"
 import { VouchersTable } from "../components/vouchers-table"
 import type { Invoice } from "../types/invoice"
+import type { PaymentVoucher } from "../types/voucher"
+
+const EMPTY_INVOICES: Invoice[] = []
+const EMPTY_VOUCHERS: PaymentVoucher[] = []
 
 function getInvoiceStatusBadgeVariant(status: string): StatusBadgeVariant {
   switch (status) {
@@ -58,14 +63,19 @@ export function InvoicesPage() {
   const [statusFilter, setStatusFilter] = useState("all")
   const [storeFilter, setStoreFilter] = useState("all")
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
-  const [recordVoucherOpen, setRecordVoucherOpen] = useState(false)
+  const [voucherInvoiceId, setVoucherInvoiceId] = useState<number | null>(null)
   const [previewInvoice, setPreviewInvoice] = useState<Invoice | null>(null)
 
   const invoicesQuery = useInvoicesQuery()
   const vouchersQuery = useVouchersQuery()
+  const storesQuery = useStoresPageQuery({ pageNumber: 1, pageSize: 200 })
 
-  const invoices = invoicesQuery.data || []
-  const vouchers = vouchersQuery.data || []
+  const invoices = invoicesQuery.data ?? EMPTY_INVOICES
+  const vouchers = vouchersQuery.data ?? EMPTY_VOUCHERS
+  const stores = storesQuery.data?.data ?? []
+
+  // The voucher dialog allocates against a specific invoice's orders, so it needs the detail payload.
+  const voucherInvoiceQuery = useInvoiceDetailQuery(voucherInvoiceId)
 
   // Stats calculation
   const totalInvoicesCount = invoices.length
@@ -82,14 +92,15 @@ export function InvoicesPage() {
   // Filtered invoices
   const filteredInvoices = useMemo(() => {
     return invoices.filter((inv) => {
+      const keyword = search.trim().toLowerCase()
       const matchSearch =
-        !search ||
-        inv.invoiceNumber.toLowerCase().includes(search.toLowerCase()) ||
-        inv.title.toLowerCase().includes(search.toLowerCase()) ||
-        inv.storeName.toLowerCase().includes(search.toLowerCase())
+        !keyword ||
+        inv.invoiceNumber.toLowerCase().includes(keyword) ||
+        inv.title.toLowerCase().includes(keyword) ||
+        (inv.storeName?.toLowerCase().includes(keyword) ?? false)
 
       const matchStatus = statusFilter === "all" || inv.status === statusFilter
-      const matchStore = storeFilter === "all" || inv.storeId === storeFilter
+      const matchStore = storeFilter === "all" || String(inv.storeId) === storeFilter
 
       return matchSearch && matchStatus && matchStore
     })
@@ -112,7 +123,8 @@ export function InvoicesPage() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => setRecordVoucherOpen(true)}
+            disabled={invoices.length === 0}
+            onClick={() => setVoucherInvoiceId(invoices[0]?.id ?? null)}
             className="rounded-none text-xs h-9 font-semibold gap-1.5 border-primary text-primary hover:bg-primary/10"
           >
             <Receipt className="size-4" />
@@ -251,7 +263,11 @@ export function InvoicesPage() {
                   </SelectTrigger>
                   <SelectContent className="rounded-none">
                     <SelectItem value="all">All Stores</SelectItem>
-                    <SelectItem value="1">Tiktok Shop (1) By Dev Alvin</SelectItem>
+                    {stores.map((store) => (
+                      <SelectItem key={store.id} value={String(store.id)}>
+                        {store.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -316,7 +332,7 @@ export function InvoicesPage() {
                         <td className="px-4 py-3 font-sans text-muted-foreground">
                           <div className="flex items-center gap-1.5">
                             <Store className="size-3.5 shrink-0" />
-                            <span className="truncate max-w-[140px]">{inv.storeName}</span>
+                            <span className="truncate max-w-[140px]">{inv.storeName ?? "-"}</span>
                           </div>
                         </td>
                         <td className="px-4 py-3 text-muted-foreground text-[11px]">
@@ -345,6 +361,16 @@ export function InvoicesPage() {
                             className="flex items-center justify-end gap-1.5"
                             onClick={(e) => e.stopPropagation()}
                           >
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setVoucherInvoiceId(inv.id)}
+                              className="h-7 px-2 text-xs rounded-none gap-1"
+                            >
+                              <Receipt className="size-3" />
+                              <span>Pay</span>
+                            </Button>
                             <Button
                               type="button"
                               variant="outline"
@@ -383,13 +409,12 @@ export function InvoicesPage() {
 
       {/* Record Voucher Dialog */}
       <RecordVoucherDialog
-        open={recordVoucherOpen}
-        onOpenChange={setRecordVoucherOpen}
-        invoice={invoices[0] || null}
-        onSuccess={() => {
-          vouchersQuery.refetch()
-          invoicesQuery.refetch()
+        open={voucherInvoiceId != null}
+        onOpenChange={(open) => {
+          if (!open) setVoucherInvoiceId(null)
         }}
+        invoice={voucherInvoiceQuery.data ?? null}
+        onSuccess={() => setVoucherInvoiceId(null)}
       />
 
       {/* Printable Preview Dialog */}

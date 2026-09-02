@@ -32,6 +32,10 @@ public class OrderInputRun extends StoreScopedEntity {
 	private String title;
 
 	@Enumerated(EnumType.STRING)
+	@Column(name = "input_file_type", length = 20)
+	private OrderInputFileType inputFileType = OrderInputFileType.SHIPPING_FEE;
+
+	@Enumerated(EnumType.STRING)
 	@Column(name = "status", nullable = false, length = 20)
 	private OrderInputRunStatus status = OrderInputRunStatus.DRAFT;
 

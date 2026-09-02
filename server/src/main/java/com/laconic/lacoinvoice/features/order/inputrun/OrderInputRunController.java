@@ -3,7 +3,10 @@ package com.laconic.lacoinvoice.features.order.inputrun;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.laconic.lacoinvoice.common.web.ApiResponse;
 import com.laconic.lacoinvoice.features.order.import_.OrderImportPreviewBatchDto;
 import com.laconic.lacoinvoice.features.order.import_.OrderImportResultDto;
+import com.laconic.lacoinvoice.features.order.inputrun.dto.OrderInputFileDownload;
+import com.laconic.lacoinvoice.features.order.inputrun.dto.OrderInputFileTypeDetectResultDto;
 import com.laconic.lacoinvoice.features.order.inputrun.pageable.OrderInputRunPageRequest;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,6 +33,9 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/v1/order-input-runs")
 @Tag(name = "Order input runs")
 public class OrderInputRunController {
+
+	private static final MediaType XLSX = MediaType.parseMediaType(
+			"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
 	private final OrderInputRunService service;
 
@@ -45,6 +53,13 @@ public class OrderInputRunController {
 	@Operation(summary = "Create an order input run (title + store + marketplace)")
 	public ApiResponse<OrderInputRunDto> create(@RequestBody @Valid OrderInputRunCreateRequest request) {
 		return ApiResponse.ok("Created", service.create(request));
+	}
+
+	@PostMapping(value = "/detect-input-file-type", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@Operation(summary = "Detect input file type from Excel (AI auto-choose users only)")
+	public ApiResponse<OrderInputFileTypeDetectResultDto> detectInputFileType(
+			@RequestParam("file") MultipartFile file) {
+		return ApiResponse.ok("Detected", service.detectInputFileType(file));
 	}
 
 	@GetMapping("/{id}")
@@ -76,6 +91,17 @@ public class OrderInputRunController {
 			@PathVariable Long id,
 			@RequestParam("file") MultipartFile file) {
 		return ApiResponse.ok("Withdraw file uploaded", service.uploadWithdraw(id, file));
+	}
+
+	@GetMapping("/{id}/files/download")
+	@Operation(summary = "Download uploaded input Excel file for this run")
+	public ResponseEntity<byte[]> downloadInputFile(@PathVariable Long id) {
+		OrderInputFileDownload file = service.downloadInputFile(id);
+		return ResponseEntity.status(HttpStatus.OK)
+				.header(HttpHeaders.CONTENT_DISPOSITION,
+						"attachment; filename=\"" + file.filename() + "\"")
+				.contentType(XLSX)
+				.body(file.content());
 	}
 
 	@PostMapping("/{id}/run/preview")

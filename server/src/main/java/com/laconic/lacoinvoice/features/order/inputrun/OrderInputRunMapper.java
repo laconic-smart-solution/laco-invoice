@@ -34,6 +34,7 @@ public class OrderInputRunMapper implements BaseMapper<OrderInputRun, OrderInput
 				marketplaceId,
 				marketplaceCode,
 				entity.getTitle(),
+				entity.getInputFileType(),
 				entity.getStatus(),
 				entity.getOrderDetailFilename(),
 				entity.getOrderDetailSize(),

@@ -1,5 +1,7 @@
 package com.laconic.lacoinvoice.features.order.inputrun;
 
+import com.laconic.lacoinvoice.domain.models.OrderInputFileType;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -17,6 +19,9 @@ public class OrderInputRunCreateRequest {
 
 	@NotBlank
 	private String marketplaceCode;
+
+	@NotNull
+	private OrderInputFileType inputFileType;
 
 	public String getTitle() {
 		return title;
@@ -40,5 +45,13 @@ public class OrderInputRunCreateRequest {
 
 	public void setMarketplaceCode(String marketplaceCode) {
 		this.marketplaceCode = marketplaceCode;
+	}
+
+	public OrderInputFileType getInputFileType() {
+		return inputFileType;
+	}
+
+	public void setInputFileType(OrderInputFileType inputFileType) {
+		this.inputFileType = inputFileType;
 	}
 }

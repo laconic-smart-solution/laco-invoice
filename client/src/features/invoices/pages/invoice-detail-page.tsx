@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react"
+import { useState } from "react"
 import { useParams, Link } from "react-router-dom"
 import {
   ArrowLeft,
@@ -51,8 +51,8 @@ import {
   useUpdateInvoiceNumberMutation,
 } from "../queries/invoice.query"
 import { useInvoiceVouchersQuery } from "../queries/voucher.query"
-import { invoiceLocalService } from "../services/invoice-local.service"
-import { voucherLocalService } from "../services/voucher-local.service"
+import { extractApiErrorMessage } from "@/shared/api/extract-api-error-message"
+import { invoiceService } from "@/shared/services/invoice.service"
 import { InvoiceTaxPreview } from "../components/invoice-tax-preview"
 import { RecordVoucherDialog } from "../components/record-voucher-dialog"
 import { VoucherDetailDialog } from "../components/voucher-detail-dialog"
@@ -99,31 +99,31 @@ export function InvoiceDetailPage() {
   const [minAmount, setMinAmount] = useState("")
   const [maxAmount, setMaxAmount] = useState("")
 
-  const invoiceQuery = useInvoiceDetailQuery(id)
-  const vouchersQuery = useInvoiceVouchersQuery(id)
+  const invoiceId = Number(id)
+  const invoiceQuery = useInvoiceDetailQuery(Number.isFinite(invoiceId) ? invoiceId : null)
+  const vouchersQuery = useInvoiceVouchersQuery(Number.isFinite(invoiceId) ? invoiceId : null)
   const updateStatusMutation = useUpdateInvoiceStatusMutation()
   const updateNumberMutation = useUpdateInvoiceNumberMutation()
 
   const invoice = invoiceQuery.data
   const invoiceVouchers = vouchersQuery.data || []
 
-  // Dynamic Payment & Voucher Calculations
-  const paymentSummary = useMemo(() => {
-    if (!invoice) return { totalPaidAmount: 0, remainingBalance: 0, paidPercentage: 0, status: "UNPAID" }
-    return voucherLocalService.getInvoicePaymentSummary(invoice.id, invoice.grandTotal)
-  }, [invoice, invoiceVouchers])
+  const paymentSummary = invoice?.paymentSummary ?? {
+    totalPaidAmount: 0,
+    remainingBalance: 0,
+    paidPercentage: 0,
+    status: "UNPAID" as const,
+  }
 
-  const activeFilterCount = useMemo(() => {
-    let count = 0
-    if (search.trim()) count++
-    if (buyerQuery.trim()) count++
-    if (buyerTaxStatus !== "all") count++
-    if (startDate) count++
-    if (endDate) count++
-    if (minAmount !== "") count++
-    if (maxAmount !== "") count++
-    return count
-  }, [search, buyerQuery, buyerTaxStatus, startDate, endDate, minAmount, maxAmount])
+  const activeFilterCount = [
+    search.trim(),
+    buyerQuery.trim(),
+    buyerTaxStatus !== "all",
+    startDate,
+    endDate,
+    minAmount !== "",
+    maxAmount !== "",
+  ].filter(Boolean).length
 
   const handleResetFilters = () => {
     setSearch("")
@@ -136,23 +136,22 @@ export function InvoiceDetailPage() {
   }
 
   // Filtered Orders Calculation with Payment summaries
-  const filteredOrdersWithPayment = useMemo(() => {
-    if (!invoice?.orders) return []
-    return invoice.orders
-      .map((o) => {
-        const pSummary = voucherLocalService.getOrderPaymentSummary(o.orderId, o.totalAmount)
-        return {
-          ...o,
-          payment: pSummary,
-        }
-      })
+  const filteredOrdersWithPayment = (invoice?.orders ?? [])
+      .map((o) => ({
+        ...o,
+        payment: {
+          totalPaidAmount: o.totalPaidAmount,
+          remainingBalance: o.remainingBalance,
+          status: o.paymentStatus,
+        },
+      }))
       .filter((o) => {
         // Search Order ID
         if (search.trim()) {
           const q = search.trim().toLowerCase()
           const match =
             o.externalOrderId.toLowerCase().includes(q) ||
-            o.orderId.toLowerCase().includes(q)
+            String(o.orderId).includes(q)
           if (!match) return false
         }
 
@@ -182,30 +181,17 @@ export function InvoiceDetailPage() {
 
         return true
       })
-  }, [
-    invoice?.orders,
-    invoiceVouchers,
-    search,
-    buyerQuery,
-    buyerTaxStatus,
-    startDate,
-    endDate,
-    minAmount,
-    maxAmount,
-  ])
 
   // Filtered Items Calculation
-  const filteredItems = useMemo(() => {
-    if (!invoice?.items) return []
-    return invoice.items.filter((item) => {
+  const filteredItems = (invoice?.items ?? []).filter((item) => {
       // General search
       if (search.trim()) {
         const q = search.trim().toLowerCase()
         const match =
           item.externalOrderId.toLowerCase().includes(q) ||
-          item.sellerSku.toLowerCase().includes(q) ||
-          item.platformSkuId.toLowerCase().includes(q) ||
-          item.productName.toLowerCase().includes(q)
+          (item.sellerSku?.toLowerCase().includes(q) ?? false) ||
+          (item.platformSkuId?.toLowerCase().includes(q) ?? false) ||
+          (item.productName?.toLowerCase().includes(q) ?? false)
         if (!match) return false
       }
 
@@ -222,16 +208,17 @@ export function InvoiceDetailPage() {
 
       return true
     })
-  }, [invoice?.items, search, startDate, endDate, minAmount, maxAmount])
 
   // Filtered Total Stats
-  const filteredSummary = useMemo(() => {
-    const totalAmount = filteredOrdersWithPayment.reduce((sum, o) => sum + o.totalAmount, 0)
-    const vatAmount = filteredOrdersWithPayment.reduce((sum, o) => sum + o.vatAmount, 0)
-    const exVat = filteredOrdersWithPayment.reduce((sum, o) => sum + o.amountExVat, 0)
-    const totalPaid = filteredOrdersWithPayment.reduce((sum, o) => sum + o.payment.totalPaidAmount, 0)
-    return { totalAmount, vatAmount, exVat, totalPaid }
-  }, [filteredOrdersWithPayment])
+  const filteredSummary = {
+    totalAmount: filteredOrdersWithPayment.reduce((sum, o) => sum + o.totalAmount, 0),
+    vatAmount: filteredOrdersWithPayment.reduce((sum, o) => sum + o.vatAmount, 0),
+    exVat: filteredOrdersWithPayment.reduce((sum, o) => sum + o.amountExVat, 0),
+    totalPaid: filteredOrdersWithPayment.reduce(
+      (sum, o) => sum + o.payment.totalPaidAmount,
+      0
+    ),
+  }
 
   if (invoiceQuery.isLoading) {
     return (
@@ -278,14 +265,15 @@ export function InvoiceDetailPage() {
     )
   }
 
-  const handleSaveInvoiceNumber = (e?: React.FormEvent) => {
+  const handleSaveInvoiceNumber = async (e?: React.FormEvent) => {
     e?.preventDefault()
     const trimmed = editNumberValue.trim()
     if (!trimmed) {
       setEditNumberError("Invoice number is required.")
       return
     }
-    if (invoiceLocalService.isInvoiceNumberTaken(trimmed, invoice.id)) {
+    const availability = await invoiceService.checkNumberAvailability(trimmed, invoice.id)
+    if (!availability.available) {
       setEditNumberError(`Invoice number "${trimmed}" is already in use.`)
       return
     }
@@ -296,8 +284,10 @@ export function InvoiceDetailPage() {
           setIsEditingNumber(false)
           setEditNumberError("")
         },
-        onError: (err: any) => {
-          setEditNumberError(err.message || "Failed to update invoice number.")
+        onError: (error) => {
+          setEditNumberError(
+            extractApiErrorMessage(error, "Failed to update invoice number.")
+          )
         },
       }
     )
@@ -734,7 +724,11 @@ export function InvoiceDetailPage() {
                     </Label>
                     <select
                       value={buyerTaxStatus}
-                      onChange={(e) => setBuyerTaxStatus(e.target.value as any)}
+                      onChange={(e) =>
+                        setBuyerTaxStatus(
+                          e.target.value as "all" | "has_tax_id" | "no_tax_id"
+                        )
+                      }
                       className="w-full h-8.5 border border-input bg-background px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-ring rounded-none"
                     >
                       <option value="all">All Buyers (With or Without Tax ID)</option>

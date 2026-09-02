@@ -1,54 +1,73 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { voucherLocalService } from "../services/voucher-local.service"
-import type { CreateVoucherRequest } from "../types/voucher"
-import { INVOICES_QUERY_KEY } from "./invoice.query"
 
-export const VOUCHERS_QUERY_KEY = ["payment_vouchers"]
+import { invoiceKeys } from "@/features/invoices/queries/invoice.query"
+import type { CreateVoucherRequest } from "@/features/invoices/types/voucher"
+import type { PaymentVoucherPageRequest } from "@/shared/services/payment-voucher.service"
+import { paymentVoucherService } from "@/shared/services/payment-voucher.service"
 
-export function useVouchersQuery() {
+export const voucherKeys = {
+  all: ["payment-vouchers"] as const,
+  lists: () => [...voucherKeys.all, "list"] as const,
+  list: (request: PaymentVoucherPageRequest) =>
+    [...voucherKeys.lists(), request] as const,
+  details: () => [...voucherKeys.all, "detail"] as const,
+  detail: (id: number) => [...voucherKeys.details(), id] as const,
+  byInvoice: (invoiceId: number) =>
+    [...voucherKeys.all, "invoice", invoiceId] as const,
+  nextNumber: () => [...voucherKeys.all, "next-number"] as const,
+}
+
+const LIST_PAGE_REQUEST: PaymentVoucherPageRequest = {
+  pageNumber: 1,
+  pageSize: 200,
+  sortBy: "createdAt",
+  sortOrder: "DESC",
+}
+
+export function useVouchersQuery(
+  request: PaymentVoucherPageRequest = LIST_PAGE_REQUEST
+) {
   return useQuery({
-    queryKey: VOUCHERS_QUERY_KEY,
-    queryFn: async () => {
-      await new Promise((r) => setTimeout(r, 120))
-      return voucherLocalService.getAll()
-    },
+    queryKey: voucherKeys.list(request),
+    queryFn: async () => (await paymentVoucherService.page(request)).data ?? [],
+    staleTime: 30_000,
   })
 }
 
-export function useVoucherDetailQuery(id: string | undefined) {
+export function useVoucherDetailQuery(id: number | null) {
   return useQuery({
-    queryKey: [...VOUCHERS_QUERY_KEY, id],
-    queryFn: async () => {
-      if (!id) return null
-      await new Promise((r) => setTimeout(r, 100))
-      return voucherLocalService.getById(id) ?? null
-    },
-    enabled: Boolean(id),
+    queryKey: voucherKeys.detail(id ?? 0),
+    queryFn: () => paymentVoucherService.getById(id as number),
+    enabled: id != null && id > 0,
   })
 }
 
-export function useInvoiceVouchersQuery(invoiceId: string | undefined) {
+export function useInvoiceVouchersQuery(invoiceId: number | null) {
   return useQuery({
-    queryKey: [...VOUCHERS_QUERY_KEY, "invoice", invoiceId],
-    queryFn: async () => {
-      if (!invoiceId) return []
-      await new Promise((r) => setTimeout(r, 100))
-      return voucherLocalService.getByInvoiceId(invoiceId)
-    },
-    enabled: Boolean(invoiceId),
+    queryKey: voucherKeys.byInvoice(invoiceId ?? 0),
+    queryFn: () => paymentVoucherService.listByInvoice(invoiceId as number),
+    enabled: invoiceId != null && invoiceId > 0,
+  })
+}
+
+export function useNextVoucherNumberQuery(enabled: boolean) {
+  return useQuery({
+    queryKey: voucherKeys.nextNumber(),
+    queryFn: () => paymentVoucherService.getNextNumber(),
+    enabled,
+    staleTime: 0,
+    gcTime: 0,
   })
 }
 
 export function useCreateVoucherMutation() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (req: CreateVoucherRequest) => {
-      await new Promise((r) => setTimeout(r, 300))
-      return voucherLocalService.create(req)
-    },
+    mutationFn: (request: CreateVoucherRequest) =>
+      paymentVoucherService.create(request),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: VOUCHERS_QUERY_KEY })
-      queryClient.invalidateQueries({ queryKey: INVOICES_QUERY_KEY })
+      void queryClient.invalidateQueries({ queryKey: voucherKeys.all })
+      void queryClient.invalidateQueries({ queryKey: invoiceKeys.all })
     },
   })
 }
@@ -56,13 +75,10 @@ export function useCreateVoucherMutation() {
 export function useDeleteVoucherMutation() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (id: string) => {
-      await new Promise((r) => setTimeout(r, 200))
-      return voucherLocalService.delete(id)
-    },
+    mutationFn: (id: number) => paymentVoucherService.remove(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: VOUCHERS_QUERY_KEY })
-      queryClient.invalidateQueries({ queryKey: INVOICES_QUERY_KEY })
+      void queryClient.invalidateQueries({ queryKey: voucherKeys.all })
+      void queryClient.invalidateQueries({ queryKey: invoiceKeys.all })
     },
   })
 }

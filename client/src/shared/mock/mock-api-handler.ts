@@ -1,7 +1,10 @@
 import type { InternalAxiosRequestConfig } from "axios"
 
 import type { CustomerCreateInput } from "@/features/customers/types/customer"
-import type { StoreCreateInput } from "@/features/stores/types/store"
+import type {
+  MarketplaceCode,
+  StoreCreateInput,
+} from "@/features/stores/types/store"
 import type { AdminUserCreateInput } from "@/shared/services/admin-user.service"
 import {
   getConnections,
@@ -162,6 +165,29 @@ function matchPath(pattern: RegExp, path: string): RegExpMatchArray | null {
   return path.match(pattern)
 }
 
+function extractUploadFilename(data: unknown): string | null {
+  if (data instanceof FormData) {
+    const file = data.get("file")
+    if (file instanceof File) {
+      return file.name
+    }
+  }
+  return null
+}
+
+function mockDetectInputFileType(filename: string | null): "SHIPPING_FEE" | "SERVICE_FEE" {
+  const name = (filename ?? "").toLowerCase()
+  if (
+    name.includes("payout") ||
+    name.includes("withdraw") ||
+    name.includes("service") ||
+    name.includes("settlement")
+  ) {
+    return "SERVICE_FEE"
+  }
+  return "SHIPPING_FEE"
+}
+
 export async function handleMockRequest(
   config: InternalAxiosRequestConfig
 ): Promise<MockHandlerResult> {
@@ -219,7 +245,7 @@ export async function handleMockRequest(
   }
 
   if (method === "POST" && path === "/v1/stores") {
-    const input = body as StoreCreateInput
+    const input = body as unknown as StoreCreateInput
     const newStore = {
       id: state.nextStoreId++,
       ownerId: MOCK_USER.id,
@@ -269,7 +295,7 @@ export async function handleMockRequest(
   }
 
   if (method === "POST" && path === "/v1/customers") {
-    const input = body as CustomerCreateInput
+    const input = body as unknown as CustomerCreateInput
     const newCustomer = {
       id: state.nextCustomerId++,
       storeId: null,
@@ -295,7 +321,7 @@ export async function handleMockRequest(
     if (!existing) {
       return { status: 404, body: ok(null) }
     }
-    const input = body as CustomerCreateInput
+    const input = body as unknown as CustomerCreateInput
     Object.assign(existing, {
       name: String(input.name ?? existing.name).trim(),
       email: input.email ?? existing.email,
@@ -349,7 +375,7 @@ export async function handleMockRequest(
   }
 
   if (method === "POST" && path === "/v1/users") {
-    const input = body as AdminUserCreateInput
+    const input = body as unknown as AdminUserCreateInput
     const newUser = {
       id: state.nextUserId++,
       email: String(input.email ?? "").trim(),
@@ -564,6 +590,55 @@ export async function handleMockRequest(
     return { status: 200, body: ok(data, meta) }
   }
 
+  if (method === "POST" && path === "/v1/order-input-runs/detect-input-file-type") {
+    if (!MOCK_USER.orderInputAiAutoChoose) {
+      return {
+        status: 403,
+        body: {
+          success: false,
+          code: 403,
+          message: "AI auto-choose input file type is not enabled for this user.",
+          data: null,
+        },
+      }
+    }
+    const filename = extractUploadFilename(config.data)
+    return {
+      status: 200,
+      body: ok({ inputFileType: mockDetectInputFileType(filename) }),
+    }
+  }
+
+  const inputRunDownload = matchPath(/^\/v1\/order-input-runs\/(\d+)\/files\/download$/, path)
+  if (method === "GET" && inputRunDownload) {
+    const run = getInputRunById(Number(inputRunDownload[1]))
+    if (!run) {
+      return {
+        status: 404,
+        body: {
+          success: false,
+          code: 404,
+          message: "Order input run not found.",
+          data: null,
+        },
+      }
+    }
+    const filename =
+      run.inputFileType === "SERVICE_FEE"
+        ? run.withdrawFilename ?? "service-fee.xlsx"
+        : run.orderDetailFilename ?? "order-detail.xlsx"
+    return {
+      status: 200,
+      body: emptyBlob(),
+      isBlob: true,
+      headers: {
+        "content-type":
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "content-disposition": `attachment; filename="${filename}"`,
+      },
+    }
+  }
+
   const inputRunGet = matchPath(/^\/v1\/order-input-runs\/(\d+)$/, path)
   if (method === "GET" && inputRunGet) {
     return {
@@ -576,6 +651,10 @@ export async function handleMockRequest(
     const title = String(body.title ?? "New input run")
     const storeId = Number(body.storeId) || 1
     const marketplaceCode = String(body.marketplaceCode ?? "TIKTOK")
+    const inputFileType =
+      body.inputFileType === "SERVICE_FEE"
+        ? ("SERVICE_FEE" as const)
+        : ("SHIPPING_FEE" as const)
     const store = getStoreById(storeId)
     const newRun = {
       id: state.nextInputRunId++,
@@ -584,6 +663,7 @@ export async function handleMockRequest(
       marketplaceId: marketplaceCode === "LAZADA" ? 1 : 3,
       marketplaceCode,
       title,
+      inputFileType,
       status: "DRAFT" as const,
       orderDetailFilename: null,
       orderDetailSize: null,
@@ -766,7 +846,8 @@ export async function handleMockRequest(
 
   if (method === "POST" && path === "/v1/marketplace-products/sync") {
     const storeId = Number(params?.storeId) || 1
-    const marketplaceCode = String(params?.marketplaceCode ?? "TIKTOK")
+    const marketplaceCode = (params?.marketplaceCode ??
+      "TIKTOK") as MarketplaceCode
     const run = {
       id: state.syncRuns.length + 1,
       storeId,
@@ -775,8 +856,10 @@ export async function handleMockRequest(
       insertedCount: 5,
       updatedCount: 12,
       disabledCount: 0,
+      failedCount: 0,
       startedAt: NOW,
       finishedAt: NOW,
+      completedAt: NOW,
       errorMessage: null,
     }
     state.syncRuns.push(run)

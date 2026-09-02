@@ -16,6 +16,7 @@ import com.laconic.lacoinvoice.domain.models.User;
 import com.laconic.lacoinvoice.domain.repositories.UserRepository;
 import com.laconic.lacoinvoice.features.me.dto.MeCredentialsRequest;
 import com.laconic.lacoinvoice.features.me.dto.MeProfileDto;
+import com.laconic.lacoinvoice.features.usersettings.UserSettingsService;
 import com.laconic.lacoinvoice.integration.sso.LcnSsoClient;
 import com.laconic.lacoinvoice.integration.sso.dto.LcnSsoCredentialsResponse;
 
@@ -25,20 +26,24 @@ public class MeProfileServiceImpl implements MeProfileService {
 	private final UserRepository userRepository;
 	private final SsoProperties ssoProperties;
 	private final LcnSsoClient lcnSsoClient;
+	private final UserSettingsService userSettingsService;
 
 	public MeProfileServiceImpl(
 			UserRepository userRepository,
 			SsoProperties ssoProperties,
-			LcnSsoClient lcnSsoClient) {
+			LcnSsoClient lcnSsoClient,
+			UserSettingsService userSettingsService) {
 		this.userRepository = userRepository;
 		this.ssoProperties = ssoProperties;
 		this.lcnSsoClient = lcnSsoClient;
+		this.userSettingsService = userSettingsService;
 	}
 
 	@Override
 	@Transactional(readOnly = true)
 	public MeProfileDto getMyProfile() {
-		return toDto(currentUser());
+		User user = currentUser();
+		return toDto(user, userSettingsService.isAiAutoChooseInputFileType(user.getId()));
 	}
 
 	@Override
@@ -79,7 +84,7 @@ public class MeProfileServiceImpl implements MeProfileService {
 		}
 
 		User saved = userRepository.save(user);
-		return toDto(saved);
+		return toDto(saved, userSettingsService.isAiAutoChooseInputFileType(saved.getId()));
 	}
 
 	private User currentUser() {
@@ -89,13 +94,14 @@ public class MeProfileServiceImpl implements MeProfileService {
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated."));
 	}
 
-	private static MeProfileDto toDto(User user) {
+	private static MeProfileDto toDto(User user, boolean orderInputAiAutoChoose) {
 		MeProfileDto dto = new MeProfileDto();
 		dto.setId(user.getId());
 		dto.setEmail(user.getEmail());
 		dto.setFullName(user.getFullName());
 		dto.setRole(user.getRole());
 		dto.setActive(user.isActive());
+		dto.setOrderInputAiAutoChoose(orderInputAiAutoChoose);
 		return dto;
 	}
 }

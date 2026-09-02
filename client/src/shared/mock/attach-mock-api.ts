@@ -1,11 +1,9 @@
-import type { AxiosAdapter, InternalAxiosRequestConfig } from "axios"
+import type { AxiosInstance, InternalAxiosRequestConfig } from "axios"
 
 import { env } from "@/app/config/env"
 import { handleMockRequest } from "@/shared/mock/mock-api-handler"
 
-export function attachMockApiAdapter(client: {
-  defaults: { adapter?: AxiosAdapter }
-}): void {
+export function attachMockApiAdapter(client: AxiosInstance): void {
   if (!env.useMockApi) {
     return
   }

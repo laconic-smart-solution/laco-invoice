@@ -3,6 +3,7 @@ package com.laconic.lacoinvoice.features.order.inputrun;
 import java.time.Instant;
 
 import com.laconic.lacoinvoice.domain.models.OrderInputFileStatus;
+import com.laconic.lacoinvoice.domain.models.OrderInputFileType;
 import com.laconic.lacoinvoice.domain.models.OrderInputRunStatus;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,6 +16,7 @@ public record OrderInputRunDto(
 		Long marketplaceId,
 		String marketplaceCode,
 		String title,
+		OrderInputFileType inputFileType,
 		OrderInputRunStatus status,
 		String orderDetailFilename,
 		Long orderDetailSize,

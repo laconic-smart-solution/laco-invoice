@@ -39,6 +39,7 @@ import com.laconic.lacoinvoice.features.user.UserCommands.CreateRequest;
 import com.laconic.lacoinvoice.features.user.UserCommands.UpdateRequest;
 import com.laconic.lacoinvoice.features.user.UserCommands.UpdateRoleRequest;
 import com.laconic.lacoinvoice.features.user.pageable.UserPageRequest;
+import com.laconic.lacoinvoice.features.usersettings.UserSettingsService;
 import com.laconic.lacoinvoice.integration.sso.LcnSsoClient;
 import com.laconic.lacoinvoice.integration.sso.dto.LcnSsoSignupResponse;
 import com.laconic.lacoinvoice.integration.sso.dto.LcnSsoUserResponse;
@@ -70,16 +71,19 @@ public class UserServiceImpl extends BaseServiceImpl<User, UserDto, CreateReques
 	private final UserMapper mapper;
 	private final SsoProperties ssoProperties;
 	private final LcnSsoClient lcnSsoClient;
+	private final UserSettingsService userSettingsService;
 
 	public UserServiceImpl(
 			UserRepository repository,
 			UserMapper mapper,
 			SsoProperties ssoProperties,
-			LcnSsoClient lcnSsoClient) {
+			LcnSsoClient lcnSsoClient,
+			UserSettingsService userSettingsService) {
 		this.repository = repository;
 		this.mapper = mapper;
 		this.ssoProperties = ssoProperties;
 		this.lcnSsoClient = lcnSsoClient;
+		this.userSettingsService = userSettingsService;
 	}
 
 	@Override
@@ -111,6 +115,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, UserDto, CreateReques
 
 			User entity = createEntity(request);
 			User saved = repository.save(entity);
+			userSettingsService.ensureForUser(saved);
 			return mapper.toDto(saved);
 		} catch (RuntimeException e) {
 			if (rollbackSsoUserId != null && StringUtils.hasText(ssoProperties.getUrl())) {

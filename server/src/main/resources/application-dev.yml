@@ -21,6 +21,11 @@ spring:
 app:
   cors:
     allowed-origin-patterns: http://localhost:*,http://127.0.0.1:*,http://192.168.23.224:*,http://192.168.23.224,https://brittany-pretrochal-supergloriously.ngrok-free.dev:*,https://dev-laco-invoice.laconic.co.th:*,https://dev-laco-invoice.laconic.co.th,http://192.168.23.151:*,http://192.168.23.151
+  order-input:
+    ai-auto-choose:
+      default-admin-enabled: true
+  openai:
+    api-key: ${OPENAI_API_KEY:}
   auth:
     cookies:
       secure: false

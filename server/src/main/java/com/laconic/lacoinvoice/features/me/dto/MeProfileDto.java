@@ -18,4 +18,7 @@ public class MeProfileDto {
 	private UserRole role;
 
 	private boolean active;
+
+	/** When true, order input create flow hides file type selector and auto-detects via AI. */
+	private boolean orderInputAiAutoChoose;
 }

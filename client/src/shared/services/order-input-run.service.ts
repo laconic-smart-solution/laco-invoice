@@ -1,5 +1,10 @@
 import { apiClient } from "@/app/api/client"
 import type { ApiResponse } from "@/shared/types/api-response"
+import {
+  downloadBlob,
+  filenameFromContentDisposition,
+  rethrowBlobApiError,
+} from "@/util/download-blob"
 import type {
   ApiOrderImportPreviewBatchDto,
   ApiOrderImportResultDto,
@@ -27,6 +32,8 @@ export type ApiOrderWithdrawApplyStatus =
   | "SKIPPED"
   | "FAILED"
 
+export type ApiOrderInputFileType = "SHIPPING_FEE" | "SERVICE_FEE"
+
 export interface ApiOrderInputRunDto {
   id: number
   storeId: number | null
@@ -34,6 +41,7 @@ export interface ApiOrderInputRunDto {
   marketplaceId: number | null
   marketplaceCode: string | null
   title: string
+  inputFileType: ApiOrderInputFileType
   status: ApiOrderInputRunStatus
   orderDetailFilename: string | null
   orderDetailSize: number | null
@@ -91,6 +99,11 @@ export interface OrderInputRunCreateRequest {
   title: string
   storeId: number
   marketplaceCode: string
+  inputFileType: ApiOrderInputFileType
+}
+
+export interface OrderInputFileTypeDetectResult {
+  inputFileType: ApiOrderInputFileType
 }
 
 export const orderInputRunService = {
@@ -125,6 +138,17 @@ export const orderInputRunService = {
     return response.data.data
   },
 
+  detectInputFileType: async (file: File) => {
+    const formData = new FormData()
+    formData.append("file", file)
+    const response = await apiClient.post<ApiResponse<OrderInputFileTypeDetectResult>>(
+      "/v1/order-input-runs/detect-input-file-type",
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    )
+    return response.data.data
+  },
+
   uploadOrderDetail: async (id: number, file: File) => {
     const formData = new FormData()
     formData.append("file", file)
@@ -145,6 +169,22 @@ export const orderInputRunService = {
       { headers: { "Content-Type": "multipart/form-data" } }
     )
     return response.data.data
+  },
+
+  downloadInputFile: async (id: number, fallbackFilename: string) => {
+    try {
+      const response = await apiClient.get<Blob>(
+        `/v1/order-input-runs/${id}/files/download`,
+        { responseType: "blob" }
+      )
+      const filename = filenameFromContentDisposition(
+        response.headers["content-disposition"] as string | undefined,
+        fallbackFilename
+      )
+      downloadBlob(response.data, filename)
+    } catch (error) {
+      await rethrowBlobApiError(error)
+    }
   },
 
   startRunPreview: async (id: number) => {

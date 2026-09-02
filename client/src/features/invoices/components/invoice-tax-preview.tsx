@@ -223,7 +223,7 @@ export function InvoiceTaxPreview({ invoice, onClose }: InvoiceTaxPreviewProps) 
               </div>
               <div class="meta-row">
                 <span class="meta-label">Date:</span>
-                <span class="meta-value">${formatDateTime(invoice.issuedAt, locale)}</span>
+                <span class="meta-value">${formatDateTime(invoice.issuedAt ?? invoice.createdAt, locale)}</span>
               </div>
               <div class="meta-row">
                 <span class="meta-label">Period:</span>
@@ -364,7 +364,7 @@ export function InvoiceTaxPreview({ invoice, onClose }: InvoiceTaxPreviewProps) 
                     Invoice No: <span className="font-mono text-primary font-bold">{invoice.invoiceNumber}</span>
                   </p>
                   <p className="text-neutral-700">
-                    Date: <span className="font-medium text-neutral-900">{formatDateTime(invoice.issuedAt, locale)}</span>
+                    Date: <span className="font-medium text-neutral-900">{formatDateTime(invoice.issuedAt ?? invoice.createdAt, locale)}</span>
                   </p>
                   <p className="text-neutral-700">
                     Period: <span className="font-mono text-neutral-900">{invoice.startDate} → {invoice.endDate}</span>

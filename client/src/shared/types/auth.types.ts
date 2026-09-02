@@ -17,6 +17,7 @@ export interface MeProfile {
   fullName: string | null
   role: UserRole
   active: boolean
+  orderInputAiAutoChoose?: boolean
 }
 
 export interface MeCredentialsRequest {

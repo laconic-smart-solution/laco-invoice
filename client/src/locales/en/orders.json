@@ -337,16 +337,15 @@
     }
   },
   "inputs": {
-    "title": "Order sets",
-    "subtitle": "Create a titled order set, attach Shipping Fee + Service fee Excels, then Run files.",
-    "create": "New order set",
-    "create_title": "New order set",
-    "create_subtitle": "Give this order set a title, then upload both Excel files on the next screen.",
+    "title": "Order Data Input",
+    "subtitle": "Create a titled input, choose Shipping Fee or Service Fee, upload one Excel, then run it.",
+    "create": "New data input",
+    "create_title": "New order data input",
+    "create_subtitle": "Choose an input file type and upload the matching Excel file.",
     "create_submit": "Create",
     "creating": "Creating…",
     "cancel": "Cancel",
-    "back": "Back to order sets",
-    "run_files": "Run both",
+    "back": "Back to order data input",
     "run_file": "Run file",
     "running": "Running…",
     "fields": {
@@ -354,7 +353,12 @@
       "title_placeholder": "e.g. TikTok May 2026 week 1",
       "store": "Store",
       "store_placeholder": "Select store",
-      "marketplace": "Marketplace"
+      "marketplace": "Marketplace",
+      "input_file_type": "Input file type"
+    },
+    "input_file_type": {
+      "shipping_fee": "Shipping Fee",
+      "service_fee": "Service Fee"
     },
     "filters": {
       "store": "Store",
@@ -369,11 +373,11 @@
       "status": "Status",
       "orders": "Orders",
       "items": "Items",
-      "files": "Files",
-      "file_states": "Shipping Fee: {{orderDetail}} · Service fee: {{withdraw}}",
+      "input_file_type": "Input type",
+      "file_status": "File status",
       "created_at": "Created",
       "loading": "Loading…",
-      "empty": "No order sets yet.",
+      "empty": "No order data inputs yet.",
       "showing": "Showing {{start}}-{{end}} of {{total}}"
     },
     "status": {
@@ -412,6 +416,9 @@
       "upload": "Upload file",
       "uploading": "Uploading…",
       "download_sample": "Download sample",
+      "download_file": "Download file",
+      "downloading_file": "Downloading…",
+      "download_failed": "Could not download the uploaded file.",
       "withdraw_summary": "{{rows}} rows · {{matched}} matched · {{unmatched}} unmatched",
       "stuck_running": "This run was left in Running (e.g. after refresh). Reset to continue.",
       "reset_stuck": "Reset status",
@@ -447,24 +454,29 @@
       "rollback_withdraw_title": "Rollback Service Fee File?",
       "rollback_withdraw_description": "Are you sure you want to rollback this file? All imported fee and payout settlement rows for this set will be deleted.",
       "rollback_confirm_btn": "Rollback & Delete Data",
-      "delete_set": "Delete Set",
-      "delete_set_title": "Delete Order Set?",
-      "delete_set_description": "Are you sure you want to delete this order set? This will permanently delete all imported orders, order items, tax invoices, history logs, settlement records, temporary preview tables, and any unlinked products/customers associated with this set.",
-      "delete_set_confirm_btn": "Delete Set & All Data",
-      "delete_set_success": "Order set and all associated data deleted successfully."
+      "delete_set": "Delete input",
+      "delete_set_title": "Delete order data input?",
+      "delete_set_description": "Are you sure you want to delete this order data input? This will permanently delete all imported orders, order items, tax invoices, history logs, settlement records, temporary preview tables, and any unlinked products/customers associated with this input.",
+      "delete_set_confirm_btn": "Delete input & all data",
+      "delete_set_success": "Order data input and all associated data deleted successfully."
     },
     "errors": {
-      "load_failed": "Unable to load order sets.",
-      "create_failed": "Unable to create order set.",
+      "load_failed": "Unable to load order data inputs.",
+      "create_failed": "Unable to create order data input.",
       "title_required": "Please enter a title.",
       "store_required": "Please select a store.",
-      "files_required": "Upload both Excel files (Ready) before running both.",
-      "order_detail_required": "Upload Order Detail Excel (Ready) before running.",
-      "withdraw_required": "Upload Total Withdraw Excel (Ready) before running.",
-      "not_found": "Order set not found."
+      "file_required": "Please upload an Excel file for the selected input type.",
+      "order_detail_required": "Upload Shipping Fee Excel (Ready) before running.",
+      "withdraw_required": "Upload Service Fee Excel (Ready) before running.",
+      "not_found": "Order data input not found."
     },
-    "create_modal_subtitle": "Give this order set a title and optionally attach Shipping Fee & Service Fee Excels.",
+    "create_modal_subtitle": "Choose input file type, then upload the matching Excel file.",
+    "create_modal_subtitle_ai": "Upload your Excel file — we'll detect the input type automatically.",
+    "detecting_file_type": "Detecting file type...",
+    "upload_excel_file": "Excel file",
+    "choose_excel_file": "Click to select Excel file",
     "download_template": "Download Template",
+    "download_templates": "Templates",
     "choose_shipping_file": "Click to select Shipping Fee Excel file",
     "choose_service_file": "Click to select Service Fee Excel file",
     "uploading_order_detail": "Uploading Shipping Fee Excel...",
