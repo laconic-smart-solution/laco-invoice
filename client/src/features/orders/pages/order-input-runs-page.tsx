@@ -9,8 +9,7 @@ import { DataTable } from "@/components/common/data-table/data-table"
 import { DataTableColumnHeader } from "@/components/common/data-table/data-table-column-header"
 import { DataTableFooter } from "@/components/common/data-table/data-table-footer"
 import { useDataTable } from "@/components/common/data-table/use-data-table"
-import { StatusBadge } from "@/components/common/status-badge"
-import type { StatusBadgeVariant } from "@/components/common/status-badge"
+import { OrderInputRunStatusBadges } from "@/features/orders/components/order-input-run-status-badges"
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
 import { OrderInputRunCreateDialog } from "@/features/orders/components/order-input-run-create-dialog"
 import { Button } from "@/components/ui/button"
@@ -41,19 +40,10 @@ import {
 import { useStoresPageQuery } from "@/shared/queries/store.query"
 import type {
   ApiOrderInputRunDto,
-  ApiOrderInputRunStatus,
 } from "@/shared/services/order-input-run.service"
 import { useLocaleStore } from "@/shared/stores/locale-store"
 import { formatDateTime } from "@/util/format"
 import { sortingToPageSort } from "@/util/table-sort"
-
-const STATUS_BADGE: Record<ApiOrderInputRunStatus, StatusBadgeVariant> = {
-  DRAFT: "pending",
-  RUNNING: "pending",
-  COMPLETED: "synced",
-  PARTIAL: "pending",
-  FAILED: "failed",
-}
 
 const STORES_LIST_REQUEST = {
   pageNumber: 1,
@@ -163,12 +153,7 @@ export function OrderInputRunsPage() {
             title={t("inputs.table.status")}
           />
         ),
-        cell: ({ row }) => (
-          <StatusBadge
-            status={STATUS_BADGE[row.original.status]}
-            label={t(`inputs.status.${row.original.status.toLowerCase()}`)}
-          />
-        ),
+        cell: ({ row }) => <OrderInputRunStatusBadges run={row.original} />,
       },
       {
         accessorKey: "orderCount",
@@ -189,22 +174,6 @@ export function OrderInputRunsPage() {
           t(
             `inputs.input_file_type.${row.original.inputFileType === "SHIPPING_FEE" ? "shipping_fee" : "service_fee"}`
           ),
-        enableSorting: false,
-      },
-      {
-        id: "fileStatus",
-        header: t("inputs.table.file_status"),
-        cell: ({ row }) => {
-          const isShipping = row.original.inputFileType === "SHIPPING_FEE"
-          const status = isShipping
-            ? row.original.orderDetailStatus
-            : row.original.withdrawStatus
-          return (
-            <span className="text-xs text-muted-foreground">
-              {t(`inputs.file_status.${status.toLowerCase()}`)}
-            </span>
-          )
-        },
         enableSorting: false,
       },
       {

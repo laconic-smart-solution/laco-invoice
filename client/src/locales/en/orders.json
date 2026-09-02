@@ -385,7 +385,8 @@
       "running": "Running",
       "completed": "Completed",
       "partial": "Partial",
-      "failed": "Failed"
+      "failed": "Failed",
+      "error": "Error"
     },
     "file_status": {
       "missing": "Missing",
@@ -467,7 +468,10 @@
       "delete_set_title": "Delete order data input?",
       "delete_set_description": "Are you sure you want to delete this order data input? This will permanently delete all imported orders, order items, tax invoices, history logs, settlement records, temporary preview tables, and any unlinked products/customers associated with this input.",
       "delete_set_confirm_btn": "Delete input & all data",
-      "delete_set_success": "Order data input and all associated data deleted successfully."
+      "delete_set_success": "Order data input and all associated data deleted successfully.",
+      "replace_succeeded_title": "Replace this file?",
+      "replace_succeeded_description": "This Excel already ran successfully. Uploading a new file will replace it. Imported orders are not deleted unless you rollback first.",
+      "replace_succeeded_confirm": "Upload new file"
     },
     "errors": {
       "load_failed": "Unable to load order data inputs.",

@@ -385,7 +385,8 @@
       "running": "Running",
       "completed": "Completed",
       "partial": "Partial",
-      "failed": "Failed"
+      "failed": "Failed",
+      "error": "ข้อผิดพลาด"
     },
     "file_status": {
       "missing": "Missing",
@@ -467,7 +468,10 @@
       "delete_set_title": "ลบชุดข้อมูลคำสั่งซื้อนี้หรือไม่?",
       "delete_set_description": "คุณแน่ใจหรือไม่ว่าต้องการลบชุดข้อมูลคำสั่งซื้อนี้? ระบบจะลบคำสั่งซื้อ รายการสินค้า ใบกำกับภาษี ประวัติ ข้อมูลยอดเงิน ตารางพรีวิวชั่วคราว และสินค้า/ลูกค้าที่ไม่เกี่ยวข้องทั้งหมดอย่างถาวร",
       "delete_set_confirm_btn": "ลบชุดข้อมูลและข้อมูลทั้งหมด",
-      "delete_set_success": "ลบชุดข้อมูลและข้อมูลทั้งหมดสำเร็จแล้ว"
+      "delete_set_success": "ลบชุดข้อมูลและข้อมูลทั้งหมดสำเร็จแล้ว",
+      "replace_succeeded_title": "แทนที่ไฟล์นี้หรือไม่?",
+      "replace_succeeded_description": "ไฟล์ Excel นี้รันสำเร็จแล้ว การอัปโหลดไฟล์ใหม่จะแทนที่ไฟล์เดิม ข้อมูลที่นำเข้าจะไม่ถูกลบจนกว่าจะทำ Rollback",
+      "replace_succeeded_confirm": "อัปโหลดไฟล์ใหม่"
     },
     "errors": {
       "load_failed": "โหลด order data input ไม่สำเร็จ",

@@ -3,6 +3,7 @@ import { useRef } from "react"
 import { useTranslation } from "react-i18next"
 
 import { StatusBadge, type StatusBadgeVariant } from "@/components/common/status-badge"
+import { getOrderInputInvoiceErrorMessage } from "@/features/orders/components/order-input-run-status-badges"
 import { Button } from "@/components/ui/button"
 import { formatCurrency } from "@/util/format"
 import type { Locale } from "@/app/i18n"
@@ -14,12 +15,16 @@ import type {
 
 interface InvoicePdfCardProps {
   run: ApiOrderInputRunDto
-  locale: Locale
   disabled: boolean
   uploading: boolean
   downloading: boolean
   onUpload: (file: File) => void
   onDownload: () => void
+}
+
+interface InvoicePdfMatchSummaryProps {
+  run: ApiOrderInputRunDto
+  locale: Locale
 }
 
 const FILE_STATUS_BADGE: Record<ApiOrderInputFileStatus, StatusBadgeVariant> = {
@@ -51,7 +56,6 @@ function formatAmount(value: number | null, locale: Locale): string {
 
 export function InvoicePdfCard({
   run,
-  locale,
   disabled,
   uploading,
   downloading,
@@ -65,7 +69,7 @@ export function InvoicePdfCard({
   const hasFile = Boolean(run.invoicePdfFilename)
 
   return (
-    <div className="flex h-full flex-col space-y-3 rounded-md border border-border bg-card p-4">
+    <div className="flex h-full flex-col gap-3 rounded-md border border-border bg-card p-4">
       <div className="flex items-start justify-between gap-2">
         <div>
           <h2 className="font-heading text-sm font-semibold">
@@ -83,6 +87,7 @@ export function InvoicePdfCard({
           <StatusBadge
             status={MATCH_BADGE[matchStatus]}
             label={t(`inputs.invoice_match.${matchStatus.toLowerCase()}`)}
+            tooltip={getOrderInputInvoiceErrorMessage(run, t)}
           />
         </div>
       </div>
@@ -100,68 +105,6 @@ export function InvoicePdfCard({
 
       {run.invoicePdfError ? (
         <p className="text-xs text-destructive break-words">{run.invoicePdfError}</p>
-      ) : null}
-
-      {hasFile ? (
-        <dl className="grid gap-2 sm:grid-cols-2 text-xs">
-          <div>
-            <dt className="text-muted-foreground">
-              {t("inputs.detail.invoice_receipt_number")}
-            </dt>
-            <dd className="font-mono font-medium">{run.invoiceReceiptNumber ?? "—"}</dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground">
-              {t("inputs.detail.invoice_receipt_date")}
-            </dt>
-            <dd className="font-medium">{formatDate(run.invoiceReceiptDate)}</dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground">{t("inputs.detail.invoice_period")}</dt>
-            <dd className="font-medium">
-              {run.invoicePeriodStart || run.invoicePeriodEnd
-                ? `${formatDate(run.invoicePeriodStart)} → ${formatDate(run.invoicePeriodEnd)}`
-                : "—"}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground">{t("inputs.detail.invoice_buyer")}</dt>
-            <dd className="font-medium">
-              {run.invoiceBuyerName ?? "—"}
-              {run.invoiceBuyerTaxId ? (
-                <span className="block font-mono text-[11px] text-muted-foreground">
-                  {run.invoiceBuyerTaxId}
-                </span>
-              ) : null}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground">
-              {t("inputs.detail.invoice_pdf_amount")}
-            </dt>
-            <dd className="font-semibold">
-              {formatAmount(run.invoiceTotalAmount, locale)}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground">
-              {t("inputs.detail.excel_matched_amount")}
-            </dt>
-            <dd className="font-semibold">
-              {formatAmount(run.excelMatchedAmount, locale)}
-            </dd>
-          </div>
-          {matchStatus === "MISMATCH" ? (
-            <div>
-              <dt className="text-muted-foreground">
-                {t("inputs.detail.invoice_match_difference")}
-              </dt>
-              <dd className="font-semibold text-destructive">
-                {formatAmount(run.invoiceMatchDifference, locale)}
-              </dd>
-            </div>
-          ) : null}
-        </dl>
       ) : null}
 
       <input
@@ -214,5 +157,69 @@ export function InvoicePdfCard({
         </Button>
       </div>
     </div>
+  )
+}
+
+export function InvoicePdfMatchSummary({ run, locale }: InvoicePdfMatchSummaryProps) {
+  const { t } = useTranslation("orders")
+  const matchStatus = run.invoiceMatchStatus ?? "MISSING"
+  if (!run.invoicePdfFilename) {
+    return null
+  }
+
+  return (
+    <dl className="grid gap-3 rounded-md border border-border bg-card p-4 text-xs sm:grid-cols-2 lg:grid-cols-3">
+      <div>
+        <dt className="text-muted-foreground">
+          {t("inputs.detail.invoice_receipt_number")}
+        </dt>
+        <dd className="font-mono font-medium">{run.invoiceReceiptNumber ?? "—"}</dd>
+      </div>
+      <div>
+        <dt className="text-muted-foreground">
+          {t("inputs.detail.invoice_receipt_date")}
+        </dt>
+        <dd className="font-medium">{formatDate(run.invoiceReceiptDate)}</dd>
+      </div>
+      <div>
+        <dt className="text-muted-foreground">{t("inputs.detail.invoice_period")}</dt>
+        <dd className="font-medium">
+          {run.invoicePeriodStart || run.invoicePeriodEnd
+            ? `${formatDate(run.invoicePeriodStart)} → ${formatDate(run.invoicePeriodEnd)}`
+            : "—"}
+        </dd>
+      </div>
+      <div>
+        <dt className="text-muted-foreground">{t("inputs.detail.invoice_buyer")}</dt>
+        <dd className="font-medium">
+          {run.invoiceBuyerName ?? "—"}
+          {run.invoiceBuyerTaxId ? (
+            <span className="block font-mono text-[11px] text-muted-foreground">
+              {run.invoiceBuyerTaxId}
+            </span>
+          ) : null}
+        </dd>
+      </div>
+      <div>
+        <dt className="text-muted-foreground">{t("inputs.detail.invoice_pdf_amount")}</dt>
+        <dd className="font-semibold">{formatAmount(run.invoiceTotalAmount, locale)}</dd>
+      </div>
+      <div>
+        <dt className="text-muted-foreground">
+          {t("inputs.detail.excel_matched_amount")}
+        </dt>
+        <dd className="font-semibold">{formatAmount(run.excelMatchedAmount, locale)}</dd>
+      </div>
+      {matchStatus === "MISMATCH" ? (
+        <div>
+          <dt className="text-muted-foreground">
+            {t("inputs.detail.invoice_match_difference")}
+          </dt>
+          <dd className="font-semibold text-destructive">
+            {formatAmount(run.invoiceMatchDifference, locale)}
+          </dd>
+        </div>
+      ) : null}
+    </dl>
   )
 }

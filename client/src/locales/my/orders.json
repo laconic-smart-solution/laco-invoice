@@ -385,7 +385,8 @@
       "running": "Running",
       "completed": "Completed",
       "partial": "Partial",
-      "failed": "Failed"
+      "failed": "Failed",
+      "error": "Error"
     },
     "file_status": {
       "missing": "Missing",
@@ -467,7 +468,10 @@
       "delete_set_title": "ဤအော်ဒါတွဲကို ဖျက်မှာ သေချာပါသလား?",
       "delete_set_description": "ဤအော်ဒါတွဲကို ဖျက်မှာ သေချာပါသလား? ၎င်းနှင့်သက်ဆိုင်သော အော်ဒါများ၊ ကုန်ပစ္စည်းစာရင်းများ၊ အခွန်ပြေစာများ၊ ငွေစာရင်းတွက်ချက်မှုများနှင့် ယာယီဇယားများအားလုံးကို အပြီးတိုင် ဖျက်ပစ်မည်ဖြစ်ပါသည်။",
       "delete_set_confirm_btn": "အော်ဒါတွဲနှင့် အချက်အလက်အားလုံး ဖျက်မည်",
-      "delete_set_success": "အော်ဒါတွဲနှင့် သက်ဆိုင်ရာ အချက်အလက်အားလုံးကို အောင်မြင်စွာ ဖျက်ပြီးပါပြီ။"
+      "delete_set_success": "အော်ဒါတွဲနှင့် သက်ဆိုင်ရာ အချက်အလက်အားလုံးကို အောင်မြင်စွာ ဖျက်ပြီးပါပြီ။",
+      "replace_succeeded_title": "Replace this file?",
+      "replace_succeeded_description": "This Excel already ran successfully. Uploading a new file will replace it. Imported orders are not deleted unless you rollback first.",
+      "replace_succeeded_confirm": "Upload new file"
     },
     "errors": {
       "load_failed": "Unable to load order data inputs.",

@@ -19,11 +19,13 @@ import { useTranslation } from "react-i18next"
 import { Link, useNavigate, useParams } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
+import { ConfirmDialog } from "@/components/common/confirm-dialog"
 import { StatusBadge } from "@/components/common/status-badge"
 import type { StatusBadgeVariant } from "@/components/common/status-badge"
 import { AuthFormError } from "@/features/auth/components/auth-form-error"
-import { InvoicePdfCard } from "@/features/orders/components/invoice-pdf-card"
+import { InvoicePdfCard, InvoicePdfMatchSummary } from "@/features/orders/components/invoice-pdf-card"
 import { OrderImportDialog } from "@/features/orders/components/order-import-dialog"
+import { OrderInputRunStatusBadges } from "@/features/orders/components/order-input-run-status-badges"
 import { OrdersFilters } from "@/features/orders/components/orders-filters"
 import { OrdersTable } from "@/features/orders/components/orders-table"
 import {
@@ -98,14 +100,6 @@ import { useLocaleStore } from "@/shared/stores/locale-store"
 import { formatCurrency, formatDateTime, formatNumber } from "@/util/format"
 import { getColumnFilterValue } from "@/util/table-column-filters"
 import { sortingToPageSort } from "@/util/table-sort"
-
-const RUN_STATUS_BADGE: Record<ApiOrderInputRunStatus, StatusBadgeVariant> = {
-  DRAFT: "pending",
-  RUNNING: "pending",
-  COMPLETED: "synced",
-  PARTIAL: "pending",
-  FAILED: "failed",
-}
 
 const FILE_STATUS_BADGE: Record<ApiOrderInputFileStatus, StatusBadgeVariant> = {
   MISSING: "pending",
@@ -626,10 +620,7 @@ export function OrderInputRunDetailPage() {
             <span>
               {t(`inputs.input_file_type.${inputFileType === "SHIPPING_FEE" ? "shipping_fee" : "service_fee"}`)}
             </span>
-            <StatusBadge
-              status={RUN_STATUS_BADGE[displayStatus]}
-              label={t(`inputs.status.${displayStatus.toLowerCase()}`)}
-            />
+            <OrderInputRunStatusBadges run={run} displayStatus={displayStatus} />
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -740,84 +731,88 @@ export function OrderInputRunDetailPage() {
           setPreviewBatch(null)
         }}
       />
-      <div className="grid gap-4 md:grid-cols-2 md:items-stretch">
-        <InvoicePdfCard
-          run={run}
-          locale={locale}
-          disabled={isBusy}
-          uploading={uploadInvoicePdf.isPending}
-          downloading={downloadInvoicePdfMutation.isPending}
-          onUpload={(file) => uploadInvoicePdf.mutate({ id: run.id, file })}
-          onDownload={handleDownloadInvoicePdf}
-        />
-        {isShippingFeeInput ? (
-          <FileUploadCard
-            title={t("inputs.detail.order_detail_title")}
-            description={t("inputs.detail.order_detail_description")}
-            filename={run.orderDetailFilename}
-            status={displayOrderDetailStatus}
-            error={
-              startPreviewMutation.isPending || previewOpen
-                ? null
-                : run.orderDetailError
-            }
-            inputRef={orderDetailInputRef}
+      <div className="grid items-stretch gap-4 md:grid-cols-2">
+        <div className="h-full min-h-0">
+          <InvoicePdfCard
+            run={run}
             disabled={isBusy}
-            sampleHref={SHIPPING_FEE_SAMPLE_HREF}
-            sampleFilename={SHIPPING_FEE_SAMPLE_FILENAME}
-            onPick={() => orderDetailInputRef.current?.click()}
-            onFile={(file) => uploadOrderDetail.mutate({ id: run.id, file })}
-            uploading={uploadOrderDetail.isPending}
-            canRun={canRunOrderDetail}
-            running={startPreviewMutation.isPending || previewOpen}
-            onRun={() => startOrderDetailPreview()}
-            canRollback={canRollbackOrderDetail}
-            rollingBack={rollbackOrderDetailMutation.isPending}
-            onRollback={() => setRollbackTarget("orderDetail")}
-            completed={isRunCompleted}
-            canDownload={canDownloadInputFile(
-              run.orderDetailFilename,
-              displayOrderDetailStatus
-            )}
-            downloading={downloadInputFileMutation.isPending}
-            onDownload={() =>
-              handleDownloadInputFile(run.orderDetailFilename ?? "order-detail.xlsx")
-            }
-            t={t}
+            uploading={uploadInvoicePdf.isPending}
+            downloading={downloadInvoicePdfMutation.isPending}
+            onUpload={(file) => uploadInvoicePdf.mutate({ id: run.id, file })}
+            onDownload={handleDownloadInvoicePdf}
           />
-        ) : (
-          <FileUploadCard
-            title={t("inputs.detail.withdraw_title")}
-            description={t("inputs.detail.withdraw_description")}
-            filename={run.withdrawFilename}
-            status={displayWithdrawStatus}
-            error={runWithdrawMutation.isPending ? null : run.withdrawError}
-            inputRef={withdrawInputRef}
-            disabled={isBusy}
-            sampleHref={SERVICE_FEE_SAMPLE_HREF}
-            sampleFilename={SERVICE_FEE_SAMPLE_FILENAME}
-            onPick={() => withdrawInputRef.current?.click()}
-            onFile={(file) => uploadWithdraw.mutate({ id: run.id, file })}
-            uploading={uploadWithdraw.isPending}
-            canRun={canRunWithdraw}
-            running={runWithdrawMutation.isPending}
-            onRun={handleRunWithdraw}
-            canRollback={canRollbackWithdraw}
-            rollingBack={rollbackWithdrawMutation.isPending}
-            onRollback={() => setRollbackTarget("withdraw")}
-            completed={isRunCompleted}
-            canDownload={canDownloadInputFile(
-              run.withdrawFilename,
-              displayWithdrawStatus
-            )}
-            downloading={downloadInputFileMutation.isPending}
-            onDownload={() =>
-              handleDownloadInputFile(run.withdrawFilename ?? "service-fee.xlsx")
-            }
-            t={t}
-          />
-        )}
+        </div>
+        <div className="h-full min-h-0">
+          {isShippingFeeInput ? (
+            <FileUploadCard
+              title={t("inputs.detail.order_detail_title")}
+              description={t("inputs.detail.order_detail_description")}
+              filename={run.orderDetailFilename}
+              status={displayOrderDetailStatus}
+              error={
+                startPreviewMutation.isPending || previewOpen
+                  ? null
+                  : run.orderDetailError
+              }
+              inputRef={orderDetailInputRef}
+              disabled={isBusy}
+              sampleHref={SHIPPING_FEE_SAMPLE_HREF}
+              sampleFilename={SHIPPING_FEE_SAMPLE_FILENAME}
+              onPick={() => orderDetailInputRef.current?.click()}
+              onFile={(file) => uploadOrderDetail.mutate({ id: run.id, file })}
+              uploading={uploadOrderDetail.isPending}
+              canRun={canRunOrderDetail}
+              running={startPreviewMutation.isPending || previewOpen}
+              onRun={() => startOrderDetailPreview()}
+              canRollback={canRollbackOrderDetail}
+              rollingBack={rollbackOrderDetailMutation.isPending}
+              onRollback={() => setRollbackTarget("orderDetail")}
+              completed={isRunCompleted}
+              canDownload={canDownloadInputFile(
+                run.orderDetailFilename,
+                displayOrderDetailStatus
+              )}
+              downloading={downloadInputFileMutation.isPending}
+              onDownload={() =>
+                handleDownloadInputFile(run.orderDetailFilename ?? "order-detail.xlsx")
+              }
+              t={t}
+            />
+          ) : (
+            <FileUploadCard
+              title={t("inputs.detail.withdraw_title")}
+              description={t("inputs.detail.withdraw_description")}
+              filename={run.withdrawFilename}
+              status={displayWithdrawStatus}
+              error={runWithdrawMutation.isPending ? null : run.withdrawError}
+              inputRef={withdrawInputRef}
+              disabled={isBusy}
+              sampleHref={SERVICE_FEE_SAMPLE_HREF}
+              sampleFilename={SERVICE_FEE_SAMPLE_FILENAME}
+              onPick={() => withdrawInputRef.current?.click()}
+              onFile={(file) => uploadWithdraw.mutate({ id: run.id, file })}
+              uploading={uploadWithdraw.isPending}
+              canRun={canRunWithdraw}
+              running={runWithdrawMutation.isPending}
+              onRun={handleRunWithdraw}
+              canRollback={canRollbackWithdraw}
+              rollingBack={rollbackWithdrawMutation.isPending}
+              onRollback={() => setRollbackTarget("withdraw")}
+              completed={isRunCompleted}
+              canDownload={canDownloadInputFile(
+                run.withdrawFilename,
+                displayWithdrawStatus
+              )}
+              downloading={downloadInputFileMutation.isPending}
+              onDownload={() =>
+                handleDownloadInputFile(run.withdrawFilename ?? "service-fee.xlsx")
+              }
+              t={t}
+            />
+          )}
+        </div>
       </div>
+      <InvoicePdfMatchSummary run={run} locale={locale} />
 
       <div className="space-y-4">
         {isShippingFeeInput ? (
@@ -1332,7 +1327,7 @@ interface FileUploadCardProps {
   canRollback?: boolean
   rollingBack?: boolean
   onRollback?: () => void
-  /** When true, hide uploaded filename and sample download (completed run). */
+  /** When true, hide sample download (completed run). */
   completed?: boolean
   canDownload?: boolean
   downloading?: boolean
@@ -1365,8 +1360,19 @@ function FileUploadCard({
   onDownload,
   t,
 }: FileUploadCardProps) {
+  const [replaceOpen, setReplaceOpen] = useState(false)
+  const needsReplaceConfirm = status === "SUCCEEDED" || status === "PARTIAL"
+
+  const handleUploadClick = () => {
+    if (needsReplaceConfirm) {
+      setReplaceOpen(true)
+      return
+    }
+    onPick()
+  }
+
   return (
-    <div className="flex h-full flex-col space-y-3 rounded-md border border-border bg-card p-4">
+    <div className="flex h-full flex-col gap-3 rounded-md border border-border bg-card p-4">
       <div className="flex items-start justify-between gap-2">
         <div>
           <h2 className="font-heading text-sm font-semibold">{title}</h2>
@@ -1377,20 +1383,18 @@ function FileUploadCard({
           label={t(`inputs.file_status.${status.toLowerCase()}`)}
         />
       </div>
-      {!completed ? (
-        <p className="truncate text-sm">
-          {filename ? (
-            <span className="inline-flex items-center gap-1.5">
-              <FileSpreadsheet className="size-4 text-muted-foreground" />
-              {filename}
-            </span>
-          ) : (
-            <span className="text-muted-foreground">
-              {t("inputs.detail.no_file")}
-            </span>
-          )}
-        </p>
-      ) : null}
+      <p className="truncate text-sm">
+        {filename ? (
+          <span className="inline-flex items-center gap-1.5">
+            <FileSpreadsheet className="size-4 text-muted-foreground" />
+            {filename}
+          </span>
+        ) : (
+          <span className="text-muted-foreground">
+            {t("inputs.detail.no_file")}
+          </span>
+        )}
+      </p>
       {error ? (
         <p className="text-xs text-destructive break-words">{error}</p>
       ) : null}
@@ -1408,13 +1412,13 @@ function FileUploadCard({
           event.target.value = ""
         }}
       />
-      <div className="flex flex-wrap gap-2">
+      <div className="mt-auto flex flex-wrap gap-2">
         <Button
           type="button"
           variant="outline"
           size="sm"
           disabled={disabled}
-          onClick={onPick}
+          onClick={handleUploadClick}
         >
           {uploading ? (
             <Loader2 data-icon="inline-start" className="animate-spin" />
@@ -1489,6 +1493,17 @@ function FileUploadCard({
           </Button>
         ) : null}
       </div>
+
+      <ConfirmDialog
+        open={replaceOpen}
+        onOpenChange={setReplaceOpen}
+        title={t("inputs.detail.replace_succeeded_title")}
+        description={t("inputs.detail.replace_succeeded_description")}
+        confirmLabel={t("inputs.detail.replace_succeeded_confirm")}
+        onConfirm={() => {
+          onPick()
+        }}
+      />
     </div>
   )
 }

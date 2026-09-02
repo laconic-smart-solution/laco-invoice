@@ -33,7 +33,9 @@ export function AppBreadcrumb({ className }: AppBreadcrumbProps) {
               {index > 0 ? <BreadcrumbSeparator /> : null}
               <BreadcrumbItem>
                 {isLast || !item.href ? (
-                  <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                  <BreadcrumbPage className="max-w-md truncate" title={item.label}>
+                    {item.label}
+                  </BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink asChild>
                     <Link to={item.href}>{item.label}</Link>

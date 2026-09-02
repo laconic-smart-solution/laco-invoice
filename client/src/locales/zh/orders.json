@@ -379,7 +379,8 @@
       "running": "运行中",
       "completed": "已完成",
       "partial": "部分成功",
-      "failed": "失败"
+      "failed": "失败",
+      "error": "错误"
     },
     "file_status": {
       "missing": "缺失",
@@ -450,7 +451,10 @@
       "match_apply_hint": "Unmatched = 本店尚无该订单号，因此 Apply 为 Skipped。费用仍显示在此表；成功匹配后才会出现在订单列表。请先运行 Order detail，再重新运行 Withdraw。",
       "prev": "上一页",
       "next": "下一页",
-      "updated_at": "更新于 {{value}}"
+      "updated_at": "更新于 {{value}}",
+      "replace_succeeded_title": "要替换此文件吗？",
+      "replace_succeeded_description": "该 Excel 已成功运行。上传新文件将替换当前文件。除非先回滚，否则已导入的订单不会被删除。",
+      "replace_succeeded_confirm": "上传新文件"
     },
     "errors": {
       "load_failed": "无法加载 order data input。",

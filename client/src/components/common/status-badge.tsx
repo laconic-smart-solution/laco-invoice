@@ -1,5 +1,6 @@
 import { cva, type VariantProps } from "class-variance-authority"
 
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
 const statusBadgeVariants = cva(
@@ -32,15 +33,39 @@ interface StatusBadgeProps {
   label: string
   className?: string
   showDot?: boolean
+  tooltip?: string | null
 }
 
-export function StatusBadge({ status, label, className, showDot = false }: StatusBadgeProps) {
-  return (
+export function StatusBadge({
+  status,
+  label,
+  className,
+  showDot = false,
+  tooltip,
+}: StatusBadgeProps) {
+  const badge = (
     <span className={cn(statusBadgeVariants({ status }), className)}>
       {showDot ? (
         <span className="size-1.5 shrink-0 rounded-full bg-current" aria-hidden />
       ) : null}
       {label}
     </span>
+  )
+
+  if (!tooltip) {
+    return badge
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button type="button" className="inline-flex cursor-default rounded-full">
+          {badge}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="max-w-xs text-left leading-relaxed">
+        {tooltip}
+      </TooltipContent>
+    </Tooltip>
   )
 }

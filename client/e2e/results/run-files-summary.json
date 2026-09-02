@@ -1,0 +1,76 @@
+{
+  "passed": 4,
+  "failed": 6,
+  "results": [
+    {
+      "id": 51,
+      "title": "E2E 01 THJV202610002306645 MATCHED",
+      "pass": false,
+      "detail": "Preview closed but status unclear",
+      "url": "http://localhost:5173/orders/inputs/51"
+    },
+    {
+      "id": 52,
+      "title": "E2E 02 THJV202610002401102 MATCHED",
+      "pass": true,
+      "detail": "Imported",
+      "url": "http://localhost:5173/orders/inputs/52"
+    },
+    {
+      "id": 53,
+      "title": "E2E 03 THJV202610002512883 MATCHED",
+      "pass": false,
+      "detail": "Preview closed but status unclear",
+      "url": "http://localhost:5173/orders/inputs/53"
+    },
+    {
+      "id": 54,
+      "title": "E2E 04 THJV202610002623441 MATCHED",
+      "pass": true,
+      "detail": "Imported",
+      "url": "http://localhost:5173/orders/inputs/54"
+    },
+    {
+      "id": 55,
+      "title": "E2E 05 THJV202610002734009 MATCHED",
+      "pass": false,
+      "detail": "Preview closed but status unclear",
+      "url": "http://localhost:5173/orders/inputs/55"
+    },
+    {
+      "id": 56,
+      "title": "E2E 06 THJV202610002845770 MATCHED",
+      "pass": false,
+      "detail": "Preview closed but status unclear",
+      "url": "http://localhost:5173/orders/inputs/56"
+    },
+    {
+      "id": 57,
+      "title": "E2E 07 THJV202610002956218 MATCHED",
+      "pass": true,
+      "detail": "Imported",
+      "url": "http://localhost:5173/orders/inputs/57"
+    },
+    {
+      "id": 58,
+      "title": "E2E 08 THJV202610003067331 MISMATCH",
+      "pass": false,
+      "detail": "Preview closed but status unclear",
+      "url": "http://localhost:5173/orders/inputs/58"
+    },
+    {
+      "id": 59,
+      "title": "E2E 09 THJV202610003178442 MISMATCH",
+      "pass": false,
+      "detail": "Preview closed but status unclear",
+      "url": "http://localhost:5173/orders/inputs/59"
+    },
+    {
+      "id": 60,
+      "title": "E2E 10 THJV202610003289553 MISMATCH",
+      "pass": true,
+      "detail": "Imported",
+      "url": "http://localhost:5173/orders/inputs/60"
+    }
+  ]
+}

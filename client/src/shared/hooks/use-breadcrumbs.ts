@@ -5,6 +5,7 @@ import { useLocation, useParams } from "react-router-dom"
 import { ROUTES } from "@/app/constants/routes"
 import { SIDEBAR_NAV_ITEMS } from "@/constants/navigation"
 import { getMockOrderById } from "@/features/orders/data/mock-orders"
+import { useOrderInputRunDetailQuery } from "@/shared/queries/order-input-run.query"
 
 export interface BreadcrumbItem {
   label: string
@@ -13,8 +14,19 @@ export interface BreadcrumbItem {
 
 export function useBreadcrumbs(): BreadcrumbItem[] {
   const { pathname } = useLocation()
-  const { orderId, customerId, productId } = useParams()
+  const { orderId, customerId, productId, inputRunId } = useParams()
   const { t } = useTranslation(["breadcrumb", "sidebar", "common", "products", "customers", "users"])
+  const inputRunIdFromPath = pathname.startsWith(`${ROUTES.dashboard.orderInputs}/`)
+    ? pathname.split("/").pop()
+    : undefined
+  const resolvedInputRunId = inputRunId || inputRunIdFromPath
+  const parsedInputRunId = Number(resolvedInputRunId)
+  const inputRunDetailQuery = useOrderInputRunDetailQuery(
+    Number.isFinite(parsedInputRunId) && parsedInputRunId > 0
+      ? parsedInputRunId
+      : null
+  )
+  const inputRunTitle = inputRunDetailQuery.data?.title?.trim() || ""
 
   return useMemo(() => {
     if (pathname === ROUTES.dashboard.root) {
@@ -93,7 +105,6 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
     }
 
     if (pathname.startsWith(`${ROUTES.dashboard.orderInputs}/`)) {
-      const inputRunId = pathname.split("/").pop()
       return [
         { label: t("sidebar:nav.dashboard"), href: ROUTES.dashboard.root },
         { label: t("sidebar:nav.orders"), href: ROUTES.dashboard.orders },
@@ -101,7 +112,7 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
           label: t("sidebar:nav.order_inputs"),
           href: ROUTES.dashboard.orderInputs,
         },
-        { label: inputRunId ?? "" },
+        { label: inputRunTitle || resolvedInputRunId || "" },
       ]
     }
 
@@ -173,5 +184,5 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
       default:
         return [{ label: t("sidebar:nav.dashboard"), href: ROUTES.dashboard.root }]
     }
-  }, [customerId, orderId, pathname, t])
+  }, [customerId, inputRunTitle, orderId, pathname, resolvedInputRunId, t])
 }
