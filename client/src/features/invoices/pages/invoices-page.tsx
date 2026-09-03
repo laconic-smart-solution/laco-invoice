@@ -2,16 +2,14 @@ import { useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import {
   ClipboardList,
-  FileText,
   HandCoins,
-    Plus,
+  Plus,
   Printer,
   Receipt,
   Scale,
   Search,
   Store,
-  CreditCard,
-    } from "lucide-react"
+} from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -28,17 +26,12 @@ import { formatCurrency, formatNumber } from "@/util/format"
 import { useLocaleStore } from "@/shared/stores/locale-store"
 import { ROUTES } from "@/app/constants/routes"
 import { useStoresPageQuery } from "@/shared/queries/store.query"
-import { useInvoiceDetailQuery, useInvoicesQuery } from "../queries/invoice.query"
-import { useVouchersQuery } from "../queries/voucher.query"
+import { useInvoicesQuery } from "../queries/invoice.query"
 import { CreateInvoiceDialog } from "../components/create-invoice-dialog"
 import { InvoiceTaxPreview } from "../components/invoice-tax-preview"
-import { RecordVoucherDialog } from "../components/record-voucher-dialog"
-import { VouchersTable } from "../components/vouchers-table"
 import type { Invoice } from "../types/invoice"
-import type { PaymentVoucher } from "../types/voucher"
 
 const EMPTY_INVOICES: Invoice[] = []
-const EMPTY_VOUCHERS: PaymentVoucher[] = []
 
 function getInvoiceStatusBadgeVariant(status: string): StatusBadgeVariant {
   switch (status) {
@@ -58,36 +51,23 @@ export function InvoicesPage() {
   const navigate = useNavigate()
   const locale = useLocaleStore((state) => state.locale)
 
-  const [activeView, setActiveView] = useState<"invoices" | "vouchers">("invoices")
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [storeFilter, setStoreFilter] = useState("all")
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
-  const [voucherInvoiceId, setVoucherInvoiceId] = useState<number | null>(null)
   const [previewInvoice, setPreviewInvoice] = useState<Invoice | null>(null)
 
   const invoicesQuery = useInvoicesQuery()
-  const vouchersQuery = useVouchersQuery()
   const storesQuery = useStoresPageQuery({ pageNumber: 1, pageSize: 200 })
 
   const invoices = invoicesQuery.data ?? EMPTY_INVOICES
-  const vouchers = vouchersQuery.data ?? EMPTY_VOUCHERS
   const stores = storesQuery.data?.data ?? []
 
-  // The voucher dialog allocates against a specific invoice's orders, so it needs the detail payload.
-  const voucherInvoiceQuery = useInvoiceDetailQuery(voucherInvoiceId)
-
-  // Stats calculation
   const totalInvoicesCount = invoices.length
   const totalOrdersCount = invoices.reduce((sum, inv) => sum + inv.orderCount, 0)
   const totalSubtotal = invoices.reduce((sum, inv) => sum + inv.subtotal, 0)
   const totalVat = invoices.reduce((sum, inv) => sum + inv.vatAmount, 0)
   const grandTotal = invoices.reduce((sum, inv) => sum + inv.grandTotal, 0)
-
-  const totalVouchersCount = vouchers.length
-  const totalVouchersReceived = vouchers.reduce((sum, v) => sum + v.totalAmount, 0)
-  const totalVouchersAllocated = vouchers.reduce((sum, v) => sum + v.allocatedAmount, 0)
-  const totalVouchersUnallocated = vouchers.reduce((sum, v) => sum + v.unallocatedAmount, 0)
 
   // Filtered invoices
   const filteredInvoices = useMemo(() => {
@@ -112,25 +92,14 @@ export function InvoicesPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">
-            Invoices & Payment Vouchers
+            Invoices
           </h1>
           <p className="text-xs text-muted-foreground mt-0.5">
-            จัดการใบแจ้งหนี้รวมตามรอบการสั่งซื้อ และบันทึกใบสำคัญรับเงินสำหรับตัดยอดชำระเงิน
+            Manage consolidated invoices by store, period, and order batch.
           </p>
         </div>
 
         <div className="flex items-center gap-2.5">
-          <Button
-            type="button"
-            variant="outline"
-            disabled={invoices.length === 0}
-            onClick={() => setVoucherInvoiceId(invoices[0]?.id ?? null)}
-            className="rounded-none text-xs h-9 font-semibold gap-1.5 border-primary text-primary hover:bg-primary/10"
-          >
-            <Receipt className="size-4" />
-            + Record Voucher
-          </Button>
-
           <Button
             type="button"
             onClick={() => setCreateDialogOpen(true)}
@@ -142,94 +111,35 @@ export function InvoicesPage() {
         </div>
       </div>
 
-      {/* Main View Mode Navigation Tabs */}
-      <div className="flex gap-2 border-b border-border text-sm">
-        <button
-          type="button"
-          onClick={() => setActiveView("invoices")}
-          className={`flex items-center gap-2 border-b-2 px-4 py-2.5 text-xs font-medium transition-colors rounded-none ${
-            activeView === "invoices"
-              ? "border-primary text-foreground font-bold"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <FileText className="size-4 text-primary" />
-          Invoices ({invoices.length})
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveView("vouchers")}
-          className={`flex items-center gap-2 border-b-2 px-4 py-2.5 text-xs font-medium transition-colors rounded-none ${
-            activeView === "vouchers"
-              ? "border-primary text-foreground font-bold"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          <CreditCard className="size-4 text-primary" />
-          Payment Vouchers / ใบลดหนี้ ({vouchers.length})
-        </button>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          title="TOTAL INVOICES"
+          value={`${totalInvoicesCount} (${formatNumber(totalOrdersCount, locale)} Orders)`}
+          icon={ClipboardList}
+          iconWrapperClassName="bg-info/10 text-info"
+        />
+        <StatCard
+          title="SUBTOTAL (EX-VAT)"
+          value={formatCurrency(totalSubtotal, locale, "THB")}
+          icon={HandCoins}
+          iconWrapperClassName="bg-muted text-foreground"
+        />
+        <StatCard
+          title="VAT (7%)"
+          value={formatCurrency(totalVat, locale, "THB")}
+          icon={Receipt}
+          iconWrapperClassName="bg-primary/10 text-primary"
+        />
+        <StatCard
+          title="GRAND TOTAL"
+          value={formatCurrency(grandTotal, locale, "THB")}
+          icon={Scale}
+          iconWrapperClassName="bg-success/10 text-success"
+        />
       </div>
 
-      {/* Stat Cards according to active view */}
-      {activeView === "invoices" ? (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard
-            title="TOTAL INVOICES"
-            value={`${totalInvoicesCount} (${formatNumber(totalOrdersCount, locale)} Orders)`}
-            icon={ClipboardList}
-            iconWrapperClassName="bg-info/10 text-info"
-          />
-          <StatCard
-            title="SUBTOTAL (EX-VAT)"
-            value={formatCurrency(totalSubtotal, locale, "THB")}
-            icon={HandCoins}
-            iconWrapperClassName="bg-muted text-foreground"
-          />
-          <StatCard
-            title="VAT (7%)"
-            value={formatCurrency(totalVat, locale, "THB")}
-            icon={Receipt}
-            iconWrapperClassName="bg-primary/10 text-primary"
-          />
-          <StatCard
-            title="GRAND TOTAL"
-            value={formatCurrency(grandTotal, locale, "THB")}
-            icon={Scale}
-            iconWrapperClassName="bg-success/10 text-success"
-          />
-        </div>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard
-            title="TOTAL VOUCHERS"
-            value={`${totalVouchersCount} Payment Vouchers`}
-            icon={Receipt}
-            iconWrapperClassName="bg-info/10 text-info"
-          />
-          <StatCard
-            title="TOTAL FUNDS RECEIVED"
-            value={formatCurrency(totalVouchersReceived, locale, "THB")}
-            icon={HandCoins}
-            iconWrapperClassName="bg-muted text-foreground"
-          />
-          <StatCard
-            title="ALLOCATED TO ORDERS"
-            value={formatCurrency(totalVouchersAllocated, locale, "THB")}
-            icon={CreditCard}
-            iconWrapperClassName="bg-primary/10 text-primary"
-          />
-          <StatCard
-            title="UNALLOCATED CREDIT"
-            value={formatCurrency(totalVouchersUnallocated, locale, "THB")}
-            icon={Scale}
-            iconWrapperClassName="bg-success/10 text-success"
-          />
-        </div>
-      )}
-
-      {/* Tab 1: Consolidated Invoices Table */}
-      {activeView === "invoices" && (
-        <div className="space-y-4">
+      {/* Invoices Table */}
+      <div className="space-y-4">
           {/* Filters Bar */}
           <div className="border border-border bg-card p-4 shadow-sm rounded-none">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -365,16 +275,6 @@ export function InvoicesPage() {
                               type="button"
                               variant="outline"
                               size="sm"
-                              onClick={() => setVoucherInvoiceId(inv.id)}
-                              className="h-7 px-2 text-xs rounded-none gap-1"
-                            >
-                              <Receipt className="size-3" />
-                              <span>Pay</span>
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
                               onClick={() => setPreviewInvoice(inv)}
                               className="h-7 px-2 text-xs rounded-none gap-1"
                             >
@@ -391,30 +291,11 @@ export function InvoicesPage() {
             </div>
           </div>
         </div>
-      )}
-
-      {/* Tab 2: Payment Vouchers Table */}
-      {activeView === "vouchers" && (
-        <VouchersTable
-          vouchers={vouchers}
-          isLoading={vouchersQuery.isLoading}
-        />
-      )}
 
       {/* Create Consolidated Invoice Dialog */}
       <CreateInvoiceDialog
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
-      />
-
-      {/* Record Voucher Dialog */}
-      <RecordVoucherDialog
-        open={voucherInvoiceId != null}
-        onOpenChange={(open) => {
-          if (!open) setVoucherInvoiceId(null)
-        }}
-        invoice={voucherInvoiceQuery.data ?? null}
-        onSuccess={() => setVoucherInvoiceId(null)}
       />
 
       {/* Printable Preview Dialog */}

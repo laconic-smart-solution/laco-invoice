@@ -1,0 +1,126 @@
+{
+  "title": "Vouchers",
+  "subtitle": "Generate ERP GL vouchers. Only ERP IDs are stored locally; item, account, and vendor details are loaded from ERP when needed.",
+  "generate": "Generate Voucher",
+  "generate_subtitle": "Pick ERP item, account, and vendor, then enter balanced debit/credit lines.",
+  "edit": "Edit Voucher",
+  "edit_subtitle": "Update ERP item, account, vendor, and balanced debit/credit lines.",
+  "loading": "Loading vouchers...",
+  "empty": "No vouchers match the selected criteria.",
+  "kpi": {
+    "total": "TOTAL VOUCHERS",
+    "generated": "GENERATED",
+    "debit": "DEBIT TOTAL",
+    "credit": "CREDIT TOTAL"
+  },
+  "table": {
+    "voucher_no": "Voucher No.",
+    "erp_no": "ERP Voucher No.",
+    "category": "Type",
+    "brief": "Brief",
+    "item": "Item",
+    "vendor": "Vendor",
+    "store": "Store",
+    "date": "Date",
+    "debit": "Debit",
+    "credit": "Credit",
+    "status": "Status",
+    "invoice": "Invoice",
+    "actions": "Action",
+    "edit": "Edit",
+    "post_to_erp": "Post to ERP"
+  },
+  "status": {
+    "draft": "Draft",
+    "generated": "Generated",
+    "posted": "Posted",
+    "failed": "Failed"
+  },
+  "status_description": {
+    "draft": "Saved locally. A voucher number has not been assigned yet.",
+    "generated": "Local record created with a voucher number. Not posted to ERP yet.",
+    "posted": "Successfully posted to ERP GL.",
+    "failed": "Generate or ERP post failed."
+  },
+  "category": {
+    "APV": "AP Voucher",
+    "ARV": "AR Voucher",
+    "PV": "Payment Voucher",
+    "RV": "Receipt Voucher",
+    "JV": "Journal Voucher"
+  },
+  "filters": {
+    "search": "Search voucher number, brief...",
+    "status": "Status",
+    "all_statuses": "All Statuses",
+    "store": "Store",
+    "all_stores": "All Stores",
+    "showing": "Showing {{count}} of {{total}} vouchers"
+  },
+  "form": {
+    "category": "Voucher type",
+    "date": "Voucher date",
+    "store": "Store",
+    "store_placeholder": "Optional store",
+    "brief": "Brief",
+    "brief_placeholder": "Short description",
+    "description": "Description",
+    "description_placeholder": "Optional notes for ERP",
+    "tax_month": "Tax month",
+    "wht_month": "WHT month",
+    "no_tax_invoice": "No tax invoice",
+    "reject_remark": "Reject remark",
+    "reject_remark_placeholder": "Optional remark if the voucher is rejected",
+    "yes": "Yes",
+    "no": "No",
+    "item": "ERP item",
+    "item_placeholder": "Search item",
+    "account": "Account code",
+    "account_placeholder": "Search account",
+    "vendor": "Vendor",
+    "vendor_placeholder": "Search vendor",
+    "entries": "Entry lines",
+    "add_line": "Add line",
+    "remove_line": "Remove line",
+    "line_brief_placeholder": "Line brief",
+    "invoice_no": "Invoice no.",
+    "invoice_date": "Invoice date",
+    "department": "Department",
+    "department_placeholder": "Search department",
+    "exchange_rate": "Exchange rate",
+    "currency": "Currency",
+    "currency_placeholder": "Search currency",
+    "balanced": "Balanced",
+    "unbalanced": "Unbalanced",
+    "cancel": "Cancel",
+    "save": "Save",
+    "validation": {
+      "brief_required": "Brief is required.",
+      "item_required": "Select an ERP item.",
+      "account_required": "Select an account code.",
+      "vendor_required": "Select a vendor.",
+      "entry_account_required": "Select an account for this line.",
+      "invalid_amount": "Enter a valid amount.",
+      "entry_amount_required": "Enter a debit or credit amount.",
+      "both_debit_credit": "A line cannot have both debit and credit.",
+      "unbalanced": "Debit and credit totals must match.",
+      "invalid_rate": "Exchange rate must be greater than zero."
+    }
+  },
+  "detail": {
+    "not_found": "Voucher not found.",
+    "totals": "Totals"
+  },
+  "post": {
+    "confirm_title": "Post voucher to ERP?",
+    "confirm_description": "Post {{number}} to ERP GL. This cannot be edited afterward.",
+    "confirm": "Post to ERP"
+  },
+  "errors": {
+    "generate_failed": "Failed to generate the voucher.",
+    "update_failed": "Failed to update the voucher.",
+    "post_failed": "Failed to post the voucher to ERP.",
+    "cannot_edit_posted": "Posted vouchers cannot be edited.",
+    "cannot_post": "Only generated vouchers can be posted to ERP."
+  }
+}

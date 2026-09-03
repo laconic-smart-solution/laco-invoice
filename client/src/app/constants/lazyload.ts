@@ -78,6 +78,22 @@ export const InvoiceDetailPage = PageLoader(
   )
 )
 
+export const VouchersPage = PageLoader(
+  lazy(() =>
+    import("@/features/vouchers/pages/vouchers-page").then((module) => ({
+      default: module.VouchersPage,
+    }))
+  )
+)
+
+export const VoucherDetailPage = PageLoader(
+  lazy(() =>
+    import("@/features/vouchers/pages/voucher-detail-page").then((module) => ({
+      default: module.VoucherDetailPage,
+    }))
+  )
+)
+
 export const CustomersPage = PageLoader(
   lazy(() =>
     import("@/features/customers/pages/customers-page").then((module) => ({

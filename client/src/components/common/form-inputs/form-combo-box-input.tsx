@@ -73,7 +73,11 @@ export function FormComboBoxInput<T extends FieldValues>({
               name={field.name}
               items={options}
               value={selected}
-              itemToStringValue={(item) => item?.label ?? ""}
+              itemToStringLabel={(item) => item?.label ?? ""}
+              itemToStringValue={(item) => item?.value ?? ""}
+              isItemEqualToValue={(itemValue, value) =>
+                itemValue?.value === value?.value
+              }
               disabled={disabled}
               required={required}
               onValueChange={(option) => {

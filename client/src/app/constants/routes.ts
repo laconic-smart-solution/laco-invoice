@@ -21,6 +21,8 @@ export const ROUTES = {
       `/orders/inputs/${inputRunId}`,
     invoices: "/invoices",
     invoiceDetail: (invoiceId: string | number) => `/invoices/${invoiceId}`,
+    vouchers: "/vouchers",
+    voucherDetail: (voucherId: string | number) => `/vouchers/${voucherId}`,
     customers: "/customers",
     customerCreate: "/customers/new",
     customerEdit: (customerId: string) => `/customers/${customerId}/edit`,

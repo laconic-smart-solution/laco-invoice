@@ -2,7 +2,6 @@ import type { InternalAxiosRequestConfig } from "axios"
 
 import type { CustomerCreateInput } from "@/features/customers/types/customer"
 import type { CreateInvoiceRequest, InvoiceStatus } from "@/features/invoices/types/invoice"
-import type { CreateVoucherRequest } from "@/features/invoices/types/voucher"
 import type {
   MarketplaceCode,
   StoreCreateInput,
@@ -27,25 +26,33 @@ import {
 } from "@/shared/mock/mock-order-bridge"
 import {
   checkMockInvoiceNumber,
-  checkMockVoucherNumber,
   createMockInvoice,
-  createMockVoucher,
   deleteMockInvoice,
-  deleteMockVoucher,
   getMockInvoiceDetail,
   getMockInvoiceRecord,
   getMockNextInvoiceNumber,
-  getMockNextVoucherNumber,
-  getMockVoucher,
-  listMockVouchersByInvoice,
   MockApiError,
   pageMockInvoices,
-  pageMockVouchers,
   previewMockInvoice,
   updateMockInvoiceNumber,
   updateMockInvoiceStatus,
   buildInvoicePaymentSummary,
 } from "@/shared/mock/mock-invoice-bridge"
+import {
+  generateMockVoucher,
+  getMockVoucherDetail,
+  pageMockVouchers,
+  postMockVoucherToErp,
+  updateMockVoucher,
+} from "@/shared/mock/mock-voucher-bridge"
+import {
+  listMockErpAccounts,
+  listMockErpCurrencies,
+  listMockErpDepartments,
+  listMockErpItems,
+  listMockErpVendors,
+} from "@/shared/mock/mock-erp-catalog"
+import type { GenerateVoucherRequest, VoucherPageRequest } from "@/features/vouchers/types/voucher"
 import { MOCK_USER } from "@/shared/mock/mock-user"
 import {
   emptyBlob,
@@ -1240,62 +1247,89 @@ export async function handleMockRequest(
     }
   }
 
-  if (method === "POST" && path === "/v1/payment-vouchers/pageable") {
-    const { data, meta } = pageMockVouchers(body)
+  if (method === "GET" && path === "/v1/erp-lookups/items") {
+    return {
+      status: 200,
+      body: ok(listMockErpItems(typeof params?.search === "string" ? params.search : undefined)),
+    }
+  }
+
+  if (method === "GET" && path === "/v1/erp-lookups/account-codes") {
+    return {
+      status: 200,
+      body: ok(listMockErpAccounts(typeof params?.search === "string" ? params.search : undefined)),
+    }
+  }
+
+  if (method === "GET" && path === "/v1/erp-lookups/vendors") {
+    return {
+      status: 200,
+      body: ok(listMockErpVendors(typeof params?.search === "string" ? params.search : undefined)),
+    }
+  }
+
+  if (method === "GET" && path === "/v1/erp-lookups/departments") {
+    return {
+      status: 200,
+      body: ok(listMockErpDepartments(typeof params?.search === "string" ? params.search : undefined)),
+    }
+  }
+
+  if (method === "GET" && path === "/v1/erp-lookups/currencies") {
+    return {
+      status: 200,
+      body: ok(listMockErpCurrencies(typeof params?.search === "string" ? params.search : undefined)),
+    }
+  }
+
+  if (method === "POST" && path === "/v1/vouchers/pageable") {
+    const { data, meta } = pageMockVouchers(body as unknown as VoucherPageRequest)
     return { status: 200, body: ok(data, meta) }
   }
 
-  if (method === "GET" && path === "/v1/payment-vouchers/next-number") {
-    return { status: 200, body: ok(getMockNextVoucherNumber()) }
-  }
-
-  if (method === "GET" && path === "/v1/payment-vouchers/number-availability") {
-    const voucherNumber = String(params?.voucherNumber ?? "")
-    const excludeId =
-      params?.excludeId == null || params.excludeId === ""
-        ? undefined
-        : Number(params.excludeId)
-    return {
-      status: 200,
-      body: ok(checkMockVoucherNumber(voucherNumber, excludeId)),
-    }
-  }
-
-  const vouchersByInvoice = matchPath(
-    /^\/v1\/payment-vouchers\/by-invoice\/(\d+)$/,
-    path
-  )
-  if (method === "GET" && vouchersByInvoice) {
-    return {
-      status: 200,
-      body: ok(listMockVouchersByInvoice(Number(vouchersByInvoice[1]))),
-    }
-  }
-
-  if (method === "POST" && path === "/v1/payment-vouchers") {
+  if (method === "POST" && path === "/v1/vouchers") {
     try {
       return {
         status: 200,
-        body: ok(createMockVoucher(body as unknown as CreateVoucherRequest)),
+        body: ok(generateMockVoucher(body as unknown as GenerateVoucherRequest)),
       }
     } catch (error) {
       return handleMockApiError(error)
     }
   }
 
-  const voucherGet = matchPath(/^\/v1\/payment-vouchers\/(\d+)$/, path)
-  if (method === "GET" && voucherGet) {
+  const voucherPostErp = matchPath(/^\/v1\/vouchers\/(\d+)\/post$/, path)
+  if (method === "POST" && voucherPostErp) {
     try {
-      return { status: 200, body: ok(getMockVoucher(Number(voucherGet[1]))) }
+      return {
+        status: 200,
+        body: ok(postMockVoucherToErp(Number(voucherPostErp[1]))),
+      }
     } catch (error) {
       return handleMockApiError(error)
     }
   }
 
-  if (method === "DELETE" && voucherGet) {
+  const voucherById = matchPath(/^\/v1\/vouchers\/(\d+)$/, path)
+  if (method === "PUT" && voucherById) {
     try {
-      deleteMockVoucher(Number(voucherGet[1]))
-      return { status: 200, body: ok(null) }
+      return {
+        status: 200,
+        body: ok(
+          updateMockVoucher(
+            Number(voucherById[1]),
+            body as unknown as GenerateVoucherRequest
+          )
+        ),
+      }
+    } catch (error) {
+      return handleMockApiError(error)
+    }
+  }
+
+  if (method === "GET" && voucherById) {
+    try {
+      return { status: 200, body: ok(getMockVoucherDetail(Number(voucherById[1]))) }
     } catch (error) {
       return handleMockApiError(error)
     }

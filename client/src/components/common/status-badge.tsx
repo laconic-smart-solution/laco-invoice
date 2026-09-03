@@ -63,7 +63,7 @@ export function StatusBadge({
           {badge}
         </button>
       </TooltipTrigger>
-      <TooltipContent side="top" className="max-w-xs text-left leading-relaxed">
+      <TooltipContent side="top" className="max-w-xs whitespace-pre-line text-left leading-relaxed">
         {tooltip}
       </TooltipContent>
     </Tooltip>

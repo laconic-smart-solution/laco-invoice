@@ -78,7 +78,7 @@ public class InvoiceController {
 	}
 
 	@GetMapping("/{id}/payment-summary")
-	@Operation(summary = "Get voucher settlement summary for an invoice")
+	@Operation(summary = "Get payment summary for an invoice")
 	public ApiResponse<InvoicePaymentSummaryDto> paymentSummary(@PathVariable Long id) {
 		return ApiResponse.ok("OK", service.paymentSummary(id));
 	}

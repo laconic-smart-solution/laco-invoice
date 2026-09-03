@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,7 +41,6 @@ import com.laconic.lacoinvoice.domain.repositories.OrderInputRunRepository;
 import com.laconic.lacoinvoice.domain.repositories.OrderRepository;
 import com.laconic.lacoinvoice.domain.repositories.OrderTaxInvoiceRepository;
 import com.laconic.lacoinvoice.domain.repositories.StoreRepository;
-import com.laconic.lacoinvoice.domain.repositories.VoucherOrderAllocationRepository;
 import com.laconic.lacoinvoice.features.invoice.dto.GeneratedNumberDto;
 import com.laconic.lacoinvoice.features.invoice.dto.InvoiceCreateRequest;
 import com.laconic.lacoinvoice.features.invoice.dto.InvoiceDetailDto;
@@ -76,7 +74,6 @@ public class InvoiceService {
 	private final OrderInputRunRepository orderInputRunRepository;
 	private final StoreRepository storeRepository;
 	private final MarketplaceRepository marketplaceRepository;
-	private final VoucherOrderAllocationRepository allocationRepository;
 	private final InvoiceMapper mapper;
 
 	public InvoiceService(
@@ -88,7 +85,6 @@ public class InvoiceService {
 			OrderInputRunRepository orderInputRunRepository,
 			StoreRepository storeRepository,
 			MarketplaceRepository marketplaceRepository,
-			VoucherOrderAllocationRepository allocationRepository,
 			InvoiceMapper mapper) {
 		this.invoiceRepository = invoiceRepository;
 		this.invoiceOrderRepository = invoiceOrderRepository;
@@ -98,7 +94,6 @@ public class InvoiceService {
 		this.orderInputRunRepository = orderInputRunRepository;
 		this.storeRepository = storeRepository;
 		this.marketplaceRepository = marketplaceRepository;
-		this.allocationRepository = allocationRepository;
 		this.mapper = mapper;
 	}
 
@@ -122,17 +117,12 @@ public class InvoiceService {
 		Invoice invoice = requireInvoice(id);
 		List<InvoiceOrder> invoiceOrders = invoiceOrderRepository.findByInvoice_IdOrderByOrderDateAscIdAsc(id);
 		List<InvoiceItem> invoiceItems = invoiceItemRepository.findByInvoice_IdOrderByOrderDateAscIdAsc(id);
-
-		Map<Long, BigDecimal> paidByOrderId = paidAmountsByOrderId(invoiceOrders.stream()
-				.map(io -> io.getOrder() != null ? io.getOrder().getId() : null)
-				.filter(Objects::nonNull)
-				.toList());
+		boolean fullyPaid = invoice.getStatus() == InvoiceStatus.PAID;
 
 		List<InvoiceOrderSummaryDto> orders = invoiceOrders.stream()
 				.map(io -> {
-					Long orderId = io.getOrder() != null ? io.getOrder().getId() : null;
 					BigDecimal total = nonNull(io.getTotalAmount());
-					BigDecimal paid = paidByOrderId.getOrDefault(orderId, BigDecimal.ZERO);
+					BigDecimal paid = fullyPaid ? total : BigDecimal.ZERO;
 					BigDecimal remaining = total.subtract(paid).max(BigDecimal.ZERO);
 					return mapper.toOrderSummaryDto(io, paid, remaining, allocationStatus(total, paid));
 				})
@@ -403,12 +393,9 @@ public class InvoiceService {
 
 	private InvoicePaymentSummaryDto buildPaymentSummary(Invoice invoice) {
 		BigDecimal total = nonNull(invoice.getGrandTotal());
-		BigDecimal paid = nonNull(allocationRepository.sumAllocatedByInvoiceId(invoice.getId()));
-		BigDecimal remaining = total.subtract(paid).max(BigDecimal.ZERO);
-		int paidPercentage = total.signum() > 0
-				? Math.min(100, paid.multiply(BigDecimal.valueOf(100))
-						.divide(total, 0, RoundingMode.HALF_UP).intValue())
-				: 0;
+		boolean fullyPaid = invoice.getStatus() == InvoiceStatus.PAID;
+		BigDecimal paid = fullyPaid ? total : BigDecimal.ZERO;
+		BigDecimal remaining = fullyPaid ? BigDecimal.ZERO : total;
 		return new InvoicePaymentSummaryDto(
 				invoice.getId(),
 				invoice.getInvoiceNumber(),
@@ -416,19 +403,7 @@ public class InvoiceService {
 				paid,
 				remaining,
 				allocationStatus(total, paid),
-				paidPercentage,
-				allocationRepository.countVouchersByInvoiceId(invoice.getId()));
-	}
-
-	private Map<Long, BigDecimal> paidAmountsByOrderId(List<Long> orderIds) {
-		if (orderIds.isEmpty()) {
-			return Map.of();
-		}
-		Map<Long, BigDecimal> result = new HashMap<>();
-		for (Object[] row : allocationRepository.sumAllocatedByOrderIds(orderIds)) {
-			result.put((Long) row[0], row[1] == null ? BigDecimal.ZERO : (BigDecimal) row[1]);
-		}
-		return result;
+				fullyPaid ? 100 : 0);
 	}
 
 	private String generateNextNumber() {

@@ -6,14 +6,7 @@ import type {
   InvoicePaymentSummary,
   InvoicePreview,
   InvoiceStatus,
-  PaymentAllocationStatus,
 } from "@/features/invoices/types/invoice"
-import type {
-  CreateVoucherRequest,
-  PaymentMethod,
-  PaymentVoucher,
-  VoucherStatus,
-} from "@/features/invoices/types/voucher"
 import { getMockApiOrderDetail, getMockApiOrdersPage } from "@/shared/mock/mock-order-bridge"
 import {
   getInputRunById,
@@ -59,69 +52,20 @@ function marketplaceIdFor(code: string): number {
   return MOCK_MARKETPLACES.find((m) => m.code === code)?.id ?? 3
 }
 
-function periodPrefix(kind: "INV" | "VCH"): string {
+function periodPrefix(): string {
   const now = new Date()
   const month = String(now.getMonth() + 1).padStart(2, "0")
-  return `${kind}-${now.getFullYear()}${month}-`
+  return `INV-${now.getFullYear()}${month}-`
 }
 
-function nextSequentialNumber(kind: "INV" | "VCH", existing: string[]): string {
-  const prefix = periodPrefix(kind)
+function nextSequentialNumber(existing: string[]): string {
+  const prefix = periodPrefix()
   const maxSuffix = existing
     .filter((number) => number.toUpperCase().startsWith(prefix))
     .map((number) => Number.parseInt(number.slice(prefix.length), 10))
     .filter((value) => Number.isFinite(value))
     .reduce((max, value) => Math.max(max, value), 0)
   return `${prefix}${String(maxSuffix + 1).padStart(3, "0")}`
-}
-
-function allocationStatus(total: number, paid: number): PaymentAllocationStatus {
-  if (total <= 0) {
-    return "UNPAID"
-  }
-  if (paid > total) {
-    return "OVERPAID"
-  }
-  if (paid === total) {
-    return "PAID"
-  }
-  return paid > 0 ? "PARTIAL" : "UNPAID"
-}
-
-function paidByOrderId(): Map<number, number> {
-  const paid = new Map<number, number>()
-  for (const voucher of getMockState().vouchers) {
-    if (voucher.status === "VOID") {
-      continue
-    }
-    for (const allocation of voucher.allocations) {
-      if (allocation.orderId == null) {
-        continue
-      }
-      paid.set(
-        allocation.orderId,
-        money((paid.get(allocation.orderId) ?? 0) + allocation.allocatedAmount)
-      )
-    }
-  }
-  return paid
-}
-
-function paidByInvoiceId(invoiceId: number): { paid: number; voucherIds: Set<number> } {
-  let paid = 0
-  const voucherIds = new Set<number>()
-  for (const voucher of getMockState().vouchers) {
-    if (voucher.status === "VOID") {
-      continue
-    }
-    for (const allocation of voucher.allocations) {
-      if (allocation.invoiceId === invoiceId) {
-        paid += allocation.allocatedAmount
-        voucherIds.add(voucher.id)
-      }
-    }
-  }
-  return { paid: money(paid), voucherIds }
 }
 
 function billedOrderIds(excludeInvoiceId?: number): Set<number> {
@@ -141,34 +85,31 @@ function billedOrderIds(excludeInvoiceId?: number): Set<number> {
 }
 
 export function buildInvoicePaymentSummary(invoice: Invoice): InvoicePaymentSummary {
-  const { paid, voucherIds } = paidByInvoiceId(invoice.id)
-  const remaining = money(Math.max(0, invoice.grandTotal - paid))
-  const paidPercentage =
-    invoice.grandTotal > 0
-      ? Math.min(100, Math.round((paid * 100) / invoice.grandTotal))
-      : 0
+  const fullyPaid = invoice.status === "PAID"
+  const paid = fullyPaid ? invoice.grandTotal : 0
   return {
     invoiceId: invoice.id,
     invoiceNumber: invoice.invoiceNumber,
     invoiceTotalAmount: invoice.grandTotal,
     totalPaidAmount: paid,
-    remainingBalance: remaining,
-    status: allocationStatus(invoice.grandTotal, paid),
-    paidPercentage,
-    voucherCount: voucherIds.size,
+    remainingBalance: fullyPaid ? 0 : invoice.grandTotal,
+    status: fullyPaid ? "PAID" : "UNPAID",
+    paidPercentage: fullyPaid ? 100 : 0,
   }
 }
 
-function withLiveOrderPayments(orders: InvoiceOrderSummary[]): InvoiceOrderSummary[] {
-  const paid = paidByOrderId()
+function withLiveOrderPayments(
+  orders: InvoiceOrderSummary[],
+  invoice: Invoice
+): InvoiceOrderSummary[] {
+  const fullyPaid = invoice.status === "PAID"
   return orders.map((order) => {
-    const totalPaidAmount = paid.get(order.orderId) ?? 0
-    const remainingBalance = money(Math.max(0, order.totalAmount - totalPaidAmount))
+    const totalPaidAmount = fullyPaid ? order.totalAmount : 0
     return {
       ...order,
       totalPaidAmount,
-      remainingBalance,
-      paymentStatus: allocationStatus(order.totalAmount, totalPaidAmount),
+      remainingBalance: money(Math.max(0, order.totalAmount - totalPaidAmount)),
+      paymentStatus: fullyPaid ? "PAID" : "UNPAID",
     }
   })
 }
@@ -184,7 +125,7 @@ export function getMockInvoiceDetail(id: number) {
   }
   return {
     invoice: record.invoice,
-    orders: withLiveOrderPayments(record.orders),
+    orders: withLiveOrderPayments(record.orders, record.invoice),
     items: record.items,
     paymentSummary: buildInvoicePaymentSummary(record.invoice),
   }
@@ -228,7 +169,6 @@ export function pageMockInvoices(body: Record<string, unknown>) {
 export function getMockNextInvoiceNumber(): GeneratedNumber {
   return {
     number: nextSequentialNumber(
-      "INV",
       getMockState().invoices.map((record) => record.invoice.invoiceNumber)
     ),
     available: true,
@@ -484,188 +424,3 @@ export function deleteMockInvoice(id: number): void {
   state.invoices.splice(index, 1)
 }
 
-export function pageMockVouchers(body: Record<string, unknown>) {
-  const filter = (body.filter as Record<string, unknown> | undefined) ?? {}
-  let items = [...getMockState().vouchers]
-
-  if (filter.storeId != null) {
-    const storeId = Number(filter.storeId)
-    items = items.filter((voucher) => voucher.storeId === storeId)
-  }
-  if (typeof filter.voucherNumber === "string" && filter.voucherNumber.trim()) {
-    items = items.filter((voucher) =>
-      contains(voucher.voucherNumber, filter.voucherNumber as string)
-    )
-  }
-  if (typeof filter.customerName === "string" && filter.customerName.trim()) {
-    items = items.filter((voucher) =>
-      contains(voucher.customerName, filter.customerName as string)
-    )
-  }
-  if (typeof filter.paymentMethod === "string" && filter.paymentMethod) {
-    items = items.filter((voucher) => voucher.paymentMethod === filter.paymentMethod)
-  }
-  if (typeof filter.status === "string" && filter.status) {
-    items = items.filter((voucher) => voucher.status === filter.status)
-  }
-
-  const sortOrder = body.sortOrder === "ASC" ? 1 : -1
-  items.sort((a, b) => a.createdAt.localeCompare(b.createdAt) * sortOrder)
-
-  return paginateArray(items, body.pageNumber, body.pageSize)
-}
-
-export function getMockVoucher(id: number): PaymentVoucher {
-  const voucher = getMockState().vouchers.find((item) => item.id === id)
-  if (!voucher) {
-    throw new MockApiError(404, `Payment voucher not found: id=${id}`)
-  }
-  return voucher
-}
-
-export function listMockVouchersByInvoice(invoiceId: number): PaymentVoucher[] {
-  return getMockState().vouchers.filter((voucher) =>
-    voucher.allocations.some((allocation) => allocation.invoiceId === invoiceId)
-  )
-}
-
-export function getMockNextVoucherNumber(): GeneratedNumber {
-  return {
-    number: nextSequentialNumber(
-      "VCH",
-      getMockState().vouchers.map((voucher) => voucher.voucherNumber)
-    ),
-    available: true,
-  }
-}
-
-export function checkMockVoucherNumber(
-  voucherNumber: string,
-  excludeId?: number
-): GeneratedNumber {
-  const trimmed = voucherNumber.trim()
-  if (!trimmed) {
-    return { number: trimmed, available: false }
-  }
-  const taken = getMockState().vouchers.some(
-    (voucher) =>
-      voucher.voucherNumber.toLowerCase() === trimmed.toLowerCase() &&
-      voucher.id !== excludeId
-  )
-  return { number: trimmed, available: !taken }
-}
-
-const PAYMENT_METHODS: PaymentMethod[] = [
-  "BANK_TRANSFER",
-  "CREDIT_CARD",
-  "CASH",
-  "PLATFORM_PAYOUT",
-  "PROMPTPAY",
-  "CHEQUE",
-]
-
-function asPaymentMethod(value: unknown): PaymentMethod {
-  if (typeof value === "string" && PAYMENT_METHODS.includes(value as PaymentMethod)) {
-    return value as PaymentMethod
-  }
-  return "BANK_TRANSFER"
-}
-
-export function createMockVoucher(request: CreateVoucherRequest): PaymentVoucher {
-  const state = getMockState()
-  const store = getStoreById(request.storeId)
-  if (!store) {
-    throw new MockApiError(400, `Store not found: id=${request.storeId}`)
-  }
-
-  const voucherNumber =
-    (request.voucherNumber ?? "").trim() || getMockNextVoucherNumber().number
-  if (!checkMockVoucherNumber(voucherNumber).available) {
-    throw new MockApiError(
-      400,
-      `Voucher number "${voucherNumber}" already exists. Please choose a unique number.`
-    )
-  }
-
-  const allocationsInput = request.allocations ?? []
-  if (allocationsInput.length === 0) {
-    throw new MockApiError(400, "At least one allocation is required.")
-  }
-
-  const allocatedTotal = money(
-    allocationsInput.reduce((sum, allocation) => sum + allocation.allocatedAmount, 0)
-  )
-  if (allocatedTotal > request.totalAmount) {
-    throw new MockApiError(
-      400,
-      `Allocated amount (${allocatedTotal}) exceeds the received voucher amount (${request.totalAmount}).`
-    )
-  }
-
-  const previouslyPaid = paidByOrderId()
-  const timestamp = nowIso()
-  const id = state.nextVoucherId++
-  const allocations = allocationsInput.map((allocation) => {
-    const invoice =
-      allocation.invoiceId != null ? getMockInvoiceRecord(allocation.invoiceId) : undefined
-    const billedOrder = invoice?.orders.find((order) => order.orderId === allocation.orderId)
-    const liveOrder = getMockApiOrderDetail(allocation.orderId)
-    const orderTotal =
-      billedOrder?.totalAmount ?? liveOrder?.order.totalAmount ?? allocation.allocatedAmount
-    const previous = previouslyPaid.get(allocation.orderId) ?? 0
-    const remaining = money(Math.max(0, orderTotal - previous - allocation.allocatedAmount))
-    previouslyPaid.set(allocation.orderId, money(previous + allocation.allocatedAmount))
-
-    return {
-      id: state.nextAllocationId++,
-      voucherId: id,
-      orderId: allocation.orderId,
-      externalOrderId:
-        billedOrder?.externalOrderId ??
-        liveOrder?.order.externalOrderId ??
-        `ORDER-${allocation.orderId}`,
-      invoiceId: allocation.invoiceId ?? invoice?.invoice.id ?? null,
-      invoiceNumber: invoice?.invoice.invoiceNumber ?? null,
-      orderTotalAmount: orderTotal,
-      allocatedAmount: allocation.allocatedAmount,
-      previousPaidAmount: previous,
-      remainingBalance: remaining,
-      buyerName: billedOrder?.buyerName ?? liveOrder?.customer?.name ?? null,
-      allocatedAt: timestamp,
-      notes: allocation.notes ?? null,
-    }
-  })
-
-  const voucher: PaymentVoucher = {
-    id,
-    voucherNumber,
-    date: request.date,
-    storeId: store.id,
-    storeName: store.name,
-    customerName: request.customerName ?? null,
-    customerTaxId: request.customerTaxId ?? null,
-    totalAmount: request.totalAmount,
-    allocatedAmount: allocatedTotal,
-    unallocatedAmount: money(Math.max(0, request.totalAmount - allocatedTotal)),
-    paymentMethod: asPaymentMethod(request.paymentMethod),
-    bankReference: request.bankReference ?? null,
-    proofFileUrl: null,
-    notes: request.notes ?? null,
-    status: "CONFIRMED" satisfies VoucherStatus,
-    createdAt: timestamp,
-    updatedAt: timestamp,
-    allocations,
-  }
-
-  state.vouchers.unshift(voucher)
-  return voucher
-}
-
-export function deleteMockVoucher(id: number): void {
-  const state = getMockState()
-  const index = state.vouchers.findIndex((voucher) => voucher.id === id)
-  if (index < 0) {
-    throw new MockApiError(404, `Payment voucher not found: id=${id}`)
-  }
-  state.vouchers.splice(index, 1)
-}

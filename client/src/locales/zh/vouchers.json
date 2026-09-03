@@ -1,0 +1,126 @@
+{
+  "title": "凭证",
+  "subtitle": "生成 ERP 总账凭证。本系统只保存 ERP ID；物料、科目和供应商详情在需要时从 ERP 读取。",
+  "generate": "生成凭证",
+  "generate_subtitle": "从 ERP 选择物料、科目和供应商，并录入借贷平衡的分录。",
+  "edit": "编辑凭证",
+  "edit_subtitle": "更新 ERP 物料、科目、供应商及借贷平衡的分录。",
+  "loading": "正在加载凭证...",
+  "empty": "没有符合条件的凭证。",
+  "kpi": {
+    "total": "凭证总数",
+    "generated": "已生成",
+    "debit": "借方合计",
+    "credit": "贷方合计"
+  },
+  "table": {
+    "voucher_no": "凭证号",
+    "erp_no": "ERP 凭证号",
+    "category": "类型",
+    "brief": "摘要",
+    "item": "物料",
+    "vendor": "供应商",
+    "store": "店铺",
+    "date": "日期",
+    "debit": "借方",
+    "credit": "贷方",
+    "status": "状态",
+    "invoice": "发票",
+    "actions": "操作",
+    "edit": "编辑",
+    "post_to_erp": "过账到 ERP"
+  },
+  "status": {
+    "draft": "草稿",
+    "generated": "已生成",
+    "posted": "已过账",
+    "failed": "失败"
+  },
+  "status_description": {
+    "draft": "已保存在本系统，尚未分配凭证号。",
+    "generated": "本系统已生成凭证号，尚未过账到 ERP。",
+    "posted": "已成功过账到 ERP 总账。",
+    "failed": "生成或过账到 ERP 失败。"
+  },
+  "category": {
+    "APV": "应付凭证",
+    "ARV": "应收凭证",
+    "PV": "付款凭证",
+    "RV": "收款凭证",
+    "JV": "转账凭证"
+  },
+  "filters": {
+    "search": "搜索凭证号、摘要...",
+    "status": "状态",
+    "all_statuses": "全部状态",
+    "store": "店铺",
+    "all_stores": "全部店铺",
+    "showing": "显示 {{count}} / {{total}} 张凭证"
+  },
+  "form": {
+    "category": "凭证类型",
+    "date": "凭证日期",
+    "store": "店铺",
+    "store_placeholder": "可选店铺",
+    "brief": "摘要",
+    "brief_placeholder": "简短说明",
+    "description": "说明",
+    "description_placeholder": "可选的 ERP 备注",
+    "tax_month": "税务月份",
+    "wht_month": "预扣税月份",
+    "no_tax_invoice": "无税务发票",
+    "reject_remark": "驳回备注",
+    "reject_remark_placeholder": "凭证被驳回时的可选备注",
+    "yes": "是",
+    "no": "否",
+    "item": "ERP 物料",
+    "item_placeholder": "搜索物料",
+    "account": "科目代码",
+    "account_placeholder": "搜索科目",
+    "vendor": "供应商",
+    "vendor_placeholder": "搜索供应商",
+    "entries": "分录",
+    "add_line": "添加分录",
+    "remove_line": "删除分录",
+    "line_brief_placeholder": "分录摘要",
+    "invoice_no": "发票号",
+    "invoice_date": "发票日期",
+    "department": "部门",
+    "department_placeholder": "搜索部门",
+    "exchange_rate": "汇率",
+    "currency": "币种",
+    "currency_placeholder": "搜索币种",
+    "balanced": "已平衡",
+    "unbalanced": "未平衡",
+    "cancel": "取消",
+    "save": "保存",
+    "validation": {
+      "brief_required": "请填写摘要。",
+      "item_required": "请选择 ERP 物料。",
+      "account_required": "请选择科目。",
+      "vendor_required": "请选择供应商。",
+      "entry_account_required": "请为本行选择科目。",
+      "invalid_amount": "请输入有效金额。",
+      "entry_amount_required": "请输入借方或贷方金额。",
+      "both_debit_credit": "同一行不能同时有借方和贷方。",
+      "unbalanced": "借方合计必须等于贷方合计。",
+      "invalid_rate": "汇率必须大于零。"
+    }
+  },
+  "detail": {
+    "not_found": "未找到凭证。",
+    "totals": "合计"
+  },
+  "post": {
+    "confirm_title": "过账到 ERP？",
+    "confirm_description": "将 {{number}} 过账到 ERP 总账。过账后不可再编辑。",
+    "confirm": "过账到 ERP"
+  },
+  "errors": {
+    "generate_failed": "生成凭证失败。",
+    "update_failed": "更新凭证失败。",
+    "post_failed": "过账到 ERP 失败。",
+    "cannot_edit_posted": "已过账的凭证不能编辑。",
+    "cannot_post": "只有已生成的凭证可以过账到 ERP。"
+  }
+}

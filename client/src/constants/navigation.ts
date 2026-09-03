@@ -7,6 +7,7 @@ import {
   Store,
   UserCog,
   Users,
+  BookText,
   type LucideIcon,
 } from "lucide-react"
 
@@ -41,6 +42,7 @@ export const SIDEBAR_NAV_ITEMS: SidebarNavItem[] = [
     ],
   },
   { key: "invoices", path: ROUTES.dashboard.invoices, icon: FileText },
+  { key: "vouchers", path: ROUTES.dashboard.vouchers, icon: BookText },
   { key: "customers", path: ROUTES.dashboard.customers, icon: Users },
   { key: "users", path: ROUTES.dashboard.users, icon: UserCog, adminOnly: true },
   { key: "shortcuts", path: ROUTES.dashboard.shortcuts, icon: Keyboard },

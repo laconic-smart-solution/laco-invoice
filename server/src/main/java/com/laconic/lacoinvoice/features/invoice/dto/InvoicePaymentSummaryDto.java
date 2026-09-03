@@ -11,6 +11,5 @@ public record InvoicePaymentSummaryDto(
 		BigDecimal totalPaidAmount,
 		BigDecimal remainingBalance,
 		PaymentAllocationStatus status,
-		int paidPercentage,
-		long voucherCount) {
+		int paidPercentage) {
 }

@@ -25,9 +25,7 @@ import {
   User,
   FilterX,
   CreditCard,
-  Plus,
-  Eye,
-  } from "lucide-react"
+} from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -50,13 +48,9 @@ import {
   useUpdateInvoiceStatusMutation,
   useUpdateInvoiceNumberMutation,
 } from "../queries/invoice.query"
-import { useInvoiceVouchersQuery } from "../queries/voucher.query"
 import { extractApiErrorMessage } from "@/shared/api/extract-api-error-message"
 import { invoiceService } from "@/shared/services/invoice.service"
 import { InvoiceTaxPreview } from "../components/invoice-tax-preview"
-import { RecordVoucherDialog } from "../components/record-voucher-dialog"
-import { VoucherDetailDialog } from "../components/voucher-detail-dialog"
-import type { PaymentVoucher } from "../types/voucher"
 
 function getInvoiceStatusBadgeVariant(status: string): StatusBadgeVariant {
   switch (status) {
@@ -76,13 +70,10 @@ export function InvoiceDetailPage() {
   const { id } = useParams<{ id: string }>()
   const locale = useLocaleStore((state) => state.locale)
 
-  const [activeTab, setActiveTab] = useState<"orders" | "items" | "vouchers">("orders")
+  const [activeTab, setActiveTab] = useState<"orders" | "items">("orders")
   const [showTaxPreview, setShowTaxPreview] = useState(false)
-  const [showRecordVoucher, setShowRecordVoucher] = useState(false)
   const [showMarkPaidConfirm, setShowMarkPaidConfirm] = useState(false)
   const [showRollbackConfirm, setShowRollbackConfirm] = useState(false)
-  const [selectedVoucherForView, setSelectedVoucherForView] = useState<PaymentVoucher | null>(null)
-  const [showVoucherDetail, setShowVoucherDetail] = useState(false)
 
   // Inline edit state for invoice number
   const [isEditingNumber, setIsEditingNumber] = useState(false)
@@ -101,12 +92,10 @@ export function InvoiceDetailPage() {
 
   const invoiceId = Number(id)
   const invoiceQuery = useInvoiceDetailQuery(Number.isFinite(invoiceId) ? invoiceId : null)
-  const vouchersQuery = useInvoiceVouchersQuery(Number.isFinite(invoiceId) ? invoiceId : null)
   const updateStatusMutation = useUpdateInvoiceStatusMutation()
   const updateNumberMutation = useUpdateInvoiceNumberMutation()
 
   const invoice = invoiceQuery.data
-  const invoiceVouchers = vouchersQuery.data || []
 
   const paymentSummary = invoice?.paymentSummary ?? {
     totalPaidAmount: 0,
@@ -425,16 +414,6 @@ export function InvoiceDetailPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            {/* Record Payment Voucher Action */}
-            <Button
-              type="button"
-              onClick={() => setShowRecordVoucher(true)}
-              className="rounded-none bg-primary text-primary-foreground font-semibold gap-1.5 text-xs shadow-xs"
-            >
-              <Receipt className="size-4" />
-              Record Payment Voucher
-            </Button>
-
             <Button
               type="button"
               variant="outline"
@@ -503,7 +482,7 @@ export function InvoiceDetailPage() {
         <div className="border border-border bg-card p-4 rounded-none shadow-xs space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-              VOUCHERS COLLECTED
+              AMOUNT PAID
             </span>
             <span className="font-mono text-xs font-bold text-primary">
               {paymentSummary.paidPercentage}%
@@ -548,23 +527,10 @@ export function InvoiceDetailPage() {
             <Layers className="size-4" />
             Order Line Items ({filteredItems.length} / {invoice.items?.length || 0})
           </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("vouchers")}
-            className={`flex items-center gap-1.5 border-b-2 px-3 py-2 text-xs font-medium transition-colors rounded-none ${
-              activeTab === "vouchers"
-                ? "border-primary text-foreground font-semibold"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <CreditCard className="size-4" />
-            Payment Vouchers & Allocations ({invoiceVouchers.length})
-          </button>
         </div>
 
-        {/* Tab 1 & Tab 2: Filters Toolbar */}
-        {activeTab !== "vouchers" && (
-          <div className="border border-border bg-card shadow-sm rounded-none">
+        {/* Filters Toolbar */}
+        <div className="border border-border bg-card shadow-sm rounded-none">
             {/* Main Filter Bar */}
             <div className="flex flex-wrap items-center justify-between gap-3 p-4 border-b border-border bg-muted/20">
               <div className="flex flex-1 flex-wrap items-center gap-3">
@@ -932,139 +898,7 @@ export function InvoiceDetailPage() {
               </div>
             )}
           </div>
-        )}
-
-        {/* Tab 3: Payment Vouchers & Allocations Listing */}
-        {activeTab === "vouchers" && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between border border-border bg-card p-4 rounded-none shadow-sm">
-              <div>
-                <h3 className="font-heading text-sm font-bold text-foreground flex items-center gap-2">
-                  <CreditCard className="size-4 text-primary" />
-                  Payment Vouchers Linked to this Invoice ({invoiceVouchers.length})
-                </h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  รายการใบสำคัญรับเงินทั้งหมดที่มีการตัดยอดชำระให้กับคำสั่งซื้อในรอบใบแจ้งหนี้นี้
-                </p>
-              </div>
-
-              <Button
-                type="button"
-                onClick={() => setShowRecordVoucher(true)}
-                className="h-8 text-xs rounded-none bg-primary text-primary-foreground font-semibold gap-1.5"
-              >
-                <Plus className="size-3.5" />
-                Record New Voucher
-              </Button>
-            </div>
-
-            <div className="border border-border bg-card shadow-sm rounded-none overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-muted font-medium text-muted-foreground border-b border-border">
-                    <tr>
-                      <th className="px-4 py-3">#</th>
-                      <th className="px-4 py-3">VOUCHER NO.</th>
-                      <th className="px-4 py-3">DATE</th>
-                      <th className="px-4 py-3">PAYER NAME</th>
-                      <th className="px-4 py-3">METHOD / SLIP</th>
-                      <th className="px-4 py-3 text-center">ALLOCATED ORDERS</th>
-                      <th className="px-4 py-3 text-right">VOUCHER TOTAL</th>
-                      <th className="px-4 py-3 text-right text-primary">ALLOCATED THIS INVOICE</th>
-                      <th className="px-4 py-3 text-center">ACTION</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border font-mono">
-                    {invoiceVouchers.length === 0 ? (
-                      <tr>
-                        <td
-                          colSpan={9}
-                          className="py-12 text-center text-muted-foreground font-sans text-xs"
-                        >
-                          No payment vouchers recorded for this invoice yet. Click &quot;Record
-                          Payment Voucher&quot; to add one.
-                        </td>
-                      </tr>
-                    ) : (
-                      invoiceVouchers.map((v, idx) => {
-                        const thisInvAllocated = v.allocations
-                          .filter(
-                            (a) =>
-                              a.invoiceId === invoice.id || a.invoiceNumber === invoice.invoiceNumber
-                          )
-                          .reduce((sum, a) => sum + a.allocatedAmount, 0)
-
-                        return (
-                          <tr key={v.id} className="transition-colors hover:bg-muted/30">
-                            <td className="px-4 py-3 text-muted-foreground font-sans">{idx + 1}</td>
-                            <td className="px-4 py-3 font-bold text-foreground">
-                              {v.voucherNumber}
-                            </td>
-                            <td className="px-4 py-3 text-muted-foreground">{v.date}</td>
-                            <td className="px-4 py-3 font-sans">{v.customerName}</td>
-                            <td className="px-4 py-3 font-sans text-[11px]">
-                              {v.paymentMethod}{" "}
-                              {v.bankReference && (
-                                <span className="font-mono text-muted-foreground">
-                                  ({v.bankReference})
-                                </span>
-                              )}
-                            </td>
-                            <td className="px-4 py-3 text-center font-sans">
-                              <span className="px-2 py-0.5 text-[11px] bg-muted rounded-none border border-border">
-                                {v.allocations.length} orders
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 text-right font-medium">
-                              {formatCurrency(v.totalAmount, locale, "THB")}
-                            </td>
-                            <td className="px-4 py-3 text-right font-bold text-primary">
-                              {formatCurrency(thisInvAllocated, locale, "THB")}
-                            </td>
-                            <td className="px-4 py-3 text-center font-sans">
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedVoucherForView(v)
-                                  setShowVoucherDetail(true)
-                                }}
-                                className="h-7 px-2.5 text-xs rounded-none hover:bg-primary/10 hover:text-primary gap-1"
-                              >
-                                <Eye className="size-3.5" />
-                                <span>View</span>
-                              </Button>
-                            </td>
-                          </tr>
-                        )
-                      })
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
-
-      {/* Record Payment Voucher Dialog */}
-      <RecordVoucherDialog
-        open={showRecordVoucher}
-        onOpenChange={setShowRecordVoucher}
-        invoice={invoice}
-        onSuccess={() => {
-          vouchersQuery.refetch()
-          invoiceQuery.refetch()
-        }}
-      />
-
-      {/* Voucher Detail View Dialog */}
-      <VoucherDetailDialog
-        voucher={selectedVoucherForView}
-        open={showVoucherDetail}
-        onOpenChange={setShowVoucherDetail}
-      />
 
       {/* Mark as Paid Confirmation Modal */}
       <Dialog open={showMarkPaidConfirm} onOpenChange={setShowMarkPaidConfirm}>

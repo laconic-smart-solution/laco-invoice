@@ -4,7 +4,9 @@ import { useLocation, useParams } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
 import { SIDEBAR_NAV_ITEMS } from "@/constants/navigation"
+import { useInvoiceDetailQuery } from "@/features/invoices/queries/invoice.query"
 import { getMockOrderById } from "@/features/orders/data/mock-orders"
+import { useVoucherDetailQuery } from "@/features/vouchers/queries/voucher.query"
 import { useOrderInputRunDetailQuery } from "@/shared/queries/order-input-run.query"
 
 export interface BreadcrumbItem {
@@ -12,12 +14,21 @@ export interface BreadcrumbItem {
   href?: string
 }
 
+function lastPathSegment(pathname: string): string {
+  return pathname.split("/").filter(Boolean).pop() ?? ""
+}
+
+function parsePositiveId(value: string | undefined): number | null {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null
+}
+
 export function useBreadcrumbs(): BreadcrumbItem[] {
   const { pathname } = useLocation()
   const { orderId, customerId, productId, inputRunId } = useParams()
   const { t } = useTranslation(["breadcrumb", "sidebar", "common", "products", "customers", "users"])
   const inputRunIdFromPath = pathname.startsWith(`${ROUTES.dashboard.orderInputs}/`)
-    ? pathname.split("/").pop()
+    ? lastPathSegment(pathname)
     : undefined
   const resolvedInputRunId = inputRunId || inputRunIdFromPath
   const parsedInputRunId = Number(resolvedInputRunId)
@@ -27,6 +38,21 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
       : null
   )
   const inputRunTitle = inputRunDetailQuery.data?.title?.trim() || ""
+  const isInvoiceDetailPath = pathname.startsWith(`${ROUTES.dashboard.invoices}/`)
+  const isVoucherDetailPath = pathname.startsWith(`${ROUTES.dashboard.vouchers}/`)
+  const invoicePathId = isInvoiceDetailPath ? lastPathSegment(pathname) : ""
+  const voucherPathId = isVoucherDetailPath ? lastPathSegment(pathname) : ""
+  const invoiceDetailQuery = useInvoiceDetailQuery(
+    isInvoiceDetailPath ? parsePositiveId(invoicePathId) : null
+  )
+  const voucherDetailQuery = useVoucherDetailQuery(
+    isVoucherDetailPath ? parsePositiveId(voucherPathId) : null
+  )
+  const invoiceTitle = invoiceDetailQuery.data?.invoiceNumber?.trim() || ""
+  const voucherTitle =
+    voucherDetailQuery.data?.voucherNumber?.trim() ||
+    voucherDetailQuery.data?.erpVoucherNo?.trim() ||
+    ""
 
   return useMemo(() => {
     if (pathname === ROUTES.dashboard.root) {
@@ -88,11 +114,18 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
     }
 
     if (pathname.startsWith(`${ROUTES.dashboard.invoices}/`)) {
-      const invoiceId = pathname.split("/").pop()
       return [
         { label: t("sidebar:nav.dashboard"), href: ROUTES.dashboard.root },
-        { label: "Invoices", href: ROUTES.dashboard.invoices },
-        { label: invoiceId ?? "" },
+        { label: t("sidebar:nav.invoices"), href: ROUTES.dashboard.invoices },
+        { label: invoiceTitle || t("sidebar:nav.invoices") },
+      ]
+    }
+
+    if (pathname.startsWith(`${ROUTES.dashboard.vouchers}/`)) {
+      return [
+        { label: t("sidebar:nav.dashboard"), href: ROUTES.dashboard.root },
+        { label: t("sidebar:nav.vouchers"), href: ROUTES.dashboard.vouchers },
+        { label: voucherTitle || t("sidebar:nav.vouchers") },
       ]
     }
 
@@ -184,5 +217,5 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
       default:
         return [{ label: t("sidebar:nav.dashboard"), href: ROUTES.dashboard.root }]
     }
-  }, [customerId, inputRunTitle, orderId, pathname, resolvedInputRunId, t])
+  }, [customerId, inputRunTitle, invoiceTitle, orderId, pathname, resolvedInputRunId, t, voucherTitle])
 }

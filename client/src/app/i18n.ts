@@ -11,6 +11,7 @@ import enErrors from "@/locales/en/errors.json"
 import enUsers from "@/locales/en/users.json"
 import enStores from "@/locales/en/stores.json"
 import enInvoices from "@/locales/en/invoices.json"
+import enVouchers from "@/locales/en/vouchers.json"
 import enNavbar from "@/locales/en/navbar.json"
 import enOrders from "@/locales/en/orders.json"
 import enProducts from "@/locales/en/products.json"
@@ -25,6 +26,7 @@ import myDashboard from "@/locales/my/dashboard.json"
 import myCustomers from "@/locales/my/customers.json"
 import myErrors from "@/locales/my/errors.json"
 import myInvoices from "@/locales/my/invoices.json"
+import myVouchers from "@/locales/my/vouchers.json"
 import myUsers from "@/locales/my/users.json"
 import myStores from "@/locales/my/stores.json"
 import myNavbar from "@/locales/my/navbar.json"
@@ -41,6 +43,7 @@ import thDashboard from "@/locales/th/dashboard.json"
 import thCustomers from "@/locales/th/customers.json"
 import thErrors from "@/locales/th/errors.json"
 import thInvoices from "@/locales/th/invoices.json"
+import thVouchers from "@/locales/th/vouchers.json"
 import thUsers from "@/locales/th/users.json"
 import thStores from "@/locales/th/stores.json"
 import thNavbar from "@/locales/th/navbar.json"
@@ -57,6 +60,7 @@ import zhDashboard from "@/locales/zh/dashboard.json"
 import zhCustomers from "@/locales/zh/customers.json"
 import zhErrors from "@/locales/zh/errors.json"
 import zhInvoices from "@/locales/zh/invoices.json"
+import zhVouchers from "@/locales/zh/vouchers.json"
 import zhUsers from "@/locales/zh/users.json"
 import zhStores from "@/locales/zh/stores.json"
 import zhNavbar from "@/locales/zh/navbar.json"
@@ -82,6 +86,7 @@ void i18n.use(initReactI18next).init({
       dashboard: enDashboard,
       orders: enOrders,
       invoices: enInvoices,
+      vouchers: enVouchers,
       customers: enCustomers,
       errors: enErrors,
       users: enUsers,
@@ -100,6 +105,7 @@ void i18n.use(initReactI18next).init({
       dashboard: thDashboard,
       orders: thOrders,
       invoices: thInvoices,
+      vouchers: thVouchers,
       customers: thCustomers,
       errors: thErrors,
       users: thUsers,
@@ -118,6 +124,7 @@ void i18n.use(initReactI18next).init({
       dashboard: zhDashboard,
       orders: zhOrders,
       invoices: zhInvoices,
+      vouchers: zhVouchers,
       customers: zhCustomers,
       errors: zhErrors,
       users: zhUsers,
@@ -136,6 +143,7 @@ void i18n.use(initReactI18next).init({
       dashboard: myDashboard,
       orders: myOrders,
       invoices: myInvoices,
+      vouchers: myVouchers,
       customers: myCustomers,
       errors: myErrors,
       users: myUsers,

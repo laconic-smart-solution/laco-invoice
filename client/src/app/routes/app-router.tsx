@@ -9,6 +9,8 @@ import {
   ForgotPasswordPage,
   InvoicesPage,
   InvoiceDetailPage,
+  VouchersPage,
+  VoucherDetailPage,
   LoginPage,
   OrderDetailPage,
   OrderImportFilesPage,
@@ -109,6 +111,14 @@ export const router = createBrowserRouter([
               {
                 path: `${ROUTES.dashboard.invoices}/:id`,
                 element: <InvoiceDetailPage />,
+              },
+              {
+                path: ROUTES.dashboard.vouchers,
+                element: <VouchersPage />,
+              },
+              {
+                path: `${ROUTES.dashboard.vouchers}/:id`,
+                element: <VoucherDetailPage />,
               },
               {
                 path: ROUTES.dashboard.customers,

@@ -73,7 +73,6 @@ export interface InvoicePaymentSummary {
   remainingBalance: number
   status: PaymentAllocationStatus
   paidPercentage: number
-  voucherCount: number
 }
 
 /** Invoice header flattened together with its billed orders and line items. */

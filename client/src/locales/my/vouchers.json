@@ -1,0 +1,126 @@
+{
+  "title": "ဘောက်ချာများ",
+  "subtitle": "ERP GL ဘောက်ချာ ဖန်တီးရန်။ ဤအက်ပ်တွင် ERP ID များသာ သိမ်းသည်။ ပစ္စည်း၊ အကောင့်နှင့် ရောင်းသူ အချက်အလက်များကို လိုအပ်သည့်အခါ ERP မှ ခေါ်သည်။",
+  "generate": "ဘောက်ချာ ဖန်တီးရန်",
+  "generate_subtitle": "ERP ပစ္စည်း၊ အကောင့်နှင့် ရောင်းသူကို ရွေးပြီး debit/credit လိုင်းများကို မျှတအောင် ဖြည့်ပါ။",
+  "edit": "ဘောက်ချာ ပြင်ရန်",
+  "edit_subtitle": "ERP ပစ္စည်း၊ အကောင့်၊ ရောင်းသူနှင့် debit/credit လိုင်းများကို ပြင်ပါ။",
+  "loading": "ဘောက်ချာများ ဖတ်နေသည်...",
+  "empty": "ရွေးထားသော စစ်ထုတ်ချက်နှင့် ကိုက်ညီသော ဘောက်ချာ မရှိပါ။",
+  "kpi": {
+    "total": "ဘောက်ချာ စုစုပေါင်း",
+    "generated": "ဖန်တီးပြီး",
+    "debit": "Debit စုစုပေါင်း",
+    "credit": "Credit စုစုပေါင်း"
+  },
+  "table": {
+    "voucher_no": "ဘောက်ချာ နံပါတ်",
+    "erp_no": "ERP ဘောက်ချာ နံပါတ်",
+    "category": "အမျိုးအစား",
+    "brief": "အကျဉ်းချုပ်",
+    "item": "ပစ္စည်း",
+    "vendor": "ရောင်းသူ",
+    "store": "ဆိုင်",
+    "date": "ရက်စွဲ",
+    "debit": "Debit",
+    "credit": "Credit",
+    "status": "အခြေအနေ",
+    "invoice": "ငွေတောင်းခံလွှာ",
+    "actions": "လုပ်ဆောင်ချက်",
+    "edit": "ပြင်ရန်",
+    "post_to_erp": "ERP သို့ Post လုပ်ရန်"
+  },
+  "status": {
+    "draft": "မူကြမ်း",
+    "generated": "ဖန်တီးပြီး",
+    "posted": "Post လုပ်ပြီး",
+    "failed": "မအောင်မြင်"
+  },
+  "status_description": {
+    "draft": "ဤအက်ပ်တွင် သိမ်းပြီး။ ဘောက်ချာ နံပါတ် မပေးရသေးပါ။",
+    "generated": "ဘောက်ချာ နံပါတ် ထုတ်ပြီး။ ERP သို့ မပို့ရသေးပါ။",
+    "posted": "ERP GL သို့ Post လုပ်ပြီးပါပြီ။",
+    "failed": "ဖန်တီးခြင်း သို့မဟုတ် ERP Post မအောင်မြင်ပါ။"
+  },
+  "category": {
+    "APV": "AP ဘောက်ချာ",
+    "ARV": "AR ဘောက်ချာ",
+    "PV": "ပေးချေမှု ဘောက်ချာ",
+    "RV": "လက်ခံမှု ဘောက်ချာ",
+    "JV": "ဂျာနယ် ဘောက်ချာ"
+  },
+  "filters": {
+    "search": "ဘောက်ချာ နံပါတ်၊ အကျဉ်းချုပ် ရှာပါ...",
+    "status": "အခြေအနေ",
+    "all_statuses": "အခြေအနေအားလုံး",
+    "store": "ဆိုင်",
+    "all_stores": "ဆိုင်အားလုံး",
+    "showing": "{{total}} မှ {{count}} ပြနေသည်"
+  },
+  "form": {
+    "category": "ဘောက်ချာ အမျိုးအစား",
+    "date": "ဘောက်ချာ ရက်စွဲ",
+    "store": "ဆိုင်",
+    "store_placeholder": "ဆိုင် (မဖြစ်မနေ မဟုတ်)",
+    "brief": "အကျဉ်းချုပ်",
+    "brief_placeholder": "တိုတောင်းသော ဖော်ပြချက်",
+    "description": "အသေးစိတ်",
+    "description_placeholder": "ERP အတွက် မှတ်ချက် (မဖြစ်မနေ မဟုတ်)",
+    "tax_month": "အခွန်လ",
+    "wht_month": "WHT လ",
+    "no_tax_invoice": "အခွန်ပြေစာ မရှိ",
+    "reject_remark": "ပယ်ချ မှတ်ချက်",
+    "reject_remark_placeholder": "ဘောက်ချာ ပယ်ချခံရပါက မှတ်ချက် (မဖြစ်မနေ မဟုတ်)",
+    "yes": "ဟုတ်",
+    "no": "မဟုတ်",
+    "item": "ERP ပစ္စည်း",
+    "item_placeholder": "ပစ္စည်း ရှာပါ",
+    "account": "အကောင့် ကုဒ်",
+    "account_placeholder": "အကောင့် ရှာပါ",
+    "vendor": "ရောင်းသူ",
+    "vendor_placeholder": "ရောင်းသူ ရှာပါ",
+    "entries": "စာရင်းလိုင်းများ",
+    "add_line": "လိုင်း ထည့်ရန်",
+    "remove_line": "လိုင်း ဖယ်ရန်",
+    "line_brief_placeholder": "လိုင်း အကျဉ်းချုပ်",
+    "invoice_no": "ငွေတောင်းခံလွှာ နံပါတ်",
+    "invoice_date": "ငွေတောင်းခံလွှာ ရက်စွဲ",
+    "department": "ဌာန",
+    "department_placeholder": "ဌာန ရှာပါ",
+    "exchange_rate": "ငွေလဲနှုန်း",
+    "currency": "ငွေကြေး",
+    "currency_placeholder": "ငွေကြေး ရှာပါ",
+    "balanced": "မျှတသည်",
+    "unbalanced": "မမျှတ",
+    "cancel": "ပယ်ဖျက်",
+    "save": "သိမ်းရန်",
+    "validation": {
+      "brief_required": "အကျဉ်းချုပ် လိုအပ်သည်။",
+      "item_required": "ERP ပစ္စည်း ရွေးပါ။",
+      "account_required": "အကောင့် ကုဒ် ရွေးပါ။",
+      "vendor_required": "ရောင်းသူ ရွေးပါ။",
+      "entry_account_required": "ဤလိုင်းအတွက် အကောင့် ရွေးပါ။",
+      "invalid_amount": "မှန်ကန်သော ပမာဏ ထည့်ပါ။",
+      "entry_amount_required": "debit သို့မဟုတ် credit ပမာဏ ထည့်ပါ။",
+      "both_debit_credit": "လိုင်းတစ်ခုတွင် debit နှင့် credit နှစ်ခုလုံး မထားရ။",
+      "unbalanced": "debit နှင့် credit စုစုပေါင်း တူညီရမည်။",
+      "invalid_rate": "ငွေလဲနှုန်းသည် သုညထက် ကြီးရမည်။"
+    }
+  },
+  "detail": {
+    "not_found": "ဘောက်ချာ မတွေ့ပါ။",
+    "totals": "စုစုပေါင်း"
+  },
+  "post": {
+    "confirm_title": "ERP သို့ Post လုပ်မည်လား?",
+    "confirm_description": "{{number}} ကို ERP GL သို့ Post လုပ်မည်။ ပြီးနောက် ပြင်၍ မရပါ။",
+    "confirm": "ERP သို့ Post လုပ်ရန်"
+  },
+  "errors": {
+    "generate_failed": "ဘောက်ချာ ဖန်တီး၍ မရပါ။",
+    "update_failed": "ဘောက်ချာ ပြင်၍ မရပါ။",
+    "post_failed": "ERP သို့ Post လုပ်၍ မရပါ။",
+    "cannot_edit_posted": "Post လုပ်ပြီး ဘောက်ချာကို ပြင်၍ မရပါ။",
+    "cannot_post": "ဖန်တီးပြီး ဘောက်ချာများကိုသာ ERP သို့ Post လုပ်နိုင်သည်။"
+  }
+}

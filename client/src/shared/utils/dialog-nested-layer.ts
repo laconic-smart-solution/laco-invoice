@@ -1,4 +1,4 @@
-/** Radix layers portaled outside dialog content that should not dismiss the parent dialog. */
+/** Portaled overlays outside dialog content that should not dismiss the parent dialog. */
 export function isDialogNestedLayer(target: EventTarget | null): boolean {
   return (
     target instanceof Element &&
@@ -12,6 +12,9 @@ export function isDialogNestedLayer(target: EventTarget | null): boolean {
           '[data-slot="dropdown-menu-content"]',
           '[data-slot="dropdown-menu-sub-content"]',
           '[data-radix-popper-content-wrapper]',
+          '[data-slot="combobox-content"]',
+          '[data-slot="combobox-item"]',
+          '[data-slot="combobox-list"]',
         ].join(", ")
       )
     )

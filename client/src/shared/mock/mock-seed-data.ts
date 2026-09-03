@@ -4,7 +4,6 @@ import type {
   InvoiceItemLine,
   InvoiceOrderSummary,
 } from "@/features/invoices/types/invoice"
-import type { PaymentVoucher } from "@/features/invoices/types/voucher"
 import type {
   MarketplaceProduct,
   MarketplaceProductDetail,
@@ -16,6 +15,7 @@ import type { AdminUser } from "@/features/users/types/user"
 import type { ApiOrderImportFileDto } from "@/shared/services/order-import-file.service"
 import type { ApiOrderInputRunDto } from "@/shared/services/order-input-run.service"
 import type { MarketplaceConnection } from "@/features/stores/types/store"
+import type { VoucherDetail } from "@/features/vouchers/types/voucher"
 
 const NOW = "2024-06-15T10:00:00Z"
 
@@ -325,7 +325,7 @@ interface MockState {
   inputRuns: ApiOrderInputRunDto[]
   syncRuns: MarketplaceProductSyncRun[]
   invoices: MockInvoiceRecord[]
-  vouchers: PaymentVoucher[]
+  vouchers: VoucherDetail[]
   nextCustomerId: number
   nextUserId: number
   nextStoreId: number
@@ -333,7 +333,7 @@ interface MockState {
   nextInvoiceId: number
   nextInvoiceItemId: number
   nextVoucherId: number
-  nextAllocationId: number
+  nextVoucherEntryId: number
 }
 
 function buildInvoices(): MockInvoiceRecord[] {
@@ -601,56 +601,177 @@ function buildInvoices(): MockInvoiceRecord[] {
   ]
 }
 
-function buildVouchers(): PaymentVoucher[] {
+function buildVouchers(): VoucherDetail[] {
+  const createdAt = "2026-09-01T09:00:00Z"
   return [
     {
       id: 1,
-      voucherNumber: "VCH-202609-001",
-      date: "2024-06-10",
+      voucherNumber: "APV-MOCK-001",
+      voucherRefNo: null,
+      erpVoucherNo: "APV-MOCK-001",
+      voucherCategory: "APV",
+      voucherDate: "2026-09-01",
+      taxMonth: "2026-09-01",
+      whtMonth: "2026-09-01",
+      currency: "THB",
+      chequeTransferNumber: null,
+      voucherBrief: "TikTok shipping fee — September",
+      voucherDescription: "Mock AP voucher for marketplace shipping charges.",
+      noTaxInvoice: false,
+      rejectRemark: null,
+      status: "GENERATED",
       storeId: 1,
       storeName: "TikTok Shop US",
-      customerName: "Marcus Thompson",
-      customerTaxId: "0105558123456",
-      totalAmount: 5000,
-      allocatedAmount: 5000,
-      unallocatedAmount: 0,
-      paymentMethod: "BANK_TRANSFER",
-      bankReference: "TRF-482910",
-      proofFileUrl: null,
-      notes: "Partial settlement for INV-202609-001",
-      status: "CONFIRMED",
-      createdAt: NOW,
-      updatedAt: NOW,
-      allocations: [
+      invoiceId: 1,
+      invoiceNumber: "INV-202609-001",
+      externalErpItemId: 1001,
+      externalErpAccountCodeId: 2101,
+      externalErpVendorId: 501,
+      debitTotal: 1250,
+      creditTotal: 1250,
+      generateError: null,
+      createdAt,
+      updatedAt: createdAt,
+      entries: [
         {
           id: 1,
-          voucherId: 1,
-          orderId: 1,
-          externalOrderId: "#TK-8942-01",
-          invoiceId: 1,
-          invoiceNumber: "INV-202609-001",
-          orderTotalAmount: 4200,
-          allocatedAmount: 4200,
-          previousPaidAmount: 0,
-          remainingBalance: 0,
-          buyerName: "Marcus Thompson",
-          allocatedAt: NOW,
-          notes: null,
+          externalErpAccountCodeId: 5101,
+          debit: 1250,
+          credit: 0,
+          invoiceNo: "INV-202609-001",
+          invoiceDate: "2026-09-01",
+          note: null,
+          externalErpVendorId: 501,
+          externalErpDepartmentId: 3,
+          externalErpCurrencyId: 1,
+          exchangeRate: 1,
         },
         {
           id: 2,
-          voucherId: 1,
-          orderId: 4,
-          externalOrderId: "#TK-8945-04",
-          invoiceId: 1,
-          invoiceNumber: "INV-202609-001",
-          orderTotalAmount: 5100,
-          allocatedAmount: 800,
-          previousPaidAmount: 0,
-          remainingBalance: 4300,
-          buyerName: "James Chen",
-          allocatedAt: NOW,
-          notes: null,
+          externalErpAccountCodeId: 2101,
+          debit: 0,
+          credit: 1250,
+          invoiceNo: "INV-202609-001",
+          invoiceDate: "2026-09-01",
+          note: null,
+          externalErpVendorId: 501,
+          externalErpDepartmentId: 2,
+          externalErpCurrencyId: 1,
+          exchangeRate: 1,
+        },
+      ],
+    },
+    {
+      id: 2,
+      voucherNumber: "APV-MOCK-002",
+      voucherRefNo: null,
+      erpVoucherNo: "APV-MOCK-002",
+      voucherCategory: "APV",
+      voucherDate: "2026-08-28",
+      taxMonth: "2026-08-01",
+      whtMonth: "2026-08-01",
+      currency: "THB",
+      chequeTransferNumber: null,
+      voucherBrief: "Lazada marketplace commission",
+      voucherDescription: "Mock AP voucher for platform commission.",
+      noTaxInvoice: false,
+      rejectRemark: null,
+      status: "POSTED",
+      storeId: 3,
+      storeName: "Lazada Thailand",
+      invoiceId: null,
+      invoiceNumber: null,
+      externalErpItemId: 1002,
+      externalErpAccountCodeId: 2102,
+      externalErpVendorId: 502,
+      debitTotal: 3840,
+      creditTotal: 3840,
+      generateError: null,
+      createdAt: "2026-08-28T10:30:00Z",
+      updatedAt: "2026-08-28T10:30:00Z",
+      entries: [
+        {
+          id: 3,
+          externalErpAccountCodeId: 5102,
+          debit: 3840,
+          credit: 0,
+          invoiceNo: "INV-202608-014",
+          invoiceDate: "2026-08-28",
+          note: null,
+          externalErpVendorId: 502,
+          externalErpDepartmentId: 3,
+          externalErpCurrencyId: 1,
+          exchangeRate: 1,
+        },
+        {
+          id: 4,
+          externalErpAccountCodeId: 2102,
+          debit: 0,
+          credit: 3840,
+          invoiceNo: "INV-202608-014",
+          invoiceDate: "2026-08-28",
+          note: null,
+          externalErpVendorId: 502,
+          externalErpDepartmentId: 2,
+          externalErpCurrencyId: 1,
+          exchangeRate: 1,
+        },
+      ],
+    },
+    {
+      id: 3,
+      voucherNumber: "PV-MOCK-001",
+      voucherRefNo: null,
+      erpVoucherNo: "PV-MOCK-001",
+      voucherCategory: "PV",
+      voucherDate: "2026-08-15",
+      taxMonth: "2026-08-01",
+      whtMonth: "2026-08-01",
+      currency: "THB",
+      chequeTransferNumber: null,
+      voucherBrief: "Shopee advertising fee payment",
+      voucherDescription: "Mock payment voucher clearing accrued ads expense.",
+      noTaxInvoice: false,
+      rejectRemark: null,
+      status: "GENERATED",
+      storeId: 2,
+      storeName: "TikTok Shop UK",
+      invoiceId: null,
+      invoiceNumber: null,
+      externalErpItemId: 1003,
+      externalErpAccountCodeId: 2101,
+      externalErpVendorId: 503,
+      debitTotal: 2500,
+      creditTotal: 2500,
+      generateError: null,
+      createdAt: "2026-08-15T08:15:00Z",
+      updatedAt: "2026-08-15T08:15:00Z",
+      entries: [
+        {
+          id: 5,
+          externalErpAccountCodeId: 2101,
+          debit: 2500,
+          credit: 0,
+          invoiceNo: "INV-202608-008",
+          invoiceDate: "2026-08-15",
+          note: null,
+          externalErpVendorId: 503,
+          externalErpDepartmentId: 2,
+          externalErpCurrencyId: 1,
+          exchangeRate: 1,
+        },
+        {
+          id: 6,
+          externalErpAccountCodeId: 1101,
+          debit: 0,
+          credit: 2500,
+          invoiceNo: "INV-202608-008",
+          invoiceDate: "2026-08-15",
+          note: null,
+          externalErpVendorId: 503,
+          externalErpDepartmentId: 2,
+          externalErpCurrencyId: 1,
+          exchangeRate: 1,
         },
       ],
     },
@@ -660,6 +781,7 @@ function buildVouchers(): PaymentVoucher[] {
 function createInitialState(): MockState {
   const stores = buildStores()
   const products = buildProducts()
+  const vouchers = buildVouchers()
 
   return {
     stores,
@@ -671,15 +793,15 @@ function createInitialState(): MockState {
     inputRuns: buildInputRuns(),
     syncRuns: [],
     invoices: buildInvoices(),
-    vouchers: buildVouchers(),
+    vouchers,
     nextCustomerId: 100,
     nextUserId: 100,
     nextStoreId: stores.length + 1,
     nextInputRunId: 100,
     nextInvoiceId: 3,
     nextInvoiceItemId: 9,
-    nextVoucherId: 2,
-    nextAllocationId: 3,
+    nextVoucherId: vouchers.length + 1,
+    nextVoucherEntryId: 7,
   }
 }
 
