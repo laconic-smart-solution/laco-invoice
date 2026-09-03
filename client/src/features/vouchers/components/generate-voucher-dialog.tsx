@@ -194,7 +194,7 @@ export function GenerateVoucherDialog({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="flex max-h-[90vh] flex-col"
+            className="flex max-h-[90vh] flex-col group-data-[maximized=true]/dialog:h-full group-data-[maximized=true]/dialog:max-h-none"
           >
             <div className="border-b border-border/80 bg-muted/20 px-6 py-5">
               <DialogHeader className="space-y-1 text-left">

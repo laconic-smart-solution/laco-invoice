@@ -11,7 +11,10 @@
   "loading": "ခဏစောင့်ပါ...",
   "dialog": {
     "cancel": "မလုပ်တော့",
-    "confirm": "အတည်ပြုမည်"
+    "confirm": "အတည်ပြုမည်",
+    "close": "ပိတ်ရန်",
+    "maximize": "မျက်နှာပြင်အပြည့်",
+    "restore": "မူလအရွယ်"
   },
   "pagination": {
     "rows_per_page": "ပြသမည်",

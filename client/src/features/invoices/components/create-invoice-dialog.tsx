@@ -220,7 +220,7 @@ export function CreateInvoiceDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl sm:max-w-4xl w-full overflow-hidden p-0 gap-0 border-border bg-card shadow-2xl rounded-none">
-        <form onSubmit={handleSubmit} className="flex flex-col max-h-[90vh]">
+        <form onSubmit={handleSubmit} className="flex max-h-[90vh] flex-col group-data-[maximized=true]/dialog:h-full group-data-[maximized=true]/dialog:max-h-none">
           <div className="border-b border-border/80 bg-muted/20 px-6 py-5">
             <DialogHeader className="space-y-1 text-left">
               <div className="flex items-center gap-2.5">

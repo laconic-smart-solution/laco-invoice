@@ -11,7 +11,10 @@
   "loading": "กำลังโหลด...",
   "dialog": {
     "cancel": "ยกเลิก",
-    "confirm": "ยืนยัน"
+    "confirm": "ยืนยัน",
+    "close": "ปิด",
+    "maximize": "เต็มจอ",
+    "restore": "คืนขนาดเดิม"
   },
   "pagination": {
     "rows_per_page": "แสดง",

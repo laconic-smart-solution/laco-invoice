@@ -11,7 +11,10 @@
   "loading": "Loading...",
   "dialog": {
     "cancel": "Cancel",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "close": "Close",
+    "maximize": "Full screen",
+    "restore": "Restore size"
   },
   "pagination": {
     "rows_per_page": "Show",

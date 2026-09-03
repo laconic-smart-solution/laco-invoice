@@ -11,7 +11,10 @@
   "loading": "加载中...",
   "dialog": {
     "cancel": "取消",
-    "confirm": "确认"
+    "confirm": "确认",
+    "close": "关闭",
+    "maximize": "全屏",
+    "restore": "还原大小"
   },
   "pagination": {
     "rows_per_page": "每页",
