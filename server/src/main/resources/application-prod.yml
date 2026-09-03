@@ -18,13 +18,19 @@ spring:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
 
 app:
+  cors:
+    allowed-origin-patterns: ${CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:*,http://127.0.0.1:*,https://*.laconic.co.th,https://laconic.co.th}
   security:
     jwks:
-      insecure-ssl: false
+      insecure-ssl: ${JWKS_INSECURE_SSL:false}
   sso:
-    insecure-ssl: false
+    insecure-ssl: ${SSO_INSECURE_SSL:false}
+  users:
+    default-admin:
+      auth-server-user-id: ${DEFAULT_ADMIN_AUTH_SERVER_USER_ID:}
   sync:
     quartz:
       enabled: true
@@ -33,3 +39,19 @@ app:
       quartz:
         enabled: true
         retention-days: 7
+  communication:
+    gateway-url: ${COMMUNICATION_GATEWAY_URL}
+    lazada-base-path: ${COMMUNICATION_LAZADA_BASE_PATH:}
+    shopee-base-path: ${COMMUNICATION_SHOPEE_BASE_PATH:}
+    tiktok-base-path: ${COMMUNICATION_TIKTOK_BASE_PATH:}
+    gateway-secret: ${GATEWAY_SECRET:}
+    lazada-app-key: ${LAZADA_APP_KEY:}
+    lazada-app-secret: ${LAZADA_APP_SECRET:}
+    tiktok-app-key: ${TIKTOK_APP_KEY:}
+    tiktok-app-secret: ${TIKTOK_APP_SECRET:}
+    tiktok-shop-scraping: ${TIKTOK_SHOP_SCRAPPING:false}
+    tiktok-scrape-url: ${TIKTOK_SCRAPE_URL:http://localhost:8090}
+  openai:
+    api-key: ${OPENAI_API_KEY:}
+    model: ${OPENAI_MODEL:gpt-4o-mini}
+    base-url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
