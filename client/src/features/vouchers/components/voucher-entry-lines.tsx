@@ -81,7 +81,7 @@ export function VoucherEntryLines({
           <tbody className="divide-y divide-border">
             {fields.map((field, index) => (
               <tr key={field.id}>
-                <td className="min-w-[200px] px-2 py-2 align-top">
+                <td className="min-w-[220px] px-2 py-2 align-top">
                   <ErpLookupCombobox
                     form={form}
                     name={`entries.${index}.externalErpAccountCodeId`}
@@ -89,6 +89,7 @@ export function VoucherEntryLines({
                     options={accounts}
                     placeholder={t("form.account_placeholder")}
                     required
+                    showNameBelow
                   />
                 </td>
                 <td className="w-28 px-2 py-2 align-top">
@@ -128,6 +129,7 @@ export function VoucherEntryLines({
                     label=""
                     options={departments}
                     placeholder={t("form.department_placeholder")}
+                    showNameBelow
                   />
                 </td>
                 <td className="w-24 px-2 py-2 align-top">
@@ -145,6 +147,7 @@ export function VoucherEntryLines({
                     label=""
                     options={currencies}
                     placeholder={t("form.currency_placeholder")}
+                    showNameBelow
                   />
                 </td>
                 <td className="px-2 py-2 align-top">

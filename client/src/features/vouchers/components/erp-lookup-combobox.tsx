@@ -30,6 +30,15 @@ interface ErpLookupComboboxProps<T extends FieldValues> {
   disabled?: boolean
   className?: string
   onChange?: (value: string) => void
+  /** Put the code in the input and wrap the full name under the field. */
+  showNameBelow?: boolean
+}
+
+interface ErpLookupOption {
+  value: string
+  code: string
+  name: string
+  label: string
 }
 
 function optionLabel(record: ErpLookupRecord): string {
@@ -46,12 +55,15 @@ export function ErpLookupCombobox<T extends FieldValues>({
   disabled,
   className,
   onChange,
+  showNameBelow = false,
 }: ErpLookupComboboxProps<T>) {
   const { t } = useTranslation("common")
-  const items = useMemo(
+  const items = useMemo<ErpLookupOption[]>(
     () =>
       options.map((option) => ({
         value: String(option.id),
+        code: option.code,
+        name: option.name,
         label: optionLabel(option),
       })),
     [options]
@@ -80,7 +92,9 @@ export function ErpLookupCombobox<T extends FieldValues>({
               name={field.name}
               items={items}
               value={selected}
-              itemToStringLabel={(item) => item?.label ?? ""}
+              itemToStringLabel={(item) =>
+                showNameBelow ? (item?.code ?? "") : (item?.label ?? "")
+              }
               itemToStringValue={(item) => item?.value ?? ""}
               isItemEqualToValue={(itemValue, value) =>
                 itemValue?.value === value?.value
@@ -102,17 +116,25 @@ export function ErpLookupCombobox<T extends FieldValues>({
                   className="w-full rounded-none border border-border bg-background px-3 py-2 text-left text-sm placeholder:text-muted-foreground"
                 />
               </FormControl>
-              <ComboboxContent>
+              <ComboboxContent className="min-w-[20rem] w-max max-w-[min(24rem,var(--available-width))]">
                 <ComboboxList>
-                  {(item: { value: string; label: string }) => (
+                  {(item: ErpLookupOption) => (
                     <ComboboxItem key={item.value} value={item}>
-                      <span className="truncate">{item.label}</span>
+                      <span className="flex min-w-0 flex-col gap-0.5 whitespace-normal">
+                        <span className="font-medium">{item.code}</span>
+                        <span className="text-muted-foreground">{item.name}</span>
+                      </span>
                     </ComboboxItem>
                   )}
                 </ComboboxList>
                 <ComboboxEmpty>{t("form.no_matches")}</ComboboxEmpty>
               </ComboboxContent>
             </Combobox>
+            {showNameBelow && selected?.name ? (
+              <p className="pt-1 text-xs leading-snug whitespace-normal break-words text-muted-foreground">
+                {selected.name}
+              </p>
+            ) : null}
             <FormMessage className="text-xs" />
           </FormItem>
         )
