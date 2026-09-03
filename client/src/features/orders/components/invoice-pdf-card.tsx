@@ -32,7 +32,7 @@ const FILE_STATUS_BADGE: Record<ApiOrderInputFileStatus, StatusBadgeVariant> = {
   READY: "pending",
   RUNNING: "pending",
   SUCCEEDED: "synced",
-  PARTIAL: "warning",
+  PARTIAL: "pending",
   FAILED: "failed",
 }
 
@@ -40,7 +40,7 @@ const MATCH_BADGE: Record<ApiInvoicePdfMatchStatus, StatusBadgeVariant> = {
   MISSING: "draft",
   MATCHED: "paid",
   MISMATCH: "failed",
-  UNPARSED: "warning",
+  UNPARSED: "pending",
 }
 
 function formatDate(value: string | null): string {
