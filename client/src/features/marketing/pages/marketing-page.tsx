@@ -86,8 +86,8 @@ export function MarketingPage() {
             <span>Laco<span>Invoice</span></span>
           </Link>
           <nav className={menuOpen ? "site-nav is-open" : "site-nav"} aria-label="Main navigation">
-            <a href="#how-it-works" onClick={() => setMenuOpen(false)}>How it works</a>
             <a href="#features" onClick={() => setMenuOpen(false)}>Features</a>
+            <a href="#how-it-works" onClick={() => setMenuOpen(false)}>How it works</a>
             <a href="#pricing" onClick={() => setMenuOpen(false)}>Pricing</a>
             <a href="#faq" onClick={() => setMenuOpen(false)}>FAQ</a>
           </nav>
@@ -127,12 +127,12 @@ export function MarketingPage() {
         <div className="marketplace-strip"><div className="marketing-container"><span>Built to simplify operations across</span><strong>TikTok Shop</strong><strong>Shopee</strong><strong>Lazada</strong><strong>Amazon</strong></div></div>
       </section>
 
-      <section className="section problem-section" aria-labelledby="problem-title">
-        <div className="marketing-container operations-intro"><span className="section-rule" aria-hidden="true"></span><h2 id="problem-title">Your marketplace operations, finally in sync.</h2><p>Skip the tab-switching, spreadsheet updates, and document-by-document work. Laco Invoice gives sales operations and finance a shared source of truth.</p></div>
-        <div className="marketing-container benefits-grid" id="features">
-          <article><span className="icon-wrap coral"><PackageCheck aria-hidden="true" /></span><h3>Bring every order together</h3><p>Keep marketplace orders searchable, filterable, and ready for action in one central workspace.</p></article>
-          <article><span className="icon-wrap gold"><FileText aria-hidden="true" /></span><h3>Issue documents with confidence</h3><p>Create tax invoices and receipts with consistent numbering and 7% VAT already applied.</p></article>
-          <article><span className="icon-wrap violet"><BarChart3 aria-hidden="true" /></span><h3>Give finance a cleaner handoff</h3><p>Export PDFs individually or in bulk, then prepare invoice information for ERP voucher workflows.</p></article>
+      <section className="section problem-section" aria-labelledby="features">
+        <div className="marketing-container operations-intro"><h2 id="features">Everything you need to turn orders into ready-to-send documents.</h2><p>Bring marketplace sales, tax documents, and finance handoffs into one reliable daily workflow—without the portal switching and spreadsheet chasing.</p></div>
+        <div className="marketing-container benefits-grid">
+          <article><span className="icon-wrap coral"><PackageCheck aria-hidden="true" /></span><p className="feature-number">01</p><h3>See every order in one place</h3><p>Keep marketplace orders searchable, filterable, and ready for action in one organised workspace.</p></article>
+          <article><span className="icon-wrap gold"><FileText aria-hidden="true" /></span><p className="feature-number">02</p><h3>Create documents in moments</h3><p>Generate tax invoices and receipts with consistent numbering and 7% VAT already applied.</p></article>
+          <article><span className="icon-wrap violet"><BarChart3 aria-hidden="true" /></span><p className="feature-number">03</p><h3>Keep finance moving</h3><p>Export PDFs individually or in bulk, then prepare invoice information for ERP voucher workflows.</p></article>
         </div>
       </section>
 
