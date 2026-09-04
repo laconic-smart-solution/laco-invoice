@@ -95,34 +95,113 @@ Save 15% with annual billing.
 | Assisted onboarding | ฿4,900 one time | Guided setup for stores, document preferences, products, and team training. |
 | Dedicated ERP workflow workshop | ฿12,000 one time | A focused working session to map invoice-to-ERP voucher processes. |
 
-## Suggested website copy
-
-### Hero
-
-**Turn marketplace orders into tax invoices without the manual work.**
-
-Laco Invoice connects your sales channels, keeps orders organised, and makes it simple to issue, download, and manage tax invoices and receipts.
-
-**Call to action:** Start with Starter | Talk to sales
-
-### Growth section
-
-**From a completed order to a ready-to-share document.**
-
-Stop switching between seller portals and spreadsheets. Laco Invoice gives your team one place to sync orders, generate documents, export PDFs in bulk, and keep finance workflows moving.
-
-### Trust section
-
-**Made for the rhythm of marketplace operations.**
-
-Whether you are issuing a handful of documents each day or managing thousands each month, Laco Invoice helps you keep sales records clear, documents consistent, and handoffs easier.
-
 ## Sales talking points
 
 - “Your team can move from marketplace order to tax invoice or receipt in one connected workflow.”
 - “Bulk PDF ZIP exports reduce the repetitive work of preparing documents one at a time.”
 - “Searchable orders and invoice records give operations and finance a shared, clearer view of the work.”
 - “The plan grows with your stores and document volume, so you can start simply and add capacity when it delivers value.”
+
+## Brand messaging toolkit
+
+### Core promise
+
+**Every marketplace order, invoice ready.**
+
+Laco Invoice helps marketplace sellers turn completed orders into professional tax invoices and receipts from one organised workspace.
+
+### Supporting messages
+
+- **For operations:** Keep orders from connected sales channels in one searchable, actionable view.
+- **For finance:** Generate consistent documents, export PDFs in bulk, and prepare a cleaner handoff to ERP voucher workflows.
+- **For growing teams:** Start with one store and add capacity as marketplace volume and team needs increase.
+
+### Approved message themes
+
+- Clear marketplace operations
+- Faster document preparation
+- Confident tax invoice and receipt workflows
+- Less repetitive work at month end
+- A simpler connection between sales operations and finance
+
+Avoid promising marketplace coverage, tax compliance, ERP integration, automation frequency, or service levels beyond the customer’s released product configuration and agreement.
+
+## Sales discovery questions
+
+Use these questions to qualify a prospect before recommending a plan.
+
+1. Which marketplaces and storefronts do you sell through today?
+2. Approximately how many tax invoices or receipts do you issue each month?
+3. How does your team currently move from a completed order to a customer document?
+4. Which part of the process creates the most manual work or delays?
+5. Does finance need bulk PDFs, ERP voucher preparation, or multi-user access?
+
+## Objection handling
+
+| Prospect concern | Suggested response |
+|---|---|
+| “We only have one store.” | Starter is designed for a focused single-store workflow, so you can simplify invoice work without paying for multi-store capacity. |
+| “We already use spreadsheets.” | Laco Invoice helps replace repetitive spreadsheet handling with searchable orders, document generation, and organised exports. |
+| “Our volume changes each month.” | Choose the plan that fits your normal volume, then use additional invoice capacity when business spikes. |
+| “Finance needs the files in bulk.” | Growth and above include bulk invoice selection and ZIP exports, making document handoffs faster at month end. |
+| “We need more than a standard setup.” | Enterprise can be scoped around custom store volumes, onboarding, and ERP workflow configuration. |
+
+## Email campaign copy
+
+### Launch email
+
+**Subject:** Turn marketplace orders into ready-to-send tax invoices
+
+Managing marketplace orders should not mean chasing documents across portals and spreadsheets. Laco Invoice brings your orders into one clear workspace, then helps your team create, download, and export professional tax invoices and receipts.
+
+Start with the plan that suits your current store count and invoice volume. As your business grows, add stores and capacity without changing the way your team works.
+
+**Call to action:** Explore plans and start free
+
+### Follow up email
+
+**Subject:** A simpler way to prepare marketplace invoices
+
+If invoice administration is taking time away from your operations team, Laco Invoice can help. Search your orders, issue documents with consistent VAT treatment, and export PDFs individually or in bulk for finance.
+
+Reply to this email to discuss the right plan for your marketplace operations.
+
+## Social media copy
+
+### Post one
+
+Marketplace orders move fast. Your invoice workflow should too.
+
+Laco Invoice brings orders, tax invoices, receipts, and PDF exports into one organised workspace—so your team can spend less time on manual document work.
+
+### Post two
+
+From completed order to ready-to-send document.
+
+Connect your store, keep orders current, create tax invoices and receipts, then export one PDF or a full ZIP for finance. Laco Invoice keeps the handoff clear.
+
+### Post three
+
+Growing from one store to many? Start with the capacity you need today, then add marketplace stores and invoice volume as your business grows with Laco Invoice.
+
+## Product demonstration outline
+
+Use this five-minute structure for a sales demo or product video.
+
+1. Show the problem: multiple marketplace portals, order records, and manual document preparation.
+2. Connect a store and show the centralised order list.
+3. Open an order and generate a tax invoice or receipt.
+4. Show a single PDF download and bulk ZIP export.
+5. Close with the relevant plan and the next action: start free or talk to sales.
+
+## Launch assets checklist
+
+- Live marketing page and confirmed final pricing
+- Product screenshots showing orders, invoice generation, and bulk export
+- Launch email and follow-up email
+- Three social media posts adapted for the selected channels
+- Sales discovery questions and objection-handling guide
+- Confirmed sales contact address, payment terms, support hours, and legal wording
 
 ## Pricing notes for publication
 

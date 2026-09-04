@@ -60,12 +60,16 @@ export function MarketingPage() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [activeFaq, setActiveFaq] = useState(0)
   const [showScrollTop, setShowScrollTop] = useState(false)
+  const [isNavScrolled, setIsNavScrolled] = useState(false)
 
   useEffect(() => {
-    const updateScrollTopVisibility = () => setShowScrollTop(window.scrollY > 420)
-    updateScrollTopVisibility()
-    window.addEventListener("scroll", updateScrollTopVisibility, { passive: true })
-    return () => window.removeEventListener("scroll", updateScrollTopVisibility)
+    const updateScrollState = () => {
+      setShowScrollTop(window.scrollY > 420)
+      setIsNavScrolled(window.scrollY > 8)
+    }
+    updateScrollState()
+    window.addEventListener("scroll", updateScrollState, { passive: true })
+    return () => window.removeEventListener("scroll", updateScrollState)
   }, [])
 
   const scrollToTop = () => {
@@ -75,7 +79,7 @@ export function MarketingPage() {
   return (
     <main className="marketing-shell">
       <a className="skip-link" href="#main-content">Skip to content</a>
-      <header className="site-header">
+      <header className={isNavScrolled ? "site-header is-scrolled" : "site-header"}>
         <div className="marketing-container nav-row">
           <Link className="brand" to={ROUTES.home} aria-label="Laco Invoice home">
             <span className="brand-mark" aria-hidden="true"><ReceiptText size={20} /></span>
