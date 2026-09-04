@@ -40,4 +40,6 @@
 .benefits-grid article { position: relative; overflow: hidden; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }.benefits-grid article:hover { border-color: color-mix(in srgb, var(--coral) 35%, var(--line)); box-shadow: 0 14px 28px rgba(24,42,36,.08); transform: translateY(-4px); }.feature-number { position: absolute; top: 1.8rem; right: 1.75rem; margin: 0; color: color-mix(in srgb, var(--coral) 52%, #fff); font: 800 .78rem "Inter Variable", sans-serif; letter-spacing: .08em; }
 .problem-section { padding-top: 56px; }
 .problem-section h2#features { scroll-margin-top: 118px; }
+.how-section h2#how-it-works, .pricing-section h2#pricing { scroll-margin-top: 118px; }
+.marketing-language-select { border-color: var(--line); background: #fff; color: #46524f; font-family: "Nunito Sans Variable", sans-serif; font-weight: 700; }
 @media (max-width: 680px) { .scroll-top { right: 1rem; bottom: 1rem; width: 44px; height: 44px; } }

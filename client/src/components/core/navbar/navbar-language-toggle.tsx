@@ -18,7 +18,12 @@ const LOCALE_LABEL_KEYS: Record<Locale, string> = {
   my: "locales.my",
 }
 
-export function NavbarLanguageToggle() {
+interface NavbarLanguageToggleProps {
+  locales?: readonly Locale[]
+  className?: string
+}
+
+export function NavbarLanguageToggle({ locales = SUPPORTED_LOCALES, className }: NavbarLanguageToggleProps) {
   const { t } = useTranslation("navbar")
   const locale = useLocaleStore((state) => state.locale)
   const setLocale = useLocaleStore((state) => state.setLocale)
@@ -27,14 +32,14 @@ export function NavbarLanguageToggle() {
     <Select value={locale} onValueChange={(value) => setLocale(value as Locale)}>
       <SelectTrigger
         size="sm"
-        className="h-9 w-auto gap-1.5 border-border bg-muted/40 px-2.5 text-muted-foreground"
+        className={`h-9 w-auto gap-1.5 border-border bg-muted/40 px-2.5 text-muted-foreground ${className ?? ""}`}
         aria-label={t("language")}
       >
         <Globe className="size-4 shrink-0" aria-hidden />
         <SelectValue />
       </SelectTrigger>
       <SelectContent align="end">
-        {SUPPORTED_LOCALES.map((code) => (
+        {locales.map((code) => (
           <SelectItem key={code} value={code}>
             {t(LOCALE_LABEL_KEYS[code])}
           </SelectItem>
