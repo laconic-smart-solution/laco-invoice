@@ -103,6 +103,12 @@ app:
     api-key: ${OPENAI_API_KEY:}
     model: ${OPENAI_MODEL:gpt-4o-mini}
     base-url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
+  erp:
+    enabled: ${USE_ERP_API:false}
+    base-url: ${ERP_API_BASE_URL:}
+    token: ${ERP_API_TOKEN:}
+    posted-by: ${ERP_POSTED_BY:LACO-INVOICE}
+    insecure-ssl: ${ERP_INSECURE_SSL:false}
   marketplace-product-sync:
     list-chunk-size: 50
     detail-chunk-size: 10

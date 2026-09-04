@@ -12,7 +12,7 @@ export function GuestRoute() {
   }
 
   if (isAuthenticated) {
-    return <Navigate to={ROUTES.home} replace />
+    return <Navigate to={ROUTES.dashboard.root} replace />
   }
 
   return <Outlet />

@@ -1,7 +1,7 @@
 export const ROUTES = {
   home: "/",
   dashboard: {
-    root: "/",
+    root: "/app",
     stores: "/stores",
     storeCreate: "/stores/new",
     storeDetail: (storeId: number | string) => `/stores/${storeId}`,

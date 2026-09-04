@@ -53,3 +53,9 @@ app:
     # Temporary: true → tiktok-shop-scrape (Playwright); false → Partner tiktok-service
     tiktok-shop-scraping: ${TIKTOK_SHOP_SCRAPPING:false}
     tiktok-scrape-url: ${TIKTOK_SCRAPE_URL:http://localhost:8090}
+  erp:
+    enabled: ${USE_ERP_API:false}
+    base-url: ${ERP_API_BASE_URL:}
+    token: ${ERP_API_TOKEN:}
+    posted-by: ${ERP_POSTED_BY:LACO-INVOICE}
+    insecure-ssl: ${ERP_INSECURE_SSL:true}

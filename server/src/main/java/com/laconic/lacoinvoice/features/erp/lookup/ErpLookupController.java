@@ -20,15 +20,15 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "ERP Lookups")
 public class ErpLookupController {
 
-	private final StubErpLookupService lookupService;
+	private final ErpLookupService lookupService;
 
-	public ErpLookupController(StubErpLookupService lookupService) {
+	public ErpLookupController(ErpLookupService lookupService) {
 		this.lookupService = lookupService;
 	}
 
 	@GetMapping("/items")
 	@PreAuthorize("@authz.isOwnerOrAdmin()")
-	@Operation(summary = "List ERP items (PART_ID). Stub until live ERP is wired.")
+	@Operation(summary = "List ERP items (PART_ID). Mock catalog when USE_ERP_API=false.")
 	public ApiResponse<List<ErpLookupItemDto>> items(@RequestParam(required = false) String search) {
 		return ApiResponse.ok("OK", lookupService.items(search));
 	}
@@ -43,7 +43,7 @@ public class ErpLookupController {
 
 	@GetMapping("/account-codes")
 	@PreAuthorize("@authz.isOwnerOrAdmin()")
-	@Operation(summary = "List ERP GL account codes. Stub until live ERP is wired.")
+	@Operation(summary = "List ERP GL account codes. Mock catalog when USE_ERP_API=false.")
 	public ApiResponse<List<ErpLookupAccountDto>> accounts(@RequestParam(required = false) String search) {
 		return ApiResponse.ok("OK", lookupService.accounts(search));
 	}
@@ -58,7 +58,7 @@ public class ErpLookupController {
 
 	@GetMapping("/vendors")
 	@PreAuthorize("@authz.isOwnerOrAdmin()")
-	@Operation(summary = "List ERP vendors. Stub until live ERP is wired.")
+	@Operation(summary = "List ERP vendors. Mock catalog when USE_ERP_API=false.")
 	public ApiResponse<List<ErpLookupVendorDto>> vendors(@RequestParam(required = false) String search) {
 		return ApiResponse.ok("OK", lookupService.vendors(search));
 	}
@@ -73,7 +73,7 @@ public class ErpLookupController {
 
 	@GetMapping("/departments")
 	@PreAuthorize("@authz.isOwnerOrAdmin()")
-	@Operation(summary = "List ERP departments. Stub until live ERP is wired.")
+	@Operation(summary = "List ERP departments. Mock catalog when USE_ERP_API=false.")
 	public ApiResponse<List<ErpLookupDepartmentDto>> departments(@RequestParam(required = false) String search) {
 		return ApiResponse.ok("OK", lookupService.departments(search));
 	}
@@ -88,7 +88,7 @@ public class ErpLookupController {
 
 	@GetMapping("/currencies")
 	@PreAuthorize("@authz.isOwnerOrAdmin()")
-	@Operation(summary = "List ERP currencies. Stub until live ERP is wired.")
+	@Operation(summary = "List ERP currencies. Mock catalog when USE_ERP_API=false.")
 	public ApiResponse<List<ErpLookupCurrencyDto>> currencies(@RequestParam(required = false) String search) {
 		return ApiResponse.ok("OK", lookupService.currencies(search));
 	}

@@ -4,15 +4,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 /**
- * In-memory ERP lookup catalog used until the live ERP HTTP client is wired.
+ * In-memory ERP lookup catalog used when {@code USE_ERP_API=false}.
  * These records are not stored in the invoice database.
  */
 @Service
-public class StubErpLookupService {
+@ConditionalOnProperty(name = "app.erp.enabled", havingValue = "false", matchIfMissing = true)
+public class StubErpLookupService implements ErpLookupService {
 
 	private static final List<ErpLookupItemDto> ITEMS = List.of(
 			new ErpLookupItemDto(1001L, "FG-SHIP-FEE", "Shipping Fee Service"),

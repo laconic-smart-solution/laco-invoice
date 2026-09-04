@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.laconic.lacoinvoice.common.aspect.Loggable;
+import com.laconic.lacoinvoice.common.exception.BadGatewayException;
 import com.laconic.lacoinvoice.common.exception.ResourceNotFoundException;
 import com.laconic.lacoinvoice.common.pagination.PageQuerySupport;
 import com.laconic.lacoinvoice.common.web.ApiResponse;
@@ -25,7 +26,8 @@ import com.laconic.lacoinvoice.domain.repositories.ErpGlVoucherEntryRepository;
 import com.laconic.lacoinvoice.domain.repositories.ErpGlVoucherRepository;
 import com.laconic.lacoinvoice.domain.repositories.InvoiceRepository;
 import com.laconic.lacoinvoice.domain.repositories.StoreRepository;
-import com.laconic.lacoinvoice.features.erp.lookup.StubErpLookupService;
+import com.laconic.lacoinvoice.features.erp.ErpPostService;
+import com.laconic.lacoinvoice.features.erp.lookup.ErpLookupService;
 import com.laconic.lacoinvoice.features.voucher.dto.ErpGlVoucherDetailDto;
 import com.laconic.lacoinvoice.features.voucher.dto.ErpGlVoucherDto;
 import com.laconic.lacoinvoice.features.voucher.dto.ErpGlVoucherEntryRequest;
@@ -51,7 +53,8 @@ public class ErpGlVoucherService {
 	private final ErpGlVoucherEntryRepository entryRepository;
 	private final StoreRepository storeRepository;
 	private final InvoiceRepository invoiceRepository;
-	private final StubErpLookupService erpLookupService;
+	private final ErpLookupService erpLookupService;
+	private final ErpPostService erpPostService;
 	private final ErpGlVoucherMapper mapper;
 
 	public ErpGlVoucherService(
@@ -59,13 +62,15 @@ public class ErpGlVoucherService {
 			ErpGlVoucherEntryRepository entryRepository,
 			StoreRepository storeRepository,
 			InvoiceRepository invoiceRepository,
-			StubErpLookupService erpLookupService,
+			ErpLookupService erpLookupService,
+			ErpPostService erpPostService,
 			ErpGlVoucherMapper mapper) {
 		this.voucherRepository = voucherRepository;
 		this.entryRepository = entryRepository;
 		this.storeRepository = storeRepository;
 		this.invoiceRepository = invoiceRepository;
 		this.erpLookupService = erpLookupService;
+		this.erpPostService = erpPostService;
 		this.mapper = mapper;
 	}
 
@@ -163,11 +168,11 @@ public class ErpGlVoucherService {
 	}
 
 	/**
-	 * Marks the local voucher as posted. Live ERP HTTP posting is stubbed until
-	 * the ERP client is wired.
+	 * Posts the voucher to ERP when {@code USE_ERP_API=true}; otherwise marks it
+	 * posted locally using the mock catalog.
 	 */
 	@Loggable
-	@Transactional
+	@Transactional(noRollbackFor = BadGatewayException.class)
 	@PreAuthorize("@authz.isOwnerOrAdmin()")
 	public ErpGlVoucherDto postToErp(Long id) {
 		ErpGlVoucher voucher = requireVoucher(id);
@@ -177,10 +182,21 @@ public class ErpGlVoucherService {
 		if (voucher.getStatus() == ErpGlVoucherStatus.DRAFT) {
 			throw new IllegalArgumentException("Generate the voucher before posting to ERP.");
 		}
-		voucher.setStatus(ErpGlVoucherStatus.POSTED);
-		voucher.setGenerateError(null);
-		if (!StringUtils.hasText(voucher.getErpVoucherNo())) {
-			voucher.setErpVoucherNo(voucher.getVoucherNumber());
+		try {
+			voucher.getEntries().size();
+			String erpVoucherNo = erpPostService.post(voucher);
+			voucher.setStatus(ErpGlVoucherStatus.POSTED);
+			voucher.setGenerateError(null);
+			voucher.setErpVoucherNo(StringUtils.hasText(erpVoucherNo) ? erpVoucherNo : voucher.getVoucherNumber());
+		} catch (RuntimeException ex) {
+			voucher.setStatus(ErpGlVoucherStatus.FAILED);
+			voucher.setGenerateError(ex.getMessage());
+			voucherRepository.save(voucher);
+			if (ex instanceof BadGatewayException) {
+				throw ex;
+			}
+			throw new BadGatewayException(
+					ex.getMessage() != null ? ex.getMessage() : "ERP post failed", ex);
 		}
 		return mapper.toDto(voucherRepository.save(voucher));
 	}

@@ -38,6 +38,7 @@ import { GuestRoute } from "@/components/common/guest-route"
 import { ProtectedRoute } from "@/components/common/protected-route"
 import { AuthLayout } from "@/components/layouts/auth-layout"
 import { DashboardLayout } from "@/components/layouts/dashboard-layout"
+import { MarketingPage } from "@/features/marketing/pages/marketing-page"
 import { NotFoundPage } from "@/features/errors/pages/not-found-page"
 import { ServerErrorPage } from "@/features/errors/pages/server-error-page"
 import { SomethingWentWrongPage } from "@/features/errors/pages/something-went-wrong-page"
@@ -47,13 +48,17 @@ export const router = createBrowserRouter([
     errorElement: <SomethingWentWrongPage />,
     children: [
       {
+        path: ROUTES.home,
+        element: <MarketingPage />,
+      },
+      {
         element: <ProtectedRoute />,
         children: [
           {
             element: <DashboardLayout />,
             children: [
               {
-                index: true,
+                path: ROUTES.dashboard.root,
                 element: <DashboardPage />,
               },
               {
