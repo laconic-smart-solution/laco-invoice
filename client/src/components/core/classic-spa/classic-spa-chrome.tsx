@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
+import { NavbarColorThemeToggle } from "@/components/core/navbar/navbar-color-theme-toggle"
 import { NavbarLanguageToggle } from "@/components/core/navbar/navbar-language-toggle"
 import { NavbarThemeToggle } from "@/components/core/navbar/navbar-theme-toggle"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -106,6 +107,7 @@ export function ClassicSpaChrome() {
           {t("shortcuts:classic_shell.hint")}
         </p>
         <NavbarLanguageToggle />
+        <NavbarColorThemeToggle />
         <NavbarThemeToggle />
         {displayName ? (
           <DropdownMenu>

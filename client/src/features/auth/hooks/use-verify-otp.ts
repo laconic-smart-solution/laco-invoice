@@ -17,7 +17,7 @@ function isForgotPasswordFlow(mode: string | null, flow: string | null): boolean
 
 function resolveReturnUrl(returnUrl: string | null): string {
   if (!returnUrl || !returnUrl.startsWith("/")) {
-    return ROUTES.home
+    return ROUTES.dashboard.root
   }
   return returnUrl
 }

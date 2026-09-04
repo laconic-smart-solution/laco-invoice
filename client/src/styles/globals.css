@@ -95,6 +95,19 @@
     --sidebar-ring: oklch(0.556 0 0);
 }
 
+:root[data-color-theme="teal"] {
+    --primary: #1d5147;
+    --primary-foreground: #ffffff;
+    --sidebar-primary: #1d5147;
+    --sidebar-primary-foreground: #ffffff;
+    --ring: #2d7668;
+    --chart-1: #2d7668;
+    --chart-2: #4e9e91;
+    --chart-3: #1d5147;
+    --chart-4: #143d35;
+    --chart-5: #0f2f29;
+}
+
 @theme inline {
     --font-sans: 'Nunito Sans Variable', sans-serif;
     --font-heading: 'Inter Variable', sans-serif;

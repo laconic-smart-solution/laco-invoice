@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
 import { NavbarLanguageToggle } from "@/components/core/navbar/navbar-language-toggle"
+import { NavbarColorThemeToggle } from "@/components/core/navbar/navbar-color-theme-toggle"
 import { NavbarThemeToggle } from "@/components/core/navbar/navbar-theme-toggle"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -73,6 +74,7 @@ export function Navbar() {
 
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         <NavbarLanguageToggle />
+        <NavbarColorThemeToggle />
         <NavbarThemeToggle />
 
         {displayName ? (
