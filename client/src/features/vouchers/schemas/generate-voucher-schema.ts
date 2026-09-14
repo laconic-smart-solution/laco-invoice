@@ -85,6 +85,9 @@ export function createGenerateVoucherSchema(messages: {
       noTaxInvoice: z.boolean(),
       rejectRemark: z.string().optional(),
       storeId: z.string().optional(),
+      orderInputRunId: z.string().optional(),
+      tradingPartnerTypeId: z.string().optional(),
+      selectedFinanceAccountId: z.string().optional(),
       externalErpItemId: z.string().min(1, messages.itemRequired),
       externalErpAccountCodeId: z.string().min(1, messages.accountRequired),
       externalErpVendorId: z.string().min(1, messages.vendorRequired),
@@ -142,6 +145,10 @@ export function voucherToFormValues(
     noTaxInvoice: voucher.noTaxInvoice === true,
     rejectRemark: voucher.rejectRemark ?? "",
     storeId: voucher.storeId != null ? String(voucher.storeId) : "",
+    orderInputRunId:
+      voucher.orderInputRunId != null ? String(voucher.orderInputRunId) : "",
+    tradingPartnerTypeId: "",
+    selectedFinanceAccountId: "",
     externalErpItemId:
       voucher.externalErpItemId != null ? String(voucher.externalErpItemId) : "",
     externalErpAccountCodeId:
@@ -181,9 +188,11 @@ export function voucherToFormValues(
   }
 }
 
-export function defaultGenerateVoucherValues(): GenerateVoucherFormValues {
+export function defaultGenerateVoucherValues(
+  defaultOrderInputRunId?: number | null
+): GenerateVoucherFormValues {
   return {
-    voucherCategory: "APV",
+    voucherCategory: "JV",
     voucherDate: new Date().toISOString().slice(0, 10),
     taxMonth: currentMonthValue(),
     whtMonth: currentMonthValue(),
@@ -192,6 +201,10 @@ export function defaultGenerateVoucherValues(): GenerateVoucherFormValues {
     noTaxInvoice: false,
     rejectRemark: "",
     storeId: "",
+    orderInputRunId:
+      defaultOrderInputRunId != null ? String(defaultOrderInputRunId) : "",
+    tradingPartnerTypeId: "",
+    selectedFinanceAccountId: "",
     externalErpItemId: "",
     externalErpAccountCodeId: "",
     externalErpVendorId: "",

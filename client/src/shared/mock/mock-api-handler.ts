@@ -8,6 +8,10 @@ import type {
 } from "@/features/stores/types/store"
 import type { AdminUserCreateInput } from "@/shared/services/admin-user.service"
 import {
+  matchesOrderInputRunDisplayStatus,
+  type ApiOrderInputRunDisplayStatusFilter,
+} from "@/shared/services/order-input-run.service"
+import {
   getConnections,
   getCustomerById,
   getImportFileById,
@@ -52,7 +56,7 @@ import {
   listMockErpItems,
   listMockErpVendors,
 } from "@/shared/mock/mock-erp-catalog"
-import type { GenerateVoucherRequest, VoucherPageRequest } from "@/features/vouchers/types/voucher"
+import type { GenerateVoucherRequest, VoucherPageRequest, VoucherPreviewRequest } from "@/features/vouchers/types/voucher"
 import { MOCK_USER } from "@/shared/mock/mock-user"
 import {
   emptyBlob,
@@ -635,7 +639,35 @@ export async function handleMockRequest(
   }
 
   if (method === "POST" && path === "/v1/order-input-runs/pageable") {
-    const { data, meta } = paginateArray(state.inputRuns, body.pageNumber, body.pageSize)
+    const payload = body as {
+      filter?: {
+        storeId?: number
+        title?: string
+        status?: string
+        inputFileType?: string
+      }
+      pageNumber?: number
+      pageSize?: number
+    }
+    let rows = state.inputRuns
+    const filter = payload?.filter
+    if (filter?.storeId) {
+      rows = rows.filter((r) => r.storeId === filter.storeId)
+    }
+    if (filter?.title?.trim()) {
+      const titleNeedle = filter.title.trim().toLowerCase()
+      rows = rows.filter((r) => r.title.toLowerCase().includes(titleNeedle))
+    }
+    if (filter?.status) {
+      const statusFilter = filter.status as ApiOrderInputRunDisplayStatusFilter
+      rows = rows.filter((r) =>
+        matchesOrderInputRunDisplayStatus(r, statusFilter)
+      )
+    }
+    if (filter?.inputFileType) {
+      rows = rows.filter((r) => r.inputFileType === filter.inputFileType)
+    }
+    const { data, meta } = paginateArray(rows, payload.pageNumber, payload.pageSize)
     return { status: 200, body: ok(data, meta) }
   }
 
@@ -1282,6 +1314,153 @@ export async function handleMockRequest(
     }
   }
 
+  const itemFinanceAccountsMatch = matchPath(/^\/v1\/erp-lookups\/items\/(\d+)\/finance-accounts$/, path)
+  if (method === "GET" && itemFinanceAccountsMatch) {
+    return {
+      status: 200,
+      body: ok([
+        {
+          tradingPartnerTypeId: 1,
+          tradingPartnerTypeCode: "DOMESTIC",
+          tradingPartnerTypeName: "Domestic Customer / Supplier",
+          budget: false,
+          purchaseAccountId: 5101,
+          purchaseAccountCode: "5101-000",
+          purchaseAccountTitle: "Cost of Goods Sold - Domestic",
+          saleAccountId: 4101,
+          saleAccountCode: "4101-000",
+          saleAccountTitle: "Sales - Domestic",
+          goodsInTransitAccountId: 1105,
+          goodsInTransitAccountCode: "1105-000",
+          goodsInTransitAccountTitle: "Goods in Transit",
+          depositAccountId: 2101,
+          depositAccountCode: "2101-000",
+          depositAccountTitle: "Accounts Payable - Domestic",
+          assigned: true,
+        },
+        {
+          tradingPartnerTypeId: 2,
+          tradingPartnerTypeCode: "DOMESTIC_OTHER",
+          tradingPartnerTypeName: "Domestic - Other",
+          budget: false,
+          purchaseAccountId: 5102,
+          purchaseAccountCode: "5102-000",
+          purchaseAccountTitle: "Cost of Goods Sold - Other",
+          saleAccountId: 4102,
+          saleAccountCode: "4102-000",
+          saleAccountTitle: "Sales - Other",
+          goodsInTransitAccountId: 1105,
+          goodsInTransitAccountCode: "1105-000",
+          goodsInTransitAccountTitle: "Goods in Transit",
+          depositAccountId: 2102,
+          depositAccountCode: "2102-000",
+          depositAccountTitle: "Accounts Payable - Other",
+          assigned: false,
+        },
+      ]),
+    }
+  }
+
+  const vouchersByRunMatch = matchPath(/^\/v1\/vouchers\/by-order-input-run\/(\d+)$/, path)
+  if (method === "GET" && vouchersByRunMatch) {
+    const runId = Number(vouchersByRunMatch[1])
+    const vouchers = getMockState().vouchers.filter((v) => (v as any).orderInputRunId === runId)
+    return { status: 200, body: ok(vouchers) }
+  }
+
+  if (method === "POST" && path === "/v1/vouchers/preview-from-order-input") {
+    const previewReq = body as unknown as VoucherPreviewRequest
+    const run = getInputRunById(previewReq.orderInputRunId)
+    const totalAmount = run ? (run.invoiceTotalAmount ?? run.excelMatchedAmount ?? 0) : 0
+    const receiptNo = run?.invoiceReceiptNumber || "INV-MOCK-001"
+    const receiptDate = run?.invoiceReceiptDate || new Date().toISOString().slice(0, 10)
+    const debitAcc = previewReq.debitAccountId || 5101
+    const creditAcc = previewReq.creditAccountId || 2101
+    return {
+      status: 200,
+      body: ok({
+        storeId: run?.storeId ?? 1,
+        storeName: run?.storeName ?? "Default Store",
+        orderInputRunId: previewReq.orderInputRunId,
+        orderInputRunTitle: run?.title ?? `Run #${previewReq.orderInputRunId}`,
+        voucherCategory: "JV",
+        voucherDate: receiptDate,
+        taxMonth: receiptDate.slice(0, 7),
+        whtMonth: receiptDate.slice(0, 7),
+        currency: "THB",
+        voucherBrief: `Order Data Input: ${run?.title ?? `Run #${previewReq.orderInputRunId}`}`,
+        voucherDescription: `Order Data Input #${previewReq.orderInputRunId} (${run?.title ?? ""}) | Receipt: ${receiptNo}`,
+        noTaxInvoice: previewReq.noTaxInvoice === true,
+        externalErpItemId: previewReq.externalErpItemId || 1001,
+        itemCode: "ITEM-001",
+        itemName: "Standard Merchandising Item",
+        externalErpAccountCodeId: creditAcc,
+        accountCode: "2101-000",
+        accountTitle: "Accounts Payable - Domestic",
+        externalErpVendorId: 501,
+        vendorCode: "VEND-001",
+        vendorName: "TikTok Shop Thailand",
+        externalErpDepartmentId: 101,
+        externalErpCurrencyId: 1,
+        totalAmount,
+        debitTotal: totalAmount + (previewReq.noTaxInvoice ? 0 : Math.round((totalAmount * 7 / 107) * 100) / 100),
+        creditTotal: totalAmount + (previewReq.noTaxInvoice ? 0 : Math.round((totalAmount * 7 / 107) * 100) / 100),
+        entries: (() => {
+          const hasVat = !previewReq.noTaxInvoice && totalAmount > 0
+          const vatAmount = hasVat ? Math.round((totalAmount * 7 / 107) * 100) / 100 : 0
+          const lines = [
+            {
+              externalErpAccountCodeId: debitAcc,
+              debit: totalAmount,
+              credit: 0,
+              invoiceNo: receiptNo,
+              invoiceDate: receiptDate,
+              externalErpDepartmentId: 101,
+              exchangeRate: 1,
+              externalErpCurrencyId: 1,
+            },
+          ]
+          if (hasVat && vatAmount > 0) {
+            lines.push({
+              externalErpAccountCodeId: 21400070,
+              debit: vatAmount,
+              credit: 0,
+              invoiceNo: receiptNo,
+              invoiceDate: receiptDate,
+              externalErpDepartmentId: 101,
+              exchangeRate: 1,
+              externalErpCurrencyId: 1,
+            })
+          }
+          lines.push({
+            externalErpAccountCodeId: creditAcc,
+            debit: 0,
+            credit: totalAmount,
+            invoiceNo: receiptNo,
+            invoiceDate: receiptDate,
+            externalErpDepartmentId: 101,
+            exchangeRate: 1,
+            externalErpCurrencyId: 1,
+          })
+          if (hasVat && vatAmount > 0) {
+            lines.push({
+              externalErpAccountCodeId: 21400060,
+              debit: 0,
+              credit: vatAmount,
+              invoiceNo: receiptNo,
+              invoiceDate: receiptDate,
+              externalErpDepartmentId: 101,
+              exchangeRate: 1,
+              externalErpCurrencyId: 1,
+            })
+          }
+          return lines
+        })(),
+        financeAccounts: [],
+      }),
+    }
+  }
+
   if (method === "POST" && path === "/v1/vouchers/pageable") {
     const { data, meta } = pageMockVouchers(body as unknown as VoucherPageRequest)
     return { status: 200, body: ok(data, meta) }
@@ -1324,6 +1503,95 @@ export async function handleMockRequest(
       }
     } catch (error) {
       return handleMockApiError(error)
+    }
+  }
+
+  if (method === "POST" && path === "/v1/vouchers/export/excel") {
+    return {
+      status: 200,
+      body: emptyBlob(),
+      isBlob: true,
+      headers: {
+        "content-type":
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "content-disposition": "attachment; filename=vouchers-export.xlsx",
+      },
+    }
+  }
+
+  if (method === "POST" && path === "/v1/vouchers/export/csv") {
+    return {
+      status: 200,
+      body: emptyBlob(),
+      isBlob: true,
+      headers: {
+        "content-type": "text/csv; charset=UTF-8",
+        "content-disposition": "attachment; filename=vouchers-export.csv",
+      },
+    }
+  }
+
+  const singleVoucherExportExcel = matchPath(
+    /^\/v1\/vouchers\/(\d+)\/export\/excel$/,
+    path
+  )
+  if (method === "GET" && singleVoucherExportExcel) {
+    const vId = singleVoucherExportExcel[1]
+    return {
+      status: 200,
+      body: emptyBlob(),
+      isBlob: true,
+      headers: {
+        "content-type":
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "content-disposition": `attachment; filename=voucher-${vId}.xlsx`,
+      },
+    }
+  }
+
+  if (method === "POST" && path === "/v1/vouchers/export/pdf") {
+    return {
+      status: 200,
+      body: emptyBlob(),
+      isBlob: true,
+      headers: {
+        "content-type": "application/pdf",
+        "content-disposition": "attachment; filename=vouchers-export.pdf",
+      },
+    }
+  }
+
+  const singleVoucherExportPdf = matchPath(
+    /^\/v1\/vouchers\/(\d+)\/export\/pdf$/,
+    path
+  )
+  if (method === "GET" && singleVoucherExportPdf) {
+    const vId = singleVoucherExportPdf[1]
+    return {
+      status: 200,
+      body: emptyBlob(),
+      isBlob: true,
+      headers: {
+        "content-type": "application/pdf",
+        "content-disposition": `attachment; filename=voucher-${vId}.pdf`,
+      },
+    }
+  }
+
+  const singleVoucherExportCsv = matchPath(
+    /^\/v1\/vouchers\/(\d+)\/export\/csv$/,
+    path
+  )
+  if (method === "GET" && singleVoucherExportCsv) {
+    const vId = singleVoucherExportCsv[1]
+    return {
+      status: 200,
+      body: emptyBlob(),
+      isBlob: true,
+      headers: {
+        "content-type": "text/csv; charset=UTF-8",
+        "content-disposition": `attachment; filename=voucher-${vId}.csv`,
+      },
     }
   }
 

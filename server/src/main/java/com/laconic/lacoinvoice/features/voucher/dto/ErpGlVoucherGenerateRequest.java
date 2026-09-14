@@ -26,6 +26,8 @@ public class ErpGlVoucherGenerateRequest {
 
 	private Long invoiceId;
 
+	private Long orderInputRunId;
+
 	@NotNull
 	private ErpGlVoucherCategory voucherCategory;
 

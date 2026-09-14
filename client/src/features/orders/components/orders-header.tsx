@@ -29,7 +29,7 @@ export function OrdersHeader({
         type="button"
         variant="outline"
         size={isClassic ? "sm" : "default"}
-        className="border-primary text-primary"
+        className="hidden border-primary text-primary"
         onClick={onSync}
         disabled={isSyncing || !onSync || busy}
       >
@@ -43,7 +43,7 @@ export function OrdersHeader({
         type="button"
         variant="outline"
         size={isClassic ? "sm" : "default"}
-        className="border-primary text-primary"
+        className="hidden border-primary text-primary"
         onClick={onImport}
         disabled={!onImport || busy}
       >

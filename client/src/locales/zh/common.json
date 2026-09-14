@@ -34,8 +34,10 @@
     },
     "view": {
       "columns": "列",
-      "toggle_columns": "切换列显示",
-      "reset_columns": "重置列"
+      "toggle_columns": "显示/隐藏列",
+      "reset_columns": "重置列",
+      "compact": "紧凑",
+      "comfortable": "舒适"
     }
   },
   "export_preview": {

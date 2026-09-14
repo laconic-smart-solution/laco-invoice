@@ -27,6 +27,8 @@ public record ErpGlVoucherDto(
 		String storeName,
 		Long invoiceId,
 		String invoiceNumber,
+		Long orderInputRunId,
+		String orderInputRunTitle,
 		Long externalErpItemId,
 		Long externalErpAccountCodeId,
 		Long externalErpVendorId,

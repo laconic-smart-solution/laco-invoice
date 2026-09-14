@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Laco Invoice — Sales Pamphlet</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Nunito+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Nunito Sans', sans-serif;
+    color: #17201f;
+    background-color: #fff;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, .brand, .heading-font {
+    font-family: 'Inter', sans-serif;
+  }
+
+  .page {
+    width: 210mm;
+    height: 297mm;
+    page-break-after: always;
+    position: relative;
+    padding: 26mm 26mm 24mm 26mm;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .header-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 26px;
+  }
+
+  .brand-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: #e75e43;
+    border-radius: 8px;
+    color: #fff;
+    box-shadow: 0 3px 8px rgba(231, 94, 67, 0.35);
+  }
+
+  .brand-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #17201f;
+  }
+
+  .brand-text span {
+    color: #e75e43;
+  }
+
+  .main-heading {
+    font-size: 36px;
+    font-weight: 900;
+    line-height: 1.18;
+    color: #17201f;
+    margin-bottom: 18px;
+    letter-spacing: -1px;
+  }
+
+  .subtitle {
+    font-size: 16px;
+    font-style: italic;
+    color: #1d5147;
+    line-height: 1.45;
+    margin-bottom: 26px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .lead-summary {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #2d3748;
+    margin-bottom: 24px;
+  }
+
+  .marketplace-badge-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+    padding: 10px 14px;
+    background: #f8f7f2;
+    border-radius: 8px;
+    border: 1px solid #dce4e0;
+  }
+
+  .mkt-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: #64716d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-family: 'Inter', sans-serif;
+    margin-right: 4px;
+  }
+
+  .mkt-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #17201f;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .mkt-item img {
+    height: 18px;
+    width: 18px;
+    object-fit: contain;
+    border-radius: 3px;
+  }
+
+  .bullet-list {
+    list-style: none;
+    margin-bottom: 30px;
+  }
+
+  .bullet-item {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: #2d3748;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .bullet-icon {
+    color: #e75e43;
+    margin-right: 12px;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .bullet-item strong {
+    color: #17201f;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .callout-box {
+    background: #17201f;
+    border-left: 4.5px solid #e75e43;
+    border-radius: 6px;
+    padding: 20px 22px;
+    color: #ffffff;
+    margin-top: auto;
+    margin-bottom: 8px;
+  }
+
+  .callout-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #e75e43;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .callout-quote {
+    font-size: 13.5px;
+    font-style: italic;
+    line-height: 1.55;
+    color: #f8fafc;
+  }
+
+  /* PAGE 2 */
+  .page-2-container {
+    padding-top: 15mm;
+  }
+
+  .action-banner {
+    background: linear-gradient(135deg, #e75e43 0%, #c94632 100%);
+    border-radius: 8px;
+    padding: 30px 24px;
+    text-align: center;
+    color: #ffffff;
+    margin-bottom: 40px;
+    box-shadow: 0 8px 20px rgba(231, 94, 67, 0.25);
+  }
+
+  .action-banner-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    margin-bottom: 12px;
+  }
+
+  .action-title {
+    font-size: 21px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .action-title a {
+    color: #ffffff;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .action-sub {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fdf6f4;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .page-2-tagline {
+    text-align: center;
+    font-size: 15px;
+    font-style: italic;
+    color: #1d5147;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+  }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1 -->
+<div class="page">
+  <div class="header-brand">
+    <span class="brand-mark">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/>
+        <path d="M14 8H8"/>
+        <path d="M16 12H8"/>
+        <path d="M13 16H8"/>
+      </svg>
+    </span>
+    <span class="brand-text">Laco<span>Invoice</span></span>
+  </div>
+
+  <h1 class="main-heading">Stop Copy-Pasting Marketplace Excel Files to Invoice One Order.</h1>
+
+  <div class="subtitle">
+    Drop your order Excel. Get every 7% VAT tax invoice. Connect directly to your ERP.
+  </div>
+
+  <p class="lead-summary">
+    Laco Invoice turns raw marketplace order and tax invoice spreadsheets into ready-to-send 7% VAT tax invoices, receipts, and ERP-ready accounting vouchers — all in one place.
+  </p>
+
+
+
+  <ul class="bullet-list">
+    <li class="bullet-item">
+      <span class="bullet-icon">&#9656;</span>
+      <div><strong>Smart Excel import.</strong> Drop your order and tax invoice spreadsheets from TikTok Shop, Shopee, Lazada, or POS — the system extracts, validates, and structures all data automatically.</div>
+    </li>
+    <li class="bullet-item">
+      <span class="bullet-icon">&#9656;</span>
+      <div><strong>1-Click Thai tax invoices.</strong> Automated sequential numbering (<code>INV-YYYYMM-XXXXXX</code>), 7% VAT breakdown, and 13-digit Tax ID validation.</div>
+    </li>
+    <li class="bullet-item">
+      <span class="bullet-icon">&#9656;</span>
+      <div><strong>Bulk PDF ZIP export.</strong> Download an entire month's invoices in a single packaged archive with one click.</div>
+    </li>
+    <li class="bullet-item">
+      <span class="bullet-icon">&#9656;</span>
+      <div><strong>ERP GL voucher bridge.</strong> Export pre-balanced journal entries directly into Express ERP, SAP, and Business Central without ERP lag.</div>
+    </li>
+  </ul>
+
+  <div class="callout-box">
+    <div class="callout-label">S A Y &nbsp; I T &nbsp; O U T &nbsp; L O U D</div>
+    <div class="callout-quote">
+      “You're downloading messy order spreadsheets from three different seller portals, copy-pasting customer tax IDs into Excel, manually typing invoices, and still scrambling to reconcile with ERP at month-end. Laco Invoice replaces all of that — just upload your Excel sheets, and it turns every order into a compliant tax invoice and audit-ready ERP voucher.”
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 2 -->
+<div class="page">
+  <div class="page-2-container">
+    <div class="action-banner">
+      <div class="action-banner-logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/>
+          <path d="M14 8H8"/>
+          <path d="M16 12H8"/>
+          <path d="M13 16H8"/>
+        </svg>
+      </div>
+      <div class="action-title">
+        READY TO INVOICE FASTER? &nbsp;<a href="https://lacoinvoice.com">lacoinvoice.com</a>
+      </div>
+      <div class="action-sub">Contact sales for a live walkthrough</div>
+    </div>
+
+    <div class="page-2-tagline">
+      Every marketplace order — invoice ready &amp; ERP connected.
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

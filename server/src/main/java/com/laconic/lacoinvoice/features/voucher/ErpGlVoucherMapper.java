@@ -46,6 +46,8 @@ public class ErpGlVoucherMapper implements BaseMapper<ErpGlVoucher, ErpGlVoucher
 				entity.getStore() != null ? entity.getStore().getName() : null,
 				entity.getInvoice() != null ? entity.getInvoice().getId() : null,
 				entity.getInvoice() != null ? entity.getInvoice().getInvoiceNumber() : null,
+				entity.getOrderInputRun() != null ? entity.getOrderInputRun().getId() : null,
+				entity.getOrderInputRun() != null ? entity.getOrderInputRun().getTitle() : null,
 				entity.getExternalErpItemId(),
 				entity.getExternalErpAccountCodeId(),
 				entity.getExternalErpVendorId(),

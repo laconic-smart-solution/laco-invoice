@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
 import { DataTable } from "@/components/common/data-table/data-table"
+import { DataTableColumnControls } from "@/components/common/data-table/data-table-column-controls"
 import { DataTableColumnHeader } from "@/components/common/data-table/data-table-column-header"
 import { DataTableFooter } from "@/components/common/data-table/data-table-footer"
 import { DataTableRowActions } from "@/components/common/data-table/data-table-row-actions"
@@ -238,6 +239,19 @@ export function OrderImportFilesPage() {
     [locale, navigate, t]
   )
 
+  const columnLabels = useMemo(
+    () => ({
+      originalFilename: t("imports.table.filename"),
+      storeName: t("imports.table.store"),
+      marketplaceCode: t("imports.table.marketplace"),
+      status: t("imports.table.status"),
+      importedOrders: t("imports.table.imported_orders"),
+      importedItems: t("imports.table.imported_items"),
+      createdAt: t("imports.table.created_at"),
+    }),
+    [t]
+  )
+
   const table = useDataTable({
     data: rows,
     columns,
@@ -321,6 +335,9 @@ export function OrderImportFilesPage() {
       <AuthFormError message={loadError} />
 
       <section className="border border-border bg-card shadow-sm">
+        <div className="flex justify-end border-b border-border px-4 py-2.5">
+          <DataTableColumnControls table={table} columnLabels={columnLabels} />
+        </div>
         <div className="overflow-x-auto">
           <DataTable
             table={table}

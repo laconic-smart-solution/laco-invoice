@@ -1,5 +1,8 @@
 import { apiClient } from "@/app/api/client"
-import type { ErpLookupRecord } from "@/features/vouchers/types/voucher"
+import type {
+  ErpItemFinanceAccount,
+  ErpLookupRecord,
+} from "@/features/vouchers/types/voucher"
 import type { ApiResponse } from "@/shared/types/api-response"
 
 export const erpLookupService = {
@@ -7,6 +10,13 @@ export const erpLookupService = {
     const response = await apiClient.get<ApiResponse<ErpLookupRecord[]>>(
       "/v1/erp-lookups/items",
       { params: search ? { search } : undefined }
+    )
+    return response.data.data ?? []
+  },
+
+  itemFinanceAccounts: async (itemId: number) => {
+    const response = await apiClient.get<ApiResponse<ErpItemFinanceAccount[]>>(
+      `/v1/erp-lookups/items/${itemId}/finance-accounts`
     )
     return response.data.data ?? []
   },

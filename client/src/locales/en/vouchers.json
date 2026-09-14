@@ -58,6 +58,15 @@
     "showing": "Showing {{count}} of {{total}} vouchers"
   },
   "form": {
+    "order_input": "Order Data Input (Set)",
+    "order_input_placeholder": "Select an Order Data Input set to auto-generate voucher...",
+    "order_input_description": "Choosing an Order Data Input will auto-calculate date, receipt no, description, and balanced debit/credit lines from the backend.",
+    "finance_info": "Trading Partner Finance Info",
+    "finance_info_placeholder": "Select account from ERP item finance info...",
+    "finance_info_description": "Debit and credit accounts are determined by the ERP Item's Finance Info tab.",
+    "calculating_preview": "Calculating voucher lines...",
+    "recalculate": "Recalculate",
+    "auto_calculated_badge": "Auto-Calculated from Order Input",
     "category": "Voucher type",
     "date": "Voucher date",
     "store": "Store",
@@ -81,6 +90,7 @@
     "vendor_placeholder": "Search vendor",
     "entries": "Entry lines",
     "add_line": "Add line",
+    "recalculate_vat_7": "Add / Recalculate 7% VAT",
     "remove_line": "Remove line",
     "line_brief_placeholder": "Line brief",
     "invoice_no": "Invoice no.",
@@ -115,6 +125,24 @@
     "confirm_title": "Post voucher to ERP?",
     "confirm_description": "Post {{number}} to ERP GL. This cannot be edited afterward.",
     "confirm": "Post to ERP"
+  },
+  "duplicate_order_set": {
+    "title": "Voucher already exists for this order set",
+    "description": "You've already generated a voucher for this Order Data Input. Creating another will add a second voucher for the same set. Are you sure you want to continue?",
+    "description_with_numbers": "You've already generated a voucher for this Order Data Input ({{numbers}}). Creating another will add a second voucher for the same set. Are you sure you want to continue?",
+    "confirm": "Generate anyway"
+  },
+  "export": {
+    "button": "Export",
+    "excel": "Export Excel (.xlsx)",
+    "csv": "Export CSV (.csv)",
+    "pdf": "Export PDF (.pdf)",
+    "exporting": "Exporting vouchers...",
+    "success": "Vouchers exported successfully.",
+    "single_excel": "Export Excel",
+    "single_csv": "Export CSV",
+    "single_pdf": "Export PDF",
+    "failed": "Failed to export vouchers."
   },
   "errors": {
     "generate_failed": "Failed to generate the voucher.",

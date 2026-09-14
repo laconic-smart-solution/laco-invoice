@@ -2,10 +2,10 @@ import { useTranslation } from "react-i18next"
 
 import { StatusBadge, type StatusBadgeVariant } from "@/components/common/status-badge"
 import type {
-  ApiInvoicePdfMatchStatus,
   ApiOrderInputRunDto,
   ApiOrderInputRunStatus,
 } from "@/shared/services/order-input-run.service"
+import { hasOrderInputInvoiceDisplayError } from "@/shared/services/order-input-run.service"
 
 const RUN_STATUS_BADGE: Record<ApiOrderInputRunStatus, StatusBadgeVariant> = {
   DRAFT: "pending",
@@ -15,19 +15,14 @@ const RUN_STATUS_BADGE: Record<ApiOrderInputRunStatus, StatusBadgeVariant> = {
   FAILED: "failed",
 }
 
-const ERROR_MATCH_STATUSES: ApiInvoicePdfMatchStatus[] = ["MISMATCH", "UNPARSED"]
-
 export function getOrderInputInvoiceErrorMessage(
   run: ApiOrderInputRunDto,
   t: (key: string) => string
 ): string | null {
-  const matchStatus = run.invoiceMatchStatus
-  const hasMatchError =
-    matchStatus != null && ERROR_MATCH_STATUSES.includes(matchStatus)
-  const hasParseError = run.invoicePdfStatus === "FAILED"
-  if (!hasMatchError && !hasParseError) {
+  if (!hasOrderInputInvoiceDisplayError(run)) {
     return null
   }
+  const matchStatus = run.invoiceMatchStatus
   const detail = run.invoicePdfError?.trim()
   if (detail) {
     return detail

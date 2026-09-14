@@ -32,6 +32,8 @@ export interface Voucher {
   storeName: string | null
   invoiceId: number | null
   invoiceNumber: string | null
+  orderInputRunId?: number | null
+  orderInputRunTitle?: string | null
   externalErpItemId: number | null
   externalErpAccountCodeId: number | null
   externalErpVendorId: number | null
@@ -76,6 +78,7 @@ export interface VoucherEntryInput {
 export interface GenerateVoucherRequest {
   storeId?: number | null
   invoiceId?: number | null
+  orderInputRunId?: number | null
   voucherCategory: VoucherCategory
   voucherDate: string
   taxMonth?: string | null
@@ -92,17 +95,91 @@ export interface GenerateVoucherRequest {
   entries: VoucherEntryInput[]
 }
 
+export interface ErpItemFinanceAccount {
+  tradingPartnerTypeId: number
+  tradingPartnerTypeCode: string
+  tradingPartnerTypeName: string
+  budget?: boolean
+  purchaseAccountId?: number | null
+  purchaseAccountCode?: string | null
+  purchaseAccountTitle?: string | null
+  saleAccountId?: number | null
+  saleAccountCode?: string | null
+  saleAccountTitle?: string | null
+  goodsInTransitAccountId?: number | null
+  goodsInTransitAccountCode?: string | null
+  goodsInTransitAccountTitle?: string | null
+  depositAccountId?: number | null
+  depositAccountCode?: string | null
+  depositAccountTitle?: string | null
+  assigned?: boolean
+}
+
+export interface VoucherPreviewRequest {
+  orderInputRunId: number
+  externalErpItemId?: number | null
+  tradingPartnerTypeId?: number | null
+  debitAccountId?: number | null
+  creditAccountId?: number | null
+  accountType?: string | null
+  externalErpVendorId?: number | null
+  externalErpDepartmentId?: number | null
+  externalErpCurrencyId?: number | null
+  noTaxInvoice?: boolean
+}
+
+export interface VoucherPreviewDto {
+  storeId?: number | null
+  storeName?: string | null
+  orderInputRunId?: number | null
+  orderInputRunTitle?: string | null
+  voucherCategory: VoucherCategory
+  voucherDate: string
+  taxMonth?: string | null
+  whtMonth?: string | null
+  currency: string
+  voucherBrief: string
+  voucherDescription?: string | null
+  noTaxInvoice?: boolean
+  externalErpItemId: number
+  itemCode?: string | null
+  itemName?: string | null
+  externalErpAccountCodeId: number
+  accountCode?: string | null
+  accountTitle?: string | null
+  externalErpVendorId: number
+  vendorCode?: string | null
+  vendorName?: string | null
+  externalErpDepartmentId?: number | null
+  externalErpCurrencyId?: number | null
+  totalAmount: number
+  debitTotal: number
+  creditTotal: number
+  entries: VoucherEntryInput[]
+  financeAccounts: ErpItemFinanceAccount[]
+}
+
+export interface VoucherPageFilter {
+  storeId?: number
+  voucherNumber?: string
+  voucherCategory?: VoucherCategory
+  status?: VoucherStatus
+}
+
 export interface VoucherPageRequest {
   pageNumber?: number
   pageSize?: number
   sortBy?: string
   sortOrder?: "ASC" | "DESC"
-  filter?: {
-    storeId?: number
-    voucherNumber?: string
-    voucherCategory?: VoucherCategory
-    status?: VoucherStatus
-  }
+  filter?: VoucherPageFilter
+}
+
+export type VoucherExportFilter = VoucherPageFilter
+
+export interface VoucherExportRequest {
+  ids?: number[]
+  exportAll?: boolean
+  filter?: VoucherExportFilter
 }
 
 export interface ErpLookupRecord {

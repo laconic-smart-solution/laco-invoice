@@ -363,6 +363,10 @@
     "filters": {
       "store": "ร้านค้า",
       "store_all": "ทุกร้าน",
+      "status": "สถานะ",
+      "status_all": "ทุกสถานะ",
+      "input_type": "ประเภทไฟล์",
+      "input_type_all": "ทุกประเภทไฟล์",
       "search": "ชื่อเรื่อง",
       "search_placeholder": "ค้นหาด้วยชื่อเรื่อง…"
     },

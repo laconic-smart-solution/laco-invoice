@@ -81,6 +81,7 @@
     "vendor_placeholder": "ရောင်းသူ ရှာပါ",
     "entries": "စာရင်းလိုင်းများ",
     "add_line": "လိုင်း ထည့်ရန်",
+    "recalculate_vat_7": "၇% အခွန် ပေါင်းထည့် / ပြန်လည်တွက်ချက်",
     "remove_line": "လိုင်း ဖယ်ရန်",
     "line_brief_placeholder": "လိုင်း အကျဉ်းချုပ်",
     "invoice_no": "ငွေတောင်းခံလွှာ နံပါတ်",
@@ -115,6 +116,24 @@
     "confirm_title": "ERP သို့ Post လုပ်မည်လား?",
     "confirm_description": "{{number}} ကို ERP GL သို့ Post လုပ်မည်။ ပြီးနောက် ပြင်၍ မရပါ။",
     "confirm": "ERP သို့ Post လုပ်ရန်"
+  },
+  "duplicate_order_set": {
+    "title": "ဤ order set အတွက် voucher ရှိပြီးသားဖြစ်သည်",
+    "description": "ဤ Order Data Input အတွက် voucher တစ်ခု ဖန်တီးပြီးသားဖြစ်သည်။ ထပ်ဖန်တီးပါက တူညီသော set အတွက် voucher အသစ် ထပ်တိုးမည်။ ဆက်လက်လုပ်ဆောင်မည်မှာ သေချာပါသလား?",
+    "description_with_numbers": "ဤ Order Data Input အတွက် voucher တစ်ခု ဖန်တီးပြီးသားဖြစ်သည် ({{numbers}})။ ထပ်ဖန်တီးပါက တူညီသော set အတွက် voucher အသစ် ထပ်တိုးမည်။ ဆက်လက်လုပ်ဆောင်မည်မှာ သေချာပါသလား?",
+    "confirm": "ဆက်လက် ဖန်တီးမည်"
+  },
+  "export": {
+    "button": "ထုတ်ယူရန်",
+    "excel": "Excel ထုတ်ယူရန် (.xlsx)",
+    "csv": "CSV ထုတ်ယူရန် (.csv)",
+    "pdf": "PDF ထုတ်ယူရန် (.pdf)",
+    "exporting": "ဘောက်ချာများ ထုတ်ယူနေသည်...",
+    "success": "ဘောက်ချာများ ထုတ်ယူပြီးပါပြီ။",
+    "single_excel": "Excel ထုတ်ယူရန်",
+    "single_csv": "CSV ထုတ်ယူရန်",
+    "single_pdf": "PDF ထုတ်ယူရန်",
+    "failed": "ဘောက်ချာ ထုတ်ယူ၍ မရပါ။"
   },
   "errors": {
     "generate_failed": "ဘောက်ချာ ဖန်တီး၍ မရပါ။",

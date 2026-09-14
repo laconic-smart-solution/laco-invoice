@@ -79,8 +79,9 @@
     "account_placeholder": "搜索科目",
     "vendor": "供应商",
     "vendor_placeholder": "搜索供应商",
-    "entries": "分录",
-    "add_line": "添加分录",
+    "entries": "分录列表",
+    "add_line": "新增分录",
+    "recalculate_vat_7": "添加 / 重新计算 7% 增值税",
     "remove_line": "删除分录",
     "line_brief_placeholder": "分录摘要",
     "invoice_no": "发票号",
@@ -115,6 +116,24 @@
     "confirm_title": "过账到 ERP？",
     "confirm_description": "将 {{number}} 过账到 ERP 总账。过账后不可再编辑。",
     "confirm": "过账到 ERP"
+  },
+  "duplicate_order_set": {
+    "title": "该订单数据输入已有凭证",
+    "description": "您已为此订单数据输入生成过凭证。再生成将为同一数据集新增另一张凭证。确定要继续吗？",
+    "description_with_numbers": "您已为此订单数据输入生成过凭证（{{numbers}}）。再生成将为同一数据集新增另一张凭证。确定要继续吗？",
+    "confirm": "仍要生成"
+  },
+  "export": {
+    "button": "导出",
+    "excel": "导出 Excel (.xlsx)",
+    "csv": "导出 CSV (.csv)",
+    "pdf": "导出 PDF (.pdf)",
+    "exporting": "正在导出凭证...",
+    "success": "凭证导出成功。",
+    "single_excel": "导出 Excel",
+    "single_csv": "导出 CSV",
+    "single_pdf": "导出 PDF",
+    "failed": "导出凭证失败。"
   },
   "errors": {
     "generate_failed": "生成凭证失败。",

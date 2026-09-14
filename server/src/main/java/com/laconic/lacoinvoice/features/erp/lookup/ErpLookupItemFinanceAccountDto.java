@@ -1,0 +1,48 @@
+package com.laconic.lacoinvoice.features.erp.lookup;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Part finance account assignment for a trading partner type from ERP")
+public record ErpLookupItemFinanceAccountDto(
+		Long tradingPartnerTypeId,
+		String tradingPartnerTypeCode,
+		String tradingPartnerTypeName,
+		Boolean budget,
+		Long purchaseAccountId,
+		String purchaseAccountCode,
+		String purchaseAccountTitle,
+		Long saleAccountId,
+		String saleAccountCode,
+		String saleAccountTitle,
+		Long goodsInTransitAccountId,
+		String goodsInTransitAccountCode,
+		String goodsInTransitAccountTitle,
+		Long purchaseMemoAccountId,
+		String purchaseMemoAccountCode,
+		String purchaseMemoAccountTitle,
+		Long salesMemoAccountId,
+		String salesMemoAccountCode,
+		String salesMemoAccountTitle,
+		Long advancePoAccountId,
+		String advancePoAccountCode,
+		String advancePoAccountTitle,
+		Long advanceOrderAccountId,
+		String advanceOrderAccountCode,
+		String advanceOrderAccountTitle,
+		Long depositAccountId,
+		String depositAccountCode,
+		String depositAccountTitle,
+		Long arDepositAccountId,
+		String arDepositAccountCode,
+		String arDepositAccountTitle,
+		Long faDisposalAccountId,
+		String faDisposalAccountCode,
+		String faDisposalAccountTitle,
+		Long maintenanceAccountId,
+		String maintenanceAccountCode,
+		String maintenanceAccountTitle,
+		Long installmentAccountId,
+		String installmentAccountCode,
+		String installmentAccountTitle,
+		Boolean assigned) {
+}

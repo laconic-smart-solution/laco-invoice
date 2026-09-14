@@ -25,6 +25,9 @@ public class HttpErpLookupService implements ErpLookupService {
 	private static final ParameterizedTypeReference<ApiResponse<ErpLookupItemDto>> ITEM_ONE =
 			new ParameterizedTypeReference<>() {
 			};
+	private static final ParameterizedTypeReference<ApiResponse<List<ErpLookupItemFinanceAccountDto>>> ITEM_FINANCE_ACCOUNT_LIST =
+			new ParameterizedTypeReference<>() {
+			};
 	private static final ParameterizedTypeReference<ApiResponse<List<ErpLookupAccountDto>>> ACCOUNT_LIST =
 			new ParameterizedTypeReference<>() {
 			};
@@ -64,6 +67,28 @@ public class HttpErpLookupService implements ErpLookupService {
 	@Override
 	public Optional<ErpLookupItemDto> item(Long id) {
 		return one("/api/common/erp-lookups/items/{id}", id, ITEM_ONE);
+	}
+
+	@Override
+	public List<ErpLookupItemFinanceAccountDto> itemFinanceAccounts(Long itemId) {
+		if (itemId == null) {
+			return List.of();
+		}
+		try {
+			ApiResponse<List<ErpLookupItemFinanceAccountDto>> body = restClient.get()
+					.uri("/api/common/erp-lookups/items/{id}/finance-accounts", itemId)
+					.retrieve()
+					.body(ITEM_FINANCE_ACCOUNT_LIST);
+			if (body == null || body.getData() == null) {
+				return List.of();
+			}
+			return body.getData();
+		} catch (RestClientResponseException ex) {
+			if (ex.getStatusCode() == HttpStatus.NOT_FOUND || ex.getStatusCode().value() == 404) {
+				return List.of();
+			}
+			throw erpFailure("ERP lookup failed: /api/common/erp-lookups/items/" + itemId + "/finance-accounts", ex);
+		}
 	}
 
 	@Override

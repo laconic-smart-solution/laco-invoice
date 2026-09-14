@@ -41,6 +41,13 @@ public class ErpLookupController {
 				.orElseThrow(() -> new ResourceNotFoundException("ERP item not found: id=" + id)));
 	}
 
+	@GetMapping("/items/{id}/finance-accounts")
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	@Operation(summary = "List finance info accounts for an ERP item by PART_ID")
+	public ApiResponse<List<ErpLookupItemFinanceAccountDto>> itemFinanceAccounts(@PathVariable Long id) {
+		return ApiResponse.ok("OK", lookupService.itemFinanceAccounts(id));
+	}
+
 	@GetMapping("/account-codes")
 	@PreAuthorize("@authz.isOwnerOrAdmin()")
 	@Operation(summary = "List ERP GL account codes. Mock catalog when USE_ERP_API=false.")

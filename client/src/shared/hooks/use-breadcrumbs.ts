@@ -5,8 +5,8 @@ import { useLocation, useParams } from "react-router-dom"
 import { ROUTES } from "@/app/constants/routes"
 import { SIDEBAR_NAV_ITEMS } from "@/constants/navigation"
 import { useInvoiceDetailQuery } from "@/features/invoices/queries/invoice.query"
-import { getMockOrderById } from "@/features/orders/data/mock-orders"
 import { useVoucherDetailQuery } from "@/features/vouchers/queries/voucher.query"
+import { useOrderDetailQuery } from "@/shared/queries/order.query"
 import { useOrderInputRunDetailQuery } from "@/shared/queries/order-input-run.query"
 
 export interface BreadcrumbItem {
@@ -48,11 +48,21 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
   const voucherDetailQuery = useVoucherDetailQuery(
     isVoucherDetailPath ? parsePositiveId(voucherPathId) : null
   )
+  const isOrderDetailPath =
+    Boolean(orderId) &&
+    pathname.startsWith(`${ROUTES.dashboard.orders}/`) &&
+    !pathname.startsWith(ROUTES.dashboard.orderImports) &&
+    !pathname.startsWith(ROUTES.dashboard.orderInputs)
+  const orderDetailQuery = useOrderDetailQuery(
+    isOrderDetailPath ? parsePositiveId(orderId) : null
+  )
   const invoiceTitle = invoiceDetailQuery.data?.invoiceNumber?.trim() || ""
   const voucherTitle =
     voucherDetailQuery.data?.voucherNumber?.trim() ||
     voucherDetailQuery.data?.erpVoucherNo?.trim() ||
     ""
+  const orderTitle =
+    orderDetailQuery.data?.order.externalOrderId?.trim() || ""
 
   return useMemo(() => {
     if (pathname === ROUTES.dashboard.root) {
@@ -155,12 +165,10 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
       !pathname.startsWith(ROUTES.dashboard.orderImports) &&
       !pathname.startsWith(ROUTES.dashboard.orderInputs)
     ) {
-      const order = getMockOrderById(orderId)
-
       return [
         { label: t("sidebar:nav.dashboard"), href: ROUTES.dashboard.root },
         { label: t("sidebar:nav.orders"), href: ROUTES.dashboard.orders },
-        { label: order?.orderId ?? orderId },
+        { label: orderTitle || orderId },
       ]
     }
 
@@ -217,5 +225,5 @@ export function useBreadcrumbs(): BreadcrumbItem[] {
       default:
         return [{ label: t("sidebar:nav.dashboard"), href: ROUTES.dashboard.root }]
     }
-  }, [customerId, inputRunTitle, invoiceTitle, orderId, pathname, resolvedInputRunId, t, voucherTitle])
+  }, [customerId, inputRunTitle, invoiceTitle, orderId, orderTitle, pathname, resolvedInputRunId, t, voucherTitle])
 }

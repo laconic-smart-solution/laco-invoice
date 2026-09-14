@@ -35,7 +35,9 @@
     "view": {
       "columns": "Columns",
       "toggle_columns": "Toggle columns",
-      "reset_columns": "Reset column"
+      "reset_columns": "Reset column",
+      "compact": "Compact",
+      "comfortable": "Comfortable"
     }
   },
   "export_preview": {

@@ -1,12 +1,31 @@
 import { useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
-import { BookText, Plus, Scale, Search, Store } from "lucide-react"
+import {
+  BookText,
+  Download,
+  FileSpreadsheet,
+  FileText,
+  Loader2,
+  Plus,
+  Scale,
+  Search,
+  Store,
+} from "lucide-react"
 
 import { ROUTES } from "@/app/constants/routes"
 import { ConfirmDialog } from "@/components/common/confirm-dialog"
 import { StatCard } from "@/components/common/stat-card"
 import { Button } from "@/components/ui/button"
+import { ManualColumnControls, type ManualColumnItem } from "@/components/common/data-table/manual-column-controls"
+import { useTableDensityStore } from "@/shared/stores/table-density-store"
+import { cn } from "@/lib/utils"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -27,10 +46,17 @@ import {
   useErpVendorsQuery,
 } from "@/features/vouchers/queries/erp-lookup.query"
 import {
+  useExportVouchersCsvMutation,
+  useExportVouchersExcelMutation,
+  useExportVouchersPdfMutation,
   usePostVoucherToErpMutation,
   useVouchersQuery,
 } from "@/features/vouchers/queries/voucher.query"
-import type { Voucher } from "@/features/vouchers/types/voucher"
+import type {
+  Voucher,
+  VoucherExportRequest,
+  VoucherStatus,
+} from "@/features/vouchers/types/voucher"
 import { extractApiErrorMessage } from "@/shared/api/extract-api-error-message"
 import { useStoresPageQuery } from "@/shared/queries/store.query"
 import { useLocaleStore } from "@/shared/stores/locale-store"
@@ -38,10 +64,39 @@ import { formatCurrency, formatNumber } from "@/util/format"
 
 const EMPTY_VOUCHERS: Voucher[] = []
 
+type VoucherColumnKey =
+  | "voucherNo"
+  | "category"
+  | "brief"
+  | "item"
+  | "vendor"
+  | "store"
+  | "date"
+  | "debit"
+  | "credit"
+  | "status"
+  | "actions"
+
+const DEFAULT_VOUCHER_COLUMNS: Record<VoucherColumnKey, boolean> = {
+  voucherNo: true,
+  category: true,
+  brief: true,
+  item: true,
+  vendor: true,
+  store: true,
+  date: true,
+  debit: true,
+  credit: true,
+  status: true,
+  actions: true,
+}
+
 export function VouchersPage() {
   const { t } = useTranslation("vouchers")
   const navigate = useNavigate()
   const locale = useLocaleStore((state) => state.locale)
+  const density = useTableDensityStore((state) => state.density)
+  const isCompact = density === "compact"
 
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
@@ -50,12 +105,48 @@ export function VouchersPage() {
   const [editingId, setEditingId] = useState<number | null>(null)
   const [postingVoucher, setPostingVoucher] = useState<Voucher | null>(null)
   const [postError, setPostError] = useState<string | null>(null)
+  const [visibleColumns, setVisibleColumns] = useState(DEFAULT_VOUCHER_COLUMNS)
+
+  const handleToggleColumn = (id: string, isVisible: boolean) => {
+    setVisibleColumns((prev) => ({
+      ...prev,
+      [id as VoucherColumnKey]: isVisible,
+    }))
+  }
+
+  const handleResetColumns = () => {
+    setVisibleColumns(DEFAULT_VOUCHER_COLUMNS)
+  }
+
+  const columnOptions: ManualColumnItem[] = [
+    { id: "voucherNo", label: t("table.voucher_no"), isVisible: visibleColumns.voucherNo },
+    { id: "category", label: t("table.category"), isVisible: visibleColumns.category },
+    { id: "brief", label: t("table.brief"), isVisible: visibleColumns.brief },
+    { id: "item", label: t("table.item"), isVisible: visibleColumns.item },
+    { id: "vendor", label: t("table.vendor"), isVisible: visibleColumns.vendor },
+    { id: "store", label: t("table.store"), isVisible: visibleColumns.store },
+    { id: "date", label: t("table.date"), isVisible: visibleColumns.date },
+    { id: "debit", label: t("table.debit"), isVisible: visibleColumns.debit },
+    { id: "credit", label: t("table.credit"), isVisible: visibleColumns.credit },
+    { id: "status", label: t("table.status"), isVisible: visibleColumns.status },
+    { id: "actions", label: t("table.actions"), isVisible: visibleColumns.actions },
+  ]
+
+  const visibleColumnCount = Object.values(visibleColumns).filter(Boolean).length
 
   const vouchersQuery = useVouchersQuery()
   const postMutation = usePostVoucherToErpMutation()
+  const exportExcelMutation = useExportVouchersExcelMutation()
+  const exportCsvMutation = useExportVouchersCsvMutation()
+  const exportPdfMutation = useExportVouchersPdfMutation()
   const storesQuery = useStoresPageQuery({ pageNumber: 1, pageSize: 200 })
   const itemsQuery = useErpItemsQuery()
   const vendorsQuery = useErpVendorsQuery()
+
+  const isExporting =
+    exportExcelMutation.isPending ||
+    exportCsvMutation.isPending ||
+    exportPdfMutation.isPending
 
   const vouchers = vouchersQuery.data ?? EMPTY_VOUCHERS
   const stores = storesQuery.data?.data ?? []
@@ -79,6 +170,42 @@ export function VouchersPage() {
     })
   }, [itemsQuery.data, search, statusFilter, storeFilter, vendorsQuery.data, vouchers])
 
+  const buildExportPayload = (): VoucherExportRequest => {
+    const ids = filteredVouchers.map((v) => v.id)
+    return {
+      ids: ids.length > 0 ? ids : undefined,
+      exportAll: ids.length === 0,
+      filter: {
+        storeId: storeFilter !== "all" ? Number(storeFilter) : undefined,
+        status: statusFilter !== "all" ? (statusFilter as VoucherStatus) : undefined,
+      },
+    }
+  }
+
+  const handleExportExcel = async () => {
+    try {
+      await exportExcelMutation.mutateAsync(buildExportPayload())
+    } catch (error) {
+      console.error("Export Excel error", error)
+    }
+  }
+
+  const handleExportCsv = async () => {
+    try {
+      await exportCsvMutation.mutateAsync(buildExportPayload())
+    } catch (error) {
+      console.error("Export CSV error", error)
+    }
+  }
+
+  const handleExportPdf = async () => {
+    try {
+      await exportPdfMutation.mutateAsync(buildExportPayload())
+    } catch (error) {
+      console.error("Export PDF error", error)
+    }
+  }
+
   const debitTotal = filteredVouchers.reduce((sum, voucher) => sum + voucher.debitTotal, 0)
   const creditTotal = filteredVouchers.reduce(
     (sum, voucher) => sum + voucher.creditTotal,
@@ -97,17 +224,59 @@ export function VouchersPage() {
           </h1>
           <p className="mt-0.5 text-xs text-muted-foreground">{t("subtitle")}</p>
         </div>
-        <Button
-          type="button"
-          onClick={() => {
-            setEditingId(null)
-            setGenerateOpen(true)
-          }}
-          className="h-9 gap-1.5 rounded-none bg-primary text-xs font-semibold text-primary-foreground shadow-xs"
-        >
-          <Plus className="size-4" />
-          {t("generate")}
-        </Button>
+        <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isExporting || filteredVouchers.length === 0}
+                className="h-9 gap-1.5 rounded-none text-xs font-semibold shadow-xs"
+              >
+                {isExporting ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Download className="size-4" />
+                )}
+                {isExporting ? t("export.exporting") : t("export.button")}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="rounded-none">
+              <DropdownMenuItem
+                onClick={handleExportExcel}
+                className="cursor-pointer gap-2 text-xs"
+              >
+                <FileSpreadsheet className="size-4 text-emerald-600" />
+                {t("export.excel")}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={handleExportCsv}
+                className="cursor-pointer gap-2 text-xs"
+              >
+                <FileText className="size-4 text-sky-600" />
+                {t("export.csv")}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={handleExportPdf}
+                className="cursor-pointer gap-2 text-xs"
+              >
+                <FileText className="size-4 text-rose-600" />
+                {t("export.pdf")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Button
+            type="button"
+            onClick={() => {
+              setEditingId(null)
+              setGenerateOpen(true)
+            }}
+            className="h-9 gap-1.5 rounded-none bg-primary text-xs font-semibold text-primary-foreground shadow-xs"
+          >
+            <Plus className="size-4" />
+            {t("generate")}
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -176,11 +345,18 @@ export function VouchersPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="text-xs text-muted-foreground">
-              {t("filters.showing", {
-                count: filteredVouchers.length,
-                total: vouchers.length,
-              })}
+            <div className="flex items-center gap-3">
+              <ManualColumnControls
+                columns={columnOptions}
+                onToggleColumn={handleToggleColumn}
+                onResetColumns={handleResetColumns}
+              />
+              <div className="text-xs text-muted-foreground">
+                {t("filters.showing", {
+                  count: filteredVouchers.length,
+                  total: vouchers.length,
+                })}
+              </div>
             </div>
           </div>
         </div>
@@ -190,24 +366,24 @@ export function VouchersPage() {
             <table className="w-full text-left text-xs">
               <thead className="border-b border-border bg-muted font-medium text-muted-foreground">
                 <tr>
-                  <th className="px-4 py-3">{t("table.voucher_no")}</th>
-                  <th className="px-4 py-3">{t("table.category")}</th>
-                  <th className="px-4 py-3">{t("table.brief")}</th>
-                  <th className="px-4 py-3">{t("table.item")}</th>
-                  <th className="px-4 py-3">{t("table.vendor")}</th>
-                  <th className="px-4 py-3">{t("table.store")}</th>
-                  <th className="px-4 py-3">{t("table.date")}</th>
-                  <th className="px-4 py-3 text-right">{t("table.debit")}</th>
-                  <th className="px-4 py-3 text-right">{t("table.credit")}</th>
-                  <th className="px-4 py-3 text-center">{t("table.status")}</th>
-                  <th className="px-4 py-3 text-right">{t("table.actions")}</th>
+                  {visibleColumns.voucherNo && <th className={isCompact ? "px-2.5 py-1.5 text-[11px]" : "px-4 py-3"}>{t("table.voucher_no")}</th>}
+                  {visibleColumns.category && <th className={isCompact ? "px-2.5 py-1.5 text-[11px]" : "px-4 py-3"}>{t("table.category")}</th>}
+                  {visibleColumns.brief && <th className={isCompact ? "px-2.5 py-1.5 text-[11px]" : "px-4 py-3"}>{t("table.brief")}</th>}
+                  {visibleColumns.item && <th className={isCompact ? "px-2.5 py-1.5 text-[11px]" : "px-4 py-3"}>{t("table.item")}</th>}
+                  {visibleColumns.vendor && <th className={isCompact ? "px-2.5 py-1.5 text-[11px]" : "px-4 py-3"}>{t("table.vendor")}</th>}
+                  {visibleColumns.store && <th className={isCompact ? "px-2.5 py-1.5 text-[11px]" : "px-4 py-3"}>{t("table.store")}</th>}
+                  {visibleColumns.date && <th className={isCompact ? "px-2.5 py-1.5 text-[11px]" : "px-4 py-3"}>{t("table.date")}</th>}
+                  {visibleColumns.debit && <th className={cn(isCompact ? "px-2.5 py-1.5 text-[11px]" : "px-4 py-3", "text-right")}>{t("table.debit")}</th>}
+                  {visibleColumns.credit && <th className={cn(isCompact ? "px-2.5 py-1.5 text-[11px]" : "px-4 py-3", "text-right")}>{t("table.credit")}</th>}
+                  {visibleColumns.status && <th className={cn(isCompact ? "px-2.5 py-1.5 text-[11px]" : "px-4 py-3", "text-center")}>{t("table.status")}</th>}
+                  {visibleColumns.actions && <th className={cn(isCompact ? "px-2.5 py-1.5 text-[11px]" : "px-4 py-3", "text-right")}>{t("table.actions")}</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-border font-mono">
                 {vouchersQuery.isLoading ? (
                   <tr>
                     <td
-                      colSpan={11}
+                      colSpan={visibleColumnCount || 1}
                       className="py-12 text-center font-sans text-muted-foreground"
                     >
                       {t("loading")}
@@ -216,7 +392,7 @@ export function VouchersPage() {
                 ) : filteredVouchers.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={11}
+                      colSpan={visibleColumnCount || 1}
                       className="py-12 text-center font-sans text-muted-foreground"
                     >
                       {t("empty")}
@@ -231,61 +407,83 @@ export function VouchersPage() {
                       }
                       className="cursor-pointer transition-colors hover:bg-muted/30"
                     >
-                      <td className="px-4 py-3 font-bold text-foreground">
-                        {voucher.voucherNumber}
-                      </td>
-                      <td className="px-4 py-3 font-sans">
-                        {t(`category.${voucher.voucherCategory}`)}
-                      </td>
-                      <td className="px-4 py-3 font-sans text-muted-foreground">
-                        {voucher.voucherBrief ?? "—"}
-                      </td>
-                      <td className="px-4 py-3 font-sans">
-                        {erpLookupLabel(itemsQuery.data, voucher.externalErpItemId)}
-                      </td>
-                      <td className="px-4 py-3 font-sans">
-                        {erpLookupLabel(vendorsQuery.data, voucher.externalErpVendorId)}
-                      </td>
-                      <td className="px-4 py-3 font-sans text-muted-foreground">
-                        <div className="flex items-center gap-1.5">
-                          <Store className="size-3.5 shrink-0" />
-                          <span className="max-w-[140px] truncate">
-                            {voucher.storeName ?? "—"}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-[11px] text-muted-foreground">
-                        {voucher.voucherDate}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        {formatCurrency(voucher.debitTotal, locale, voucher.currency)}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        {formatCurrency(voucher.creditTotal, locale, voucher.currency)}
-                      </td>
-                      <td className="px-4 py-3 text-center font-sans">
-                        <VoucherStatusBadge
-                          status={voucher.status}
-                          label={t(`status.${voucher.status.toLowerCase()}`)}
-                          description={voucherStatusTooltip(
-                            voucher,
-                            t(`status_description.${voucher.status.toLowerCase()}`)
-                          )}
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <VoucherRowActions
-                          status={voucher.status}
-                          onEdit={() => {
-                            setEditingId(voucher.id)
-                            setGenerateOpen(true)
-                          }}
-                          onPost={() => {
-                            setPostError(null)
-                            setPostingVoucher(voucher)
-                          }}
-                        />
-                      </td>
+                      {visibleColumns.voucherNo && (
+                        <td className={cn(isCompact ? "px-2.5 py-1.5" : "px-4 py-3", "font-bold text-foreground")}>
+                          {voucher.voucherNumber}
+                        </td>
+                      )}
+                      {visibleColumns.category && (
+                        <td className={cn(isCompact ? "px-2.5 py-1.5" : "px-4 py-3", "font-sans")}>
+                          {t(`category.${voucher.voucherCategory}`)}
+                        </td>
+                      )}
+                      {visibleColumns.brief && (
+                        <td className={cn(isCompact ? "px-2.5 py-1.5" : "px-4 py-3", "font-sans text-muted-foreground")}>
+                          {voucher.voucherBrief ?? "—"}
+                        </td>
+                      )}
+                      {visibleColumns.item && (
+                        <td className={cn(isCompact ? "px-2.5 py-1.5" : "px-4 py-3", "font-sans")}>
+                          {erpLookupLabel(itemsQuery.data, voucher.externalErpItemId)}
+                        </td>
+                      )}
+                      {visibleColumns.vendor && (
+                        <td className={cn(isCompact ? "px-2.5 py-1.5" : "px-4 py-3", "font-sans")}>
+                          {erpLookupLabel(vendorsQuery.data, voucher.externalErpVendorId)}
+                        </td>
+                      )}
+                      {visibleColumns.store && (
+                        <td className={cn(isCompact ? "px-2.5 py-1.5" : "px-4 py-3", "font-sans text-muted-foreground")}>
+                          <div className="flex items-center gap-1.5">
+                            <Store className="size-3.5 shrink-0" />
+                            <span className="max-w-[140px] truncate">
+                              {voucher.storeName ?? "—"}
+                            </span>
+                          </div>
+                        </td>
+                      )}
+                      {visibleColumns.date && (
+                        <td className={cn(isCompact ? "px-2.5 py-1.5" : "px-4 py-3", "text-[11px] text-muted-foreground")}>
+                          {voucher.voucherDate}
+                        </td>
+                      )}
+                      {visibleColumns.debit && (
+                        <td className={cn(isCompact ? "px-2.5 py-1.5" : "px-4 py-3", "text-right")}>
+                          {formatCurrency(voucher.debitTotal, locale, voucher.currency)}
+                        </td>
+                      )}
+                      {visibleColumns.credit && (
+                        <td className={cn(isCompact ? "px-2.5 py-1.5" : "px-4 py-3", "text-right")}>
+                          {formatCurrency(voucher.creditTotal, locale, voucher.currency)}
+                        </td>
+                      )}
+                      {visibleColumns.status && (
+                        <td className={cn(isCompact ? "px-2.5 py-1.5" : "px-4 py-3", "text-center font-sans")}>
+                          <VoucherStatusBadge
+                            status={voucher.status}
+                            label={t(`status.${voucher.status.toLowerCase()}`)}
+                            description={voucherStatusTooltip(
+                              voucher,
+                              t(`status_description.${voucher.status.toLowerCase()}`)
+                            )}
+                          />
+                        </td>
+                      )}
+                      {visibleColumns.actions && (
+                        <td className={cn(isCompact ? "px-2.5 py-1.5" : "px-4 py-3")}>
+                          <VoucherRowActions
+                            status={voucher.status}
+                            onEdit={() => {
+                              setEditingId(voucher.id)
+                              setGenerateOpen(true)
+                            }}
+                            onPost={() => {
+                              setPostError(null)
+                              setPostingVoucher(voucher)
+                            }}
+                          />
+                        </td>
+                      )}
                     </tr>
                   ))
                 )}

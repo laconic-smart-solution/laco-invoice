@@ -2,7 +2,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import type {
   GenerateVoucherRequest,
+  VoucherExportRequest,
   VoucherPageRequest,
+  VoucherPreviewRequest,
 } from "@/features/vouchers/types/voucher"
 import { voucherService } from "@/shared/services/voucher.service"
 
@@ -11,6 +13,8 @@ export const voucherKeys = {
   lists: () => [...voucherKeys.all, "list"] as const,
   list: (request: VoucherPageRequest) =>
     [...voucherKeys.lists(), request] as const,
+  byOrderInputRun: (runId: number) =>
+    [...voucherKeys.all, "by-order-input-run", runId] as const,
   details: () => [...voucherKeys.all, "detail"] as const,
   detail: (id: number) => [...voucherKeys.details(), id] as const,
 }
@@ -35,6 +39,22 @@ export function useVoucherDetailQuery(id: number | null) {
     queryKey: voucherKeys.detail(id ?? 0),
     queryFn: () => voucherService.getById(id as number),
     enabled: id != null && id > 0,
+  })
+}
+
+export function useVouchersByOrderInputRunQuery(runId: number | null) {
+  return useQuery({
+    queryKey: voucherKeys.byOrderInputRun(runId ?? 0),
+    queryFn: () => voucherService.getByOrderInputRun(runId as number),
+    enabled: runId != null && runId > 0,
+    staleTime: 30_000,
+  })
+}
+
+export function useVoucherPreviewMutation() {
+  return useMutation({
+    mutationFn: (request: VoucherPreviewRequest) =>
+      voucherService.previewFromOrderInput(request),
   })
 }
 
@@ -78,3 +98,47 @@ export function usePostVoucherToErpMutation() {
     },
   })
 }
+
+export function useExportVouchersExcelMutation() {
+  return useMutation({
+    mutationFn: (request: VoucherExportRequest) =>
+      voucherService.exportExcel(request),
+  })
+}
+
+export function useExportVouchersCsvMutation() {
+  return useMutation({
+    mutationFn: (request: VoucherExportRequest) =>
+      voucherService.exportCsv(request),
+  })
+}
+
+export function useExportSingleVoucherExcelMutation() {
+  return useMutation({
+    mutationFn: ({ id, voucherNumber }: { id: number; voucherNumber?: string }) =>
+      voucherService.exportSingleExcel(id, voucherNumber),
+  })
+}
+
+export function useExportSingleVoucherCsvMutation() {
+  return useMutation({
+    mutationFn: ({ id, voucherNumber }: { id: number; voucherNumber?: string }) =>
+      voucherService.exportSingleCsv(id, voucherNumber),
+  })
+}
+
+export function useExportVouchersPdfMutation() {
+  return useMutation({
+    mutationFn: (request: VoucherExportRequest) =>
+      voucherService.exportPdf(request),
+  })
+}
+
+export function useExportSingleVoucherPdfMutation() {
+  return useMutation({
+    mutationFn: ({ id, voucherNumber }: { id: number; voucherNumber?: string }) =>
+      voucherService.exportSinglePdf(id, voucherNumber),
+  })
+}
+
+

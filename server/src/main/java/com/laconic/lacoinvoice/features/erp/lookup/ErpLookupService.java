@@ -9,6 +9,8 @@ public interface ErpLookupService {
 
 	Optional<ErpLookupItemDto> item(Long id);
 
+	List<ErpLookupItemFinanceAccountDto> itemFinanceAccounts(Long itemId);
+
 	List<ErpLookupAccountDto> accounts(String search);
 
 	Optional<ErpLookupAccountDto> account(Long id);

@@ -35,7 +35,9 @@
     "view": {
       "columns": "ကော်လံများ",
       "toggle_columns": "ကော်လံ ပြ/ဖျောက်",
-      "reset_columns": "Reset column"
+      "reset_columns": "Reset column",
+      "compact": "ကျဉ်း",
+      "comfortable": "သက်တောင့်သက်သာ"
     }
   },
   "export_preview": {

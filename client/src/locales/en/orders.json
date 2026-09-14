@@ -363,6 +363,10 @@
     "filters": {
       "store": "Store",
       "store_all": "All stores",
+      "status": "Status",
+      "status_all": "All statuses",
+      "input_type": "Input type",
+      "input_type_all": "All input types",
       "search": "Title",
       "search_placeholder": "Search by title…"
     },

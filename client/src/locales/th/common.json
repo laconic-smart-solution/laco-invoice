@@ -34,8 +34,10 @@
     },
     "view": {
       "columns": "คอลัมน์",
-      "toggle_columns": "แสดง/ซ่อนคอลัมน์",
-      "reset_columns": "รีเซ็ตคอลัมน์"
+      "toggle_columns": "เปิด/ปิดคอลัมน์",
+      "reset_columns": "รีเซ็ตคอลัมน์",
+      "compact": "กะทัดรัด",
+      "comfortable": "สบายตา"
     }
   },
   "export_preview": {

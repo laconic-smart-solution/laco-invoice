@@ -12,6 +12,8 @@ public interface ErpGlVoucherRepository extends BaseRepository<ErpGlVoucher> {
 
 	List<ErpGlVoucher> findByInvoice_IdOrderByIdDesc(Long invoiceId);
 
+	List<ErpGlVoucher> findByOrderInputRun_IdOrderByIdDesc(Long orderInputRunId);
+
 	List<ErpGlVoucher> findByVoucherNumberStartingWithIgnoreCase(String prefix);
 
 	boolean existsByVoucherNumberIgnoreCase(String voucherNumber);

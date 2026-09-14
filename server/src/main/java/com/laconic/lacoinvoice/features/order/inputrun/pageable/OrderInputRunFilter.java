@@ -14,4 +14,5 @@ public class OrderInputRunFilter {
 	private String marketplaceCode;
 	private String title;
 	private String status;
+	private String inputFileType;
 }

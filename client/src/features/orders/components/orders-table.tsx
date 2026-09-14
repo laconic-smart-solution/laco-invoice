@@ -209,7 +209,9 @@ export function OrdersTable({
           />
         ),
         cell: ({ getValue }) => (
-          <span className="font-medium text-foreground">{getValue<string>()}</span>
+          <span className="font-mono text-xs font-medium text-foreground whitespace-nowrap">
+            {getValue<string>()}
+          </span>
         ),
       },
       {
@@ -231,7 +233,11 @@ export function OrdersTable({
           if (Number.isNaN(parsed.getTime()) || parsed.getFullYear() < 1971) {
             return "—"
           }
-          return formatDate(value, locale)
+          return (
+            <span className="text-xs whitespace-nowrap text-muted-foreground">
+              {formatDate(value, locale)}
+            </span>
+          )
         },
       },
       {
@@ -245,11 +251,13 @@ export function OrdersTable({
           />
         ),
         cell: ({ row }) => (
-          <div className="flex items-center gap-2">
-            <span className="flex size-6 shrink-0 items-center justify-center bg-foreground text-background">
-              <Store className="size-3.5" aria-hidden />
+          <div className="flex items-center gap-1.5 min-w-0 max-w-[200px]">
+            <span className="flex size-5 shrink-0 items-center justify-center bg-foreground text-background">
+              <Store className="size-3" aria-hidden />
             </span>
-            <span>{row.original.storeName}</span>
+            <span className="truncate text-xs font-medium" title={row.original.storeName}>
+              {row.original.storeName}
+            </span>
           </div>
         ),
       },
@@ -268,10 +276,14 @@ export function OrdersTable({
         cell: ({ row }) => {
           const phone = row.original.customerPhone?.trim()
           return (
-            <div className="min-w-[140px]">
-              <p className="font-medium text-foreground">{row.original.customer}</p>
+            <div className="min-w-0 max-w-[150px]">
+              <p className="truncate font-medium text-foreground text-xs" title={row.original.customer}>
+                {row.original.customer}
+              </p>
               {phone ? (
-                <p className="text-xs text-muted-foreground">{phone}</p>
+                <p className="truncate font-mono text-[11px] text-muted-foreground">
+                  {phone}
+                </p>
               ) : null}
             </div>
           )
@@ -287,8 +299,11 @@ export function OrdersTable({
             enableSearch={false}
           />
         ),
-        cell: ({ row }) =>
-          formatCurrency(row.original.totalAmount, locale, row.original.currency),
+        cell: ({ row }) => (
+          <span className="font-mono text-xs font-semibold text-foreground whitespace-nowrap">
+            {formatCurrency(row.original.totalAmount, locale, row.original.currency)}
+          </span>
+        ),
       },
       {
         accessorKey: "totalFees",
@@ -332,8 +347,11 @@ export function OrdersTable({
             </TooltipProvider>
           </div>
         ),
-        cell: ({ row }) =>
-          formatCurrency(row.original.totalFees, locale, row.original.currency),
+        cell: ({ row }) => (
+          <span className="font-mono text-xs font-medium text-muted-foreground whitespace-nowrap">
+            {formatCurrency(row.original.totalFees, locale, row.original.currency)}
+          </span>
+        ),
       },
       {
         accessorKey: "tiktokCommissionFee",
@@ -346,8 +364,11 @@ export function OrdersTable({
             enableSearch={false}
           />
         ),
-        cell: ({ row }) =>
-          formatCurrency(row.original.tiktokCommissionFee ?? 0, locale, row.original.currency),
+        cell: ({ row }) => (
+          <span className="font-mono text-xs text-muted-foreground whitespace-nowrap">
+            {formatCurrency(row.original.tiktokCommissionFee ?? 0, locale, row.original.currency)}
+          </span>
+        ),
       },
       {
         accessorKey: "transactionFee",
@@ -360,8 +381,11 @@ export function OrdersTable({
             enableSearch={false}
           />
         ),
-        cell: ({ row }) =>
-          formatCurrency(row.original.transactionFee ?? 0, locale, row.original.currency),
+        cell: ({ row }) => (
+          <span className="font-mono text-xs text-muted-foreground whitespace-nowrap">
+            {formatCurrency(row.original.transactionFee ?? 0, locale, row.original.currency)}
+          </span>
+        ),
       },
       {
         accessorKey: "affiliateCommission",
@@ -374,8 +398,11 @@ export function OrdersTable({
             enableSearch={false}
           />
         ),
-        cell: ({ row }) =>
-          formatCurrency(row.original.affiliateCommission ?? 0, locale, row.original.currency),
+        cell: ({ row }) => (
+          <span className="font-mono text-xs text-muted-foreground whitespace-nowrap">
+            {formatCurrency(row.original.affiliateCommission ?? 0, locale, row.original.currency)}
+          </span>
+        ),
       },
       {
         accessorKey: "adsFee",
@@ -388,8 +415,11 @@ export function OrdersTable({
             enableSearch={false}
           />
         ),
-        cell: ({ row }) =>
-          formatCurrency(row.original.adsFee ?? 0, locale, row.original.currency),
+        cell: ({ row }) => (
+          <span className="font-mono text-xs text-muted-foreground whitespace-nowrap">
+            {formatCurrency(row.original.adsFee ?? 0, locale, row.original.currency)}
+          </span>
+        ),
       },
       {
         accessorKey: "shippingFeeDeduction",
@@ -402,8 +432,11 @@ export function OrdersTable({
             enableSearch={false}
           />
         ),
-        cell: ({ row }) =>
-          formatCurrency(row.original.shippingFeeDeduction ?? 0, locale, row.original.currency),
+        cell: ({ row }) => (
+          <span className="font-mono text-xs text-muted-foreground whitespace-nowrap">
+            {formatCurrency(row.original.shippingFeeDeduction ?? 0, locale, row.original.currency)}
+          </span>
+        ),
       },
       {
         accessorKey: "totalAdjustments",
@@ -416,12 +449,15 @@ export function OrdersTable({
             enableSearch={false}
           />
         ),
-        cell: ({ row }) =>
-          formatCurrency(
-            row.original.totalAdjustments,
-            locale,
-            row.original.currency
-          ),
+        cell: ({ row }) => (
+          <span className="font-mono text-xs text-muted-foreground whitespace-nowrap">
+            {formatCurrency(
+              row.original.totalAdjustments,
+              locale,
+              row.original.currency
+            )}
+          </span>
+        ),
       },
       {
         accessorKey: "syncStatus",

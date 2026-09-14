@@ -22,8 +22,12 @@ import {
 } from "@/components/ui/select"
 import { StatCard } from "@/components/common/stat-card"
 import { StatusBadge, type StatusBadgeVariant } from "@/components/common/status-badge"
+import { useTranslation } from "react-i18next"
 import { formatCurrency, formatNumber } from "@/util/format"
+import { ManualColumnControls, type ManualColumnItem } from "@/components/common/data-table/manual-column-controls"
+import { useTableDensityStore } from "@/shared/stores/table-density-store"
 import { useLocaleStore } from "@/shared/stores/locale-store"
+import { cn } from "@/lib/utils"
 import { ROUTES } from "@/app/constants/routes"
 import { useStoresPageQuery } from "@/shared/queries/store.query"
 import { useInvoicesQuery } from "../queries/invoice.query"
@@ -32,6 +36,31 @@ import { InvoiceTaxPreview } from "../components/invoice-tax-preview"
 import type { Invoice } from "../types/invoice"
 
 const EMPTY_INVOICES: Invoice[] = []
+
+type InvoiceColumnKey =
+  | "invoiceNumber"
+  | "title"
+  | "store"
+  | "period"
+  | "orders"
+  | "subtotal"
+  | "vat"
+  | "grandTotal"
+  | "status"
+  | "actions"
+
+const DEFAULT_INVOICE_COLUMNS: Record<InvoiceColumnKey, boolean> = {
+  invoiceNumber: true,
+  title: true,
+  store: true,
+  period: true,
+  orders: true,
+  subtotal: true,
+  vat: true,
+  grandTotal: true,
+  status: true,
+  actions: true,
+}
 
 function getInvoiceStatusBadgeVariant(status: string): StatusBadgeVariant {
   switch (status) {
@@ -48,14 +77,44 @@ function getInvoiceStatusBadgeVariant(status: string): StatusBadgeVariant {
 }
 
 export function InvoicesPage() {
+  const { t } = useTranslation("invoices")
   const navigate = useNavigate()
   const locale = useLocaleStore((state) => state.locale)
+  const density = useTableDensityStore((state) => state.density)
+  const isCompact = density === "compact"
 
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [storeFilter, setStoreFilter] = useState("all")
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [previewInvoice, setPreviewInvoice] = useState<Invoice | null>(null)
+  const [visibleColumns, setVisibleColumns] = useState(DEFAULT_INVOICE_COLUMNS)
+
+  const handleToggleColumn = (id: string, isVisible: boolean) => {
+    setVisibleColumns((prev) => ({
+      ...prev,
+      [id as InvoiceColumnKey]: isVisible,
+    }))
+  }
+
+  const handleResetColumns = () => {
+    setVisibleColumns(DEFAULT_INVOICE_COLUMNS)
+  }
+
+  const columnOptions: ManualColumnItem[] = [
+    { id: "invoiceNumber", label: t("table.invoice_no", { defaultValue: "Invoice No." }), isVisible: visibleColumns.invoiceNumber },
+    { id: "title", label: t("table.title", { defaultValue: "Title / Batch" }), isVisible: visibleColumns.title },
+    { id: "store", label: t("table.store", { defaultValue: "Store / Channel" }), isVisible: visibleColumns.store },
+    { id: "period", label: t("table.period", { defaultValue: "Period" }), isVisible: visibleColumns.period },
+    { id: "orders", label: t("table.orders", { defaultValue: "Orders" }), isVisible: visibleColumns.orders },
+    { id: "subtotal", label: t("table.subtotal", { defaultValue: "Subtotal (Ex-VAT)" }), isVisible: visibleColumns.subtotal },
+    { id: "vat", label: t("table.vat", { defaultValue: "VAT (7%)" }), isVisible: visibleColumns.vat },
+    { id: "grandTotal", label: t("table.grand_total", { defaultValue: "Grand Total" }), isVisible: visibleColumns.grandTotal },
+    { id: "status", label: t("table.status", { defaultValue: "Status" }), isVisible: visibleColumns.status },
+    { id: "actions", label: t("table.actions", { defaultValue: "Actions" }), isVisible: visibleColumns.actions },
+  ]
+
+  const visibleColumnCount = Object.values(visibleColumns).filter(Boolean).length
 
   const invoicesQuery = useInvoicesQuery()
   const storesQuery = useStoresPageQuery({ pageNumber: 1, pageSize: 200 })
@@ -182,8 +241,15 @@ export function InvoicesPage() {
                 </Select>
               </div>
 
-              <div className="text-xs text-muted-foreground">
-                Showing {filteredInvoices.length} of {invoices.length} invoices
+              <div className="flex items-center gap-3">
+                <ManualColumnControls
+                  columns={columnOptions}
+                  onToggleColumn={handleToggleColumn}
+                  onResetColumns={handleResetColumns}
+                />
+                <div className="text-xs text-muted-foreground">
+                  Showing {filteredInvoices.length} of {invoices.length} invoices
+                </div>
               </div>
             </div>
           </div>
@@ -194,28 +260,28 @@ export function InvoicesPage() {
               <table className="w-full text-left text-xs">
                 <thead className="bg-muted font-medium text-muted-foreground border-b border-border">
                   <tr>
-                    <th className="px-4 py-3">INVOICE NO.</th>
-                    <th className="px-4 py-3">TITLE & BATCH</th>
-                    <th className="px-4 py-3">STORE / CHANNEL</th>
-                    <th className="px-4 py-3">PERIOD</th>
-                    <th className="px-4 py-3 text-center">ORDERS</th>
-                    <th className="px-4 py-3 text-right">SUBTOTAL (EX-VAT)</th>
-                    <th className="px-4 py-3 text-right">VAT (7%)</th>
-                    <th className="px-4 py-3 text-right">GRAND TOTAL</th>
-                    <th className="px-4 py-3 text-center">STATUS</th>
-                    <th className="px-4 py-3 text-right">ACTIONS</th>
+                    {visibleColumns.invoiceNumber && <th className={isCompact ? "px-2.5 py-1.5 text-[11px]" : "px-4 py-3"}>{t("table.invoice_no", { defaultValue: "INVOICE NO." })}</th>}
+                    {visibleColumns.title && <th className={isCompact ? "px-2.5 py-1.5 text-[11px]" : "px-4 py-3"}>{t("table.title", { defaultValue: "TITLE & BATCH" })}</th>}
+                    {visibleColumns.store && <th className={isCompact ? "px-2.5 py-1.5 text-[11px]" : "px-4 py-3"}>{t("table.store", { defaultValue: "STORE / CHANNEL" })}</th>}
+                    {visibleColumns.period && <th className={isCompact ? "px-2.5 py-1.5 text-[11px]" : "px-4 py-3"}>{t("table.period", { defaultValue: "PERIOD" })}</th>}
+                    {visibleColumns.orders && <th className={cn(isCompact ? "px-2.5 py-1.5 text-[11px]" : "px-4 py-3", "text-center")}>{t("table.orders", { defaultValue: "ORDERS" })}</th>}
+                    {visibleColumns.subtotal && <th className={cn(isCompact ? "px-2.5 py-1.5 text-[11px]" : "px-4 py-3", "text-right")}>{t("table.subtotal", { defaultValue: "SUBTOTAL (EX-VAT)" })}</th>}
+                    {visibleColumns.vat && <th className={cn(isCompact ? "px-2.5 py-1.5 text-[11px]" : "px-4 py-3", "text-right")}>{t("table.vat", { defaultValue: "VAT (7%)" })}</th>}
+                    {visibleColumns.grandTotal && <th className={cn(isCompact ? "px-2.5 py-1.5 text-[11px]" : "px-4 py-3", "text-right")}>{t("table.grand_total", { defaultValue: "GRAND TOTAL" })}</th>}
+                    {visibleColumns.status && <th className={cn(isCompact ? "px-2.5 py-1.5 text-[11px]" : "px-4 py-3", "text-center")}>{t("table.status", { defaultValue: "STATUS" })}</th>}
+                    {visibleColumns.actions && <th className={cn(isCompact ? "px-2.5 py-1.5 text-[11px]" : "px-4 py-3", "text-right")}>{t("table.actions", { defaultValue: "ACTIONS" })}</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border font-mono">
                   {invoicesQuery.isLoading ? (
                     <tr>
-                      <td colSpan={10} className="py-12 text-center text-muted-foreground font-sans">
+                      <td colSpan={visibleColumnCount || 1} className="py-12 text-center text-muted-foreground font-sans">
                         Loading invoices...
                       </td>
                     </tr>
                   ) : filteredInvoices.length === 0 ? (
                     <tr>
-                      <td colSpan={10} className="py-12 text-center text-muted-foreground font-sans">
+                      <td colSpan={visibleColumnCount || 1} className="py-12 text-center text-muted-foreground font-sans">
                         No invoices match the selected criteria.
                       </td>
                     </tr>
@@ -226,63 +292,83 @@ export function InvoicesPage() {
                         onClick={() => navigate(ROUTES.dashboard.invoiceDetail(inv.id))}
                         className="transition-colors hover:bg-muted/30 cursor-pointer"
                       >
-                        <td className="px-4 py-3 font-bold text-foreground hover:text-primary transition-colors">
-                          {inv.invoiceNumber}
-                        </td>
-                        <td className="px-4 py-3 font-sans">
-                          <div className="flex flex-col">
-                            <span className="font-semibold text-foreground">{inv.title}</span>
-                            {inv.orderRunTitle && (
-                              <span className="text-[10px] text-muted-foreground">
-                                Batch: {inv.orderRunTitle}
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 font-sans text-muted-foreground">
-                          <div className="flex items-center gap-1.5">
-                            <Store className="size-3.5 shrink-0" />
-                            <span className="truncate max-w-[140px]">{inv.storeName ?? "-"}</span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-muted-foreground text-[11px]">
-                          {inv.startDate} → {inv.endDate}
-                        </td>
-                        <td className="px-4 py-3 text-center font-bold">
-                          {inv.orderCount}
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          {formatCurrency(inv.subtotal, locale, inv.currency)}
-                        </td>
-                        <td className="px-4 py-3 text-right text-primary">
-                          {formatCurrency(inv.vatAmount, locale, inv.currency)}
-                        </td>
-                        <td className="px-4 py-3 text-right font-bold text-foreground">
-                          {formatCurrency(inv.grandTotal, locale, inv.currency)}
-                        </td>
-                        <td className="px-4 py-3 text-center font-sans">
-                          <StatusBadge
-                            status={getInvoiceStatusBadgeVariant(inv.status)}
-                            label={inv.status}
-                          />
-                        </td>
-                        <td className="px-4 py-3 text-right font-sans">
-                          <div
-                            className="flex items-center justify-end gap-1.5"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setPreviewInvoice(inv)}
-                              className="h-7 px-2 text-xs rounded-none gap-1"
+                        {visibleColumns.invoiceNumber && (
+                          <td className={cn(isCompact ? "px-2.5 py-1.5" : "px-4 py-3", "font-bold text-foreground hover:text-primary transition-colors")}>
+                            {inv.invoiceNumber}
+                          </td>
+                        )}
+                        {visibleColumns.title && (
+                          <td className={cn(isCompact ? "px-2.5 py-1.5" : "px-4 py-3", "font-sans")}>
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-foreground">{inv.title}</span>
+                              {inv.orderRunTitle && (
+                                <span className="text-[10px] text-muted-foreground">
+                                  Batch: {inv.orderRunTitle}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                        )}
+                        {visibleColumns.store && (
+                          <td className={cn(isCompact ? "px-2.5 py-1.5" : "px-4 py-3", "font-sans text-muted-foreground")}>
+                            <div className="flex items-center gap-1.5">
+                              <Store className="size-3.5 shrink-0" />
+                              <span className="truncate max-w-[140px]">{inv.storeName ?? "-"}</span>
+                            </div>
+                          </td>
+                        )}
+                        {visibleColumns.period && (
+                          <td className={cn(isCompact ? "px-2.5 py-1.5" : "px-4 py-3", "text-muted-foreground text-[11px]")}>
+                            {inv.startDate} → {inv.endDate}
+                          </td>
+                        )}
+                        {visibleColumns.orders && (
+                          <td className={cn(isCompact ? "px-2.5 py-1.5" : "px-4 py-3", "text-center font-bold")}>
+                            {inv.orderCount}
+                          </td>
+                        )}
+                        {visibleColumns.subtotal && (
+                          <td className={cn(isCompact ? "px-2.5 py-1.5" : "px-4 py-3", "text-right")}>
+                            {formatCurrency(inv.subtotal, locale, inv.currency)}
+                          </td>
+                        )}
+                        {visibleColumns.vat && (
+                          <td className={cn(isCompact ? "px-2.5 py-1.5" : "px-4 py-3", "text-right text-primary")}>
+                            {formatCurrency(inv.vatAmount, locale, inv.currency)}
+                          </td>
+                        )}
+                        {visibleColumns.grandTotal && (
+                          <td className={cn(isCompact ? "px-2.5 py-1.5" : "px-4 py-3", "text-right font-bold text-foreground")}>
+                            {formatCurrency(inv.grandTotal, locale, inv.currency)}
+                          </td>
+                        )}
+                        {visibleColumns.status && (
+                          <td className={cn(isCompact ? "px-2.5 py-1.5" : "px-4 py-3", "text-center font-sans")}>
+                            <StatusBadge
+                              status={getInvoiceStatusBadgeVariant(inv.status)}
+                              label={inv.status}
+                            />
+                          </td>
+                        )}
+                        {visibleColumns.actions && (
+                          <td className={cn(isCompact ? "px-2.5 py-1.5" : "px-4 py-3", "text-right font-sans")}>
+                            <div
+                              className="flex items-center justify-end gap-1.5"
+                              onClick={(e) => e.stopPropagation()}
                             >
-                              <Printer className="size-3" />
-                              <span>Print</span>
-                            </Button>
-                          </div>
-                        </td>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setPreviewInvoice(inv)}
+                                className="h-7 px-2 text-xs rounded-none gap-1"
+                              >
+                                <Printer className="size-3" />
+                                <span>Print</span>
+                              </Button>
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     ))
                   )}

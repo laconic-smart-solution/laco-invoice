@@ -363,6 +363,10 @@
     "filters": {
       "store": "Store",
       "store_all": "Store အားလုံး",
+      "status": "Status",
+      "status_all": "Status အားလုံး",
+      "input_type": "Input type",
+      "input_type_all": "Input type အားလုံး",
       "search": "Title",
       "search_placeholder": "Title ဖြင့် ရှာမည်…"
     },

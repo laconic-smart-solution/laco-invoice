@@ -37,9 +37,13 @@ public class ErpGlVoucher extends StoreScopedEntity {
 	@JoinColumn(name = "invoice_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
 	private Invoice invoice;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "order_input_run_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+	private OrderInputRun orderInputRun;
+
 	@Enumerated(EnumType.STRING)
 	@Column(name = "voucher_category", nullable = false, length = 10)
-	private ErpGlVoucherCategory voucherCategory = ErpGlVoucherCategory.APV;
+	private ErpGlVoucherCategory voucherCategory = ErpGlVoucherCategory.JV;
 
 	@Column(name = "voucher_number", nullable = false, length = 100)
 	private String voucherNumber;

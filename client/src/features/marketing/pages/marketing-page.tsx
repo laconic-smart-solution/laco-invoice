@@ -513,10 +513,20 @@ export function MarketingPage() {
         <div className="marketplace-strip">
           <div className="marketing-container">
             <span>{copy.marketplace}</span>
-            <strong className="platform-tag tiktok">TikTok Shop</strong>
-            <strong className="platform-tag shopee">Shopee</strong>
-            <strong className="platform-tag lazada">Lazada</strong>
-            <strong className="platform-tag amazon">Amazon</strong>
+            <strong className="platform-tag tiktok">
+              <img src="/Tiktok_icon.svg" alt="TikTok Shop" className="platform-logo tiktok-logo" />
+              <span>TikTok Shop</span>
+            </strong>
+            <strong className="platform-tag shopee">
+              <img src="/Shopee_logo.svg" alt="Shopee" className="platform-logo shopee-logo" />
+              <span>Shopee</span>
+            </strong>
+            <strong className="platform-tag lazada">
+              <img src="/Lazada_icon.svg" alt="Lazada" className="platform-logo lazada-logo" />
+            </strong>
+            <strong className="platform-tag amazon">
+              <img src="/Amazon_logo.svg" alt="Amazon" className="platform-logo amazon-logo" />
+            </strong>
           </div>
         </div>
       </section>

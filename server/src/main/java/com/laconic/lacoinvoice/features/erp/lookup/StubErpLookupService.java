@@ -1,5 +1,6 @@
 package com.laconic.lacoinvoice.features.erp.lookup;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -25,6 +26,10 @@ public class StubErpLookupService implements ErpLookupService {
 			new ErpLookupAccountDto(2101L, "2101-000", "Accounts Payable"),
 			new ErpLookupAccountDto(2102L, "2102-000", "Accrued Expenses"),
 			new ErpLookupAccountDto(1101L, "1101-000", "Bank - Kasikorn"),
+			new ErpLookupAccountDto(11120010L, "11120010", "C/A- Kasikron 212-8-05026-7"),
+			new ErpLookupAccountDto(11300010L, "11300010", "Trade accounts receivable-Domestic (ลูกหนี้การค้า-ในประเทศ)"),
+			new ErpLookupAccountDto(21400070L, "21400070", "Out Put Tax-Unamortization (ภาษีขาย-รอเรียกเก็บ)"),
+			new ErpLookupAccountDto(21400060L, "21400060", "Out Put Tax (ภาษีขาย)"),
 			new ErpLookupAccountDto(4101L, "4101-000", "Sales Revenue"),
 			new ErpLookupAccountDto(5101L, "5101-000", "Shipping Expense"),
 			new ErpLookupAccountDto(5102L, "5102-000", "Commission Expense"));
@@ -51,7 +56,19 @@ public class StubErpLookupService implements ErpLookupService {
 	}
 
 	public List<ErpLookupAccountDto> accounts(String search) {
-		return ACCOUNTS.stream().filter(item -> matches(search, item.code(), item.name())).toList();
+		List<ErpLookupAccountDto> list = new ArrayList<>(
+				ACCOUNTS.stream().filter(item -> matches(search, item.code(), item.name())).toList());
+		if (list.isEmpty() && StringUtils.hasText(search)) {
+			String clean = search.trim().replaceAll("[^0-9]", "");
+			if (!clean.isEmpty()) {
+				try {
+					long id = Long.parseLong(clean);
+					list.add(new ErpLookupAccountDto(id, search.trim(), "Account " + search.trim()));
+				} catch (NumberFormatException ignored) {
+				}
+			}
+		}
+		return list;
 	}
 
 	public List<ErpLookupVendorDto> vendors(String search) {
@@ -62,8 +79,123 @@ public class StubErpLookupService implements ErpLookupService {
 		return ITEMS.stream().filter(item -> item.id().equals(id)).findFirst();
 	}
 
+	@Override
+	public List<ErpLookupItemFinanceAccountDto> itemFinanceAccounts(Long itemId) {
+		if (itemId == null) {
+			return List.of();
+		}
+		if (itemId == 1001L) {
+			return List.of(
+					new ErpLookupItemFinanceAccountDto(
+							10005L, "DOMESTIC", "DOMESTIC", true,
+							5101L, "5101-000", "Shipping Expense",
+							4101L, "4101-000", "Sales Revenue",
+							null, null, null,
+							null, null, null,
+							null, null, null,
+							null, null, null,
+							null, null, null,
+							2101L, "2101-000", "Accounts Payable",
+							null, null, null,
+							null, null, null,
+							null, null, null,
+							null, null, null,
+							true),
+					new ErpLookupItemFinanceAccountDto(
+							1000672L, "DOMESTIC - OTHER", "DOMESTIC - OTHER", false,
+							5101L, "5101-000", "Shipping Expense",
+							4101L, "411302", "Other Income",
+							null, null, null,
+							null, null, null,
+							null, null, null,
+							null, null, null,
+							null, null, null,
+							2101L, "2101-000", "Accounts Payable",
+							null, null, null,
+							null, null, null,
+							null, null, null,
+							null, null, null,
+							true));
+		}
+		if (itemId == 1002L) {
+			return List.of(
+					new ErpLookupItemFinanceAccountDto(
+							10005L, "DOMESTIC", "DOMESTIC", true,
+							5102L, "5102-000", "Commission Expense",
+							4101L, "4101-000", "Sales Revenue",
+							null, null, null,
+							null, null, null,
+							null, null, null,
+							null, null, null,
+							null, null, null,
+							2101L, "2101-000", "Accounts Payable",
+							null, null, null,
+							null, null, null,
+							null, null, null,
+							null, null, null,
+							true),
+					new ErpLookupItemFinanceAccountDto(
+							1000672L, "DOMESTIC - OTHER", "DOMESTIC - OTHER", false,
+							5102L, "5102-000", "Commission Expense",
+							4101L, "411302", "Other Income",
+							null, null, null,
+							null, null, null,
+							null, null, null,
+							null, null, null,
+							null, null, null,
+							2101L, "2101-000", "Accounts Payable",
+							null, null, null,
+							null, null, null,
+							null, null, null,
+							null, null, null,
+							true));
+		}
+		if (itemId == 1003L) {
+			return List.of(
+					new ErpLookupItemFinanceAccountDto(
+							10005L, "DOMESTIC", "DOMESTIC", true,
+							5101L, "5101-000", "Shipping Expense",
+							4101L, "4101-000", "Sales Revenue",
+							null, null, null,
+							null, null, null,
+							null, null, null,
+							null, null, null,
+							null, null, null,
+							2101L, "2101-000", "Accounts Payable",
+							null, null, null,
+							null, null, null,
+							null, null, null,
+							null, null, null,
+							true));
+		}
+		// Default fallback for any other item
+		return List.of(
+				new ErpLookupItemFinanceAccountDto(
+						10005L, "DOMESTIC", "DOMESTIC", true,
+						5101L, "5101-000", "Expense Account",
+						4101L, "4101-000", "Sales Revenue",
+						null, null, null,
+						null, null, null,
+						null, null, null,
+						null, null, null,
+						null, null, null,
+						2101L, "2101-000", "Accounts Payable",
+						null, null, null,
+						null, null, null,
+						null, null, null,
+						null, null, null,
+						true));
+	}
+
 	public Optional<ErpLookupAccountDto> account(Long id) {
-		return ACCOUNTS.stream().filter(item -> item.id().equals(id)).findFirst();
+		var found = ACCOUNTS.stream().filter(item -> item.id().equals(id)).findFirst();
+		if (found.isPresent()) {
+			return found;
+		}
+		if (id != null && id > 0) {
+			return Optional.of(new ErpLookupAccountDto(id, String.valueOf(id), "Account " + id));
+		}
+		return Optional.empty();
 	}
 
 	public Optional<ErpLookupVendorDto> vendor(Long id) {

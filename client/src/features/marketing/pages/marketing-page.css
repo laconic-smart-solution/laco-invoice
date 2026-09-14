@@ -777,13 +777,56 @@ html {
 }
 
 .platform-tag {
-  font: 750 1rem "Inter Variable", sans-serif;
-  letter-spacing: -0.04em;
-  padding: 4px 10px;
-  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font: 750 0.95rem "Inter Variable", sans-serif;
+  letter-spacing: -0.03em;
+  padding: 6px 14px;
+  border-radius: 8px;
   background: #fff;
   border: 1px solid #e0e7e4;
-  color: #41504b;
+  color: #17201f;
+  height: 40px;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(25, 42, 36, 0.03);
+  transition: all 0.2s ease;
+}
+
+.platform-tag:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(25, 42, 36, 0.08);
+}
+
+.platform-tag .platform-logo {
+  object-fit: contain;
+  display: block;
+}
+
+.platform-tag.tiktok .platform-logo {
+  height: 20px;
+  width: 20px;
+  border-radius: 4px;
+}
+
+.platform-tag.shopee {
+  color: #ee4d2d;
+}
+
+.platform-tag.shopee .platform-logo {
+  height: 22px;
+  width: auto;
+}
+
+.platform-tag.lazada .platform-logo {
+  height: 20px;
+  width: auto;
+}
+
+.platform-tag.amazon .platform-logo {
+  height: 18px;
+  width: auto;
 }
 
 .platform-tag.tiktok:hover {

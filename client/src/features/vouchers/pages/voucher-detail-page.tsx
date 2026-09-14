@@ -1,9 +1,16 @@
 import { useState } from "react"
 import { useParams } from "react-router-dom"
 import { useTranslation } from "react-i18next"
+import { Download, FileSpreadsheet, FileText, Loader2 } from "lucide-react"
 
 import { ConfirmDialog } from "@/components/common/confirm-dialog"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { GenerateVoucherDialog } from "@/features/vouchers/components/generate-voucher-dialog"
 import {
   voucherStatusTooltip,
@@ -19,6 +26,9 @@ import {
   useErpVendorsQuery,
 } from "@/features/vouchers/queries/erp-lookup.query"
 import {
+  useExportSingleVoucherCsvMutation,
+  useExportSingleVoucherExcelMutation,
+  useExportSingleVoucherPdfMutation,
   usePostVoucherToErpMutation,
   useVoucherDetailQuery,
 } from "@/features/vouchers/queries/voucher.query"
@@ -45,11 +55,55 @@ export function VoucherDetailPage() {
   const departmentsQuery = useErpDepartmentsQuery()
   const currenciesQuery = useErpCurrenciesQuery()
   const postMutation = usePostVoucherToErpMutation()
+  const exportExcelMutation = useExportSingleVoucherExcelMutation()
+  const exportCsvMutation = useExportSingleVoucherCsvMutation()
+  const exportPdfMutation = useExportSingleVoucherPdfMutation()
+
   const [editOpen, setEditOpen] = useState(false)
   const [postOpen, setPostOpen] = useState(false)
   const [postError, setPostError] = useState<string | null>(null)
 
+  const isExporting =
+    exportExcelMutation.isPending ||
+    exportCsvMutation.isPending ||
+    exportPdfMutation.isPending
   const voucher = detailQuery.data
+
+  const handleExportExcel = async () => {
+    if (!voucher) return
+    try {
+      await exportExcelMutation.mutateAsync({
+        id: voucher.id,
+        voucherNumber: voucher.voucherNumber,
+      })
+    } catch (error) {
+      console.error("Export voucher Excel error", error)
+    }
+  }
+
+  const handleExportCsv = async () => {
+    if (!voucher) return
+    try {
+      await exportCsvMutation.mutateAsync({
+        id: voucher.id,
+        voucherNumber: voucher.voucherNumber,
+      })
+    } catch (error) {
+      console.error("Export voucher CSV error", error)
+    }
+  }
+
+  const handleExportPdf = async () => {
+    if (!voucher) return
+    try {
+      await exportPdfMutation.mutateAsync({
+        id: voucher.id,
+        voucherNumber: voucher.voucherNumber,
+      })
+    } catch (error) {
+      console.error("Export voucher PDF error", error)
+    }
+  }
 
   if (detailQuery.isLoading) {
     return (
@@ -75,6 +129,46 @@ export function VoucherDetailPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isExporting}
+                className="gap-1.5 rounded-none text-xs font-semibold shadow-xs"
+              >
+                {isExporting ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Download className="size-4" />
+                )}
+                {isExporting ? t("export.exporting") : t("export.button")}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="rounded-none">
+              <DropdownMenuItem
+                onClick={handleExportExcel}
+                className="cursor-pointer gap-2 text-xs"
+              >
+                <FileSpreadsheet className="size-4 text-emerald-600" />
+                {t("export.single_excel")}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={handleExportCsv}
+                className="cursor-pointer gap-2 text-xs"
+              >
+                <FileText className="size-4 text-sky-600" />
+                {t("export.single_csv")}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={handleExportPdf}
+                className="cursor-pointer gap-2 text-xs"
+              >
+                <FileText className="size-4 text-rose-600" />
+                {t("export.single_pdf")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           {canEditVoucher(voucher.status) ? (
             <Button
               type="button"

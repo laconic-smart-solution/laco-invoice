@@ -6,6 +6,7 @@ import { Link, useNavigate } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
 import { DataTable } from "@/components/common/data-table/data-table"
+import { DataTableColumnControls } from "@/components/common/data-table/data-table-column-controls"
 import { DataTableColumnHeader } from "@/components/common/data-table/data-table-column-header"
 import { DataTableFooter } from "@/components/common/data-table/data-table-footer"
 import { useDataTable } from "@/components/common/data-table/use-data-table"
@@ -39,6 +40,8 @@ import {
 } from "@/shared/queries/order-input-run.query"
 import { useStoresPageQuery } from "@/shared/queries/store.query"
 import type {
+  ApiOrderInputFileType,
+  ApiOrderInputRunDisplayStatusFilter,
   ApiOrderInputRunDto,
 } from "@/shared/services/order-input-run.service"
 import { useLocaleStore } from "@/shared/stores/locale-store"
@@ -58,12 +61,28 @@ const SORT_FIELD_MAP: Record<string, string> = {
   status: "status",
 }
 
+const STATUS_FILTER_OPTIONS: ApiOrderInputRunDisplayStatusFilter[] = [
+  "ERROR",
+  "DRAFT",
+  "RUNNING",
+  "COMPLETED",
+  "PARTIAL",
+  "FAILED",
+]
+
+const INPUT_FILE_TYPE_OPTIONS: ApiOrderInputFileType[] = [
+  "SHIPPING_FEE",
+  "SERVICE_FEE",
+]
+
 export function OrderInputRunsPage() {
   const { t } = useTranslation("orders")
   const navigate = useNavigate()
   const locale = useLocaleStore((state) => state.locale)
   const { page, limit, setPage, setLimit } = usePagination()
   const [storeId, setStoreId] = useState("")
+  const [status, setStatus] = useState("")
+  const [inputFileType, setInputFileType] = useState("")
   const [search, setSearch] = useState("")
   const debouncedSearch = useDebounce(search)
   const [sorting, setSorting] = useState<SortingState>([
@@ -83,12 +102,23 @@ export function OrderInputRunsPage() {
   )
 
   const pageRequest = useMemo(() => {
-    const filter: { storeId?: number; title?: string } = {}
+    const filter: {
+      storeId?: number
+      title?: string
+      status?: ApiOrderInputRunDisplayStatusFilter
+      inputFileType?: ApiOrderInputFileType
+    } = {}
     if (storeId) {
       const parsed = Number(storeId)
       if (Number.isFinite(parsed) && parsed > 0) {
         filter.storeId = parsed
       }
+    }
+    if (status) {
+      filter.status = status as ApiOrderInputRunDisplayStatusFilter
+    }
+    if (inputFileType) {
+      filter.inputFileType = inputFileType as ApiOrderInputFileType
     }
     if (debouncedSearch.trim()) {
       filter.title = debouncedSearch.trim()
@@ -99,7 +129,7 @@ export function OrderInputRunsPage() {
       ...pageSort,
       ...(Object.keys(filter).length > 0 ? { filter } : {}),
     }
-  }, [debouncedSearch, limit, page, pageSort, storeId])
+  }, [debouncedSearch, inputFileType, limit, page, pageSort, status, storeId])
 
   const { data, isLoading, isError, error } =
     useOrderInputRunsPageQuery(pageRequest)
@@ -213,6 +243,20 @@ export function OrderInputRunsPage() {
     [locale, t]
   )
 
+  const columnLabels = useMemo(
+    () => ({
+      title: t("inputs.table.title"),
+      storeName: t("inputs.table.store"),
+      marketplaceCode: t("inputs.table.marketplace"),
+      status: t("inputs.table.status"),
+      orderCount: t("inputs.table.orders"),
+      itemCount: t("inputs.table.items"),
+      inputFileType: t("inputs.table.input_file_type"),
+      createdAt: t("inputs.table.created_at"),
+    }),
+    [t]
+  )
+
   const table = useDataTable({
     data: rows,
     columns,
@@ -272,6 +316,60 @@ export function OrderInputRunsPage() {
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground">
+            {t("inputs.filters.status")}
+          </Label>
+          <Select
+            value={status || "__all__"}
+            onValueChange={(value) => {
+              setStatus(value === "__all__" ? "" : value)
+              setPage(1)
+            }}
+          >
+            <SelectTrigger className="w-44">
+              <SelectValue placeholder={t("inputs.filters.status_all")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">{t("inputs.filters.status_all")}</SelectItem>
+              {STATUS_FILTER_OPTIONS.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {option === "ERROR"
+                    ? t("inputs.status.error")
+                    : t(`inputs.status.${option.toLowerCase()}`)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">
+            {t("inputs.filters.input_type")}
+          </Label>
+          <Select
+            value={inputFileType || "__all__"}
+            onValueChange={(value) => {
+              setInputFileType(value === "__all__" ? "" : value)
+              setPage(1)
+            }}
+          >
+            <SelectTrigger className="w-44">
+              <SelectValue placeholder={t("inputs.filters.input_type_all")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">
+                {t("inputs.filters.input_type_all")}
+              </SelectItem>
+              {INPUT_FILE_TYPE_OPTIONS.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {t(
+                    `inputs.input_file_type.${option === "SHIPPING_FEE" ? "shipping_fee" : "service_fee"}`
+                  )}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">
             {t("inputs.filters.search")}
           </Label>
           <div className="relative">
@@ -291,17 +389,22 @@ export function OrderInputRunsPage() {
 
       <AuthFormError message={loadError} />
 
-      <div className="rounded-md border border-border">
-        <DataTable
-          table={table}
-          emptyMessage={
-            isLoading ? t("inputs.table.loading") : t("inputs.table.empty")
-          }
-          isLoading={isLoading && rows.length === 0}
-          onRowClick={(row) =>
-            void navigate(ROUTES.dashboard.orderInputDetail(row.id))
-          }
-        />
+      <div className="rounded-md border border-border bg-card shadow-sm">
+        <div className="flex justify-end border-b border-border px-4 py-2.5">
+          <DataTableColumnControls table={table} columnLabels={columnLabels} />
+        </div>
+        <div className="overflow-x-auto">
+          <DataTable
+            table={table}
+            emptyMessage={
+              isLoading ? t("inputs.table.loading") : t("inputs.table.empty")
+            }
+            isLoading={isLoading && rows.length === 0}
+            onRowClick={(row) =>
+              void navigate(ROUTES.dashboard.orderInputDetail(row.id))
+            }
+          />
+        </div>
         <Dialog
         open={deleteRunTarget != null}
         onOpenChange={(open) => {

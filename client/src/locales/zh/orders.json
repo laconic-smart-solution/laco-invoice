@@ -357,6 +357,10 @@
     "filters": {
       "store": "店铺",
       "store_all": "全部店铺",
+      "status": "状态",
+      "status_all": "全部状态",
+      "input_type": "输入类型",
+      "input_type_all": "全部输入类型",
       "search": "标题",
       "search_placeholder": "按标题搜索…"
     },

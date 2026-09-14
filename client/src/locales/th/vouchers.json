@@ -58,6 +58,15 @@
     "showing": "แสดง {{count}} จาก {{total}} ใบสำคัญ"
   },
   "form": {
+    "order_input": "ชุดข้อมูลนำเข้าคำสั่งซื้อ (Order Data Input)",
+    "order_input_placeholder": "เลือกชุดข้อมูลคำสั่งซื้อเพื่อสร้างใบสำคัญอัตโนมัติ...",
+    "order_input_description": "เมื่อเลือกชุดข้อมูลคำสั่งซื้อ ระบบจะคำนวณวันที่ เลขที่ใบเสร็จ รายละเอียด และรายการเดบิต/เครดิตที่สมดุลให้อัตโนมัติจากเซิร์ฟเวอร์",
+    "finance_info": "ข้อมูลการเงินคู่ค้า (Finance Info)",
+    "finance_info_placeholder": "เลือกบัญชีจากแท็บข้อมูลการเงินของสินค้า ERP...",
+    "finance_info_description": "บัญชีเดบิตและเครดิตจะขึ้นอยู่กับแท็บ Finance Info ของสินค้าในระบบ ERP",
+    "calculating_preview": "กำลังคำนวณรายการใบสำคัญ...",
+    "recalculate": "คำนวณใหม่",
+    "auto_calculated_badge": "คำนวณอัตโนมัติจากชุดข้อมูลคำสั่งซื้อ",
     "category": "ประเภทใบสำคัญ",
     "date": "วันที่ใบสำคัญ",
     "store": "ร้านค้า",
@@ -81,6 +90,7 @@
     "vendor_placeholder": "ค้นหาผู้ขาย",
     "entries": "รายการบัญชี",
     "add_line": "เพิ่มรายการ",
+    "recalculate_vat_7": "เพิ่ม / คำนวณภาษี 7% ใหม่",
     "remove_line": "ลบรายการ",
     "line_brief_placeholder": "คำอธิบายรายการ",
     "invoice_no": "เลขที่ใบแจ้งหนี้",
@@ -115,6 +125,24 @@
     "confirm_title": "ผ่านรายการใบสำคัญไป ERP?",
     "confirm_description": "ผ่านรายการ {{number}} ไปยัง GL ของ ERP หลังจากนั้นจะแก้ไขไม่ได้",
     "confirm": "ผ่านรายการไป ERP"
+  },
+  "duplicate_order_set": {
+    "title": "มีใบสำคัญสำหรับชุดข้อมูลนี้อยู่แล้ว",
+    "description": "คุณได้สร้างใบสำคัญสำหรับ Order Data Input นี้แล้ว การสร้างอีกครั้งจะเพิ่มใบสำคัญอีกใบสำหรับชุดเดียวกัน คุณต้องการดำเนินการต่อหรือไม่?",
+    "description_with_numbers": "คุณได้สร้างใบสำคัญสำหรับ Order Data Input นี้แล้ว ({{numbers}}) การสร้างอีกครั้งจะเพิ่มใบสำคัญอีกใบสำหรับชุดเดียวกัน คุณต้องการดำเนินการต่อหรือไม่?",
+    "confirm": "สร้างต่อไป"
+  },
+  "export": {
+    "button": "ส่งออก",
+    "excel": "ส่งออก Excel (.xlsx)",
+    "csv": "ส่งออก CSV (.csv)",
+    "pdf": "ส่งออก PDF (.pdf)",
+    "exporting": "กำลังส่งออกใบสำคัญ...",
+    "success": "ส่งออกใบสำคัญเรียบร้อยแล้ว",
+    "single_excel": "ส่งออก Excel",
+    "single_csv": "ส่งออก CSV",
+    "single_pdf": "ส่งออก PDF",
+    "failed": "ส่งออกใบสำคัญไม่สำเร็จ"
   },
   "errors": {
     "generate_failed": "สร้างใบสำคัญไม่สำเร็จ",

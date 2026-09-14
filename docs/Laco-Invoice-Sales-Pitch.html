@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Laco Invoice — Sales Pitch for E-Commerce Sellers &amp; Finance Teams</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Nunito+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Nunito Sans', sans-serif;
+    color: #17201f;
+    background-color: #fff;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, .brand, .heading-font {
+    font-family: 'Inter', sans-serif;
+  }
+
+  .page {
+    width: 210mm;
+    height: 297mm;
+    page-break-after: always;
+    position: relative;
+    padding: 22mm 24mm 20mm 24mm;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  /* Header Branding */
+  .header-brand {
+    position: absolute;
+    top: 14mm;
+    right: 24mm;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .header-brand-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: #e75e43;
+    border-radius: 6.5px;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(231, 94, 67, 0.3);
+  }
+
+  .header-brand-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    color: #17201f;
+  }
+  .header-brand-text span {
+    color: #e75e43;
+  }
+
+  .page-footer {
+    position: absolute;
+    bottom: 12mm;
+    left: 24mm;
+    right: 24mm;
+    text-align: center;
+    font-size: 9.5px;
+    color: #64716d;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Cover Page */
+  .cover-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding-bottom: 25mm;
+  }
+
+  .cover-logo-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    background: #e75e43;
+    border-radius: 16px;
+    color: #fff;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 20px rgba(231, 94, 67, 0.35);
+  }
+
+  .cover-title {
+    font-size: 46px;
+    font-weight: 900;
+    letter-spacing: -1.2px;
+    color: #17201f;
+    margin-bottom: 20px;
+  }
+  .cover-title span {
+    color: #e75e43;
+  }
+
+  .cover-divider {
+    width: 100%;
+    height: 3.5px;
+    background: linear-gradient(90deg, #e75e43 0%, #1d5147 100%);
+    margin-bottom: 28px;
+    border-radius: 2px;
+  }
+
+  .cover-tagline {
+    font-size: 19px;
+    font-style: italic;
+    color: #1d5147;
+    margin-bottom: 34px;
+    line-height: 1.4;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .cover-subtext {
+    font-size: 15px;
+    color: #4a5568;
+    margin-bottom: 48px;
+    line-height: 1.55;
+  }
+
+  .cover-pitch-label {
+    font-size: 16px;
+    font-weight: 800;
+    color: #17201f;
+    margin-bottom: 14px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .cover-url {
+    font-size: 14.5px;
+    color: #e75e43;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Content Pages */
+  h2.section-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: #17201f;
+    margin-bottom: 5px;
+    letter-spacing: -0.3px;
+  }
+
+  .section-divider {
+    width: 100%;
+    height: 2px;
+    background: #e75e43;
+    margin-bottom: 10px;
+  }
+
+  p.lead-text {
+    font-size: 11px;
+    line-height: 1.55;
+    color: #2d3748;
+    margin-bottom: 10px;
+  }
+
+  .quote-box {
+    background-color: #fdf6f4;
+    border-left: 3.5px solid #e75e43;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .quote-box p {
+    font-size: 11px;
+    font-style: italic;
+    color: #8c2b18;
+    line-height: 1.45;
+    font-weight: 500;
+  }
+
+  h3.sub-section-title {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #17201f;
+    margin-top: 8px;
+    margin-bottom: 5px;
+  }
+
+  /* Persona cards */
+  .persona-item {
+    margin-bottom: 9px;
+    background: #f8f7f2;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #dce4e0;
+  }
+
+  .persona-title {
+    font-size: 12px;
+    font-weight: 800;
+    color: #1d5147;
+    margin-bottom: 2px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .persona-desc {
+    font-size: 10.5px;
+    line-height: 1.45;
+    color: #2d3748;
+  }
+
+  ul.bullet-list {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 10px;
+  }
+
+  ul.bullet-list li {
+    position: relative;
+    padding-left: 15px;
+    font-size: 10.5px;
+    line-height: 1.48;
+    color: #2d3748;
+    margin-bottom: 5px;
+  }
+
+  ul.bullet-list li::before {
+    content: "•";
+    position: absolute;
+    left: 2px;
+    color: #e75e43;
+    font-size: 14px;
+    line-height: 1.1;
+  }
+
+  ul.bullet-list li strong {
+    color: #17201f;
+  }
+
+  /* Table Styling */
+  table.features-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 6px;
+    margin-bottom: 12px;
+    font-size: 10px;
+  }
+
+  table.features-table th {
+    background: #17201f;
+    color: #ffffff;
+    padding: 7px 9px;
+    text-align: left;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    border: 1px solid #17201f;
+  }
+
+  table.features-table td {
+    padding: 6.5px 9px;
+    border: 1px solid #dce4e0;
+    vertical-align: top;
+    line-height: 1.38;
+    color: #2d3748;
+  }
+
+  table.features-table tr:nth-child(even) td {
+    background-color: #f8f7f2;
+  }
+
+  table.features-table td.col-feature {
+    font-weight: 700;
+    color: #17201f;
+    width: 27%;
+    font-family: 'Inter', sans-serif;
+  }
+
+  table.features-table td.col-what {
+    width: 44%;
+  }
+
+  table.features-table td.col-why {
+    width: 29%;
+  }
+
+  /* Ecosystem Grid */
+  .eco-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0 5px 0;
+    text-align: center;
+  }
+
+  .eco-table td {
+    border: 1px solid #dce4e0;
+    padding: 8px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    color: #17201f;
+    background: #f8f7f2;
+    width: 33.33%;
+    vertical-align: middle;
+  }
+
+  .channel-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .channel-icon {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    border-radius: 4px;
+  }
+
+  .eco-note {
+    font-size: 9.5px;
+    font-style: italic;
+    color: #64716d;
+    margin-bottom: 10px;
+    line-height: 1.4;
+  }
+
+  /* Callout Block (Say it out loud) */
+  .callout-loud {
+    background: #17201f;
+    border-left: 4px solid #e75e43;
+    color: #ffffff;
+    padding: 13px 16px;
+    border-radius: 4px;
+    margin: 12px 0 16px 0;
+  }
+
+  .callout-loud-label {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #e75e43;
+    margin-bottom: 5px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .callout-loud-quote {
+    font-size: 11.5px;
+    font-style: italic;
+    line-height: 1.5;
+    color: #f8fafc;
+  }
+
+  /* CTA Banner */
+  .cta-banner {
+    background: #fdf6f4;
+    border: 1px solid #fbdad4;
+    padding: 11px 16px;
+    text-align: center;
+    border-radius: 6px;
+    margin-top: 10px;
+  }
+
+  .cta-banner a {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #e75e43;
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .cta-banner span {
+    color: #4a5568;
+    font-size: 12.5px;
+    margin-left: 8px;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1: COVER -->
+<div class="page">
+  <div class="header-brand">
+    <span class="header-brand-mark">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/>
+        <path d="M14 8H8"/>
+        <path d="M16 12H8"/>
+        <path d="M13 16H8"/>
+      </svg>
+    </span>
+    <span class="header-brand-text">Laco<span>Invoice</span></span>
+  </div>
+  
+  <div class="cover-container">
+    <div class="cover-logo-badge">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/>
+        <path d="M14 8H8"/>
+        <path d="M16 12H8"/>
+        <path d="M13 16H8"/>
+      </svg>
+    </div>
+    <div class="cover-title">Laco<span>Invoice</span></div>
+    <div class="cover-divider"></div>
+    <div class="cover-tagline">Every marketplace order —<br>invoice ready &amp; ERP connected.</div>
+    <div class="cover-subtext">The Simple Way for Multi-Channel Online Sellers<br>to Automate 7% VAT Tax Invoices &amp; Accounting Vouchers from Excel</div>
+    <div class="cover-pitch-label">Sales Pitch for E-Commerce Sellers &amp; Finance Teams</div>
+    <div class="cover-url">lacoinvoice.com</div>
+  </div>
+
+  <div class="page-footer">Laco Invoice — Sales Pitch for E-Commerce Sellers | Page 1</div>
+</div>
+
+<!-- PAGE 2: WHAT IS LACO INVOICE, WHO IT IS FOR, THE PROBLEM -->
+<div class="page">
+  <div class="header-brand">
+    <span class="header-brand-mark">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/>
+        <path d="M14 8H8"/>
+        <path d="M16 12H8"/>
+        <path d="M13 16H8"/>
+      </svg>
+    </span>
+    <span class="header-brand-text">Laco<span>Invoice</span></span>
+  </div>
+
+  <h2 class="section-title">What is Laco Invoice?</h2>
+  <div class="section-divider"></div>
+  <p class="lead-text">
+    Laco Invoice is a dedicated e-commerce finance automation platform that turns raw marketplace order and invoice Excel files into compliant 7% VAT tax invoices, receipts, and ERP-ready accounting vouchers. Simply import your order and tax invoice spreadsheets exported from TikTok Shop, Shopee, Lazada, or your POS. Laco Invoice instantly parses and normalizes the data, validates customer 13-digit Thai Tax IDs, calculates VAT, issues sequentially numbered tax documents, and structures transactions for your ERP chart of accounts. You review with one click, then export single PDFs, bulk ZIP archives, or seamless GL vouchers.
+  </p>
+
+  <div class="quote-box">
+    <p>“Laco Invoice turns raw marketplace order and tax invoice spreadsheets into ready-to-send 7% VAT tax invoices and audit-ready ERP vouchers — all from one screen.”</p>
+  </div>
+
+  <h2 class="section-title" style="margin-top: 10px;">Who Laco Invoice Is For</h2>
+  <div class="section-divider"></div>
+
+  <div class="persona-item">
+    <div class="persona-title">Solo Sellers &amp; Single Stores (Starter Plan)</div>
+    <div class="persona-desc">You sell on marketplaces and need professional tax invoices whenever buyers request them, without hiring a bookkeeper or manually typing into Excel invoice templates.</div>
+  </div>
+
+  <div class="persona-item">
+    <div class="persona-title">Growing Multi-Channel Brands (Growth Plan)</div>
+    <div class="persona-desc">You export order sheets from TikTok Shop, Shopee, and Lazada, and your team is overwhelmed trying to consolidate files, verify tax requests, and issue receipts.</div>
+  </div>
+
+  <div class="persona-item">
+    <div class="persona-title">Multi-Store Sellers, Agencies &amp; Finance Teams (Scale Plan)</div>
+    <div class="persona-desc">You manage multiple store reports and need automated Excel batch imports, bulk PDF ZIP generation, and pre-balanced GL voucher exports into Express ERP or SAP.</div>
+  </div>
+
+  <h3 class="sub-section-title" style="margin-top: 10px;">The Problem</h3>
+  <p class="lead-text" style="margin-bottom: 5px;">Every marketplace sale requires customer documents and accounting entries — and today, that's a scramble.</p>
+  <ul class="bullet-list">
+    <li><strong>Messy, mismatched spreadsheets.</strong> TikTok Shop, Shopee, and Lazada all export orders with different column formats, cryptic fee names, and fragmented customer details.</li>
+    <li><strong>Manual tax invoicing drag.</strong> Customers demand official tax invoices, forcing staff to copy-paste buyer names, addresses, and 13-digit Thai Tax IDs from Excel into Word or templates one by one.</li>
+    <li><strong>Month-end reconciliation chaos.</strong> Payout reports, platform commission deductions, shipping subsidies, and refunds make reconciling sales from raw spreadsheets feel like detective work.</li>
+    <li><strong>ERP disconnect &amp; double-entry.</strong> Accounting teams re-key data manually into Express, SAP, or QuickBooks, resulting in delayed book closing and costly audit risks.</li>
+  </ul>
+
+  <div class="page-footer">Laco Invoice — Sales Pitch for E-Commerce Sellers | Page 2</div>
+</div>
+
+<!-- PAGE 3: THE LACO INVOICE SOLUTION, KEY FEATURES, REACH EVERY CHANNEL -->
+<div class="page">
+  <div class="header-brand">
+    <span class="header-brand-mark">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/>
+        <path d="M14 8H8"/>
+        <path d="M16 12H8"/>
+        <path d="M13 16H8"/>
+      </svg>
+    </span>
+    <span class="header-brand-text">Laco<span>Invoice</span></span>
+  </div>
+
+  <h2 class="section-title">The Laco Invoice Solution</h2>
+  <div class="section-divider"></div>
+  <p class="lead-text" style="margin-bottom: 6px;">Upload your marketplace Excel files, and Laco Invoice powers your entire order-to-accounting pipeline. You can issue compliant tax invoices and hand off clean GL vouchers to finance in minutes.</p>
+  <ul class="bullet-list">
+    <li><strong>Smart Excel order ingestion.</strong> Upload exported order and tax invoice spreadsheets from TikTok Shop, Shopee, Lazada, or POS — the system extracts, validates, and structures all records instantly.</li>
+    <li><strong>1-Click compliant invoicing.</strong> Generate sequential tax invoices and receipts with 7% VAT, company branding, and customer tax data with zero manual re-typing.</li>
+    <li><strong>Direct ERP voucher handoff.</strong> Map products and accounts once. Export pre-balanced General Ledger (GL) journal vouchers directly into your accounting software.</li>
+  </ul>
+
+  <h3 class="sub-section-title" style="margin-top: 10px;">Key Features</h3>
+  <table class="features-table">
+    <thead>
+      <tr>
+        <th>Feature</th>
+        <th>What It Does</th>
+        <th>Why It Matters</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="col-feature">Smart Excel Order &amp; Tax Import</td>
+        <td class="col-what">Uploads and parses marketplace order and tax invoice spreadsheets (TikTok Shop, Shopee, Lazada, POS) automatically.</td>
+        <td class="col-why">Eliminates manual copy-pasting; ingest thousands of order rows in seconds without formatting headaches.</td>
+      </tr>
+      <tr>
+        <td class="col-feature">Instant Tax Invoice &amp; Receipt Generator</td>
+        <td class="col-what">Issues official tax invoices and receipts with automated sequential numbering (INV-YYYYMM-XXXXXX).</td>
+        <td class="col-why">Eliminate manual document creation and human numbering errors forever.</td>
+      </tr>
+      <tr>
+        <td class="col-feature">7% VAT &amp; Thai Tax Compliance</td>
+        <td class="col-what">Accurately calculates subtotal, 7% VAT, and total amounts, while validating 13-digit Thai Tax IDs and branch codes.</td>
+        <td class="col-why">Guaranteed compliance with Revenue Department requirements and audit-ready records.</td>
+      </tr>
+      <tr>
+        <td class="col-feature">Bulk PDF &amp; ZIP Export</td>
+        <td class="col-what">Generates hundreds of tax invoice PDFs in seconds and packages them into organized ZIP archives.</td>
+        <td class="col-why">Cuts month-end document packaging time from days to just 30 seconds.</td>
+      </tr>
+      <tr>
+        <td class="col-feature">ERP Master Data Sync</td>
+        <td class="col-what">Synchronizes local items, Chart of Accounts, vendors, and cost centers via standard CSV/Excel templates.</td>
+        <td class="col-why">Pre-validates accounting codes so no invalid entries ever reach your ERP.</td>
+      </tr>
+      <tr>
+        <td class="col-feature">GL Voucher Preview &amp; Export</td>
+        <td class="col-what">Constructs balanced debit/credit accounting entries (Revenue, Output VAT, Platform Fees, Accounts Receivable).</td>
+        <td class="col-why">Finance gets balanced, reviewable journal entries ready for Express, SAP, or Business Central.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub-section-title" style="margin-top: 10px;">Built to Simplify Operations Across Channels</h3>
+  <p class="lead-text" style="margin-bottom: 5px;">Process spreadsheets from any sales channel and export to your accounting destinations — all from one place.</p>
+
+  <table class="eco-table">
+    <tr>
+      <td>TikTok Shop</td>
+      <td>Shopee</td>
+      <td>Lazada</td>
+    </tr>
+    <tr>
+      <td>Amazon</td>
+      <td>POS &amp; Offline Excel</td>
+      <td>Express ERP / SAP / Business Central</td>
+    </tr>
+  </table>
+
+  <p class="eco-note">
+    Laco Invoice bridges the gap between messy marketplace Excel exports and rigid enterprise accounting. It supports batch Excel imports for regular orders, tax invoice requests, flash sales, and offline B2B sales.
+  </p>
+
+  <div class="page-footer">Laco Invoice — Sales Pitch for E-Commerce Sellers | Page 3</div>
+</div>
+
+<!-- PAGE 4: WHY SELLERS CHOOSE, SALES PITCH, CALL TO ACTION -->
+<div class="page">
+  <div class="header-brand">
+    <span class="header-brand-mark">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/>
+        <path d="M14 8H8"/>
+        <path d="M16 12H8"/>
+        <path d="M13 16H8"/>
+      </svg>
+    </span>
+    <span class="header-brand-text">Laco<span>Invoice</span></span>
+  </div>
+
+  <h2 class="section-title">Why Sellers &amp; Finance Teams Choose Laco Invoice</h2>
+  <div class="section-divider"></div>
+  <ul class="bullet-list" style="margin-top: 6px; margin-bottom: 14px;">
+    <li><strong>One single truth for sales &amp; finance.</strong> Operations imports raw marketplace orders; finance gets balanced tax invoices and vouchers. No more arguing over spreadsheet versions or missing receipts.</li>
+    <li><strong>Audit-proof Thai tax compliance.</strong> Built specifically to meet Thailand Revenue Department tax invoice standards, including 7% VAT breakdown and Head Office / Branch formatting.</li>
+    <li><strong>Built for high-volume scale.</strong> High-performance batch processing handles thousands of imported order rows without lagging or crashing, keeping your operations running at full speed.</li>
+  </ul>
+
+  <h2 class="section-title" style="margin-top: 14px;">Sales Pitch</h2>
+  <div class="section-divider"></div>
+
+  <h3 class="sub-section-title" style="margin-top: 8px;">Elevator Pitch</h3>
+  <p class="lead-text">
+    Laco Invoice turns raw marketplace order and tax invoice Excel sheets into compliant 7% VAT tax invoices, receipts, and ERP-ready accounting vouchers for TikTok Shop, Shopee, Lazada, and Amazon — all in one place.
+  </p>
+
+  <h3 class="sub-section-title">Key Selling Points</h3>
+  <ul class="bullet-list">
+    <li><strong>Smart Excel import</strong> — upload marketplace order sheets; Laco Invoice extracts and structures everything instantly.</li>
+    <li><strong>1-Click Thai 7% VAT tax invoices</strong> — compliant numbering, tax ID validation, and instant PDFs.</li>
+    <li><strong>Bulk ZIP exports for finance</strong> — package thousands of invoices with one click at month-end.</li>
+    <li><strong>ERP-ready GL vouchers</strong> — bridge marketplace sales directly into Express ERP, SAP, and Business Central.</li>
+  </ul>
+
+  <div class="callout-loud">
+    <div class="callout-loud-label">Say It Out Loud</div>
+    <div class="callout-loud-quote">
+      “You're downloading raw order spreadsheets from three different seller portals, copy-pasting customer tax IDs into Excel, manually typing invoices, and still scrambling to reconcile with ERP at month-end. Laco Invoice replaces all of that — just drop your Excel files, and it turns every order into a compliant tax invoice and audit-ready ERP voucher.”
+    </div>
+  </div>
+
+  <h2 class="section-title" style="margin-top: 12px;">Ready to Make Invoicing the Easy Way?</h2>
+  <div class="section-divider"></div>
+  <p class="lead-text" style="margin-bottom: 8px;">
+    Just upload your order Excel. We'll show you how easy it is to import orders, issue compliant tax documents, and hand off balanced vouchers to finance in minutes.
+  </p>
+
+  <div class="cta-banner">
+    <a href="https://lacoinvoice.com">lacoinvoice.com</a>
+    <span>| &nbsp;Contact sales for a live walkthrough</span>
+  </div>
+
+  <div class="page-footer">Laco Invoice — Sales Pitch for E-Commerce Sellers | Page 4</div>
+</div>
+
+</body>
+</html>

@@ -5,6 +5,8 @@ import { erpLookupService } from "@/shared/services/erp-lookup.service"
 export const erpLookupKeys = {
   all: ["erp-lookups"] as const,
   items: () => [...erpLookupKeys.all, "items"] as const,
+  itemFinanceAccounts: (itemId: number) =>
+    [...erpLookupKeys.all, "items", itemId, "finance-accounts"] as const,
   accounts: () => [...erpLookupKeys.all, "accounts"] as const,
   vendors: () => [...erpLookupKeys.all, "vendors"] as const,
   departments: () => [...erpLookupKeys.all, "departments"] as const,
@@ -15,6 +17,15 @@ export function useErpItemsQuery() {
   return useQuery({
     queryKey: erpLookupKeys.items(),
     queryFn: () => erpLookupService.items(),
+    staleTime: 60_000,
+  })
+}
+
+export function useErpItemFinanceAccountsQuery(itemId: number | null) {
+  return useQuery({
+    queryKey: erpLookupKeys.itemFinanceAccounts(itemId ?? 0),
+    queryFn: () => erpLookupService.itemFinanceAccounts(itemId as number),
+    enabled: itemId != null && itemId > 0,
     staleTime: 60_000,
   })
 }

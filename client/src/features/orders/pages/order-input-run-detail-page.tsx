@@ -2,6 +2,7 @@ import type { ColumnFiltersState, SortingState } from "@tanstack/react-table"
 import {
   ArrowDown,
   ArrowUp,
+  BookText,
   ChevronsUpDown,
   Download,
   FileSpreadsheet,
@@ -26,6 +27,8 @@ import { AuthFormError } from "@/features/auth/components/auth-form-error"
 import { InvoicePdfCard, InvoicePdfMatchSummary } from "@/features/orders/components/invoice-pdf-card"
 import { OrderImportDialog } from "@/features/orders/components/order-import-dialog"
 import { OrderInputRunStatusBadges } from "@/features/orders/components/order-input-run-status-badges"
+import { GenerateVoucherDialog } from "@/features/vouchers/components/generate-voucher-dialog"
+import { useVouchersByOrderInputRunQuery } from "@/features/vouchers/queries/voucher.query"
 import { OrdersFilters } from "@/features/orders/components/orders-filters"
 import { OrdersTable } from "@/features/orders/components/orders-table"
 import {
@@ -158,6 +161,11 @@ export function OrderInputRunDetailPage() {
   const rollbackOrderDetailMutation = useRollbackOrderInputOrderDetailMutation()
   const rollbackWithdrawMutation = useRollbackOrderInputWithdrawMutation()
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [voucherDialogOpen, setVoucherDialogOpen] = useState(false)
+  const vouchersQuery = useVouchersByOrderInputRunQuery(
+    Number.isFinite(id) && id > 0 ? id : null
+  )
+  const existingVouchers = vouchersQuery.data ?? []
   const deleteSetMutation = useDeleteOrderInputRunMutation()
   const [rollbackTarget, setRollbackTarget] = useState<"orderDetail" | "withdraw" | null>(null)
   const resetStuckMutation = useResetStuckOrderInputRunMutation()
@@ -624,6 +632,31 @@ export function OrderInputRunDetailPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {existingVouchers.length > 0 ? (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() =>
+                navigate(ROUTES.dashboard.voucherDetail(existingVouchers[0].id))
+              }
+              className="border-primary/40 text-primary hover:bg-primary/10"
+            >
+              <BookText data-icon="inline-start" className="size-4" />
+              {existingVouchers[0].voucherNumber
+                ? `Voucher: ${existingVouchers[0].voucherNumber}`
+                : "View Voucher"}
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setVoucherDialogOpen(true)}
+              className="border-primary/40 text-primary hover:bg-primary/10"
+            >
+              <BookText data-icon="inline-start" className="size-4" />
+              Generate Voucher
+            </Button>
+          )}
           <Button
             type="button"
             variant="outline"
@@ -1251,6 +1284,14 @@ export function OrderInputRunDetailPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {run ? (
+        <GenerateVoucherDialog
+          open={voucherDialogOpen}
+          onOpenChange={setVoucherDialogOpen}
+          defaultOrderInputRunId={run.id}
+        />
+      ) : null}
 
       <p className="text-xs text-muted-foreground">
         {t("inputs.detail.updated_at", {

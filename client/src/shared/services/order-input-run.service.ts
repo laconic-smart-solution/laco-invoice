@@ -17,6 +17,10 @@ export type ApiOrderInputRunStatus =
   | "PARTIAL"
   | "FAILED"
 
+export type ApiOrderInputRunDisplayStatusFilter =
+  | ApiOrderInputRunStatus
+  | "ERROR"
+
 export type ApiOrderInputFileStatus =
   | "MISSING"
   | "READY"
@@ -115,8 +119,30 @@ export interface OrderInputRunPageRequest {
     marketplaceId?: number
     marketplaceCode?: string
     title?: string
-    status?: ApiOrderInputRunStatus
+    status?: ApiOrderInputRunDisplayStatusFilter
+    inputFileType?: ApiOrderInputFileType
   }
+}
+
+export function hasOrderInputInvoiceDisplayError(
+  run: ApiOrderInputRunDto
+): boolean {
+  const matchStatus = run.invoiceMatchStatus
+  return (
+    matchStatus === "MISMATCH" ||
+    matchStatus === "UNPARSED" ||
+    run.invoicePdfStatus === "FAILED"
+  )
+}
+
+export function matchesOrderInputRunDisplayStatus(
+  run: ApiOrderInputRunDto,
+  statusFilter: ApiOrderInputRunDisplayStatusFilter
+): boolean {
+  if (statusFilter === "ERROR") {
+    return hasOrderInputInvoiceDisplayError(run)
+  }
+  return run.status === statusFilter && !hasOrderInputInvoiceDisplayError(run)
 }
 
 export interface OrderInputRunCreateRequest {

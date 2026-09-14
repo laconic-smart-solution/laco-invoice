@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,7 @@ import com.laconic.lacoinvoice.common.aspect.Loggable;
 import com.laconic.lacoinvoice.common.exception.ResourceNotFoundException;
 import com.laconic.lacoinvoice.common.pagination.PageQuerySupport;
 import com.laconic.lacoinvoice.common.persistence.AuditUserContext;
+import com.laconic.lacoinvoice.common.util.ObjectMapUtils;
 import com.laconic.lacoinvoice.common.web.ApiResponse;
 import com.laconic.lacoinvoice.common.web.PageMeta;
 import com.laconic.lacoinvoice.domain.models.InvoicePdfMatchStatus;
@@ -52,6 +54,7 @@ import com.laconic.lacoinvoice.features.order.import_.OrderImportResultDto;
 import com.laconic.lacoinvoice.features.order.inputrun.ParsedWithdrawWorkbook.ParsedWithdrawRow;
 import com.laconic.lacoinvoice.features.order.inputrun.dto.OrderInputFileTypeDetectResultDto;
 import com.laconic.lacoinvoice.features.order.inputrun.dto.OrderInputFileDownload;
+import com.laconic.lacoinvoice.features.order.inputrun.pageable.OrderInputRunFilter;
 import com.laconic.lacoinvoice.features.order.inputrun.pageable.OrderInputRunPageRequest;
 import com.laconic.lacoinvoice.features.usersettings.UserSettingsService;
 
@@ -65,7 +68,7 @@ public class OrderInputRunService {
 			"marketplaceId", "marketplace.id",
 			"marketplaceCode", "marketplace.code",
 			"title", "title",
-			"status", "status");
+			"inputFileType", "inputFileType");
 
 	private final OrderInputRunRepository runRepository;
 	private final OrderWithdrawImportRowRepository withdrawRowRepository;
@@ -120,13 +123,29 @@ public class OrderInputRunService {
 	@Transactional(readOnly = true)
 	@PreAuthorize("@authz.isOwnerOrAdmin()")
 	public ApiResponse<List<OrderInputRunDto>> page(OrderInputRunPageRequest request) {
-		return PageQuerySupport.query(
+		OrderInputRunFilter filter = request.getFilter();
+		String statusFilter = filter != null ? filter.getStatus() : null;
+		Specification<OrderInputRun> displayStatusSpec = OrderInputRunSpecifications.displayStatus(statusFilter);
+		return PageQuerySupport.queryWithMap(
 				runRepository,
 				mapper,
 				request.toPageAndFilter(),
 				OrderInputRun.class,
-				request.getFilter(),
-				FILTER_FIELD_PATHS);
+				ObjectMapUtils.toMap(filterWithoutStatus(filter), FILTER_FIELD_PATHS),
+				displayStatusSpec);
+	}
+
+	private static OrderInputRunFilter filterWithoutStatus(OrderInputRunFilter filter) {
+		if (filter == null) {
+			return null;
+		}
+		OrderInputRunFilter copy = new OrderInputRunFilter();
+		copy.setStoreId(filter.getStoreId());
+		copy.setMarketplaceId(filter.getMarketplaceId());
+		copy.setMarketplaceCode(filter.getMarketplaceCode());
+		copy.setTitle(filter.getTitle());
+		copy.setInputFileType(filter.getInputFileType());
+		return copy;
 	}
 
 	@Loggable

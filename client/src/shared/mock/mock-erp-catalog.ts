@@ -10,6 +10,10 @@ export const MOCK_ERP_ACCOUNTS: ErpLookupRecord[] = [
   { id: 2101, code: "2101-000", name: "Accounts Payable" },
   { id: 2102, code: "2102-000", name: "Accrued Expenses" },
   { id: 1101, code: "1101-000", name: "Bank - Kasikorn" },
+  { id: 11120010, code: "11120010", name: "C/A- Kasikron 212-8-05026-7" },
+  { id: 11300010, code: "11300010", name: "Trade accounts receivable-Domestic (ลูกหนี้การค้า-ในประเทศ)" },
+  { id: 21400070, code: "21400070", name: "Out Put Tax-Unamortization (ภาษีขาย-รอเรียกเก็บ)" },
+  { id: 21400060, code: "21400060", name: "Out Put Tax (ภาษีขาย)" },
   { id: 4101, code: "4101-000", name: "Sales Revenue" },
   { id: 5101, code: "5101-000", name: "Shipping Expense" },
   { id: 5102, code: "5102-000", name: "Commission Expense" },
@@ -48,7 +52,15 @@ export function listMockErpItems(search?: string): ErpLookupRecord[] {
 }
 
 export function listMockErpAccounts(search?: string): ErpLookupRecord[] {
-  return MOCK_ERP_ACCOUNTS.filter((item) => matches(search, item.code, item.name))
+  const list = MOCK_ERP_ACCOUNTS.filter((item) => matches(search, item.code, item.name))
+  if (list.length === 0 && search?.trim()) {
+    const clean = search.trim().replace(/[^0-9]/g, "")
+    const id = clean ? Number(clean) : 0
+    if (id > 0) {
+      list.push({ id, code: search.trim(), name: `Account ${search.trim()}` })
+    }
+  }
+  return list
 }
 
 export function listMockErpVendors(search?: string): ErpLookupRecord[] {
@@ -74,6 +86,9 @@ export function requireMockErpItem(id: number): ErpLookupRecord {
 export function requireMockErpAccount(id: number): ErpLookupRecord {
   const item = MOCK_ERP_ACCOUNTS.find((record) => record.id === id)
   if (!item) {
+    if (id != null && Number.isFinite(id) && id > 0) {
+      return { id, code: String(id), name: `Account ${id}` }
+    }
     throw new Error(`ERP account not found: id=${id}`)
   }
   return item
