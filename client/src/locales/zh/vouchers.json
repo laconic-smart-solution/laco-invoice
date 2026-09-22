@@ -133,7 +133,8 @@
     "single_excel": "导出 Excel",
     "single_csv": "导出 CSV",
     "single_pdf": "导出 PDF",
-    "failed": "导出凭证失败。"
+    "failed": "导出凭证失败。",
+    "not_ready": "此凭证尚不可导出。"
   },
   "errors": {
     "generate_failed": "生成凭证失败。",

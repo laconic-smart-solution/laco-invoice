@@ -441,6 +441,7 @@
         "apply_all": "全部应用状态"
       },
       "orders_empty": "此运行尚无订单。请先运行 Order detail Excel。",
+      "orders_title": "此导入的订单",
       "orders_none": "未创建新订单（行可能全部为重复）。",
       "withdraw_rows_title": "提现/结算行",
       "withdraw_rows_empty": "无数据",

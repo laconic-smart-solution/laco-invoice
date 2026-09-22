@@ -46,7 +46,10 @@ export function ConfirmDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showCloseButton={!isLoading}>
+      <DialogContent
+        showCloseButton={!isLoading}
+        showMaximizeButton={false}
+      >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description ? (

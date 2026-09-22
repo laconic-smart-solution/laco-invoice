@@ -142,7 +142,8 @@
     "single_excel": "ส่งออก Excel",
     "single_csv": "ส่งออก CSV",
     "single_pdf": "ส่งออก PDF",
-    "failed": "ส่งออกใบสำคัญไม่สำเร็จ"
+    "failed": "ส่งออกใบสำคัญไม่สำเร็จ",
+    "not_ready": "ใบสำคัญนี้ยังส่งออกไม่ได้"
   },
   "errors": {
     "generate_failed": "สร้างใบสำคัญไม่สำเร็จ",

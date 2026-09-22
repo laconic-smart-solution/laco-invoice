@@ -6,6 +6,7 @@ import {
   CreateCustomerPage,
   DashboardPage,
   EditCustomerPage,
+  FlowWorkspacePage,
   ForgotPasswordPage,
   InvoicesPage,
   InvoiceDetailPage,
@@ -54,6 +55,10 @@ export const router = createBrowserRouter([
       {
         element: <ProtectedRoute />,
         children: [
+          {
+            path: ROUTES.dashboard.flow,
+            element: <FlowWorkspacePage />,
+          },
           {
             element: <DashboardLayout />,
             children: [

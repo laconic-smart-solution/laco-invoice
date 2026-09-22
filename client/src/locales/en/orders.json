@@ -447,6 +447,7 @@
         "apply_all": "All apply statuses"
       },
       "orders_empty": "No orders from this run yet. Run the Order detail Excel first.",
+      "orders_title": "Orders from this import",
       "orders_none": "No new orders were created (all rows may have been duplicates).",
       "withdraw_rows_title": "Withdraw / settlement rows",
       "withdraw_rows_empty": "No rows.",

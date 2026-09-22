@@ -12,6 +12,7 @@ import enUsers from "@/locales/en/users.json"
 import enStores from "@/locales/en/stores.json"
 import enInvoices from "@/locales/en/invoices.json"
 import enVouchers from "@/locales/en/vouchers.json"
+import enFlow from "@/locales/en/flow.json"
 import enNavbar from "@/locales/en/navbar.json"
 import enOrders from "@/locales/en/orders.json"
 import enProducts from "@/locales/en/products.json"
@@ -27,6 +28,7 @@ import myCustomers from "@/locales/my/customers.json"
 import myErrors from "@/locales/my/errors.json"
 import myInvoices from "@/locales/my/invoices.json"
 import myVouchers from "@/locales/my/vouchers.json"
+import myFlow from "@/locales/my/flow.json"
 import myUsers from "@/locales/my/users.json"
 import myStores from "@/locales/my/stores.json"
 import myNavbar from "@/locales/my/navbar.json"
@@ -44,6 +46,7 @@ import thCustomers from "@/locales/th/customers.json"
 import thErrors from "@/locales/th/errors.json"
 import thInvoices from "@/locales/th/invoices.json"
 import thVouchers from "@/locales/th/vouchers.json"
+import thFlow from "@/locales/th/flow.json"
 import thUsers from "@/locales/th/users.json"
 import thStores from "@/locales/th/stores.json"
 import thNavbar from "@/locales/th/navbar.json"
@@ -61,6 +64,7 @@ import zhCustomers from "@/locales/zh/customers.json"
 import zhErrors from "@/locales/zh/errors.json"
 import zhInvoices from "@/locales/zh/invoices.json"
 import zhVouchers from "@/locales/zh/vouchers.json"
+import zhFlow from "@/locales/zh/flow.json"
 import zhUsers from "@/locales/zh/users.json"
 import zhStores from "@/locales/zh/stores.json"
 import zhNavbar from "@/locales/zh/navbar.json"
@@ -87,6 +91,7 @@ void i18n.use(initReactI18next).init({
       orders: enOrders,
       invoices: enInvoices,
       vouchers: enVouchers,
+      flow: enFlow,
       customers: enCustomers,
       errors: enErrors,
       users: enUsers,
@@ -106,6 +111,7 @@ void i18n.use(initReactI18next).init({
       orders: thOrders,
       invoices: thInvoices,
       vouchers: thVouchers,
+      flow: thFlow,
       customers: thCustomers,
       errors: thErrors,
       users: thUsers,
@@ -125,6 +131,7 @@ void i18n.use(initReactI18next).init({
       orders: zhOrders,
       invoices: zhInvoices,
       vouchers: zhVouchers,
+      flow: zhFlow,
       customers: zhCustomers,
       errors: zhErrors,
       users: zhUsers,
@@ -144,6 +151,7 @@ void i18n.use(initReactI18next).init({
       orders: myOrders,
       invoices: myInvoices,
       vouchers: myVouchers,
+      flow: myFlow,
       customers: myCustomers,
       errors: myErrors,
       users: myUsers,

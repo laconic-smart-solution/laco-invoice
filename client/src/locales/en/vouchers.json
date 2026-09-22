@@ -142,7 +142,8 @@
     "single_excel": "Export Excel",
     "single_csv": "Export CSV",
     "single_pdf": "Export PDF",
-    "failed": "Failed to export vouchers."
+    "failed": "Failed to export vouchers.",
+    "not_ready": "This voucher is not ready to export yet."
   },
   "errors": {
     "generate_failed": "Failed to generate the voucher.",

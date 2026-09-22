@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
+    "test:flow": "node --experimental-strip-types --test src/features/flow/util/*.test.ts",
     "preview": "vite preview",
     "start": "serve -s dist -l 5173"
   },

@@ -1,7 +1,12 @@
 import { useEffect, useRef } from "react"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 
 import { ROUTES } from "@/app/constants/routes"
+import {
+  isEditableKeyboardTarget,
+  isFlowWorkspaceShortcut,
+  shouldOpenFlowWorkspace,
+} from "@/features/flow/util/flow-shortcut"
 import { useShortcutActionsStore } from "@/shared/stores/shortcut-actions-store"
 import { useUiModeStore } from "@/shared/stores/ui-mode-store"
 
@@ -19,16 +24,7 @@ const GO_ROUTES: Record<string, string> = {
 }
 
 function isEditableTarget(target: EventTarget | null) {
-  if (!(target instanceof HTMLElement)) {
-    return false
-  }
-
-  return (
-    target.isContentEditable ||
-    target.tagName === "INPUT" ||
-    target.tagName === "TEXTAREA" ||
-    target.tagName === "SELECT"
-  )
+  return isEditableKeyboardTarget(target)
 }
 
 function hasOpenModal() {
@@ -51,9 +47,10 @@ function focusShortcutSearch() {
 }
 
 /**
- * App-wide dashboard shortcuts:
+ * App-wide authenticated shortcuts:
  * - Ctrl/⌘+Shift+M modern UI shell (Ctrl+N is reserved by the browser)
  * - Ctrl/⌘+Shift+O classic (Hongta-style top-nav) shell
+ * - Ctrl/⌘+Shift+S open Flow workspace (prevents browser Save As)
  * - `?` open shortcuts page
  * - `g` then letter: navigate (h/o/p/i/c/s/u/k)
  * - `/` focus list search
@@ -62,6 +59,7 @@ function focusShortcutSearch() {
  */
 export function useAppKeyboardShortcuts() {
   const navigate = useNavigate()
+  const { pathname } = useLocation()
   const goPendingRef = useRef(false)
   const goTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -75,21 +73,24 @@ export function useAppKeyboardShortcuts() {
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.repeat) {
-        return
-      }
-
       const key = event.key
       const lower = key.length === 1 ? key.toLowerCase() : key
       const hasMod = event.metaKey || event.ctrlKey
 
+      if (isFlowWorkspaceShortcut(event)) {
+        event.preventDefault()
+        if (shouldOpenFlowWorkspace(event)) {
+          void navigate(ROUTES.dashboard.flow)
+        }
+        return
+      }
+
+      if (event.repeat) {
+        return
+      }
+
       // UI shell toggle — use Shift so we don't fight browser New Window / Open File.
-      if (
-        hasMod &&
-        event.shiftKey &&
-        !event.altKey &&
-        (lower === "m" || lower === "o")
-      ) {
+      if (hasMod && event.shiftKey && !event.altKey && (lower === "m" || lower === "o")) {
         if (isEditableTarget(event.target)) {
           return
         }
@@ -121,6 +122,9 @@ export function useAppKeyboardShortcuts() {
       }
 
       if (key === "Escape") {
+        if (pathname === ROUTES.dashboard.flow) {
+          return
+        }
         if (hasOpenModal()) {
           return
         }
@@ -167,5 +171,5 @@ export function useAppKeyboardShortcuts() {
       clearGoPending()
       window.removeEventListener("keydown", handleKeyDown)
     }
-  }, [navigate])
+  }, [navigate, pathname])
 }

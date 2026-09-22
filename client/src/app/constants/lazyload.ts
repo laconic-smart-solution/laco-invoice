@@ -247,3 +247,11 @@ export const ShortcutsPage = PageLoader(
     }))
   )
 )
+
+export const FlowWorkspacePage = PageLoader(
+  lazy(() =>
+    import("@/features/flow/pages/flow-workspace-page").then((module) => ({
+      default: module.FlowWorkspacePage,
+    }))
+  )
+)

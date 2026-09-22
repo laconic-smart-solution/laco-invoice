@@ -33,6 +33,12 @@ export const APP_SHORTCUTS: AppShortcut[] = [
     descriptionKey: "items.ui_classic",
   },
   {
+    id: "open-flow",
+    keys: ["Ctrl", "Shift", "S"],
+    macKeys: ["⌘", "Shift", "S"],
+    descriptionKey: "items.open_flow",
+  },
+  {
     id: "open-shortcuts",
     keys: ["?"],
     descriptionKey: "items.open_shortcuts",

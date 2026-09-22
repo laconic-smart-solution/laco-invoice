@@ -133,7 +133,8 @@
     "single_excel": "Excel ထုတ်ယူရန်",
     "single_csv": "CSV ထုတ်ယူရန်",
     "single_pdf": "PDF ထုတ်ယူရန်",
-    "failed": "ဘောက်ချာ ထုတ်ယူ၍ မရပါ။"
+    "failed": "ဘောက်ချာ ထုတ်ယူ၍ မရပါ။",
+    "not_ready": "ဤဘောက်ချာကို ယခု export မလုပ်နိုင်သေးပါ။"
   },
   "errors": {
     "generate_failed": "ဘောက်ချာ ဖန်တီး၍ မရပါ။",

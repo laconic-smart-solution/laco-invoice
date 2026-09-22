@@ -6,6 +6,7 @@ import type {
   VoucherPageRequest,
   VoucherPreviewRequest,
 } from "@/features/vouchers/types/voucher"
+import { orderInputRunKeys } from "@/shared/queries/order-input-run.query"
 import { voucherService } from "@/shared/services/voucher.service"
 
 export const voucherKeys = {
@@ -65,6 +66,7 @@ export function useGenerateVoucherMutation() {
       voucherService.generate(request),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: voucherKeys.all })
+      void queryClient.invalidateQueries({ queryKey: orderInputRunKeys.all })
     },
   })
 }
@@ -84,6 +86,7 @@ export function useUpdateVoucherMutation() {
       void queryClient.invalidateQueries({
         queryKey: voucherKeys.detail(variables.id),
       })
+      void queryClient.invalidateQueries({ queryKey: orderInputRunKeys.all })
     },
   })
 }
@@ -95,6 +98,7 @@ export function usePostVoucherToErpMutation() {
     onSuccess: (_data, id) => {
       void queryClient.invalidateQueries({ queryKey: voucherKeys.all })
       void queryClient.invalidateQueries({ queryKey: voucherKeys.detail(id) })
+      void queryClient.invalidateQueries({ queryKey: orderInputRunKeys.all })
     },
   })
 }

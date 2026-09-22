@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
@@ -59,6 +59,7 @@ import {
   DEFAULT_ERP_DEPARTMENT_ID,
   VOUCHER_CATEGORIES,
   type ErpLookupRecord,
+  type Voucher,
 } from "@/features/vouchers/types/voucher"
 import { extractApiErrorMessage } from "@/shared/api/extract-api-error-message"
 import { useOrderInputRunsPageQuery } from "@/shared/queries/order-input-run.query"
@@ -69,6 +70,55 @@ interface GenerateVoucherDialogProps {
   onOpenChange: (open: boolean) => void
   voucherId?: number | null
   defaultOrderInputRunId?: number | null
+  embedded?: boolean
+  onGenerated?: (voucher: Voucher) => void
+}
+
+interface GenerateVoucherDialogShellProps {
+  embedded: boolean
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  duplicateConfirmOpen: boolean
+  children: ReactNode
+}
+
+function GenerateVoucherDialogShell({
+  embedded,
+  open,
+  onOpenChange,
+  duplicateConfirmOpen,
+  children,
+}: GenerateVoucherDialogShellProps) {
+  if (embedded) {
+    return <>{children}</>
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        showMaximizeButton={false}
+        className="max-w-7xl sm:max-w-7xl w-full overflow-hidden p-0 gap-0 border-border bg-card shadow-2xl rounded-none"
+        onPointerDownOutside={(event) => {
+          event.preventDefault()
+        }}
+        onInteractOutside={(event) => {
+          event.preventDefault()
+        }}
+        onEscapeKeyDown={(event) => {
+          const hasOpenOverlay = Boolean(
+            document.querySelector(
+              '[data-slot="select-content"], [data-slot="combobox-content"], [data-radix-select-viewport], [data-radix-popper-content-wrapper], [role="listbox"], [data-slot="dropdown-menu-content"]'
+            )
+          )
+          if (hasOpenOverlay || duplicateConfirmOpen) {
+            event.preventDefault()
+          }
+        }}
+      >
+        {children}
+      </DialogContent>
+    </Dialog>
+  )
 }
 
 function parseAccountId(val: string | number | undefined | null): number {
@@ -116,6 +166,8 @@ export function GenerateVoucherDialog({
   onOpenChange,
   voucherId = null,
   defaultOrderInputRunId = null,
+  embedded = false,
+  onGenerated,
 }: GenerateVoucherDialogProps) {
   const { t } = useTranslation("vouchers")
   const navigate = useNavigate()
@@ -473,6 +525,10 @@ export function GenerateVoucherDialog({
     setDuplicateConfirmOpen(false)
     setPendingGenerateValues(null)
     onOpenChange(false)
+    if (onGenerated) {
+      onGenerated(created)
+      return
+    }
     navigate(ROUTES.dashboard.voucherDetail(created.id))
   }
 
@@ -481,8 +537,11 @@ export function GenerateVoucherDialog({
       updateMutation.mutate(
         { id: voucherId, request: toGenerateRequest(values) },
         {
-          onSuccess: () => {
+          onSuccess: (updated) => {
             onOpenChange(false)
+            if (onGenerated) {
+              onGenerated(updated)
+            }
           },
         }
       )
@@ -548,30 +607,21 @@ export function GenerateVoucherDialog({
 
   return (
     <>
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="max-w-7xl sm:max-w-7xl w-full overflow-hidden p-0 gap-0 border-border bg-card shadow-2xl rounded-none"
-        onPointerDownOutside={(event) => {
-          event.preventDefault()
-        }}
-        onInteractOutside={(event) => {
-          event.preventDefault()
-        }}
-        onEscapeKeyDown={(event) => {
-          const hasOpenOverlay = Boolean(
-            document.querySelector(
-              '[data-slot="select-content"], [data-slot="combobox-content"], [data-radix-select-viewport], [data-radix-popper-content-wrapper], [role="listbox"], [data-slot="dropdown-menu-content"]'
-            )
-          )
-          if (hasOpenOverlay || duplicateConfirmOpen) {
-            event.preventDefault()
-          }
-        }}
-      >
+    <GenerateVoucherDialogShell
+      embedded={embedded}
+      open={open}
+      onOpenChange={onOpenChange}
+      duplicateConfirmOpen={duplicateConfirmOpen}
+    >
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="flex max-h-[90vh] flex-col group-data-[maximized=true]/dialog:h-full group-data-[maximized=true]/dialog:max-h-none"
+            className={cn(
+              "flex flex-col",
+              embedded
+                ? "max-h-none"
+                : "max-h-[90vh] group-data-[maximized=true]/dialog:h-full group-data-[maximized=true]/dialog:max-h-none"
+            )}
           >
             <div className="border-b border-border/80 bg-muted/20 px-6 py-5">
               <DialogHeader className="space-y-1 text-left">
@@ -840,8 +890,7 @@ export function GenerateVoucherDialog({
             </DialogFooter>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+    </GenerateVoucherDialogShell>
 
       <ConfirmDialog
         open={duplicateConfirmOpen}

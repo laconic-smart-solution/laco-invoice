@@ -168,12 +168,12 @@ export function InvoicePdfMatchSummary({ run, locale }: InvoicePdfMatchSummaryPr
   }
 
   return (
-    <dl className="grid gap-3 rounded-md border border-border bg-card p-4 text-xs sm:grid-cols-2 lg:grid-cols-3">
+    <dl className="grid grid-cols-[repeat(auto-fit,minmax(12rem,1fr))] gap-3 rounded-md border border-border bg-card p-4 text-xs">
       <div>
         <dt className="text-muted-foreground">
           {t("inputs.detail.invoice_receipt_number")}
         </dt>
-        <dd className="font-mono font-medium">{run.invoiceReceiptNumber ?? "—"}</dd>
+        <dd className="break-all font-mono font-medium">{run.invoiceReceiptNumber ?? "—"}</dd>
       </div>
       <div>
         <dt className="text-muted-foreground">

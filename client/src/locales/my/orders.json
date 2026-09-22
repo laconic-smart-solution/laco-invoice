@@ -447,6 +447,7 @@
         "apply_all": "Apply အခြေအနေအားလုံး"
       },
       "orders_empty": "ဤ run မှ order မရှိသေးပါ။ Order detail Excel ကို အရင် Run လုပ်ပါ။",
+      "orders_title": "ဤတင်သွင်းမှုမှ အော်ဒါများ",
       "orders_none": "Order အသစ် မဖန်တီးပါ (duplicate အားလုံး ဖြစ်နိုင်သည်)။",
       "withdraw_rows_title": "Withdraw / settlement အတန်းများ",
       "withdraw_rows_empty": "အတန်း မရှိပါ",

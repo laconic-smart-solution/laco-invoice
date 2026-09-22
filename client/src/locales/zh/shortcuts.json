@@ -11,6 +11,7 @@
     "toggle_sidebar": "折叠或展开侧边栏",
     "ui_modern": "切换到现代 UI（侧边栏布局）",
     "ui_classic": "切换到经典 UI（Hongta 风格顶部导航）",
+    "open_flow": "打开订单到凭证流程工作区",
     "open_shortcuts": "打开此快捷键页面",
     "focus_search": "聚焦列表搜索框",
     "export": "导出当前列表（Excel）",

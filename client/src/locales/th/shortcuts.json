@@ -11,6 +11,7 @@
     "toggle_sidebar": "ย่อหรือขยายแถบด้านข้าง",
     "ui_modern": "สลับเป็น UI สมัยใหม่ (แถบด้านข้าง)",
     "ui_classic": "สลับเป็น UI คลาสสิก (แถบนำทางด้านบนแบบ Hongta)",
+    "open_flow": "เปิดพื้นที่ทำงาน Order to Voucher",
     "open_shortcuts": "เปิดหน้าคีย์ลัดนี้",
     "focus_search": "โฟกัสช่องค้นหารายการ",
     "export": "ส่งออกรายการปัจจุบัน (Excel)",

@@ -32,6 +32,7 @@ export const ROUTES = {
     profile: "/profile",
     settings: "/settings",
     shortcuts: "/shortcuts",
+    flow: "/app/flow",
   },
   auth: {
     login: "/login",

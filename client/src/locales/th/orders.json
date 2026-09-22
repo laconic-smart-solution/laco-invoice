@@ -447,6 +447,7 @@
         "apply_all": "ทุกสถานะนำไปใช้"
       },
       "orders_empty": "ยังไม่มีออเดอร์จากรอบนี้ รัน Order detail Excel ก่อน",
+      "orders_title": "คำสั่งซื้อจากการนำเข้านี้",
       "orders_none": "ไม่มีออเดอร์ใหม่ (แถวอาจเป็น duplicate ทั้งหมด)",
       "withdraw_rows_title": "แถว withdraw / settlement",
       "withdraw_rows_empty": "ไม่มีแถว",
