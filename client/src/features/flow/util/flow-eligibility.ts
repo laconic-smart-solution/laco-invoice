@@ -116,13 +116,16 @@ export function deriveFlowStageCounts(
 
 export function reconcileSelectedRunId(
   runs: ApiOrderInputRunDto[],
-  selectedId: number | null
+  selectedId: number | null | undefined
 ): number | null {
   if (runs.length === 0) {
     return null
   }
+  if (selectedId === undefined) {
+    return runs[0].id
+  }
   if (selectedId != null && runs.some((run) => run.id === selectedId)) {
     return selectedId
   }
-  return runs[0].id
+  return null
 }

@@ -123,6 +123,12 @@
     "description_with_numbers": "您已为此订单数据输入生成过凭证（{{numbers}}）。再生成将为同一数据集新增另一张凭证。确定要继续吗？",
     "confirm": "仍要生成"
   },
+  "duplicate_invoice": {
+    "title": "该发票已有凭证",
+    "description": "您已为此发票生成过凭证。再生成将为同一发票新增另一张凭证。确定要继续吗？",
+    "description_with_numbers": "您已为此发票生成过凭证（{{numbers}}）。再生成将为同一发票新增另一张凭证。确定要继续吗？",
+    "confirm": "仍要生成"
+  },
   "export": {
     "button": "导出",
     "excel": "导出 Excel (.xlsx)",

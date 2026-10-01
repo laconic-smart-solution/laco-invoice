@@ -19,12 +19,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.laconic.lacoinvoice.common.aspect.Loggable;
+import com.laconic.lacoinvoice.common.exception.BusinessRuleException;
 import com.laconic.lacoinvoice.common.exception.ResourceNotFoundException;
 import com.laconic.lacoinvoice.common.pagination.PageQuerySupport;
 import com.laconic.lacoinvoice.common.web.ApiResponse;
 import com.laconic.lacoinvoice.domain.models.Invoice;
 import com.laconic.lacoinvoice.domain.models.InvoiceItem;
 import com.laconic.lacoinvoice.domain.models.InvoiceOrder;
+import com.laconic.lacoinvoice.domain.models.InvoiceSourceType;
 import com.laconic.lacoinvoice.domain.models.InvoiceStatus;
 import com.laconic.lacoinvoice.domain.models.Marketplace;
 import com.laconic.lacoinvoice.domain.models.Order;
@@ -33,6 +35,7 @@ import com.laconic.lacoinvoice.domain.models.OrderItem;
 import com.laconic.lacoinvoice.domain.models.OrderTaxInvoice;
 import com.laconic.lacoinvoice.domain.models.PaymentAllocationStatus;
 import com.laconic.lacoinvoice.domain.models.Store;
+import com.laconic.lacoinvoice.domain.repositories.ErpGlVoucherRepository;
 import com.laconic.lacoinvoice.domain.repositories.InvoiceItemRepository;
 import com.laconic.lacoinvoice.domain.repositories.InvoiceOrderRepository;
 import com.laconic.lacoinvoice.domain.repositories.InvoiceRepository;
@@ -49,6 +52,9 @@ import com.laconic.lacoinvoice.features.invoice.dto.InvoiceItemLineDto;
 import com.laconic.lacoinvoice.features.invoice.dto.InvoiceOrderSummaryDto;
 import com.laconic.lacoinvoice.features.invoice.dto.InvoicePaymentSummaryDto;
 import com.laconic.lacoinvoice.features.invoice.dto.InvoicePreviewDto;
+import com.laconic.lacoinvoice.features.invoice.dto.ManualInvoiceLineDto;
+import com.laconic.lacoinvoice.features.invoice.dto.ManualInvoicePreviewDto;
+import com.laconic.lacoinvoice.features.invoice.dto.ManualInvoiceRequest;
 import com.laconic.lacoinvoice.features.invoice.pageable.InvoicePageRequest;
 
 @Service
@@ -64,7 +70,8 @@ public class InvoiceService {
 			"marketplaceCode", "marketplace.code",
 			"invoiceNumber", "invoiceNumber",
 			"title", "title",
-			"status", "status");
+			"status", "status",
+			"sourceType", "sourceType");
 
 	private final InvoiceRepository invoiceRepository;
 	private final InvoiceOrderRepository invoiceOrderRepository;
@@ -74,6 +81,7 @@ public class InvoiceService {
 	private final OrderInputRunRepository orderInputRunRepository;
 	private final StoreRepository storeRepository;
 	private final MarketplaceRepository marketplaceRepository;
+	private final ErpGlVoucherRepository voucherRepository;
 	private final InvoiceMapper mapper;
 
 	public InvoiceService(
@@ -85,6 +93,7 @@ public class InvoiceService {
 			OrderInputRunRepository orderInputRunRepository,
 			StoreRepository storeRepository,
 			MarketplaceRepository marketplaceRepository,
+			ErpGlVoucherRepository voucherRepository,
 			InvoiceMapper mapper) {
 		this.invoiceRepository = invoiceRepository;
 		this.invoiceOrderRepository = invoiceOrderRepository;
@@ -94,6 +103,7 @@ public class InvoiceService {
 		this.orderInputRunRepository = orderInputRunRepository;
 		this.storeRepository = storeRepository;
 		this.marketplaceRepository = marketplaceRepository;
+		this.voucherRepository = voucherRepository;
 		this.mapper = mapper;
 	}
 
@@ -207,6 +217,7 @@ public class InvoiceService {
 		invoice.setOrderInputRun(billable.orderInputRun());
 		invoice.setInvoiceNumber(invoiceNumber);
 		invoice.setTitle(request.getTitle().trim());
+		invoice.setSourceType(InvoiceSourceType.ORDERS);
 		invoice.setStatus(InvoiceStatus.ISSUED);
 		invoice.setStartDate(request.getStartDate());
 		invoice.setEndDate(request.getEndDate());
@@ -250,6 +261,15 @@ public class InvoiceService {
 	@PreAuthorize("@authz.isOwnerOrAdmin()")
 	public InvoiceDto updateStatus(Long id, InvoiceStatus status) {
 		Invoice invoice = requireInvoice(id);
+		if (invoice.getSourceType() == InvoiceSourceType.MANUAL && status == InvoiceStatus.ISSUED) {
+			if (invoiceItemRepository.countByInvoice_Id(id) == 0) {
+				throw new BusinessRuleException("A manual invoice must have at least one line before it can be issued.");
+			}
+			if (nonNull(invoice.getGrandTotal()).signum() == 0) {
+				throw new BusinessRuleException("A manual invoice total must be nonzero before it can be issued.");
+			}
+			invoice.setIssuedAt(Instant.now());
+		}
 		invoice.setStatus(status);
 		invoice.setPaidAt(status == InvoiceStatus.PAID ? Instant.now() : null);
 		return mapper.toDto(invoiceRepository.save(invoice));
@@ -260,6 +280,9 @@ public class InvoiceService {
 	@PreAuthorize("@authz.isOwnerOrAdmin()")
 	public void delete(Long id) {
 		Invoice invoice = requireInvoice(id);
+		if (voucherRepository.existsByInvoice_Id(id)) {
+			throw new BusinessRuleException("Invoice cannot be deleted because it is linked to a voucher.");
+		}
 		invoiceItemRepository.findByInvoice_IdOrderByOrderDateAscIdAsc(id).forEach(item -> {
 			item.delete();
 			invoiceItemRepository.save(item);
@@ -270,6 +293,134 @@ public class InvoiceService {
 		});
 		invoice.delete();
 		invoiceRepository.save(invoice);
+	}
+
+	@Loggable
+	@Transactional(readOnly = true)
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	public ManualInvoicePreviewDto previewManual(ManualInvoiceRequest request) {
+		validateManualHeader(request);
+		return ManualInvoiceCalculator.calculate(request);
+	}
+
+	@Loggable
+	@Transactional
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	public InvoiceDto createManual(ManualInvoiceRequest request) {
+		validateManualHeader(request);
+		String invoiceNumber = resolveUniqueInvoiceNumber(request.getInvoiceNumber(), null);
+		Store store = requireStore(request.getStoreId());
+		Marketplace marketplace = requireMarketplace(request.getMarketplaceCode());
+		ManualInvoicePreviewDto preview = ManualInvoiceCalculator.calculate(request);
+
+		Invoice invoice = new Invoice();
+		applyManualRequest(invoice, request, preview, store, marketplace, invoiceNumber);
+		Invoice saved = invoiceRepository.save(invoice);
+		persistManualLines(saved, preview.lines());
+		return mapper.toDto(saved);
+	}
+
+	@Loggable
+	@Transactional
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	public InvoiceDto updateManual(Long id, ManualInvoiceRequest request) {
+		validateManualHeader(request);
+		Invoice invoice = requireInvoice(id);
+		if (invoice.getSourceType() != InvoiceSourceType.MANUAL) {
+			throw new BusinessRuleException("Only manual invoices can be updated through this endpoint.");
+		}
+		if (invoice.getStatus() != InvoiceStatus.DRAFT) {
+			throw new BusinessRuleException("Only DRAFT manual invoices can be updated.");
+		}
+
+		String invoiceNumber = resolveUniqueInvoiceNumber(request.getInvoiceNumber(), id);
+		Store store = requireStore(request.getStoreId());
+		Marketplace marketplace = requireMarketplace(request.getMarketplaceCode());
+		ManualInvoicePreviewDto preview = ManualInvoiceCalculator.calculate(request);
+		applyManualRequest(invoice, request, preview, store, marketplace, invoiceNumber);
+
+		invoiceItemRepository.findByInvoice_IdOrderByOrderDateAscIdAsc(id).forEach(item -> {
+			item.delete();
+			invoiceItemRepository.save(item);
+		});
+		persistManualLines(invoice, preview.lines());
+		return mapper.toDto(invoiceRepository.save(invoice));
+	}
+
+	private void validateManualHeader(ManualInvoiceRequest request) {
+		if (request.getEndDate().isBefore(request.getStartDate())) {
+			throw new IllegalArgumentException("End date cannot be before start date.");
+		}
+	}
+
+	private void applyManualRequest(
+			Invoice invoice,
+			ManualInvoiceRequest request,
+			ManualInvoicePreviewDto preview,
+			Store store,
+			Marketplace marketplace,
+			String invoiceNumber) {
+		invoice.setStore(store);
+		invoice.setMarketplace(marketplace);
+		invoice.setOrderInputRun(null);
+		invoice.setInvoiceNumber(invoiceNumber);
+		invoice.setTitle(request.getTitle().trim());
+		invoice.setSourceType(InvoiceSourceType.MANUAL);
+		invoice.setStatus(InvoiceStatus.DRAFT);
+		invoice.setStartDate(request.getStartDate());
+		invoice.setEndDate(request.getEndDate());
+		invoice.setOrderCount(0);
+		invoice.setItemCount(preview.itemCount());
+		invoice.setSubtotal(preview.subtotal());
+		invoice.setVatRate(preview.vatRate());
+		invoice.setVatAmount(preview.vatAmount());
+		invoice.setGrandTotal(preview.grandTotal());
+		invoice.setCurrency(preview.currency());
+		invoice.setBuyerName(trimToNull(request.getBuyerName()));
+		invoice.setBuyerTaxId(trimToNull(request.getBuyerTaxId()));
+		invoice.setBuyerAddress(trimToNull(request.getBuyerAddress()));
+		invoice.setNotes(trimToNull(request.getNotes()));
+		invoice.setIssuedAt(null);
+		invoice.setPaidAt(null);
+	}
+
+	private void persistManualLines(Invoice invoice, List<ManualInvoiceLineDto> lines) {
+		for (ManualInvoiceLineDto source : lines) {
+			InvoiceItem item = new InvoiceItem();
+			item.setInvoice(invoice);
+			item.setOrder(null);
+			item.setSellerSku(source.sku());
+			item.setProductName(source.productName());
+			item.setVariation(source.description());
+			item.setQuantity(source.quantity());
+			item.setUnitPrice(source.unitPrice());
+			item.setSubtotal(source.subtotal());
+			item.setDiscount(source.discount());
+			item.setTotalAmount(source.totalAmount());
+			invoiceItemRepository.save(item);
+		}
+	}
+
+	private String resolveUniqueInvoiceNumber(String requested, Long excludeId) {
+		String invoiceNumber = StringUtils.hasText(requested) ? requested.trim() : generateNextNumber();
+		boolean exists = excludeId == null
+				? invoiceRepository.existsByInvoiceNumberIgnoreCase(invoiceNumber)
+				: invoiceRepository.existsByInvoiceNumberIgnoreCaseAndIdNot(invoiceNumber, excludeId);
+		if (exists) {
+			throw new IllegalArgumentException(
+					"Invoice number \"" + invoiceNumber + "\" already exists. Please choose a unique number.");
+		}
+		return invoiceNumber;
+	}
+
+	private Store requireStore(Long id) {
+		return storeRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Store not found: id=" + id));
+	}
+
+	private Marketplace requireMarketplace(String code) {
+		return marketplaceRepository.findByCodeIgnoreCase(code.trim())
+				.orElseThrow(() -> new ResourceNotFoundException("Marketplace not found: code=" + code));
 	}
 
 	private void persistSnapshots(Invoice invoice, BillableOrders billable, BigDecimal vatRate) {
@@ -474,6 +625,14 @@ public class InvoiceService {
 
 	private static BigDecimal nonNull(BigDecimal value) {
 		return value == null ? BigDecimal.ZERO : value;
+	}
+
+	private static BigDecimal money(BigDecimal value) {
+		return nonNull(value).setScale(2, RoundingMode.HALF_UP);
+	}
+
+	private static String trimToNull(String value) {
+		return StringUtils.hasText(value) ? value.trim() : null;
 	}
 
 	private static Instant startOfDay(LocalDate date) {

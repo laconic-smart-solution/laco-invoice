@@ -12,6 +12,10 @@ public interface ErpGlVoucherRepository extends BaseRepository<ErpGlVoucher> {
 
 	List<ErpGlVoucher> findByInvoice_IdOrderByIdDesc(Long invoiceId);
 
+	boolean existsByInvoice_Id(Long invoiceId);
+
+	boolean existsByInvoice_IdAndIdNot(Long invoiceId, Long id);
+
 	List<ErpGlVoucher> findByOrderInputRun_IdOrderByIdDesc(Long orderInputRunId);
 
 	List<ErpGlVoucher> findByVoucherNumberStartingWithIgnoreCase(String prefix);

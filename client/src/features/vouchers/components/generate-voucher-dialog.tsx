@@ -44,6 +44,8 @@ import {
   useUpdateVoucherMutation,
   useVoucherDetailQuery,
   useVoucherPreviewMutation,
+  useVoucherPreviewFromInvoiceMutation,
+  useVouchersByInvoiceQuery,
   useVouchersByOrderInputRunQuery,
 } from "@/features/vouchers/queries/voucher.query"
 import {
@@ -60,6 +62,7 @@ import {
   VOUCHER_CATEGORIES,
   type ErpLookupRecord,
   type Voucher,
+  type VoucherPreviewDto,
 } from "@/features/vouchers/types/voucher"
 import { extractApiErrorMessage } from "@/shared/api/extract-api-error-message"
 import { useOrderInputRunsPageQuery } from "@/shared/queries/order-input-run.query"
@@ -70,6 +73,7 @@ interface GenerateVoucherDialogProps {
   onOpenChange: (open: boolean) => void
   voucherId?: number | null
   defaultOrderInputRunId?: number | null
+  defaultInvoiceId?: number | null
   embedded?: boolean
   onGenerated?: (voucher: Voucher) => void
 }
@@ -90,7 +94,11 @@ function GenerateVoucherDialogShell({
   children,
 }: GenerateVoucherDialogShellProps) {
   if (embedded) {
-    return <>{children}</>
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        {children}
+      </Dialog>
+    )
   }
 
   return (
@@ -129,9 +137,14 @@ function parseAccountId(val: string | number | undefined | null): number {
   return Number(clean) || 0
 }
 
-function toGenerateRequest(values: GenerateVoucherFormValues) {
+function toGenerateRequest(
+  values: GenerateVoucherFormValues,
+  allowDuplicate = false
+) {
   return {
     orderInputRunId: values.orderInputRunId ? Number(values.orderInputRunId) : null,
+    invoiceId: values.invoiceId ? Number(values.invoiceId) : null,
+    allowDuplicate,
     storeId: values.storeId ? Number(values.storeId) : null,
     voucherCategory: values.voucherCategory,
     voucherDate: values.voucherDate,
@@ -166,6 +179,7 @@ export function GenerateVoucherDialog({
   onOpenChange,
   voucherId = null,
   defaultOrderInputRunId = null,
+  defaultInvoiceId = null,
   embedded = false,
   onGenerated,
 }: GenerateVoucherDialogProps) {
@@ -189,6 +203,7 @@ export function GenerateVoucherDialog({
   const generateMutation = useGenerateVoucherMutation()
   const updateMutation = useUpdateVoucherMutation()
   const previewMutation = useVoucherPreviewMutation()
+  const invoicePreviewMutation = useVoucherPreviewFromInvoiceMutation()
   const saveMutation = isEdit ? updateMutation : generateMutation
   const [duplicateConfirmOpen, setDuplicateConfirmOpen] = useState(false)
   const [pendingGenerateValues, setPendingGenerateValues] =
@@ -213,7 +228,10 @@ export function GenerateVoucherDialog({
 
   const form = useForm<GenerateVoucherFormValues>({
     resolver: zodResolver(schema),
-    defaultValues: defaultGenerateVoucherValues(defaultOrderInputRunId),
+    defaultValues: defaultGenerateVoucherValues(
+      defaultOrderInputRunId,
+      defaultInvoiceId
+    ),
   })
 
   const selectedItemId = form.watch("externalErpItemId")
@@ -232,6 +250,11 @@ export function GenerateVoucherDialog({
     open && !isEdit ? selectedRunIdNumber : null
   )
   const existingVouchersForRun = existingVouchersQuery.data ?? []
+  const existingVouchersForInvoiceQuery = useVouchersByInvoiceQuery(
+    open && !isEdit ? defaultInvoiceId : null
+  )
+  const existingVouchersForInvoice =
+    existingVouchersForInvoiceQuery.data ?? []
 
   const selectedRun = useMemo(
     () =>
@@ -297,6 +320,77 @@ export function GenerateVoucherDialog({
     return opts
   }, [financeAccounts])
 
+  const applyVoucherPreview = (preview: VoucherPreviewDto) => {
+    if (preview.storeId != null) form.setValue("storeId", String(preview.storeId))
+    if (preview.voucherCategory && !form.getFieldState("voucherCategory").isDirty) {
+      form.setValue("voucherCategory", preview.voucherCategory)
+    }
+    if (preview.voucherDate) form.setValue("voucherDate", preview.voucherDate)
+    if (preview.taxMonth) form.setValue("taxMonth", toMonthValue(preview.taxMonth))
+    if (preview.whtMonth) form.setValue("whtMonth", toMonthValue(preview.whtMonth))
+    if (preview.voucherBrief) form.setValue("voucherBrief", preview.voucherBrief)
+    if (preview.voucherDescription) {
+      form.setValue("voucherDescription", preview.voucherDescription)
+    }
+    if (preview.noTaxInvoice != null) {
+      form.setValue("noTaxInvoice", preview.noTaxInvoice)
+    }
+    if (preview.externalErpItemId != null) {
+      form.setValue("externalErpItemId", String(preview.externalErpItemId))
+    }
+    if (preview.externalErpAccountCodeId != null) {
+      form.setValue(
+        "externalErpAccountCodeId",
+        String(preview.externalErpAccountCodeId)
+      )
+    }
+    if (preview.externalErpVendorId != null) {
+      form.setValue("externalErpVendorId", String(preview.externalErpVendorId))
+    }
+    if (preview.externalErpDepartmentId != null) {
+      form.setValue(
+        "externalErpDepartmentId",
+        String(preview.externalErpDepartmentId)
+      )
+    }
+    if (preview.externalErpCurrencyId != null) {
+      form.setValue(
+        "externalErpCurrencyId",
+        String(preview.externalErpCurrencyId)
+      )
+    }
+    if (preview.entries?.length) {
+      form.setValue(
+        "entries",
+        preview.entries.map((entry) => ({
+          externalErpAccountCodeId: String(entry.externalErpAccountCodeId),
+          debit: entry.debit ? String(entry.debit) : "",
+          credit: entry.credit ? String(entry.credit) : "",
+          invoiceNo: entry.invoiceNo ?? "",
+          invoiceDate: entry.invoiceDate ?? "",
+          externalErpDepartmentId: String(
+            entry.externalErpDepartmentId ?? DEFAULT_ERP_DEPARTMENT_ID
+          ),
+          exchangeRate: String(entry.exchangeRate ?? 1),
+          externalErpCurrencyId: String(
+            entry.externalErpCurrencyId ?? DEFAULT_ERP_CURRENCY_ID
+          ),
+        }))
+      )
+    }
+  }
+
+  const handleApplyInvoicePreview = (invoiceId: number) => {
+    invoicePreviewMutation.mutate(
+      {
+        invoiceId,
+        externalErpItemId: selectedItemId ? Number(selectedItemId) : undefined,
+        noTaxInvoice: form.getValues("noTaxInvoice"),
+      },
+      { onSuccess: applyVoucherPreview }
+    )
+  }
+
   const handleApplyPreview = (
     runId: number,
     itemId?: number | null,
@@ -315,78 +409,7 @@ export function GenerateVoucherDialog({
         noTaxInvoice: noTax !== undefined ? noTax : form.getValues("noTaxInvoice"),
       },
       {
-        onSuccess: (preview) => {
-          if (preview.storeId != null) {
-            form.setValue("storeId", String(preview.storeId))
-          }
-          if (preview.voucherCategory && !form.getFieldState("voucherCategory").isDirty) {
-            form.setValue("voucherCategory", preview.voucherCategory)
-          }
-          if (preview.voucherDate) {
-            form.setValue("voucherDate", preview.voucherDate)
-          }
-          if (preview.taxMonth) {
-            form.setValue("taxMonth", toMonthValue(preview.taxMonth))
-          }
-          if (preview.whtMonth) {
-            form.setValue("whtMonth", toMonthValue(preview.whtMonth))
-          }
-          if (preview.voucherBrief) {
-            form.setValue("voucherBrief", preview.voucherBrief)
-          }
-          if (preview.voucherDescription) {
-            form.setValue("voucherDescription", preview.voucherDescription)
-          }
-          if (preview.noTaxInvoice != null) {
-            form.setValue("noTaxInvoice", preview.noTaxInvoice)
-          }
-          if (preview.externalErpItemId != null) {
-            form.setValue("externalErpItemId", String(preview.externalErpItemId))
-          }
-          if (preview.externalErpAccountCodeId != null) {
-            form.setValue(
-              "externalErpAccountCodeId",
-              String(preview.externalErpAccountCodeId)
-            )
-          }
-          if (preview.externalErpVendorId != null) {
-            form.setValue(
-              "externalErpVendorId",
-              String(preview.externalErpVendorId)
-            )
-          }
-          if (preview.externalErpDepartmentId != null) {
-            form.setValue(
-              "externalErpDepartmentId",
-              String(preview.externalErpDepartmentId)
-            )
-          }
-          if (preview.externalErpCurrencyId != null) {
-            form.setValue(
-              "externalErpCurrencyId",
-              String(preview.externalErpCurrencyId)
-            )
-          }
-          if (preview.entries && preview.entries.length > 0) {
-            form.setValue(
-              "entries",
-              preview.entries.map((entry) => ({
-                externalErpAccountCodeId: String(entry.externalErpAccountCodeId),
-                debit: entry.debit ? String(entry.debit) : "",
-                credit: entry.credit ? String(entry.credit) : "",
-                invoiceNo: entry.invoiceNo ?? "",
-                invoiceDate: entry.invoiceDate ?? "",
-                externalErpDepartmentId: String(
-                  entry.externalErpDepartmentId ?? DEFAULT_ERP_DEPARTMENT_ID
-                ),
-                exchangeRate: String(entry.exchangeRate ?? 1),
-                externalErpCurrencyId: String(
-                  entry.externalErpCurrencyId ?? DEFAULT_ERP_CURRENCY_ID
-                ),
-              }))
-            )
-          }
-        },
+        onSuccess: applyVoucherPreview,
       }
     )
   }
@@ -400,6 +423,7 @@ export function GenerateVoucherDialog({
     generateMutation.reset()
     updateMutation.reset()
     previewMutation.reset()
+    invoicePreviewMutation.reset()
     prevFinanceValueRef.current = ""
     prevNoTaxRef.current = false
     setDuplicateConfirmOpen(false)
@@ -410,13 +434,23 @@ export function GenerateVoucherDialog({
       }
       return
     }
-    form.reset(defaultGenerateVoucherValues(defaultOrderInputRunId))
-    if (defaultOrderInputRunId) {
+    form.reset(
+      defaultGenerateVoucherValues(defaultOrderInputRunId, defaultInvoiceId)
+    )
+    if (defaultInvoiceId) {
+      handleApplyInvoicePreview(defaultInvoiceId)
+    } else if (defaultOrderInputRunId) {
       handleApplyPreview(defaultOrderInputRunId)
     }
     // Reset only when the dialog opens or the edited voucher loads.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, isEdit, voucherQuery.data, defaultOrderInputRunId])
+  }, [
+    open,
+    isEdit,
+    voucherQuery.data,
+    defaultOrderInputRunId,
+    defaultInvoiceId,
+  ])
 
   useEffect(() => {
     if (isEdit || !open) {
@@ -427,7 +461,10 @@ export function GenerateVoucherDialog({
     prevNoTaxRef.current = noTaxInvoiceValue
 
     const runId = form.getValues("orderInputRunId")
-    if (runId) {
+    const invoiceId = form.getValues("invoiceId")
+    if (invoiceId) {
+      handleApplyInvoicePreview(Number(invoiceId))
+    } else if (runId) {
       handleApplyPreview(
         Number(runId),
         selectedItemId ? Number(selectedItemId) : null,
@@ -451,7 +488,20 @@ export function GenerateVoucherDialog({
     form.setValue("tradingPartnerTypeId", String(selected.partnerTypeId))
 
     const runId = form.getValues("orderInputRunId")
-    if (runId) {
+    const invoiceId = form.getValues("invoiceId")
+    if (invoiceId) {
+      invoicePreviewMutation.mutate(
+        {
+          invoiceId: Number(invoiceId),
+          externalErpItemId: selectedItemId ? Number(selectedItemId) : undefined,
+          tradingPartnerTypeId: selected.partnerTypeId,
+          debitAccountId: selected.debitAccountId,
+          creditAccountId: selected.creditAccountId,
+          noTaxInvoice: form.getValues("noTaxInvoice"),
+        },
+        { onSuccess: applyVoucherPreview }
+      )
+    } else if (runId) {
       handleApplyPreview(
         Number(runId),
         selectedItemId ? Number(selectedItemId) : null,
@@ -520,8 +570,13 @@ export function GenerateVoucherDialog({
     label: t(`category.${category}`),
   }))
 
-  const submitGenerate = async (values: GenerateVoucherFormValues) => {
-    const created = await generateMutation.mutateAsync(toGenerateRequest(values))
+  const submitGenerate = async (
+    values: GenerateVoucherFormValues,
+    allowDuplicate = false
+  ) => {
+    const created = await generateMutation.mutateAsync(
+      toGenerateRequest(values, allowDuplicate)
+    )
     setDuplicateConfirmOpen(false)
     setPendingGenerateValues(null)
     onOpenChange(false)
@@ -548,8 +603,13 @@ export function GenerateVoucherDialog({
       return
     }
 
-    let existing = existingVouchersForRun
-    if (selectedRunIdNumber) {
+    let existing = defaultInvoiceId
+      ? existingVouchersForInvoice
+      : existingVouchersForRun
+    if (defaultInvoiceId) {
+      const refreshed = await existingVouchersForInvoiceQuery.refetch()
+      existing = refreshed.data ?? []
+    } else if (selectedRunIdNumber) {
       const refreshed = await existingVouchersQuery.refetch()
       existing = refreshed.data ?? []
     }
@@ -562,7 +622,9 @@ export function GenerateVoucherDialog({
     await submitGenerate(values)
   }
 
-  const existingVoucherNumbers = existingVouchersForRun
+  const existingVoucherNumbers = (
+    defaultInvoiceId ? existingVouchersForInvoice : existingVouchersForRun
+  )
     .map((voucher) => voucher.voucherNumber)
     .filter((number): number is string => Boolean(number?.trim()))
     .join(", ")
@@ -646,7 +708,7 @@ export function GenerateVoucherDialog({
                 <p className="text-sm text-muted-foreground">{t("loading")}</p>
               ) : null}
 
-              {!isEdit && (
+              {!isEdit && !defaultInvoiceId && (
                 <div className="rounded-none border border-border/80 bg-muted/20 p-4 space-y-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
@@ -749,7 +811,7 @@ export function GenerateVoucherDialog({
                 </div>
               )}
 
-              {isEdit ? voucherSummaryFields : null}
+              {isEdit || defaultInvoiceId ? voucherSummaryFields : null}
 
               <div className="grid gap-4 md:grid-cols-3">
                 <FormTextInput
@@ -804,7 +866,10 @@ export function GenerateVoucherDialog({
                   required
                   onChange={(value) => {
                     const runId = form.getValues("orderInputRunId")
-                    if (runId && value) {
+                    const invoiceId = form.getValues("invoiceId")
+                    if (invoiceId && value) {
+                      handleApplyInvoicePreview(Number(invoiceId))
+                    } else if (runId && value) {
                       handleApplyPreview(Number(runId), Number(value))
                     }
                   }}
@@ -903,22 +968,37 @@ export function GenerateVoucherDialog({
             setPendingGenerateValues(null)
           }
         }}
-        title={t("duplicate_order_set.title")}
+        title={
+          defaultInvoiceId
+            ? t("duplicate_invoice.title")
+            : t("duplicate_order_set.title")
+        }
         description={
           existingVoucherNumbers
-            ? t("duplicate_order_set.description_with_numbers", {
-                numbers: existingVoucherNumbers,
-              })
-            : t("duplicate_order_set.description")
+            ? t(
+                defaultInvoiceId
+                  ? "duplicate_invoice.description_with_numbers"
+                  : "duplicate_order_set.description_with_numbers",
+                { numbers: existingVoucherNumbers }
+              )
+            : t(
+                defaultInvoiceId
+                  ? "duplicate_invoice.description"
+                  : "duplicate_order_set.description"
+              )
         }
-        confirmLabel={t("duplicate_order_set.confirm")}
+        confirmLabel={
+          defaultInvoiceId
+            ? t("duplicate_invoice.confirm")
+            : t("duplicate_order_set.confirm")
+        }
         cancelLabel={t("form.cancel")}
         isLoading={generateMutation.isPending}
         onConfirm={async () => {
           if (!pendingGenerateValues) {
             return
           }
-          await submitGenerate(pendingGenerateValues)
+          await submitGenerate(pendingGenerateValues, true)
         }}
       />
     </>

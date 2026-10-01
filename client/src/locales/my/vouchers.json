@@ -123,6 +123,12 @@
     "description_with_numbers": "ဤ Order Data Input အတွက် voucher တစ်ခု ဖန်တီးပြီးသားဖြစ်သည် ({{numbers}})။ ထပ်ဖန်တီးပါက တူညီသော set အတွက် voucher အသစ် ထပ်တိုးမည်။ ဆက်လက်လုပ်ဆောင်မည်မှာ သေချာပါသလား?",
     "confirm": "ဆက်လက် ဖန်တီးမည်"
   },
+  "duplicate_invoice": {
+    "title": "ဤ invoice အတွက် voucher ရှိပြီးသားဖြစ်သည်",
+    "description": "ဤ invoice အတွက် voucher တစ်ခု ဖန်တီးပြီးသားဖြစ်သည်။ ထပ်ဖန်တီးပါက တူညီသော invoice အတွက် voucher အသစ် ထပ်တိုးမည်။ ဆက်လက်လုပ်ဆောင်မည်မှာ သေချာပါသလား?",
+    "description_with_numbers": "ဤ invoice အတွက် voucher တစ်ခု ဖန်တီးပြီးသားဖြစ်သည် ({{numbers}})။ ထပ်ဖန်တီးပါက တူညီသော invoice အတွက် voucher အသစ် ထပ်တိုးမည်။ ဆက်လက်လုပ်ဆောင်မည်မှာ သေချာပါသလား?",
+    "confirm": "ဆက်လက် ဖန်တီးမည်"
+  },
   "export": {
     "button": "ထုတ်ယူရန်",
     "excel": "Excel ထုတ်ယူရန် (.xlsx)",

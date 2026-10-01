@@ -85,6 +85,7 @@ export function createGenerateVoucherSchema(messages: {
       noTaxInvoice: z.boolean(),
       rejectRemark: z.string().optional(),
       storeId: z.string().optional(),
+      invoiceId: z.string().optional(),
       orderInputRunId: z.string().optional(),
       tradingPartnerTypeId: z.string().optional(),
       selectedFinanceAccountId: z.string().optional(),
@@ -145,6 +146,7 @@ export function voucherToFormValues(
     noTaxInvoice: voucher.noTaxInvoice === true,
     rejectRemark: voucher.rejectRemark ?? "",
     storeId: voucher.storeId != null ? String(voucher.storeId) : "",
+    invoiceId: voucher.invoiceId != null ? String(voucher.invoiceId) : "",
     orderInputRunId:
       voucher.orderInputRunId != null ? String(voucher.orderInputRunId) : "",
     tradingPartnerTypeId: "",
@@ -189,7 +191,8 @@ export function voucherToFormValues(
 }
 
 export function defaultGenerateVoucherValues(
-  defaultOrderInputRunId?: number | null
+  defaultOrderInputRunId?: number | null,
+  defaultInvoiceId?: number | null
 ): GenerateVoucherFormValues {
   return {
     voucherCategory: "JV",
@@ -201,6 +204,7 @@ export function defaultGenerateVoucherValues(
     noTaxInvoice: false,
     rejectRemark: "",
     storeId: "",
+    invoiceId: defaultInvoiceId != null ? String(defaultInvoiceId) : "",
     orderInputRunId:
       defaultOrderInputRunId != null ? String(defaultOrderInputRunId) : "",
     tradingPartnerTypeId: "",

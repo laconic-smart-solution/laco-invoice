@@ -352,6 +352,7 @@ export function createMockInvoice(request: CreateInvoiceRequest): Invoice {
     storeName: store.name,
     marketplaceId: marketplaceIdFor(request.marketplaceCode),
     marketplaceCode: request.marketplaceCode,
+    sourceType: "ORDERS",
     status: "ISSUED",
     startDate: request.startDate,
     endDate: request.endDate,

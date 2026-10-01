@@ -22,6 +22,8 @@ import com.laconic.lacoinvoice.features.invoice.dto.InvoiceNumberUpdateRequest;
 import com.laconic.lacoinvoice.features.invoice.dto.InvoicePaymentSummaryDto;
 import com.laconic.lacoinvoice.features.invoice.dto.InvoicePreviewDto;
 import com.laconic.lacoinvoice.features.invoice.dto.InvoiceStatusUpdateRequest;
+import com.laconic.lacoinvoice.features.invoice.dto.ManualInvoicePreviewDto;
+import com.laconic.lacoinvoice.features.invoice.dto.ManualInvoiceRequest;
 import com.laconic.lacoinvoice.features.invoice.pageable.InvoicePageRequest;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -71,6 +73,19 @@ public class InvoiceController {
 		return ApiResponse.ok("Created", service.create(request));
 	}
 
+	@PostMapping("/manual/preview")
+	@Operation(summary = "Preview server-calculated totals for a manual invoice")
+	public ApiResponse<ManualInvoicePreviewDto> previewManual(
+			@RequestBody @Valid ManualInvoiceRequest request) {
+		return ApiResponse.ok("OK", service.previewManual(request));
+	}
+
+	@PostMapping("/manual")
+	@Operation(summary = "Create a manual invoice in DRAFT status")
+	public ApiResponse<InvoiceDto> createManual(@RequestBody @Valid ManualInvoiceRequest request) {
+		return ApiResponse.ok("Created", service.createManual(request));
+	}
+
 	@GetMapping("/{id}")
 	@Operation(summary = "Get invoice detail with billed orders, line items and payment summary")
 	public ApiResponse<InvoiceDetailDto> getById(@PathVariable Long id) {
@@ -89,6 +104,14 @@ public class InvoiceController {
 			@PathVariable Long id,
 			@RequestBody @Valid InvoiceNumberUpdateRequest request) {
 		return ApiResponse.ok("Updated", service.updateNumber(id, request.getInvoiceNumber()));
+	}
+
+	@PutMapping("/{id}/manual")
+	@Operation(summary = "Update a manual invoice while it is in DRAFT status")
+	public ApiResponse<InvoiceDto> updateManual(
+			@PathVariable Long id,
+			@RequestBody @Valid ManualInvoiceRequest request) {
+		return ApiResponse.ok("Updated", service.updateManual(id, request));
 	}
 
 	@PatchMapping("/{id}/status")

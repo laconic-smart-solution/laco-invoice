@@ -78,6 +78,7 @@ export interface VoucherEntryInput {
 export interface GenerateVoucherRequest {
   storeId?: number | null
   invoiceId?: number | null
+  allowDuplicate?: boolean
   orderInputRunId?: number | null
   voucherCategory: VoucherCategory
   voucherDate: string
@@ -126,6 +127,11 @@ export interface VoucherPreviewRequest {
   externalErpDepartmentId?: number | null
   externalErpCurrencyId?: number | null
   noTaxInvoice?: boolean
+}
+
+export interface VoucherPreviewFromInvoiceRequest
+  extends Omit<VoucherPreviewRequest, "orderInputRunId"> {
+  invoiceId: number
 }
 
 export interface VoucherPreviewDto {

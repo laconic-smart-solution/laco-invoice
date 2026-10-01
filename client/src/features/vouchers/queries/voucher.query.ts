@@ -5,7 +5,9 @@ import type {
   VoucherExportRequest,
   VoucherPageRequest,
   VoucherPreviewRequest,
+  VoucherPreviewFromInvoiceRequest,
 } from "@/features/vouchers/types/voucher"
+import { invoiceKeys } from "@/features/invoices/queries/invoice.query"
 import { orderInputRunKeys } from "@/shared/queries/order-input-run.query"
 import { voucherService } from "@/shared/services/voucher.service"
 
@@ -16,6 +18,8 @@ export const voucherKeys = {
     [...voucherKeys.lists(), request] as const,
   byOrderInputRun: (runId: number) =>
     [...voucherKeys.all, "by-order-input-run", runId] as const,
+  byInvoice: (invoiceId: number) =>
+    [...voucherKeys.all, "by-invoice", invoiceId] as const,
   details: () => [...voucherKeys.all, "detail"] as const,
   detail: (id: number) => [...voucherKeys.details(), id] as const,
 }
@@ -52,10 +56,26 @@ export function useVouchersByOrderInputRunQuery(runId: number | null) {
   })
 }
 
+export function useVouchersByInvoiceQuery(invoiceId: number | null) {
+  return useQuery({
+    queryKey: voucherKeys.byInvoice(invoiceId ?? 0),
+    queryFn: () => voucherService.getByInvoice(invoiceId as number),
+    enabled: invoiceId != null && invoiceId > 0,
+    staleTime: 30_000,
+  })
+}
+
 export function useVoucherPreviewMutation() {
   return useMutation({
     mutationFn: (request: VoucherPreviewRequest) =>
       voucherService.previewFromOrderInput(request),
+  })
+}
+
+export function useVoucherPreviewFromInvoiceMutation() {
+  return useMutation({
+    mutationFn: (request: VoucherPreviewFromInvoiceRequest) =>
+      voucherService.previewFromInvoice(request),
   })
 }
 
@@ -67,6 +87,7 @@ export function useGenerateVoucherMutation() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: voucherKeys.all })
       void queryClient.invalidateQueries({ queryKey: orderInputRunKeys.all })
+      void queryClient.invalidateQueries({ queryKey: invoiceKeys.all })
     },
   })
 }

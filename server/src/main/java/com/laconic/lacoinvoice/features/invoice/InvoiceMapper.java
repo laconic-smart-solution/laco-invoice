@@ -29,6 +29,7 @@ public class InvoiceMapper implements BaseMapper<Invoice, InvoiceDto> {
 				entity.getStore() != null ? entity.getStore().getName() : null,
 				entity.getMarketplace() != null ? entity.getMarketplace().getId() : null,
 				entity.getMarketplace() != null ? entity.getMarketplace().getCode() : null,
+				entity.getSourceType(),
 				entity.getStatus(),
 				entity.getStartDate(),
 				entity.getEndDate(),

@@ -11,4 +11,6 @@ import com.laconic.lacoinvoice.domain.models.InvoiceItem;
 public interface InvoiceItemRepository extends BaseRepository<InvoiceItem> {
 
 	List<InvoiceItem> findByInvoice_IdOrderByOrderDateAscIdAsc(Long invoiceId);
+
+	long countByInvoice_Id(Long invoiceId);
 }

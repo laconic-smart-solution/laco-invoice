@@ -15,6 +15,7 @@
   "settings": "Workspace ဆက်တင်များ",
   "compact": "Compact density",
   "show_inspector": "Context panel ပြရန်",
+  "hide_inspector": "Context panel ဝှက်ရန်",
   "show_queue": "Work queue ပြရန်",
   "hide_queue": "Work queue ဝှက်ရန်",
   "reset_layout": "Workspace layout ပြန်သတ်မှတ်ရန်",
@@ -123,10 +124,19 @@
     "continue_voucher": "Voucher သို့ ဆက်ရန်",
     "voucher_heading": "Voucher",
     "voucher_hint": "ထုတ်ပြီးသော ERP GL voucher အားလုံး။ အသေးစိတ်ကြည့်ရန် row တစ်ခုကို နှိပ်ပါ။",
+    "voucher_hint_all": "ထုတ်ပြီးသော ERP GL voucher အားလုံး။ စာရင်းကျဉ်းရန် set တစ်ခု ရွေးပါ။",
+    "voucher_hint_selected": "ဤ order set မှ ထုတ်ထားသော vouchers။",
     "no_voucher": "Voucher မထုတ်ရသေးပါ",
     "no_voucher_hint": "Match ပြီးပါပြီ။ ဤ set အတွက် ပထမ voucher ကို ထုတ်ပါ။",
+    "no_voucher_hint_all": "Order set တစ်ခုမှ voucher ထုတ်ပြီးနောက် ဤနေရာတွင် မြင်ရမည်။",
     "exports": "Exports",
     "exports_hint": "ထုတ်ပြီးသော vouchers ကို လိုအပ်သော ပုံစံဖြင့် ဒေါင်းပါ",
+    "exports_hint_all": "ဒေါင်းရန် အသင့်ဖြစ်သော voucher အားလုံး။ စာရင်းကျဉ်းရန် set တစ်ခု ရွေးပါ။",
+    "exports_hint_selected": "ဤ order set ၏ vouchers ကို ဒေါင်းပါ။",
+    "no_export": "Export လုပ်ရန် voucher မရှိသေး",
+    "no_export_hint": "ဤ set အတွက် voucher ကို ဦးစွာ ထုတ်ပြီး အပြီးသတ်ပါ။",
+    "no_export_hint_all": "ဒေါင်းရန် အသင့်ဖြစ်သော voucher မရှိသေးပါ။",
+    "current_all": "Order set အားလုံး",
     "orders_heading": "Orders",
     "orders_hint": "Store အားလုံးရှိ orders။ အသေးစိတ်ကြည့်ရန် row တစ်ခုကို နှိပ်ပါ။",
     "empty_run": "စတင်ရန် order set တစ်ခု ရွေးပါ။"
@@ -192,5 +202,167 @@
     "edit": "ပြင်ရန် · {{number}}",
     "export": "Export · {{number}}",
     "order_set": "#{{id}} · {{title}}"
+  },
+  "tabs": {
+    "label": "Invoice workflows",
+    "orders": "Order to Voucher",
+    "manual": "Manual Invoice"
+  },
+  "manual": {
+    "command_subtitle": "လွတ်လပ်သော invoice ဖန်တီးပြီး voucher ထုတ်ကာ export လုပ်ပါ",
+    "search_aria": "Manual invoices ရှာရန်",
+    "new_invoice": "Invoice အသစ်",
+    "stats": {
+      "label": "Manual invoice အရေအတွက်",
+      "total": "Invoices",
+      "draft": "မူကြမ်းများ",
+      "ready": "ထုတ်ရန် အသင့်",
+      "issued": "ထုတ်ပြီး",
+      "voucher": "Vouchers",
+      "export": "Export လုပ်ရန် အသင့်",
+      "invoice_value": "Invoice တန်ဖိုး",
+      "outstanding": "ကျန်ရှိသော တန်ဖိုး"
+    },
+    "pipeline": {
+      "label": "Manual invoice pipeline",
+      "draft": "မူကြမ်း invoice",
+      "draft_short": "Header နှင့် လိုင်းများ",
+      "draft_description": "ဝယ်သူအချက်အလက်နှင့် လွတ်လပ်သော လိုင်းများကို ဖြည့်ပါ။ စုစုပေါင်းကို ဆာဗာက တွက်သည်။",
+      "review": "ပြန်စစ်ပြီး ထုတ်မည်",
+      "review_short": "ပမာဏ အတည်ပြု",
+      "review_description": "သိမ်းပြီးသော invoice ကို စစ်ပြီး voucher မထုတ်မီ ထုတ်ပေးပါ။",
+      "voucher": "Voucher ပြန်စစ်ရန်",
+      "voucher_short": "Entry ပြင်ရန်",
+      "voucher_description": "ဤ invoice မှ balanced ERP entries ကို ကြည့်၊ ပြင်၊ ထုတ်ပါ။",
+      "export": "Export",
+      "export_short": "ဖိုင်ဒေါင်းရန်",
+      "export_description": "ချိတ်ထားသော voucher ကို Excel, CSV သို့မဟုတ် PDF အဖြစ် ဒေါင်းပါ။"
+    },
+    "queue": {
+      "label": "Manual invoices",
+      "title": "Manual invoices",
+      "count": "invoice {{filtered}} / {{total}} ခု",
+      "alerts": "အချက်ပေး {{count}} ခု",
+      "fetching": "Invoices ပြန်စစ်နေသည်…",
+      "select_invoice": "Invoice #{{id}} ရွေးရန်",
+      "refresh": "Invoices ပြန်စစ်ရန်",
+      "create": "Manual invoice ဖန်တီးရန်",
+      "search": "ခေါင်းစဉ် သို့မဟုတ် နံပါတ် ရှာရန်…",
+      "empty": "ဤရှာဖွေမှုနှင့် ကိုက်ညီသော manual invoice မရှိပါ။",
+      "unnumbered": "နံပါတ် မရှိသေး",
+      "filters": {
+        "all": "အားလုံး",
+        "draft": "မူကြမ်း",
+        "ready": "အသင့်",
+        "issued": "ထုတ်ပြီး",
+        "has_voucher": "Voucher ရှိ"
+      }
+    },
+    "inspector": {
+      "label": "Manual invoice အကြောင်းအရာ",
+      "progress": "Pipeline တိုးတက်မှု",
+      "selected": "ရွေးထားသော invoice",
+      "new_invoice": "Manual invoice စရန် မူကြမ်း ဖန်တီးပါ။",
+      "vouchers": "ချိတ်ထားသော voucher {{count}} ခု",
+      "vouchers_plural": "ချိတ်ထားသော voucher {{count}} ခု",
+      "next": "နောက်လုပ်ဆောင်ချက်",
+      "next_draft": "မူကြမ်း invoice သိမ်းပါ။",
+      "next_review": "Invoice ထုတ်ပါ။",
+      "next_voucher": "ချိတ် voucher ထုတ်ပါ။",
+      "next_export": "ထုတ်ပြီးသော voucher ကို export လုပ်ပါ။"
+    },
+    "blockers": {
+      "save_draft": "ဤအဆင့်မှ မထွက်မီ မူကြမ်း သိမ်းပါ။",
+      "issue": "Voucher မထုတ်မီ invoice ထုတ်ပါ။",
+      "generate_voucher": "Export မလုပ်မီ voucher ထုတ်ပါ။"
+    },
+    "sections": {
+      "header": "Invoice header",
+      "buyer": "ဝယ်သူ",
+      "lines": "လိုင်းများ"
+    },
+    "fields": {
+      "invoice_number": "Invoice နံပါတ်",
+      "title": "ခေါင်းစဉ်",
+      "store": "ဆိုင်",
+      "store_placeholder": "ဆိုင် ရွေးပါ",
+      "marketplace": "Marketplace",
+      "marketplace_placeholder": "Marketplace ရွေးပါ",
+      "start_date": "စတင်သည့်ရက်",
+      "end_date": "ပြီးဆုံးသည့်ရက်",
+      "date_range": "ကာလ",
+      "currency": "ငွေကြေး",
+      "vat_rate": "VAT နှုန်း",
+      "buyer_name": "ဝယ်သူအမည်",
+      "buyer_tax_id": "ဝယ်သူ အခွန်အမှတ်",
+      "buyer_address": "ဝယ်သူ လိပ်စာ",
+      "notes": "မှတ်ချက်",
+      "product": "ကုန်ပစ္စည်း / ဖော်ပြချက်",
+      "sku": "SKU",
+      "quantity": "အရေအတွက်",
+      "unit_price": "ယူနစ်ဈေး",
+      "discount": "လျှော့ဈေး",
+      "actions": "လိုင်း လုပ်ဆောင်ချက်"
+    },
+    "row_field": "အတန်း {{row}} ရှိ {{field}}",
+    "add_line": "လိုင်း ထပ်ထည့်ရန်",
+    "remove_line": "လိုင်း {{row}} ဖယ်ရန်",
+    "move_up": "လိုင်း {{row}} အပေါ်ရွှေ့ရန်",
+    "move_down": "လိုင်း {{row}} အောက်ရွှေ့ရန်",
+    "totals": {
+      "subtotal": "Subtotal {{value}}",
+      "vat": "VAT {{value}}",
+      "total": "စုစုပေါင်း {{value}}",
+      "subtotal_label": "Subtotal",
+      "total_label": "Grand total",
+      "line_total": "လိုင်း စုစုပေါင်း"
+    },
+    "actions": {
+      "preview": "စုစုပေါင်း ကြည့်ရန်",
+      "save_draft": "မူကြမ်း သိမ်းရန်",
+      "edit": "မူကြမ်း ပြင်ရန်",
+      "issue": "Invoice ထုတ်ရန်",
+      "issued": "ထုတ်ပြီး",
+      "open_voucher": "Voucher preview ဖွင့်ရန်"
+    },
+    "status": {
+      "previewing": "စုစုပေါင်း တွက်နေသည်…",
+      "saving": "မူကြမ်း သိမ်းနေသည်…",
+      "preview_ready": "ဆာဗာ စုစုပေါင်း အသင့်ဖြစ်သည်။",
+      "saved": "မူကြမ်း သိမ်းပြီး။",
+      "issuing": "Invoice ထုတ်နေသည်…",
+      "exporting": "Voucher export လုပ်နေသည်…",
+      "failed": "Manual invoice သိမ်း၍ မရပါ။"
+    },
+    "statuses": {
+      "draft": "မူကြမ်း",
+      "issued": "ထုတ်ပြီး",
+      "paid": "ပေးချေပြီး",
+      "void": "ပယ်ဖျက်သည်"
+    },
+    "error_summary": "မသိမ်းမီ အောက်ပါကို ပြင်ပါ:",
+    "not_provided": "မပေးထားပါ",
+    "empty": {
+      "title": "Invoice ရွေးပါ သို့မဟုတ် ဖန်တီးပါ",
+      "description": "Queue မှ မူကြမ်း ရွေးပါ၊ သို့မဟုတ် manual invoice အသစ် ဖန်တီးပါ။"
+    },
+    "export": {
+      "ready": "ချိတ် voucher ဒေါင်းရန် အသင့်ဖြစ်သည်။",
+      "excel": "Excel",
+      "csv": "CSV",
+      "pdf": "PDF",
+      "empty": "Export လုပ်ရန် voucher မရှိသေးပါ",
+      "empty_hint": "ဤ invoice မှ voucher အရင် ထုတ်ပါ။"
+    },
+    "validation": {
+      "required": "ဤအကွက် လိုအပ်သည်။",
+      "positive": "မှန်ကန်သော ပမာဏ ရိုက်ပါ။",
+      "date_range": "ပြီးဆုံးရက်သည် စတင်ရက်ထက် စော၍ မရပါ။",
+      "line_required": "အနည်းဆုံး လိုင်းတစ်ကြောင်း ထည့်ပါ။"
+    },
+    "issue_confirm": {
+      "title": "ဤ invoice ကို ထုတ်မည်လား?",
+      "description": "ထုတ်ပြီးနောက် ပြင်၍ မရတော့ပါ။ Voucher ထုတ်ပြီး export လုပ်နိုင်သေးသည်။"
+    }
   }
 }

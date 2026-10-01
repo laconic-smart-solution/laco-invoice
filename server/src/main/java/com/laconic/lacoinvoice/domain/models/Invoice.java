@@ -45,6 +45,10 @@ public class Invoice extends StoreScopedEntity {
 	@Column(name = "status", nullable = false, length = 20)
 	private InvoiceStatus status = InvoiceStatus.ISSUED;
 
+	@Enumerated(EnumType.STRING)
+	@Column(name = "source_type", length = 20)
+	private InvoiceSourceType sourceType = InvoiceSourceType.ORDERS;
+
 	@Column(name = "start_date", nullable = false)
 	private LocalDate startDate;
 
@@ -93,4 +97,8 @@ public class Invoice extends StoreScopedEntity {
 
 	@Column(name = "paid_at")
 	private Instant paidAt;
+
+	public InvoiceSourceType getSourceType() {
+		return sourceType == null ? InvoiceSourceType.ORDERS : sourceType;
+	}
 }

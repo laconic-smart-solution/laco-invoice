@@ -38,5 +38,7 @@ public record ErpGlVoucherPreviewDto(
 		BigDecimal debitTotal,
 		BigDecimal creditTotal,
 		List<ErpGlVoucherEntryRequest> entries,
-		List<ErpLookupItemFinanceAccountDto> financeAccounts) {
+		List<ErpLookupItemFinanceAccountDto> financeAccounts,
+		Long invoiceId,
+		String invoiceNumber) {
 }

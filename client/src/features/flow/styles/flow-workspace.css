@@ -30,6 +30,11 @@
   color: var(--foreground);
 }
 
+.flow-workspace--tabbed {
+  height: calc(100dvh - 3rem);
+  min-height: calc(100dvh - 3rem);
+}
+
 .flow-commandbar {
   z-index: var(--flow-layer-commandbar);
   display: grid;
@@ -408,7 +413,7 @@
 }
 
 .flow-workspace__body--no-inspector {
-  grid-template-columns: minmax(16rem, 19rem) minmax(30rem, 1fr);
+  grid-template-columns: minmax(16rem, 19rem) minmax(30rem, 1fr) 3.5rem;
 }
 
 .flow-workspace__body--no-queue {
@@ -416,7 +421,7 @@
 }
 
 .flow-workspace__body--no-queue.flow-workspace__body--no-inspector {
-  grid-template-columns: 3.5rem minmax(30rem, 1fr);
+  grid-template-columns: 3.5rem minmax(30rem, 1fr) 3.5rem;
 }
 
 .flow-workspace--compact .flow-stats {
@@ -522,6 +527,46 @@
 }
 
 .flow-queue-rail__expand:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.flow-inspector-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0.5rem 0.3rem;
+  border: 1px solid var(--border);
+  border-radius: 0.875rem;
+  background: var(--card);
+  color: var(--muted-foreground);
+  box-shadow: 0 1px 3px color-mix(in oklch, var(--foreground) 5%, transparent);
+}
+
+.flow-inspector-rail__expand {
+  display: inline-flex;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 0.625rem;
+  background: var(--background);
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+
+.flow-inspector-rail__expand:hover {
+  color: var(--foreground);
+  border-color: color-mix(in oklch, var(--primary) 40%, var(--border));
+  background: color-mix(in oklch, var(--primary) 8%, var(--card));
+}
+
+.flow-inspector-rail__expand:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
@@ -1346,16 +1391,47 @@ body.flow-workspace-active [data-slot="dialog-content"] {
 }
 
 @media (max-width: 1100px) {
-  .flow-workspace__body {
+  .flow-workspace__body,
+  .flow-workspace__body--no-inspector {
     grid-template-columns: minmax(15rem, 18rem) minmax(28rem, 1fr);
   }
 
-  .flow-workspace__body--no-queue {
+  .flow-workspace__body--no-queue,
+  .flow-workspace__body--no-queue.flow-workspace__body--no-inspector {
     grid-template-columns: 3.5rem minmax(28rem, 1fr);
   }
 
-  .flow-inspector {
+  .flow-inspector,
+  .flow-inspector-rail {
     display: none;
+  }
+
+  .flow-workspace--tabbed .flow-workspace__body,
+  .flow-workspace--tabbed .flow-workspace__body--no-inspector {
+    grid-template-columns: minmax(14rem, 16rem) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .flow-workspace--tabbed .flow-workspace__body--no-queue,
+  .flow-workspace--tabbed .flow-workspace__body--no-queue.flow-workspace__body--no-inspector {
+    grid-template-columns: 3.5rem minmax(0, 1fr);
+  }
+
+  .flow-workspace--tabbed .flow-inspector,
+  .flow-workspace--tabbed .flow-inspector-rail {
+    display: flex;
+    grid-column: 1 / -1;
+  }
+
+  .flow-workspace--tabbed .flow-inspector {
+    display: block;
+  }
+
+  .flow-workspace--tabbed .flow-inspector-rail {
+    flex-direction: row;
+    justify-content: flex-end;
+    min-height: 3rem;
+    padding: 0.35rem 0.5rem;
   }
 }
 
@@ -1383,8 +1459,36 @@ body.flow-workspace-active [data-slot="dialog-content"] {
   }
 
   .flow-queue,
-  .flow-queue-rail {
+  .flow-queue-rail,
+  .flow-inspector-rail {
     display: none;
+  }
+
+  .flow-workspace--tabbed .flow-queue {
+    display: flex;
+    max-height: 12rem;
+  }
+
+  .flow-workspace--tabbed .flow-queue-rail {
+    display: flex;
+  }
+
+  .flow-workspace--tabbed .flow-workspace__body--no-queue,
+  .flow-workspace--tabbed .flow-workspace__body--no-queue.flow-workspace__body--no-inspector {
+    grid-template-columns: 3.5rem minmax(0, 1fr);
+  }
+
+  .flow-workspace--tabbed .flow-inspector-rail {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    min-height: 3rem;
+    padding: 0.35rem 0.5rem;
+    grid-column: 1 / -1;
+  }
+
+  .flow-workspace--tabbed .flow-workspace__body {
+    grid-template-columns: 1fr;
   }
 
   .flow-file-grid,

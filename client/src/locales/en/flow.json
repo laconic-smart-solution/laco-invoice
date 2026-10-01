@@ -15,6 +15,7 @@
   "settings": "Workspace settings",
   "compact": "Compact density",
   "show_inspector": "Show context panel",
+  "hide_inspector": "Hide context panel",
   "show_queue": "Show work queue",
   "hide_queue": "Hide work queue",
   "reset_layout": "Reset workspace layout",
@@ -123,10 +124,19 @@
     "continue_voucher": "Continue to voucher",
     "voucher_heading": "Voucher",
     "voucher_hint": "All generated ERP GL vouchers. Open a row for detail.",
+    "voucher_hint_all": "All generated ERP GL vouchers. Select a set to narrow the list.",
+    "voucher_hint_selected": "Vouchers generated for this order set.",
     "no_voucher": "No voucher generated yet",
     "no_voucher_hint": "The match is complete. Generate the first voucher for this set.",
+    "no_voucher_hint_all": "Generate a voucher from an order set to see it here.",
     "exports": "Exports",
     "exports_hint": "Download generated vouchers in the format you need",
+    "exports_hint_all": "All vouchers ready to download. Select a set to narrow the list.",
+    "exports_hint_selected": "Download vouchers for this order set.",
+    "no_export": "No vouchers ready to export",
+    "no_export_hint": "Generate and finalize a voucher for this set first.",
+    "no_export_hint_all": "No generated vouchers are ready to download yet.",
+    "current_all": "All order sets",
     "orders_heading": "Orders",
     "orders_hint": "All orders across stores. Open a row for detail.",
     "empty_run": "Select an order set to start working."
@@ -192,5 +202,167 @@
     "edit": "Edit · {{number}}",
     "export": "Export · {{number}}",
     "order_set": "#{{id}} · {{title}}"
+  },
+  "tabs": {
+    "label": "Invoice workflows",
+    "orders": "Order to Voucher",
+    "manual": "Manual Invoice"
+  },
+  "manual": {
+    "command_subtitle": "Create a free-form invoice, then generate and export a voucher",
+    "search_aria": "Search manual invoices",
+    "new_invoice": "New invoice",
+    "stats": {
+      "label": "Manual invoice counts",
+      "total": "Invoices",
+      "draft": "Drafts",
+      "ready": "Ready to issue",
+      "issued": "Issued",
+      "voucher": "Vouchers",
+      "export": "Ready to export",
+      "invoice_value": "Invoice value",
+      "outstanding": "Outstanding value"
+    },
+    "pipeline": {
+      "label": "Manual invoice pipeline",
+      "draft": "Draft invoice",
+      "draft_short": "Header and lines",
+      "draft_description": "Enter buyer details and free-form invoice lines. Totals are calculated on the server.",
+      "review": "Review and issue",
+      "review_short": "Confirm amounts",
+      "review_description": "Check the saved invoice, then issue it before generating a voucher.",
+      "voucher": "Voucher review",
+      "voucher_short": "Edit entries",
+      "voucher_description": "Preview balanced ERP entries from this invoice, edit them, then generate.",
+      "export": "Export",
+      "export_short": "Download files",
+      "export_description": "Download the linked voucher as Excel, CSV, or PDF."
+    },
+    "queue": {
+      "label": "Manual invoices",
+      "title": "Manual invoices",
+      "count": "{{filtered}} of {{total}} invoices",
+      "alerts": "{{count}} alerts",
+      "fetching": "Refreshing invoices…",
+      "select_invoice": "Select invoice #{{id}}",
+      "refresh": "Refresh invoices",
+      "create": "Create manual invoice",
+      "search": "Search title or number…",
+      "empty": "No manual invoices match this search.",
+      "unnumbered": "No number yet",
+      "filters": {
+        "all": "All",
+        "draft": "Draft",
+        "ready": "Ready",
+        "issued": "Issued",
+        "has_voucher": "Has voucher"
+      }
+    },
+    "inspector": {
+      "label": "Manual invoice context",
+      "progress": "Pipeline progress",
+      "selected": "Selected invoice",
+      "new_invoice": "Create a draft to start the manual invoice flow.",
+      "vouchers": "{{count}} linked voucher",
+      "vouchers_plural": "{{count}} linked vouchers",
+      "next": "Next action",
+      "next_draft": "Save the draft invoice.",
+      "next_review": "Issue the invoice.",
+      "next_voucher": "Generate the linked voucher.",
+      "next_export": "Export the generated voucher."
+    },
+    "blockers": {
+      "save_draft": "Save a draft invoice before leaving this stage.",
+      "issue": "Issue the invoice before generating a voucher.",
+      "generate_voucher": "Generate a voucher before exporting."
+    },
+    "sections": {
+      "header": "Invoice header",
+      "buyer": "Buyer",
+      "lines": "Line items"
+    },
+    "fields": {
+      "invoice_number": "Invoice number",
+      "title": "Title",
+      "store": "Store",
+      "store_placeholder": "Select a store",
+      "marketplace": "Marketplace",
+      "marketplace_placeholder": "Select a marketplace",
+      "start_date": "Start date",
+      "end_date": "End date",
+      "date_range": "Period",
+      "currency": "Currency",
+      "vat_rate": "VAT rate",
+      "buyer_name": "Buyer name",
+      "buyer_tax_id": "Buyer tax ID",
+      "buyer_address": "Buyer address",
+      "notes": "Notes",
+      "product": "Product / description",
+      "sku": "SKU",
+      "quantity": "Qty",
+      "unit_price": "Unit price",
+      "discount": "Discount",
+      "actions": "Line actions"
+    },
+    "row_field": "{{field}} on row {{row}}",
+    "add_line": "Add line",
+    "remove_line": "Remove line {{row}}",
+    "move_up": "Move line {{row}} up",
+    "move_down": "Move line {{row}} down",
+    "totals": {
+      "subtotal": "Subtotal {{value}}",
+      "vat": "VAT {{value}}",
+      "total": "Total {{value}}",
+      "subtotal_label": "Subtotal",
+      "total_label": "Grand total",
+      "line_total": "Line total"
+    },
+    "actions": {
+      "preview": "Preview totals",
+      "save_draft": "Save draft",
+      "edit": "Edit draft",
+      "issue": "Issue invoice",
+      "issued": "Already issued",
+      "open_voucher": "Open voucher preview"
+    },
+    "status": {
+      "previewing": "Calculating totals…",
+      "saving": "Saving draft…",
+      "preview_ready": "Server totals are ready.",
+      "saved": "Draft saved.",
+      "issuing": "Issuing invoice…",
+      "exporting": "Exporting voucher…",
+      "failed": "Could not save the manual invoice."
+    },
+    "statuses": {
+      "draft": "Draft",
+      "issued": "Issued",
+      "paid": "Paid",
+      "void": "Void"
+    },
+    "error_summary": "Fix the following before saving:",
+    "not_provided": "Not provided",
+    "empty": {
+      "title": "Select or create an invoice",
+      "description": "Choose a draft from the queue, or create a new manual invoice."
+    },
+    "export": {
+      "ready": "This linked voucher is ready to download.",
+      "excel": "Excel",
+      "csv": "CSV",
+      "pdf": "PDF",
+      "empty": "No voucher to export yet",
+      "empty_hint": "Generate a voucher from this invoice first."
+    },
+    "validation": {
+      "required": "This field is required.",
+      "positive": "Enter a valid amount.",
+      "date_range": "End date cannot be before start date.",
+      "line_required": "Add at least one invoice line."
+    },
+    "issue_confirm": {
+      "title": "Issue this invoice?",
+      "description": "Issued invoices can no longer be edited. You can still generate and export a voucher."
+    }
   }
 }

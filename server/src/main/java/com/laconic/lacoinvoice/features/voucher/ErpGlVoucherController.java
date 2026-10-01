@@ -19,6 +19,7 @@ import com.laconic.lacoinvoice.features.voucher.dto.ErpGlVoucherDetailDto;
 import com.laconic.lacoinvoice.features.voucher.dto.ErpGlVoucherDto;
 import com.laconic.lacoinvoice.features.voucher.dto.ErpGlVoucherExportRequest;
 import com.laconic.lacoinvoice.features.voucher.dto.ErpGlVoucherGenerateRequest;
+import com.laconic.lacoinvoice.features.voucher.dto.ErpGlVoucherInvoicePreviewRequest;
 import com.laconic.lacoinvoice.features.voucher.dto.ErpGlVoucherPreviewDto;
 import com.laconic.lacoinvoice.features.voucher.dto.ErpGlVoucherPreviewRequest;
 import com.laconic.lacoinvoice.features.voucher.pageable.ErpGlVoucherPageRequest;
@@ -62,10 +63,23 @@ public class ErpGlVoucherController {
 		return ApiResponse.ok("OK", service.previewFromOrderInput(request));
 	}
 
+	@PostMapping("/preview-from-invoice")
+	@Operation(summary = "Preview balanced, editable voucher entries from a persisted invoice")
+	public ApiResponse<ErpGlVoucherPreviewDto> previewFromInvoice(
+			@RequestBody @Valid ErpGlVoucherInvoicePreviewRequest request) {
+		return ApiResponse.ok("OK", service.previewFromInvoice(request));
+	}
+
 	@GetMapping("/by-order-input-run/{runId}")
 	@Operation(summary = "Get vouchers associated with an Order Data Input run")
 	public ApiResponse<List<ErpGlVoucherDto>> getByOrderInputRun(@PathVariable Long runId) {
 		return ApiResponse.ok("OK", service.getByOrderInputRunId(runId));
+	}
+
+	@GetMapping("/by-invoice/{invoiceId}")
+	@Operation(summary = "Get the voucher associated with an invoice")
+	public ApiResponse<List<ErpGlVoucherDto>> getByInvoice(@PathVariable Long invoiceId) {
+		return ApiResponse.ok("OK", service.getByInvoiceId(invoiceId));
 	}
 
 	@PostMapping

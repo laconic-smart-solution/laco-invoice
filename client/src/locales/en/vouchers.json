@@ -132,6 +132,12 @@
     "description_with_numbers": "You've already generated a voucher for this Order Data Input ({{numbers}}). Creating another will add a second voucher for the same set. Are you sure you want to continue?",
     "confirm": "Generate anyway"
   },
+  "duplicate_invoice": {
+    "title": "Voucher already exists for this invoice",
+    "description": "You've already generated a voucher for this invoice. Creating another will add a second voucher for the same invoice. Are you sure you want to continue?",
+    "description_with_numbers": "You've already generated a voucher for this invoice ({{numbers}}). Creating another will add a second voucher for the same invoice. Are you sure you want to continue?",
+    "confirm": "Generate anyway"
+  },
   "export": {
     "button": "Export",
     "excel": "Export Excel (.xlsx)",

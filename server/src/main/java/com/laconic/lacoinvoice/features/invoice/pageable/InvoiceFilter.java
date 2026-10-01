@@ -1,5 +1,6 @@
 package com.laconic.lacoinvoice.features.invoice.pageable;
 
+import com.laconic.lacoinvoice.domain.models.InvoiceSourceType;
 import com.laconic.lacoinvoice.domain.models.InvoiceStatus;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,4 +25,6 @@ public class InvoiceFilter {
 	private String title;
 
 	private InvoiceStatus status;
+
+	private InvoiceSourceType sourceType;
 }

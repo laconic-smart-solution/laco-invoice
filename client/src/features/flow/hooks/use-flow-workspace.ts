@@ -17,7 +17,9 @@ import {
 
 export function useFlowWorkspace() {
   const [search, setSearch] = useState("")
-  const [selectedRunId, setSelectedRunId] = useState<number | null>(null)
+  const [selectedRunId, setSelectedRunId] = useState<
+    number | null | undefined
+  >(undefined)
   const debouncedSearch = useDebounce(search)
 
   const pageRequest = useMemo(

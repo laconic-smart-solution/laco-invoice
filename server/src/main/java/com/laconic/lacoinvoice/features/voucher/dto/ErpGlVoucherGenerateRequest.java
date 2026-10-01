@@ -26,6 +26,8 @@ public class ErpGlVoucherGenerateRequest {
 
 	private Long invoiceId;
 
+	private Boolean allowDuplicate;
+
 	private Long orderInputRunId;
 
 	@NotNull

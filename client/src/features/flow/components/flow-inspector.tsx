@@ -3,6 +3,7 @@ import {
   CheckCircle2,
   Clock3,
   FileCheck2,
+  PanelRightClose,
   Receipt,
 } from "lucide-react"
 import { useTranslation } from "react-i18next"
@@ -27,6 +28,7 @@ interface FlowInspectorProps {
   orderSet: ApiOrderInputRunDto | null
   vouchers: Voucher[]
   onStageChange: (stage: FlowStageId) => void
+  onHide?: () => void
 }
 
 export function FlowInspector({
@@ -34,6 +36,7 @@ export function FlowInspector({
   orderSet,
   vouchers,
   onStageChange,
+  onHide,
 }: FlowInspectorProps) {
   const { t } = useTranslation("flow")
   const locale = useLocaleStore((state) => state.locale)
@@ -62,7 +65,22 @@ export function FlowInspector({
       <section className="flow-inspector__section">
         <div className="flex items-center justify-between gap-2">
           <h2>{t("inspector.progress")}</h2>
-          <strong className="text-xs tabular-nums text-primary">{progress}%</strong>
+          <div className="flex items-center gap-1">
+            <strong className="text-xs tabular-nums text-primary">{progress}%</strong>
+            {onHide ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="size-8 rounded-lg"
+                aria-label={t("hide_inspector")}
+                title={t("hide_inspector")}
+                onClick={onHide}
+              >
+                <PanelRightClose className="size-4" />
+              </Button>
+            ) : null}
+          </div>
         </div>
         <div
           className="flow-progress"

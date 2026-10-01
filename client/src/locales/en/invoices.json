@@ -25,5 +25,9 @@
     "issued": "Issued",
     "paid": "Paid",
     "void": "Void"
+  },
+  "source": {
+    "orders": "From orders",
+    "manual": "Manual"
   }
 }

@@ -25,5 +25,9 @@
     "issued": "已开具",
     "paid": "已付款",
     "void": "作废"
+  },
+  "source": {
+    "orders": "来自订单",
+    "manual": "手工"
   }
 }

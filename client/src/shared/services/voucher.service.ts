@@ -7,6 +7,7 @@ import type {
   VoucherExportRequest,
   VoucherPageRequest,
   VoucherPreviewDto,
+  VoucherPreviewFromInvoiceRequest,
   VoucherPreviewRequest,
 } from "@/features/vouchers/types/voucher"
 import type { ApiResponse } from "@/shared/types/api-response"
@@ -51,9 +52,26 @@ export const voucherService = {
     return response.data.data
   },
 
+  previewFromInvoice: async (
+    request: VoucherPreviewFromInvoiceRequest
+  ): Promise<VoucherPreviewDto> => {
+    const response = await apiClient.post<ApiResponse<VoucherPreviewDto>>(
+      "/v1/vouchers/preview-from-invoice",
+      request
+    )
+    return response.data.data
+  },
+
   getByOrderInputRun: async (runId: number): Promise<Voucher[]> => {
     const response = await apiClient.get<ApiResponse<Voucher[]>>(
       `/v1/vouchers/by-order-input-run/${runId}`
+    )
+    return response.data.data ?? []
+  },
+
+  getByInvoice: async (invoiceId: number): Promise<Voucher[]> => {
+    const response = await apiClient.get<ApiResponse<Voucher[]>>(
+      `/v1/vouchers/by-invoice/${invoiceId}`
     )
     return response.data.data ?? []
   },

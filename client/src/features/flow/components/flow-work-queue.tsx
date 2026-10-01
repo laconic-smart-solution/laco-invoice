@@ -117,7 +117,7 @@ export function FlowWorkQueue({
             onChange={(event) => onSearchChange(event.target.value)}
             placeholder={t("search_placeholder")}
             aria-label={t("search_aria")}
-            data-shortcut-search
+            data-shortcut-search="orders"
             className="h-9 w-full rounded-lg bg-background pl-9"
           />
         </div>

@@ -1,4 +1,5 @@
 export type InvoiceStatus = "DRAFT" | "ISSUED" | "PAID" | "VOID"
+export type InvoiceSourceType = "ORDERS" | "MANUAL"
 
 export type PaymentAllocationStatus = "UNPAID" | "PARTIAL" | "PAID" | "OVERPAID"
 
@@ -10,6 +11,7 @@ export interface Invoice {
   storeName: string | null
   marketplaceId: number | null
   marketplaceCode: string | null
+  sourceType: InvoiceSourceType
   status: InvoiceStatus
   startDate: string
   endDate: string
@@ -63,6 +65,40 @@ export interface InvoiceItemLine {
   subtotal: number
   discount: number
   totalAmount: number
+}
+
+export interface ManualInvoiceLineInput {
+  productName: string
+  sku?: string
+  description?: string
+  quantity: number
+  unitPrice: number
+  discount: number
+}
+
+export interface ManualInvoiceRequest {
+  invoiceNumber?: string
+  title: string
+  storeId: number
+  marketplaceCode: string
+  startDate: string
+  endDate: string
+  vatRate: number
+  currency: string
+  notes?: string
+  buyerName?: string
+  buyerTaxId?: string
+  buyerAddress?: string
+  lines: ManualInvoiceLineInput[]
+}
+
+export interface ManualInvoicePreview {
+  subtotal: number
+  vatRate: number
+  vatAmount: number
+  grandTotal: number
+  currency: string
+  itemCount: number
 }
 
 export interface InvoicePaymentSummary {

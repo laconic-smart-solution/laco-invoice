@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import type {
   CreateInvoiceRequest,
   InvoiceStatus,
+  ManualInvoiceRequest,
 } from "@/features/invoices/types/invoice"
 import type { InvoicePageRequest } from "@/shared/services/invoice.service"
 import { invoiceService } from "@/shared/services/invoice.service"
@@ -17,6 +18,7 @@ export const invoiceKeys = {
   nextNumber: () => [...invoiceKeys.all, "next-number"] as const,
   preview: (request: CreateInvoiceRequest | null) =>
     [...invoiceKeys.all, "preview", request] as const,
+  manualPreview: () => [...invoiceKeys.all, "manual-preview"] as const,
 }
 
 const LIST_PAGE_REQUEST: InvoicePageRequest = {
@@ -68,6 +70,35 @@ export function useCreateInvoiceMutation() {
     mutationFn: (request: CreateInvoiceRequest) => invoiceService.create(request),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: invoiceKeys.all })
+    },
+  })
+}
+
+export function useManualInvoicePreviewMutation() {
+  return useMutation({
+    mutationFn: (request: ManualInvoiceRequest) =>
+      invoiceService.previewManual(request),
+  })
+}
+
+export function useSaveManualInvoiceMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      id,
+      request,
+    }: {
+      id?: number | null
+      request: ManualInvoiceRequest
+    }) =>
+      id
+        ? invoiceService.updateManual(id, request)
+        : invoiceService.createManual(request),
+    onSuccess: (invoice) => {
+      void queryClient.invalidateQueries({ queryKey: invoiceKeys.lists() })
+      void queryClient.invalidateQueries({
+        queryKey: invoiceKeys.detail(invoice.id),
+      })
     },
   })
 }

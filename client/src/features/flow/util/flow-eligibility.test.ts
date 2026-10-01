@@ -107,10 +107,12 @@ test("needsFlowReview covers mismatch unparsed and failed invoice", () => {
   assert.equal(needsFlowReview(run({ invoicePdfStatus: "FAILED" })), true)
 })
 
-test("reconcileSelectedRunId keeps valid ids and falls back after delete", () => {
+test("reconcileSelectedRunId keeps valid ids and allows explicit deselect", () => {
   const runs = [run({ id: 2 }), run({ id: 3 })]
   assert.equal(reconcileSelectedRunId(runs, 3), 3)
-  assert.equal(reconcileSelectedRunId(runs, 99), 2)
+  assert.equal(reconcileSelectedRunId(runs, undefined), 2)
+  assert.equal(reconcileSelectedRunId(runs, null), null)
+  assert.equal(reconcileSelectedRunId(runs, 99), null)
   assert.equal(reconcileSelectedRunId([], 3), null)
 })
 

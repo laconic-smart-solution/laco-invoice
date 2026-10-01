@@ -7,7 +7,10 @@ import type {
   InvoiceOrderSummary,
   InvoicePaymentSummary,
   InvoicePreview,
+  InvoiceSourceType,
   InvoiceStatus,
+  ManualInvoicePreview,
+  ManualInvoiceRequest,
 } from "@/features/invoices/types/invoice"
 import type { ApiResponse } from "@/shared/types/api-response"
 
@@ -23,6 +26,7 @@ export interface InvoicePageRequest {
     invoiceNumber?: string
     title?: string
     status?: InvoiceStatus
+    sourceType?: InvoiceSourceType
   }
 }
 
@@ -93,6 +97,30 @@ export const invoiceService = {
   create: async (request: CreateInvoiceRequest) => {
     const response = await apiClient.post<ApiResponse<Invoice>>(
       "/v1/invoices",
+      request
+    )
+    return response.data.data
+  },
+
+  previewManual: async (request: ManualInvoiceRequest) => {
+    const response = await apiClient.post<ApiResponse<ManualInvoicePreview>>(
+      "/v1/invoices/manual/preview",
+      request
+    )
+    return response.data.data
+  },
+
+  createManual: async (request: ManualInvoiceRequest) => {
+    const response = await apiClient.post<ApiResponse<Invoice>>(
+      "/v1/invoices/manual",
+      request
+    )
+    return response.data.data
+  },
+
+  updateManual: async (id: number, request: ManualInvoiceRequest) => {
+    const response = await apiClient.put<ApiResponse<Invoice>>(
+      `/v1/invoices/${id}/manual`,
       request
     )
     return response.data.data

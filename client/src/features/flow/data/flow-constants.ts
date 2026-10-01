@@ -1,5 +1,13 @@
 export type FlowStageId = "import" | "match" | "voucher" | "export"
 export type FlowQueueFilter = "all" | "ready" | "attention"
+export type FlowWorkspaceTab = "orders" | "manual"
+export type ManualInvoiceStage = "draft" | "review" | "voucher" | "export"
+export type ManualInvoiceQueueFilter =
+  | "all"
+  | "draft"
+  | "ready"
+  | "issued"
+  | "has_voucher"
 export type FlowStatId =
   | "sets"
   | "review"
@@ -8,6 +16,13 @@ export type FlowStatId =
   | "export"
   | "orders"
   | "revenue"
+
+export const MANUAL_INVOICE_STAGES: ManualInvoiceStage[] = [
+  "draft",
+  "review",
+  "voucher",
+  "export",
+]
 
 export const FLOW_STAGES: {
   id: FlowStageId

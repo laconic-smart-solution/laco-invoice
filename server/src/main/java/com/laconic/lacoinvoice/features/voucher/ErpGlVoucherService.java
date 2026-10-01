@@ -47,6 +47,7 @@ import com.laconic.lacoinvoice.features.erp.lookup.ErpLookupDepartmentDto;
 import com.laconic.lacoinvoice.features.erp.lookup.ErpLookupItemDto;
 import com.laconic.lacoinvoice.features.erp.lookup.ErpLookupVendorDto;
 import com.laconic.lacoinvoice.features.voucher.dto.ErpGlVoucherExportRequest;
+import com.laconic.lacoinvoice.features.voucher.dto.ErpGlVoucherInvoicePreviewRequest;
 import com.laconic.lacoinvoice.features.voucher.dto.ErpGlVoucherDetailDto;
 import com.laconic.lacoinvoice.features.voucher.dto.ErpGlVoucherDto;
 import com.laconic.lacoinvoice.features.voucher.dto.ErpGlVoucherEntryRequest;
@@ -140,6 +141,11 @@ public class ErpGlVoucherService {
 
 		Invoice invoice = null;
 		if (request.getInvoiceId() != null) {
+			if (!Boolean.TRUE.equals(request.getAllowDuplicate())
+					&& voucherRepository.existsByInvoice_Id(request.getInvoiceId())) {
+				throw new BusinessRuleException(
+						"A voucher already exists for invoice id=" + request.getInvoiceId() + ".");
+			}
 			invoice = invoiceRepository.findById(request.getInvoiceId())
 					.orElseThrow(() -> new ResourceNotFoundException("Invoice not found: id=" + request.getInvoiceId()));
 			if (store == null) {
@@ -189,6 +195,10 @@ public class ErpGlVoucherService {
 
 		Invoice invoice = voucher.getInvoice();
 		if (request.getInvoiceId() != null) {
+			if (voucherRepository.existsByInvoice_IdAndIdNot(request.getInvoiceId(), id)) {
+				throw new BusinessRuleException(
+						"A voucher already exists for invoice id=" + request.getInvoiceId() + ".");
+			}
 			invoice = invoiceRepository.findById(request.getInvoiceId())
 					.orElseThrow(() -> new ResourceNotFoundException("Invoice not found: id=" + request.getInvoiceId()));
 			if (store == null) {
@@ -222,6 +232,213 @@ public class ErpGlVoucherService {
 		return voucherRepository.findByOrderInputRun_IdOrderByIdDesc(runId).stream()
 				.map(mapper::toDto)
 				.toList();
+	}
+
+	@Loggable
+	@Transactional(readOnly = true)
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	public List<ErpGlVoucherDto> getByInvoiceId(Long invoiceId) {
+		if (!invoiceRepository.existsById(invoiceId)) {
+			throw new ResourceNotFoundException("Invoice not found: id=" + invoiceId);
+		}
+		return voucherRepository.findByInvoice_IdOrderByIdDesc(invoiceId).stream()
+				.map(mapper::toDto)
+				.toList();
+	}
+
+	@Loggable
+	@Transactional(readOnly = true)
+	@PreAuthorize("@authz.isOwnerOrAdmin()")
+	public ErpGlVoucherPreviewDto previewFromInvoice(ErpGlVoucherInvoicePreviewRequest request) {
+		Invoice invoice = invoiceRepository.findById(request.getInvoiceId())
+				.orElseThrow(() -> new ResourceNotFoundException(
+						"Invoice not found: id=" + request.getInvoiceId()));
+		BigDecimal totalAmount = money(invoice.getGrandTotal());
+		if (totalAmount.signum() == 0) {
+			throw new BusinessRuleException("Invoice total must be nonzero before voucher preview.");
+		}
+
+		Long itemId = request.getExternalErpItemId();
+		if (itemId == null) {
+			List<ErpLookupItemDto> items = erpLookupService.items(null);
+			if (items.size() == 1) {
+				itemId = items.get(0).id();
+			} else {
+				throw new BusinessRuleException(
+						"ERP item mapping cannot be inferred. Select externalErpItemId.");
+			}
+		}
+		ErpLookupItemDto item = erpLookupService.item(itemId)
+				.orElseThrow(() -> new BusinessRuleException("Selected ERP item was not found."));
+		List<ErpLookupItemFinanceAccountDto> financeAccounts = erpLookupService.itemFinanceAccounts(itemId);
+		ErpLookupItemFinanceAccountDto finance = selectFinanceAccount(
+				financeAccounts, request.getTradingPartnerTypeId());
+
+		Long debitAccountId = request.getDebitAccountId();
+		if (debitAccountId == null && finance != null) {
+			debitAccountId = "SALE".equalsIgnoreCase(request.getAccountType())
+					? finance.saleAccountId()
+					: finance.purchaseAccountId();
+		}
+		Long creditAccountId = request.getCreditAccountId();
+		if (creditAccountId == null && finance != null) {
+			creditAccountId = finance.saleAccountId();
+		}
+		if (debitAccountId == null) {
+			throw new BusinessRuleException(
+					"Debit account mapping cannot be inferred. Select debitAccountId.");
+		}
+		if (creditAccountId == null) {
+			throw new BusinessRuleException(
+					"Credit account mapping cannot be inferred. Select creditAccountId.");
+		}
+		ErpLookupAccountDto creditAccount = erpLookupService.account(creditAccountId)
+				.orElseThrow(() -> new BusinessRuleException(
+						"Selected ERP credit account was not found."));
+		erpLookupService.account(debitAccountId)
+				.orElseThrow(() -> new BusinessRuleException(
+						"Selected ERP debit account was not found."));
+
+		Long vendorId = resolveInvoiceVendorId(invoice, request.getExternalErpVendorId());
+		ErpLookupVendorDto vendor = erpLookupService.vendor(vendorId)
+				.orElseThrow(() -> new BusinessRuleException("ERP vendor not found: id=" + vendorId));
+		Long departmentId = resolveInvoiceDepartmentId(request.getExternalErpDepartmentId());
+		Long currencyId = resolveInvoiceCurrencyId(invoice, request.getExternalErpCurrencyId());
+
+		LocalDate invoiceDate = invoice.getEndDate();
+		LocalDate voucherDate = invoiceDate != null ? invoiceDate : LocalDate.now(BUSINESS_ZONE);
+		LocalDate taxMonth = voucherDate.withDayOfMonth(1);
+		boolean noTaxInvoice = Boolean.TRUE.equals(request.getNoTaxInvoice());
+
+		ErpGlVoucherEntryRequest debit = previewEntry(
+				debitAccountId, totalAmount, BigDecimal.ZERO, invoice, invoiceDate,
+				vendorId, departmentId, currencyId);
+		ErpGlVoucherEntryRequest credit = previewEntry(
+				creditAccountId, BigDecimal.ZERO, totalAmount, invoice, invoiceDate,
+				vendorId, departmentId, currencyId);
+		List<ErpGlVoucherEntryRequest> entries = List.of(debit, credit);
+
+		Store store = invoice.getStore();
+		String brief = "Invoice: " + invoice.getInvoiceNumber();
+		String description = StringUtils.hasText(invoice.getTitle())
+				? invoice.getTitle().trim()
+				: brief;
+		return new ErpGlVoucherPreviewDto(
+				store != null ? store.getId() : null,
+				store != null ? store.getName() : null,
+				null,
+				null,
+				ErpGlVoucherCategory.JV,
+				voucherDate,
+				taxMonth,
+				taxMonth,
+				invoice.getCurrency(),
+				brief,
+				description,
+				noTaxInvoice,
+				itemId,
+				item.code(),
+				item.name(),
+				creditAccountId,
+				creditAccount.code(),
+				creditAccount.name(),
+				vendorId,
+				vendor.code(),
+				vendor.name(),
+				departmentId,
+				currencyId,
+				totalAmount,
+				totalAmount,
+				totalAmount,
+				entries,
+				financeAccounts,
+				invoice.getId(),
+				invoice.getInvoiceNumber());
+	}
+
+	private ErpLookupItemFinanceAccountDto selectFinanceAccount(
+			List<ErpLookupItemFinanceAccountDto> accounts,
+			Long tradingPartnerTypeId) {
+		if (accounts == null || accounts.isEmpty()) {
+			return null;
+		}
+		if (tradingPartnerTypeId != null) {
+			return accounts.stream()
+					.filter(account -> tradingPartnerTypeId.equals(account.tradingPartnerTypeId()))
+					.findFirst()
+					.orElse(null);
+		}
+		return accounts.size() == 1 ? accounts.get(0) : null;
+	}
+
+	private Long resolveInvoiceVendorId(Invoice invoice, Long selectedId) {
+		if (selectedId != null) {
+			return selectedId;
+		}
+		String marketplaceCode = invoice.getMarketplace() != null
+				? invoice.getMarketplace().getCode()
+				: null;
+		List<ErpLookupVendorDto> matches = erpLookupService.vendors(marketplaceCode);
+		if (matches.size() == 1) {
+			return matches.get(0).id();
+		}
+		throw new BusinessRuleException(
+				"ERP vendor mapping cannot be inferred. Select externalErpVendorId.");
+	}
+
+	private Long resolveInvoiceDepartmentId(Long selectedId) {
+		if (selectedId != null) {
+			erpLookupService.department(selectedId)
+					.orElseThrow(() -> new BusinessRuleException("Selected ERP department was not found."));
+			return selectedId;
+		}
+		List<ErpLookupDepartmentDto> departments = erpLookupService.departments(null);
+		if (departments.size() == 1) {
+			return departments.get(0).id();
+		}
+		throw new BusinessRuleException(
+				"ERP department mapping cannot be inferred. Select externalErpDepartmentId.");
+	}
+
+	private Long resolveInvoiceCurrencyId(Invoice invoice, Long selectedId) {
+		if (selectedId != null) {
+			erpLookupService.currency(selectedId)
+					.orElseThrow(() -> new BusinessRuleException("Selected ERP currency was not found."));
+			return selectedId;
+		}
+		List<ErpLookupCurrencyDto> currencies = erpLookupService.currencies(invoice.getCurrency());
+		List<ErpLookupCurrencyDto> exact = currencies.stream()
+				.filter(currency -> invoice.getCurrency() != null
+						&& invoice.getCurrency().equalsIgnoreCase(currency.code()))
+				.toList();
+		if (exact.size() == 1) {
+			return exact.get(0).id();
+		}
+		throw new BusinessRuleException(
+				"ERP currency mapping cannot be inferred. Select externalErpCurrencyId.");
+	}
+
+	private ErpGlVoucherEntryRequest previewEntry(
+			Long accountId,
+			BigDecimal debit,
+			BigDecimal credit,
+			Invoice invoice,
+			LocalDate invoiceDate,
+			Long vendorId,
+			Long departmentId,
+			Long currencyId) {
+		ErpGlVoucherEntryRequest entry = new ErpGlVoucherEntryRequest();
+		entry.setExternalErpAccountCodeId(accountId);
+		entry.setDebit(debit);
+		entry.setCredit(credit);
+		entry.setInvoiceNo(invoice.getInvoiceNumber());
+		entry.setInvoiceDate(invoiceDate);
+		entry.setNote(invoice.getTitle());
+		entry.setExternalErpVendorId(vendorId);
+		entry.setExternalErpDepartmentId(departmentId);
+		entry.setExternalErpCurrencyId(currencyId);
+		entry.setExchangeRate(BigDecimal.ONE);
+		return entry;
 	}
 
 	@Loggable
@@ -463,7 +680,9 @@ public class ErpGlVoucherService {
 				debitTotal,
 				creditTotal,
 				entries,
-				financeAccounts);
+				financeAccounts,
+				null,
+				null);
 	}
 
 	private Long resolveAccountId(String code, Long fallbackId) {
@@ -655,6 +874,10 @@ public class ErpGlVoucherService {
 
 	private static BigDecimal nonNull(BigDecimal value) {
 		return value == null ? BigDecimal.ZERO : value;
+	}
+
+	private static BigDecimal money(BigDecimal value) {
+		return nonNull(value).setScale(2, RoundingMode.HALF_UP);
 	}
 
 	private static final int MAX_EXPORT_ROWS = 5000;

@@ -19,8 +19,12 @@ public class AutowiringSpringBeanJobFactory extends SpringBeanJobFactory impleme
 
 	@Override
 	protected Object createJobInstance(TriggerFiredBundle bundle) throws Exception {
-		Object job = super.createJobInstance(bundle);
-		beanFactory.autowireBean(job);
-		return job;
+		if (this.beanFactory == null) {
+			throw new IllegalStateException("ApplicationContext has not been set on AutowiringSpringBeanJobFactory.");
+		}
+		// createBean uses constructor injection. Quartz's default factory only
+		// calls a no-arg constructor, then field-wires — which breaks @Component jobs
+		// that take services in the constructor (OrderSyncQuartzJob, etc.).
+		return this.beanFactory.createBean(bundle.getJobDetail().getJobClass());
 	}
 }

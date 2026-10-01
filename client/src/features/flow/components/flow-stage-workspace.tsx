@@ -22,6 +22,7 @@ import { type FlowStageId } from "@/features/flow/data/flow-constants"
 import { FlowGenerateBlockedDialog, FlowGenerateVoucherButton, useFlowGenerateGate } from "@/features/flow/components/dialogs/flow-generate-voucher-button"
 import {
   excelFilenameForRun,
+  isFlowVoucherExportable,
   needsFlowReview,
 } from "@/features/flow/util/flow-eligibility"
 import { useFlowWindowsStore } from "@/features/flow/hooks/use-flow-windows"
@@ -77,7 +78,10 @@ export function FlowStageWorkspace({
   const { canGenerate: canGenerateVoucher, whyOpen, setWhyOpen, tryGenerate } =
     useFlowGenerateGate(orderSet)
 
-  if (!orderSet) {
+  const listedVouchers = orderSet ? vouchers : allVouchers
+  const exportVouchers = listedVouchers.filter(isFlowVoucherExportable)
+
+  if (!orderSet && stage !== "voucher" && stage !== "export") {
     return (
       <main className="flow-stage-workspace">
         <p className="p-6 text-sm text-muted-foreground">
@@ -87,11 +91,12 @@ export function FlowStageWorkspace({
     )
   }
 
-  const excelAmount = orderSet.excelMatchedAmount ?? 0
-  const invoiceAmount = orderSet.invoiceTotalAmount
+  const excelAmount = orderSet?.excelMatchedAmount ?? 0
+  const invoiceAmount = orderSet?.invoiceTotalAmount
 
   return (
     <main className="flow-stage-workspace">
+      {orderSet ? (
       <header className="flow-stage-workspace__header">
         <div className="min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-primary">
@@ -157,8 +162,27 @@ export function FlowStageWorkspace({
           </DropdownMenu>
         </div>
       </header>
+      ) : (
+      <header className="flow-stage-workspace__header">
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-primary">
+            {t("workspace.current_all")}
+          </p>
+          <h1 className="mt-1 truncate font-heading text-xl font-semibold tracking-tight text-foreground">
+            {stage === "export"
+              ? t("workspace.exports")
+              : t("workspace.voucher_heading")}
+          </h1>
+          <p className="mt-1 truncate text-xs text-muted-foreground">
+            {stage === "export"
+              ? t("workspace.exports_hint_all")
+              : t("workspace.voucher_hint_all")}
+          </p>
+        </div>
+      </header>
+      )}
 
-      {stage === "import" ? (
+      {stage === "import" && orderSet ? (
         <section className="flow-stage-content" aria-labelledby="import-heading">
           <div className="flow-stage-title">
             <div>
@@ -264,7 +288,7 @@ export function FlowStageWorkspace({
         </section>
       ) : null}
 
-      {stage === "match" ? (
+      {stage === "match" && orderSet ? (
         <section className="flow-stage-content" aria-labelledby="match-heading">
           <div className="flow-stage-title">
             <div>
@@ -361,16 +385,22 @@ export function FlowStageWorkspace({
           <div className="flow-stage-title">
             <div>
               <h2 id="voucher-heading">{t("workspace.voucher_heading")}</h2>
-              <p>{t("workspace.voucher_hint")}</p>
+              <p>
+                {orderSet
+                  ? t("workspace.voucher_hint_selected")
+                  : t("workspace.voucher_hint_all")}
+              </p>
             </div>
-            <FlowGenerateVoucherButton run={orderSet} className="rounded-lg">
-              <Receipt className="size-4" />
-              {t("workspace.generate")}
-            </FlowGenerateVoucherButton>
+            {orderSet ? (
+              <FlowGenerateVoucherButton run={orderSet} className="rounded-lg">
+                <Receipt className="size-4" />
+                {t("workspace.generate")}
+              </FlowGenerateVoucherButton>
+            ) : null}
           </div>
-          {allVouchers.length ? (
+          {listedVouchers.length ? (
             <div className="flow-voucher-list">
-              {allVouchers.map((voucher) => (
+              {listedVouchers.map((voucher) => (
                 <button
                   type="button"
                   key={voucher.id}
@@ -398,7 +428,11 @@ export function FlowStageWorkspace({
             <div className="flow-empty-state">
               <Receipt className="size-8" aria-hidden />
               <h3>{t("workspace.no_voucher")}</h3>
-              <p>{t("workspace.no_voucher_hint")}</p>
+              <p>
+                {orderSet
+                  ? t("workspace.no_voucher_hint")
+                  : t("workspace.no_voucher_hint_all")}
+              </p>
             </div>
           )}
         </section>
@@ -409,11 +443,16 @@ export function FlowStageWorkspace({
           <div className="flow-stage-title">
             <div>
               <h2 id="export-heading">{t("workspace.exports")}</h2>
-              <p>{t("workspace.exports_hint")}</p>
+              <p>
+                {orderSet
+                  ? t("workspace.exports_hint_selected")
+                  : t("workspace.exports_hint_all")}
+              </p>
             </div>
           </div>
+          {exportVouchers.length ? (
           <div className="flow-export-grid">
-            {allVouchers.map((voucher) => (
+            {exportVouchers.map((voucher) => (
               <article key={voucher.id}>
                 <Receipt className="size-5 text-primary" aria-hidden />
                 <div>
@@ -439,14 +478,27 @@ export function FlowStageWorkspace({
               </article>
             ))}
           </div>
+          ) : (
+            <div className="flow-empty-state">
+              <Receipt className="size-8" aria-hidden />
+              <h3>{t("workspace.no_export")}</h3>
+              <p>
+                {orderSet
+                  ? t("workspace.no_export_hint")
+                  : t("workspace.no_export_hint_all")}
+              </p>
+            </div>
+          )}
         </section>
       ) : null}
 
-      <FlowGenerateBlockedDialog
-        run={orderSet}
-        open={whyOpen}
-        onOpenChange={setWhyOpen}
-      />
+      {orderSet ? (
+        <FlowGenerateBlockedDialog
+          run={orderSet}
+          open={whyOpen}
+          onOpenChange={setWhyOpen}
+        />
+      ) : null}
     </main>
   )
 }

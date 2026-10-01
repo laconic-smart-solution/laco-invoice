@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 
+import com.laconic.lacoinvoice.domain.models.InvoiceSourceType;
 import com.laconic.lacoinvoice.domain.models.InvoiceStatus;
 
 public record InvoiceDto(
@@ -14,6 +15,7 @@ public record InvoiceDto(
 		String storeName,
 		Long marketplaceId,
 		String marketplaceCode,
+		InvoiceSourceType sourceType,
 		InvoiceStatus status,
 		LocalDate startDate,
 		LocalDate endDate,
