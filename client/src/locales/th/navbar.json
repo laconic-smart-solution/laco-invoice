@@ -10,6 +10,14 @@
   "language": "ภาษา",
   "theme_light": "สลับเป็นโหมดสว่าง",
   "theme_dark": "สลับเป็นโหมดมืด",
+  "color_theme": "ธีมสี: {{name}}",
+  "color_theme_selected": "เลือกแล้ว",
+  "color_themes": {
+    "red": "แดง Laco",
+    "teal": "เขียวการเงิน",
+    "blue": "น้ำเงินผลิตภัณฑ์",
+    "sunset": "พระอาทิตย์ตก"
+  },
   "locales": {
     "en": "อังกฤษ",
     "th": "ไทย",

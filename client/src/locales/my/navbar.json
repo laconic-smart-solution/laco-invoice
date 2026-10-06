@@ -10,6 +10,14 @@
   "language": "ဘာသာစကား",
   "theme_light": "Light mode သို့ ပြောင်းရန်",
   "theme_dark": "Dark mode သို့ ပြောင်းရန်",
+  "color_theme": "အရောင် theme: {{name}}",
+  "color_theme_selected": "ရွေးထားသည်",
+  "color_themes": {
+    "red": "Laco Red",
+    "teal": "Financial Teal",
+    "blue": "Product Blue",
+    "sunset": "Sunset"
+  },
   "locales": {
     "en": "English",
     "th": "Thai",

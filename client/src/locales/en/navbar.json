@@ -10,6 +10,14 @@
   "language": "Language",
   "theme_light": "Switch to light mode",
   "theme_dark": "Switch to dark mode",
+  "color_theme": "Color theme: {{name}}",
+  "color_theme_selected": "Selected",
+  "color_themes": {
+    "red": "Laco Red",
+    "teal": "Financial Teal",
+    "blue": "Product Blue",
+    "sunset": "Sunset"
+  },
   "locales": {
     "en": "English",
     "th": "Thai",

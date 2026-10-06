@@ -13,6 +13,8 @@ import {
 import { useTranslation } from "react-i18next"
 
 import { ROUTES } from "@/app/constants/routes"
+import { NavbarColorThemeToggle } from "@/components/core/navbar/navbar-color-theme-toggle"
+import { NavbarThemeToggle } from "@/components/core/navbar/navbar-theme-toggle"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -113,6 +115,8 @@ export function FlowCommandBar({
       </button>
 
       <div className="flex items-center gap-1">
+        <NavbarColorThemeToggle className="rounded-lg text-muted-foreground" />
+        <NavbarThemeToggle className="rounded-lg text-muted-foreground" />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

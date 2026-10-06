@@ -1,4 +1,5 @@
 import { Check, Palette } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -7,16 +8,29 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useColorTheme } from "@/shared/hooks/use-color-theme"
+import {
+  COLOR_THEMES,
+  type ColorTheme,
+  useColorTheme,
+} from "@/shared/hooks/use-color-theme"
 
-const themes = [
-  { value: "red" as const, label: "Laco Red", swatchClass: "bg-[#c80212]" },
-  { value: "teal" as const, label: "Financial Teal", swatchClass: "bg-[#1d5147]" },
-]
+const THEME_SWATCH_CLASS: Record<ColorTheme, string> = {
+  red: "theme-swatch-red",
+  teal: "theme-swatch-teal",
+  blue: "theme-swatch-blue",
+  sunset: "theme-swatch-sunset",
+}
 
-export function NavbarColorThemeToggle() {
+interface NavbarColorThemeToggleProps {
+  className?: string
+}
+
+export function NavbarColorThemeToggle({
+  className = "text-muted-foreground",
+}: NavbarColorThemeToggleProps) {
+  const { t } = useTranslation("navbar")
   const { colorTheme, setColorTheme } = useColorTheme()
-  const selectedTheme = themes.find((theme) => theme.value === colorTheme) ?? themes[0]
+  const selectedLabel = t(`color_themes.${colorTheme}`)
 
   return (
     <DropdownMenu>
@@ -24,22 +38,27 @@ export function NavbarColorThemeToggle() {
         <Button
           type="button"
           variant="ghost"
-          size="icon-sm"
-          className="text-muted-foreground"
-          aria-label={`Color theme: ${selectedTheme.label}`}
+          size="icon"
+          className={className}
+          aria-label={t("color_theme", { name: selectedLabel })}
         >
           <Palette className="size-4" aria-hidden />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        {themes.map((theme) => (
+      <DropdownMenuContent align="end" className="z-[300] w-48">
+        {COLOR_THEMES.map((theme) => (
           <DropdownMenuItem
-            key={theme.value}
-            onClick={() => setColorTheme(theme.value)}
+            key={theme}
+            onClick={() => setColorTheme(theme)}
           >
-            <span className={`size-3 rounded-full ${theme.swatchClass}`} aria-hidden />
-            {theme.label}
-            {colorTheme === theme.value ? <Check className="ml-auto" aria-label="Selected" /> : null}
+            <span
+              className={`size-3 rounded-full ${THEME_SWATCH_CLASS[theme]}`}
+              aria-hidden
+            />
+            {t(`color_themes.${theme}`)}
+            {colorTheme === theme ? (
+              <Check className="ml-auto" aria-label={t("color_theme_selected")} />
+            ) : null}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

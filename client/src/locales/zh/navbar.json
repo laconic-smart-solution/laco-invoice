@@ -10,6 +10,14 @@
   "language": "语言",
   "theme_light": "切换到浅色模式",
   "theme_dark": "切换到深色模式",
+  "color_theme": "配色主题：{{name}}",
+  "color_theme_selected": "已选择",
+  "color_themes": {
+    "red": "Laco 红",
+    "teal": "财务青绿",
+    "blue": "产品蓝",
+    "sunset": "日落"
+  },
   "locales": {
     "en": "英语",
     "th": "泰语",

@@ -29,7 +29,13 @@ function getIsDarkServerSnapshot() {
   return false
 }
 
-export function NavbarThemeToggle() {
+interface NavbarThemeToggleProps {
+  className?: string
+}
+
+export function NavbarThemeToggle({
+  className = "text-muted-foreground",
+}: NavbarThemeToggleProps) {
   const { t } = useTranslation("navbar")
   const { setTheme } = useTheme()
   const isDark = useSyncExternalStore(
@@ -46,8 +52,8 @@ export function NavbarThemeToggle() {
     <Button
       type="button"
       variant="ghost"
-      size="icon-sm"
-      className="text-muted-foreground"
+      size="icon"
+      className={className}
       onClick={handleToggle}
       aria-label={isDark ? t("theme_light") : t("theme_dark")}
     >
