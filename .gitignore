@@ -1,1 +1,6 @@
 .cursor/
+
+# Environment files and secrets
+.env
+.env.*
+!.env.example
